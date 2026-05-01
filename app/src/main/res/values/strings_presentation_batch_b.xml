@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AccountsScreen -->
+    <string name="presentation_batch_b_accounts_linked_services">Serviços Vinculados</string>
+    <string name="presentation_batch_b_accounts_connected_hero_title">Contas Conectadas</string>
+    <string name="presentation_batch_b_accounts_connected_hero_body">Gerencie provedores vinculados e mantenha cada integração sob seu controle.</string>
+    <string name="presentation_batch_b_accounts_stat_active">Ativo</string>
+    <string name="presentation_batch_b_accounts_stat_available">Disponível</string>
+    <string name="presentation_batch_b_accounts_status_soon">Em breve</string>
+    <string name="presentation_batch_b_accounts_status_connected">Conectado</string>
+    <string name="presentation_batch_b_accounts_open_service">Abrir Serviço</string>
+    <string name="presentation_batch_b_accounts_coming_soon_short">Em breve</string>
+    <string name="presentation_batch_b_accounts_logging_out">Saindo…</string>
+    <string name="presentation_batch_b_accounts_no_linked_title">Nenhuma conta vinculada ainda</string>
+    <string name="presentation_batch_b_accounts_no_linked_body">Conecte um provedor para gerenciá-lo nesta tela.</string>
+    <string name="presentation_batch_b_accounts_connect_service">Conectar %1$s</string>
+    <string name="presentation_batch_b_accounts_service_paren_coming_soon">%1$s (Em breve)</string>
+    <string name="presentation_batch_b_service_telegram">Telegram</string>
+    <string name="presentation_batch_b_service_netease">Netease</string>
+
+    <!-- PlaylistDetailScreen -->
+    <string name="presentation_batch_b_sort_songs">Ordenar Músicas</string>
+    <string name="presentation_batch_b_more_options">Mais Opções</string>
+    <string name="presentation_batch_b_play_it">Reproduzir</string>
+    <string name="presentation_batch_b_add_songs">Adicionar músicas</string>
+    <string name="presentation_batch_b_add">Adicionar</string>
+    <string name="presentation_batch_b_remove_songs">Remover músicas</string>
+    <string name="presentation_batch_b_reorder_songs">Reordenar músicas</string>
+    <string name="presentation_batch_b_reorder">Reordenar</string>
+    <string name="presentation_batch_b_reorder_song">Reordenar música</string>
+    <string name="presentation_batch_b_playlist_empty_title">Esta playlist está vazia.</string>
+    <string name="presentation_batch_b_playlist_empty_folder_body">Esta pasta não contém músicas.</string>
+    <string name="presentation_batch_b_playlist_empty_add_hint">Toque em \'Adicionar Músicas\' para começar.</string>
+    <string name="presentation_batch_b_playlist_options_title">Opções da playlist</string>
+    <string name="presentation_batch_b_edit_playlist">Editar playlist</string>
+    <string name="presentation_batch_b_delete_playlist">Excluir playlist</string>
+    <string name="presentation_batch_b_set_default_transition">Definir transição padrão</string>
+    <string name="presentation_batch_b_export_playlist">Exportar Playlist</string>
+    <string name="presentation_batch_b_delete_playlist_confirm_title">Excluir playlist?</string>
+    <string name="presentation_batch_b_delete_playlist_confirm_body">Tem certeza de que deseja excluir esta playlist?</string>
+    <string name="presentation_batch_b_rename_playlist_dialog_title">Renomear Playlist</string>
+    <string name="presentation_batch_b_new_name">Novo nome</string>
+
+    <!-- DailyMixScreen -->
+    <string name="presentation_batch_b_daily_mix_title">Mix Diária</string>
+
+    <!-- QuickFillScreen -->
+    <string name="presentation_batch_b_quick_fill_select_songs">Selecionar Músicas</string>
+    <string name="presentation_batch_b_quick_fill_choose_genre">Escolher Gênero</string>
+    <string name="presentation_batch_b_search_songs_label">Pesquisar músicas</string>
+    <string name="presentation_batch_b_select_all">Selecionar Tudo</string>
+    <string name="presentation_batch_b_clear">Limpar</string>
+    <string name="presentation_batch_b_genre_label_format">Gênero: %1$s</string>
+    <string name="presentation_batch_b_select_a_genre">Selecione um gênero</string>
+    <string name="presentation_batch_b_quick_fill">Preenchimento Rápido</string>
+    <string name="presentation_batch_b_add_custom_genre">Adicionar Personalizado</string>
+    <string name="presentation_batch_b_new_genre">Novo Gênero</string>
+    <string name="presentation_batch_b_add_custom_genre_title">Adicionar Gênero Personalizado</string>
+    <string name="presentation_batch_b_genre_name_label">Nome do Gênero</string>
+    <string name="presentation_batch_b_select_icon">Selecionar Ícone</string>
+
+    <!-- RecentlyPlayedScreen -->
+    <string name="presentation_batch_b_recently_played_title">Reproduzidas Recentemente</string>
+    <string name="presentation_batch_b_play_latest">Reproduzir mais recentes</string>
+    <string name="presentation_batch_b_recent_empty_title">Nenhuma reprodução recente em %1$s</string>
+    <string name="presentation_batch_b_recent_empty_subtitle">Altere o período ou reproduza mais músicas para preencher esta linha do tempo.</string>
+    <string name="presentation_batch_b_queue_recently_played">Reproduzidas Recentemente</string>
+    <string name="presentation_batch_b_date_today">Hoje</string>
+    <string name="presentation_batch_b_date_yesterday">Ontem</string>
+
+    <!-- NavBarCornerRadiusScreen -->
+    <string name="presentation_batch_b_navbar_adjust_title">Ajustar Raio do Canto</string>
+    <string name="presentation_batch_b_navbar_adjust_subtitle">Combine os cantos da forma da barra de navegação com os cantos físicos do seu dispositivo para uma aparência perfeita.</string>
+    <string name="presentation_batch_b_corner_radius_label">Raio do Canto</string>
+    <string name="presentation_batch_b_corner_dp_format">%1$d dp</string>
+
+    <!-- GenreDetailScreen -->
+    <string name="presentation_batch_b_genre_shuffle_label">Aleatório de %1$s</string>
+
+    <plurals name="presentation_batch_b_songs_dot_duration">
+        <item quantity="one">%1$d música • %2$s</item>
+        <item quantity="other">%1$d músicas • %2$s</item>
+    </plurals>
+</resources>
