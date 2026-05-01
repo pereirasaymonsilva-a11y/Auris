@@ -67,15 +67,15 @@ val DarkColorScheme = darkColorScheme(
 
 val LightColorScheme = lightColorScheme(
     primary = LightPrimary,
-    onPrimary = PixelPlayWhite,
+    onPrimary = Color(0xFF000000),              // Preto sobre elementos primários
     primaryContainer = LightPrimaryContainer,
     onPrimaryContainer = LightOnPrimaryContainer,
-    secondary = PixelPlayPink,
-    onSecondary = PixelPlayWhite,
-    secondaryContainer = PixelPlayPink.copy(alpha = 0.15f),
-    onSecondaryContainer = PixelPlayPink.copy(alpha = 0.85f),
-    tertiary = PixelPlayOrange,
-    onTertiary = PixelPlayBlack,
+    secondary = Color(0xFF000000),              // Preto para elementos secundários
+    onSecondary = Color(0xFFFFC107),            // Dourado sobre eles
+    secondaryContainer = Color(0xFF000000),     // Container secundário preto
+    onSecondaryContainer = Color(0xFFFFC107),   // Dourado no container secundário
+    tertiary = Color(0xFF4D3E00),               // Tom escuro para detalhes
+    onTertiary = Color(0xFFFFC107),             // Dourado sobre detalhes
     background = LightBackground,
     onBackground = LightOnSurface,
     surface = LightSurface,
@@ -85,8 +85,8 @@ val LightColorScheme = lightColorScheme(
     outline = LightOutline,
     outlineVariant = LightOutline.copy(alpha = 0.6f),
     surfaceTint = LightPrimary,
-    error = Color(0xFFD32F2F),
-    onError = PixelPlayWhite
+    error = Color(0xFFD32F2F),                 // Vermelho para erros
+    onError = Color(0xFFFFFFFF)                 // Texto branco no erro
 )
 
 @Composable
