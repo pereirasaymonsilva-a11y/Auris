@@ -1,8 +1,8 @@
-package com.theveloper.pixelplay.data.backup.module
+package com.goldensystem.auris.data.backup.module
 
 import com.google.gson.GsonBuilder
-import com.theveloper.pixelplay.data.database.FavoritesDao
-import com.theveloper.pixelplay.data.database.FavoritesEntity
+import com.goldensystem.auris.data.database.FavoritesDao
+import com.goldensystem.auris.data.database.FavoritesEntity
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

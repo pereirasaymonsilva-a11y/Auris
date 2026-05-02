@@ -1,7 +1,7 @@
-package com.theveloper.pixelplay.data.stats
+package com.goldensystem.auris.data.stats
 
 import com.google.common.truth.Truth.assertThat
-import com.theveloper.pixelplay.data.model.Song
+import com.goldensystem.auris.data.model.Song
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId

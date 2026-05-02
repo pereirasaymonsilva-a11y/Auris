@@ -1,11 +1,11 @@
-package com.theveloper.pixelplay.ui.theme
+package com.goldensystem.auris.ui.theme
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.google.common.truth.Truth.assertThat
-import com.theveloper.pixelplay.data.model.Genre
-import com.theveloper.pixelplay.data.preferences.AlbumArtPaletteStyle
+import com.goldensystem.auris.data.model.Genre
+import com.goldensystem.auris.data.preferences.AlbumArtPaletteStyle
 import org.junit.Test
 
 class GenreThemeUtilsTest {

@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data.worker
+package com.goldensystem.auris.data.worker
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

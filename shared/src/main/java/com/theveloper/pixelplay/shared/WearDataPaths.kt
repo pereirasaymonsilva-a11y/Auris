@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.shared
+package com.goldensystem.auris.shared
 
 /**
  * Shared constants for Wear Data Layer API paths.

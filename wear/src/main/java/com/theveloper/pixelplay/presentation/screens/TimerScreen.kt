@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.screens
+package com.goldensystem.auris.presentation.screens
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.spring
@@ -31,14 +31,14 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.rememberResponsiveColumnState
-import com.theveloper.pixelplay.presentation.components.AlwaysOnScalingPositionIndicator
-import com.theveloper.pixelplay.presentation.components.WearTopTimeText
-import com.theveloper.pixelplay.presentation.theme.LocalWearPalette
-import com.theveloper.pixelplay.presentation.theme.screenBackgroundColor
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerColor
-import com.theveloper.pixelplay.R
-import com.theveloper.pixelplay.presentation.viewmodel.WearPlayerViewModel
-import com.theveloper.pixelplay.presentation.viewmodel.WearSleepTimerMode
+import com.goldensystem.auris.presentation.components.AlwaysOnScalingPositionIndicator
+import com.goldensystem.auris.presentation.components.WearTopTimeText
+import com.goldensystem.auris.presentation.theme.LocalWearPalette
+import com.goldensystem.auris.presentation.theme.screenBackgroundColor
+import com.goldensystem.auris.presentation.theme.surfaceContainerColor
+import com.goldensystem.auris.R
+import com.goldensystem.auris.presentation.viewmodel.WearPlayerViewModel
+import com.goldensystem.auris.presentation.viewmodel.WearSleepTimerMode
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Schedule

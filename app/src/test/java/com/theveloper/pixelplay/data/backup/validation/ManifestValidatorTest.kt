@@ -1,9 +1,9 @@
-package com.theveloper.pixelplay.data.backup.validation
+package com.goldensystem.auris.data.backup.validation
 
-import com.theveloper.pixelplay.data.backup.model.BackupManifest
-import com.theveloper.pixelplay.data.backup.model.BackupModuleInfo
-import com.theveloper.pixelplay.data.backup.model.BackupValidationResult
-import com.theveloper.pixelplay.data.backup.model.Severity
+import com.goldensystem.auris.data.backup.model.BackupManifest
+import com.goldensystem.auris.data.backup.model.BackupModuleInfo
+import com.goldensystem.auris.data.backup.model.BackupValidationResult
+import com.goldensystem.auris.data.backup.model.Severity
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

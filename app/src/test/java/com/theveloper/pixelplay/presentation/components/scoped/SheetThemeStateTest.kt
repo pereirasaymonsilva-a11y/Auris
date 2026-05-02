@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.components.scoped
+package com.goldensystem.auris.presentation.components.scoped
 
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color

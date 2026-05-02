@@ -1,6 +1,6 @@
-package com.theveloper.pixelplay.presentation.library
+package com.goldensystem.auris.presentation.library
 
-import com.theveloper.pixelplay.data.model.SortOption
+import com.goldensystem.auris.data.model.SortOption
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.assertEquals

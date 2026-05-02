@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data.worker
+package com.goldensystem.auris.data.worker
 
 import android.content.Context
 import android.database.MatrixCursor
@@ -13,8 +13,8 @@ import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import androidx.work.testing.TestListenableWorkerBuilder
 import com.google.common.truth.Truth.assertThat
-import com.theveloper.pixelplay.data.database.MusicDao
-import com.theveloper.pixelplay.data.database.PixelPlayDatabase
+import com.goldensystem.auris.data.database.MusicDao
+import com.goldensystem.auris.data.database.PixelPlayDatabase
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first

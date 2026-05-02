@@ -1,12 +1,12 @@
-package com.theveloper.pixelplay.data.repository
+package com.goldensystem.auris.data.repository
 
 import android.content.Context
 import com.google.common.truth.Truth.assertThat
-import com.theveloper.pixelplay.data.database.LyricsEntity
-import com.theveloper.pixelplay.data.database.LyricsDao
-import com.theveloper.pixelplay.data.model.LyricsSourcePreference
-import com.theveloper.pixelplay.data.model.Song
-import com.theveloper.pixelplay.data.network.lyrics.LrcLibApiService
+import com.goldensystem.auris.data.database.LyricsEntity
+import com.goldensystem.auris.data.database.LyricsDao
+import com.goldensystem.auris.data.model.LyricsSourcePreference
+import com.goldensystem.auris.data.model.Song
+import com.goldensystem.auris.data.network.lyrics.LrcLibApiService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data.local
+package com.goldensystem.auris.data.local
 
 import androidx.room.Dao
 import androidx.room.Insert

@@ -1,7 +1,7 @@
-package com.theveloper.pixelplay.data.repository
+package com.goldensystem.auris.data.repository
 
 import com.google.common.truth.Truth.assertThat
-import com.theveloper.pixelplay.data.database.FolderSongRow
+import com.goldensystem.auris.data.database.FolderSongRow
 import org.junit.jupiter.api.Test
 
 class FolderTreeBuilderTest {

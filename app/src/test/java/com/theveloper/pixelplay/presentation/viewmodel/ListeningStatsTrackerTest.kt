@@ -1,10 +1,10 @@
-package com.theveloper.pixelplay.presentation.viewmodel
+package com.goldensystem.auris.presentation.viewmodel
 
 import android.os.SystemClock
 import com.google.common.truth.Truth.assertThat
-import com.theveloper.pixelplay.data.DailyMixManager
-import com.theveloper.pixelplay.data.model.Song
-import com.theveloper.pixelplay.data.stats.PlaybackStatsRepository
+import com.goldensystem.auris.data.DailyMixManager
+import com.goldensystem.auris.data.model.Song
+import com.goldensystem.auris.data.stats.PlaybackStatsRepository
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk

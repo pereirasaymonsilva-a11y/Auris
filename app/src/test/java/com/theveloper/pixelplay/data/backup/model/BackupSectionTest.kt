@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data.backup.model
+package com.goldensystem.auris.data.backup.model
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

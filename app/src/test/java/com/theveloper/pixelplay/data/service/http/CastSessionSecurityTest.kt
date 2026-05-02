@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data.service.http
+package com.goldensystem.auris.data.service.http
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

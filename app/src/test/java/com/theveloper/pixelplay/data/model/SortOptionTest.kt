@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data.model
+package com.goldensystem.auris.data.model
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

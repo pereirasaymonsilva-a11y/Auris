@@ -1,12 +1,12 @@
-package com.theveloper.pixelplay.presentation.viewmodel
+package com.goldensystem.auris.presentation.viewmodel
 
 import android.content.Context
 import android.os.PowerManager
-import com.theveloper.pixelplay.MainCoroutineExtension
-import com.theveloper.pixelplay.data.model.PlaybackQueueItemSnapshot
-import com.theveloper.pixelplay.data.model.PlaybackQueueSnapshot
-import com.theveloper.pixelplay.data.preferences.UserPreferencesRepository
-import com.theveloper.pixelplay.data.service.player.DualPlayerEngine
+import com.goldensystem.auris.MainCoroutineExtension
+import com.goldensystem.auris.data.model.PlaybackQueueItemSnapshot
+import com.goldensystem.auris.data.model.PlaybackQueueSnapshot
+import com.goldensystem.auris.data.preferences.UserPreferencesRepository
+import com.goldensystem.auris.data.service.player.DualPlayerEngine
 import io.mockk.every
 import io.mockk.coEvery
 import io.mockk.mockk

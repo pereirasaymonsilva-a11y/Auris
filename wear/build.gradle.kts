@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.theveloper.pixelplay"
+    namespace = "com.goldensystem.auris"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.theveloper.pixelplay"
+        applicationId = "com.goldensystem.auris"
         minSdk = 30
         targetSdk = 34
         versionCode = (project.findProperty("APP_VERSION_CODE") as String).toInt()

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalWearFoundationApi::class)
 
-package com.theveloper.pixelplay.presentation.screens
+package com.goldensystem.auris.presentation.screens
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -49,13 +49,13 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.google.android.horologist.audio.ui.VolumeUiState
 import com.google.android.horologist.audio.ui.volumeRotaryBehavior
-import com.theveloper.pixelplay.presentation.components.CurvedVolumeIndicator
-import com.theveloper.pixelplay.presentation.components.WearTopTimeText
-import com.theveloper.pixelplay.presentation.theme.LocalWearPalette
-import com.theveloper.pixelplay.presentation.theme.screenBackgroundColor
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerColor
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerHighColor
-import com.theveloper.pixelplay.presentation.viewmodel.WearPlayerViewModel
+import com.goldensystem.auris.presentation.components.CurvedVolumeIndicator
+import com.goldensystem.auris.presentation.components.WearTopTimeText
+import com.goldensystem.auris.presentation.theme.LocalWearPalette
+import com.goldensystem.auris.presentation.theme.screenBackgroundColor
+import com.goldensystem.auris.presentation.theme.surfaceContainerColor
+import com.goldensystem.auris.presentation.theme.surfaceContainerHighColor
+import com.goldensystem.auris.presentation.viewmodel.WearPlayerViewModel
 import kotlinx.coroutines.delay
 
 @Composable

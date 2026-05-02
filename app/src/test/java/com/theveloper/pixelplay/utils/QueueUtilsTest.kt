@@ -1,6 +1,6 @@
-package com.theveloper.pixelplay.utils
+package com.goldensystem.auris.utils
 
-import com.theveloper.pixelplay.data.model.Song
+import com.goldensystem.auris.data.model.Song
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch

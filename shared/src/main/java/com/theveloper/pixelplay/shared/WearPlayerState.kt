@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.shared
+package com.goldensystem.auris.shared
 
 import kotlinx.serialization.Serializable
 

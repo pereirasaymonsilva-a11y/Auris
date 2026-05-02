@@ -1,9 +1,9 @@
-package com.theveloper.pixelplay.data.repository
+package com.goldensystem.auris.data.repository
 
-import com.theveloper.pixelplay.data.database.MusicDao
-import com.theveloper.pixelplay.data.network.deezer.DeezerApiService
-import com.theveloper.pixelplay.data.network.deezer.DeezerArtist
-import com.theveloper.pixelplay.data.network.deezer.DeezerSearchResponse
+import com.goldensystem.auris.data.database.MusicDao
+import com.goldensystem.auris.data.network.deezer.DeezerApiService
+import com.goldensystem.auris.data.network.deezer.DeezerArtist
+import com.goldensystem.auris.data.network.deezer.DeezerSearchResponse
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify

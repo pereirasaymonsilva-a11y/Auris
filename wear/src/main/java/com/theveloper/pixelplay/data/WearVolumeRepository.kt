@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data
+package com.goldensystem.auris.data
 
 import android.app.Application
 import android.content.Context
@@ -11,7 +11,7 @@ import androidx.mediarouter.media.MediaRouteSelector
 import androidx.mediarouter.media.MediaRouter
 import com.google.android.horologist.audio.BluetoothSettings.launchBluetoothSettings
 import com.google.android.horologist.audio.OutputSwitcher.launchSystemMediaOutputSwitcherUi
-import com.theveloper.pixelplay.shared.WearVolumeState
+import com.goldensystem.auris.shared.WearVolumeState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.theme
+package com.goldensystem.auris.presentation.theme
 
 import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.ColorUtils
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Colors
-import com.theveloper.pixelplay.shared.WearThemePalette
+import com.goldensystem.auris.shared.WearThemePalette
 import kotlin.math.max
 import kotlin.math.min
 

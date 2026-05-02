@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.components
+package com.goldensystem.auris.presentation.components
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

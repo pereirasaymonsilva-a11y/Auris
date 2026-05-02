@@ -1,21 +1,21 @@
-package com.theveloper.pixelplay.presentation.viewmodel
+package com.goldensystem.auris.presentation.viewmodel
 
 import android.content.Context
 import app.cash.turbine.test
-import com.theveloper.pixelplay.data.database.AlbumArtThemeDao
+import com.goldensystem.auris.data.database.AlbumArtThemeDao
 import com.google.common.util.concurrent.ListenableFuture
-import com.theveloper.pixelplay.data.model.SearchFilterType
-import com.theveloper.pixelplay.data.model.SearchHistoryItem
-import com.theveloper.pixelplay.data.model.SearchResultItem
-import com.theveloper.pixelplay.data.model.Album
-import com.theveloper.pixelplay.data.model.Artist
-import com.theveloper.pixelplay.data.model.Song
-import com.theveloper.pixelplay.data.model.SortOption
-import com.theveloper.pixelplay.data.model.StorageFilter
-import com.theveloper.pixelplay.data.preferences.ThemePreferencesRepository
-import com.theveloper.pixelplay.data.preferences.UserPreferencesRepository
-import com.theveloper.pixelplay.data.preferences.AiPreferencesRepository
-import com.theveloper.pixelplay.data.repository.MusicRepository
+import com.goldensystem.auris.data.model.SearchFilterType
+import com.goldensystem.auris.data.model.SearchHistoryItem
+import com.goldensystem.auris.data.model.SearchResultItem
+import com.goldensystem.auris.data.model.Album
+import com.goldensystem.auris.data.model.Artist
+import com.goldensystem.auris.data.model.Song
+import com.goldensystem.auris.data.model.SortOption
+import com.goldensystem.auris.data.model.StorageFilter
+import com.goldensystem.auris.data.preferences.ThemePreferencesRepository
+import com.goldensystem.auris.data.preferences.UserPreferencesRepository
+import com.goldensystem.auris.data.preferences.AiPreferencesRepository
+import com.goldensystem.auris.data.repository.MusicRepository
 import io.mockk.*
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -46,13 +46,13 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import com.theveloper.pixelplay.MainCoroutineExtension
-import com.theveloper.pixelplay.data.service.player.DualPlayerEngine
-import com.theveloper.pixelplay.data.telegram.TelegramCacheManager
-import com.theveloper.pixelplay.data.worker.SyncManager
-import com.theveloper.pixelplay.utils.AppShortcutManager
-import com.theveloper.pixelplay.utils.MediaItemBuilder
-import com.theveloper.pixelplay.presentation.viewmodel.*
+import com.goldensystem.auris.MainCoroutineExtension
+import com.goldensystem.auris.data.service.player.DualPlayerEngine
+import com.goldensystem.auris.data.telegram.TelegramCacheManager
+import com.goldensystem.auris.data.worker.SyncManager
+import com.goldensystem.auris.utils.AppShortcutManager
+import com.goldensystem.auris.utils.MediaItemBuilder
+import com.goldensystem.auris.presentation.viewmodel.*
 import app.cash.turbine.Turbine
 
 import androidx.core.content.ContextCompat
@@ -75,7 +75,7 @@ class PlayerViewModelTest {
     private val mockAppShortcutManager: AppShortcutManager = mockk(relaxed = true)
     private val mockTelegramCacheManager: TelegramCacheManager = mockk(relaxed = true)
     private val mockTelegramCacheManagerProvider: Lazy<TelegramCacheManager> = mockk()
-    private val mockTelegramRepository: com.theveloper.pixelplay.data.telegram.TelegramRepository = mockk(relaxed = true)
+    private val mockTelegramRepository: com.goldensystem.auris.data.telegram.TelegramRepository = mockk(relaxed = true)
     private val mockListeningStatsTracker: ListeningStatsTracker = mockk(relaxed = true)
     private val mockDailyMixStateHolder: DailyMixStateHolder = mockk(relaxed = true)
     private val mockLyricsStateHolder: LyricsStateHolder = mockk(relaxed = true)
@@ -99,7 +99,7 @@ class PlayerViewModelTest {
     private val mockThemeStateHolder: ThemeStateHolder = mockk(relaxed = true)
     private val mockMultiSelectionStateHolder: MultiSelectionStateHolder = mockk(relaxed = true)
     private val mockPlaylistSelectionStateHolder: PlaylistSelectionStateHolder = mockk(relaxed = true)
-    private lateinit var mockMediaControllerFactory: com.theveloper.pixelplay.data.media.MediaControllerFactory
+    private lateinit var mockMediaControllerFactory: com.goldensystem.auris.data.media.MediaControllerFactory
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -136,7 +136,7 @@ class PlayerViewModelTest {
         coEvery { mockUserPreferencesRepository.navBarStyleFlow } returns flowOf("Default")
         coEvery { mockUserPreferencesRepository.libraryNavigationModeFlow } returns flowOf("TabRow")
         coEvery { mockUserPreferencesRepository.carouselStyleFlow } returns flowOf("NoPeek")
-        coEvery { mockUserPreferencesRepository.fullPlayerLoadingTweaksFlow } returns flowOf(com.theveloper.pixelplay.data.preferences.FullPlayerLoadingTweaks())
+        coEvery { mockUserPreferencesRepository.fullPlayerLoadingTweaksFlow } returns flowOf(com.goldensystem.auris.data.preferences.FullPlayerLoadingTweaks())
         coEvery { mockUserPreferencesRepository.tapBackgroundClosesPlayerFlow } returns flowOf(true)
         coEvery { mockUserPreferencesRepository.hapticsEnabledFlow } returns flowOf(true)
         coEvery { mockUserPreferencesRepository.foldersSortOptionFlow } returns flowOf("FolderNameAZ") // Added missing mock

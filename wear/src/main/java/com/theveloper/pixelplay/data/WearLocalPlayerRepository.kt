@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data
+package com.goldensystem.auris.data
 
 import android.app.Application
 import android.graphics.Bitmap
@@ -13,10 +13,10 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
-import com.theveloper.pixelplay.data.local.LocalSongDao
-import com.theveloper.pixelplay.data.local.LocalSongEntity
-import com.theveloper.pixelplay.shared.WearLibraryItem
-import com.theveloper.pixelplay.shared.WearThemePalette
+import com.goldensystem.auris.data.local.LocalSongDao
+import com.goldensystem.auris.data.local.LocalSongEntity
+import com.goldensystem.auris.shared.WearLibraryItem
+import com.goldensystem.auris.shared.WearThemePalette
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

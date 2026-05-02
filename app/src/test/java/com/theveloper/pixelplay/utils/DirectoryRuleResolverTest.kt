@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.utils
+package com.goldensystem.auris.utils
 
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

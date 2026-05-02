@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.theme
+package com.goldensystem.auris.presentation.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -6,7 +6,7 @@ import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
-import com.theveloper.pixelplay.R
+import com.goldensystem.auris.R
 
 @OptIn(ExperimentalTextApi::class)
 @Composable

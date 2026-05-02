@@ -1,7 +1,7 @@
-package com.theveloper.pixelplay.data.worker
+package com.goldensystem.auris.data.worker
 
 import com.google.common.truth.Truth.assertThat
-import com.theveloper.pixelplay.data.database.SongEntity
+import com.goldensystem.auris.data.database.SongEntity
 import org.junit.Test
 
 class AlbumGroupingUtilsTest {
@@ -76,7 +76,7 @@ class AlbumGroupingUtilsTest {
 
     @Test
     fun `buildAlbumGroupingKeys keeps media fallback even when artwork exists`() {
-        val album = com.theveloper.pixelplay.data.database.AlbumEntity(
+        val album = com.goldensystem.auris.data.database.AlbumEntity(
             id = 77L,
             title = "Unknown Album",
             artistName = "",

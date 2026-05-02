@@ -1,9 +1,9 @@
-package com.theveloper.pixelplay.data
+package com.goldensystem.auris.data
 
 import android.graphics.Bitmap
-import com.theveloper.pixelplay.shared.WearPlaybackResult
-import com.theveloper.pixelplay.shared.WearPlayerState
-import com.theveloper.pixelplay.shared.WearVolumeState
+import com.goldensystem.auris.shared.WearPlaybackResult
+import com.goldensystem.auris.shared.WearPlayerState
+import com.goldensystem.auris.shared.WearVolumeState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow

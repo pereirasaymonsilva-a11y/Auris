@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay
+package com.goldensystem.auris
 
 import org.junit.Test
 

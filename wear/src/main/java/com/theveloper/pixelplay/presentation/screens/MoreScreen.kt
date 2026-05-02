@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.screens
+package com.goldensystem.auris.presentation.screens
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.spring
@@ -47,19 +47,19 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.rememberResponsiveColumnState
-import com.theveloper.pixelplay.presentation.components.AlwaysOnScalingPositionIndicator
-import com.theveloper.pixelplay.presentation.components.WearTopTimeText
-import com.theveloper.pixelplay.presentation.theme.LocalWearPalette
-import com.theveloper.pixelplay.presentation.theme.screenBackgroundColor
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerColor
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerHighColor
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerHighestColor
-import com.theveloper.pixelplay.presentation.viewmodel.BrowseUiState
-import com.theveloper.pixelplay.presentation.viewmodel.WearBrowseViewModel
-import com.theveloper.pixelplay.presentation.viewmodel.WearDownloadsViewModel
-import com.theveloper.pixelplay.presentation.viewmodel.WearPlayerViewModel
-import com.theveloper.pixelplay.shared.WearBrowseRequest
-import com.theveloper.pixelplay.shared.WearTransferProgress
+import com.goldensystem.auris.presentation.components.AlwaysOnScalingPositionIndicator
+import com.goldensystem.auris.presentation.components.WearTopTimeText
+import com.goldensystem.auris.presentation.theme.LocalWearPalette
+import com.goldensystem.auris.presentation.theme.screenBackgroundColor
+import com.goldensystem.auris.presentation.theme.surfaceContainerColor
+import com.goldensystem.auris.presentation.theme.surfaceContainerHighColor
+import com.goldensystem.auris.presentation.theme.surfaceContainerHighestColor
+import com.goldensystem.auris.presentation.viewmodel.BrowseUiState
+import com.goldensystem.auris.presentation.viewmodel.WearBrowseViewModel
+import com.goldensystem.auris.presentation.viewmodel.WearDownloadsViewModel
+import com.goldensystem.auris.presentation.viewmodel.WearPlayerViewModel
+import com.goldensystem.auris.shared.WearBrowseRequest
+import com.goldensystem.auris.shared.WearTransferProgress
 
 @Composable
 fun MoreScreen(

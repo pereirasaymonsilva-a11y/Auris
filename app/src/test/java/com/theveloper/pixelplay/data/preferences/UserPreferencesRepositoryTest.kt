@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data.preferences
+package com.goldensystem.auris.data.preferences
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import kotlinx.coroutines.flow.first

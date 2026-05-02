@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.utils
+package com.goldensystem.auris.utils
 
 import android.provider.MediaStore
 import org.junit.jupiter.api.Assertions.assertArrayEquals

@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.benchmark
+package com.goldensystem.auris.benchmark
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Ignore

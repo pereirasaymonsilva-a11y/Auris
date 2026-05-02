@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.screens
+package com.goldensystem.auris.presentation.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -30,17 +30,17 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.rememberResponsiveColumnState
-import com.theveloper.pixelplay.R
-import com.theveloper.pixelplay.presentation.components.AlwaysOnScalingPositionIndicator
-import com.theveloper.pixelplay.presentation.components.WearTopTimeText
-import com.theveloper.pixelplay.presentation.viewmodel.BrowseUiState
-import com.theveloper.pixelplay.presentation.viewmodel.WearBrowseViewModel
-import com.theveloper.pixelplay.presentation.theme.LocalWearPalette
-import com.theveloper.pixelplay.presentation.theme.rememberBrowseSubscreenTitleFont
-import com.theveloper.pixelplay.presentation.theme.screenBackgroundColor
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerColor
-import com.theveloper.pixelplay.shared.WearBrowseRequest
-import com.theveloper.pixelplay.shared.WearLibraryItem
+import com.goldensystem.auris.R
+import com.goldensystem.auris.presentation.components.AlwaysOnScalingPositionIndicator
+import com.goldensystem.auris.presentation.components.WearTopTimeText
+import com.goldensystem.auris.presentation.viewmodel.BrowseUiState
+import com.goldensystem.auris.presentation.viewmodel.WearBrowseViewModel
+import com.goldensystem.auris.presentation.theme.LocalWearPalette
+import com.goldensystem.auris.presentation.theme.rememberBrowseSubscreenTitleFont
+import com.goldensystem.auris.presentation.theme.screenBackgroundColor
+import com.goldensystem.auris.presentation.theme.surfaceContainerColor
+import com.goldensystem.auris.shared.WearBrowseRequest
+import com.goldensystem.auris.shared.WearLibraryItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Album

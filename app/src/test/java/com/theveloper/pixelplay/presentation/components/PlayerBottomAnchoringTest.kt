@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.components
+package com.goldensystem.auris.presentation.components
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp

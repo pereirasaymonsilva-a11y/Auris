@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.shared
+package com.goldensystem.auris.shared
 
 /**
  * Shared Wear capability names used to discover reachable devices

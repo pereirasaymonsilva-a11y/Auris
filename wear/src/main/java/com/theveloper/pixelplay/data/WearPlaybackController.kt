@@ -1,10 +1,10 @@
-package com.theveloper.pixelplay.data
+package com.goldensystem.auris.data
 
 import android.app.Application
 import com.google.android.gms.wearable.Wearable
-import com.theveloper.pixelplay.shared.WearDataPaths
-import com.theveloper.pixelplay.shared.WearPlaybackCommand
-import com.theveloper.pixelplay.shared.WearVolumeCommand
+import com.goldensystem.auris.shared.WearDataPaths
+import com.goldensystem.auris.shared.WearPlaybackCommand
+import com.goldensystem.auris.shared.WearVolumeCommand
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

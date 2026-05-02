@@ -1,22 +1,22 @@
-package com.theveloper.pixelplay.data.backup
+package com.goldensystem.auris.data.backup
 
 import android.content.Context
 import android.net.Uri
-import com.theveloper.pixelplay.data.backup.format.BackupReader
-import com.theveloper.pixelplay.data.backup.format.BackupWriter
-import com.theveloper.pixelplay.data.backup.history.BackupHistoryRepository
-import com.theveloper.pixelplay.data.backup.model.BackupManifest
-import com.theveloper.pixelplay.data.backup.model.BackupModuleInfo
-import com.theveloper.pixelplay.data.backup.model.BackupSection
-import com.theveloper.pixelplay.data.backup.model.BackupValidationResult
-import com.theveloper.pixelplay.data.backup.model.DeviceInfo
-import com.theveloper.pixelplay.data.backup.model.ModuleRestoreDetail
-import com.theveloper.pixelplay.data.backup.model.RestorePlan
-import com.theveloper.pixelplay.data.backup.model.ValidationError
-import com.theveloper.pixelplay.data.backup.module.BackupModuleHandler
-import com.theveloper.pixelplay.data.backup.restore.RestoreExecutor
-import com.theveloper.pixelplay.data.backup.restore.RestorePlanner
-import com.theveloper.pixelplay.data.backup.validation.ValidationPipeline
+import com.goldensystem.auris.data.backup.format.BackupReader
+import com.goldensystem.auris.data.backup.format.BackupWriter
+import com.goldensystem.auris.data.backup.history.BackupHistoryRepository
+import com.goldensystem.auris.data.backup.model.BackupManifest
+import com.goldensystem.auris.data.backup.model.BackupModuleInfo
+import com.goldensystem.auris.data.backup.model.BackupSection
+import com.goldensystem.auris.data.backup.model.BackupValidationResult
+import com.goldensystem.auris.data.backup.model.DeviceInfo
+import com.goldensystem.auris.data.backup.model.ModuleRestoreDetail
+import com.goldensystem.auris.data.backup.model.RestorePlan
+import com.goldensystem.auris.data.backup.model.ValidationError
+import com.goldensystem.auris.data.backup.module.BackupModuleHandler
+import com.goldensystem.auris.data.backup.restore.RestoreExecutor
+import com.goldensystem.auris.data.backup.restore.RestorePlanner
+import com.goldensystem.auris.data.backup.validation.ValidationPipeline
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -59,7 +59,7 @@ class BackupManagerTest {
                 ValidationError(
                     code = "FILE_EXTENSION",
                     message = "File extension is not .pxpl.",
-                    severity = com.theveloper.pixelplay.data.backup.model.Severity.WARNING
+                    severity = com.goldensystem.auris.data.backup.model.Severity.WARNING
                 )
             )
         )
@@ -80,7 +80,7 @@ class BackupManagerTest {
                     code = "MISSING_SONG_ID",
                     message = "EngagementStats[0]: missing songId",
                     module = BackupSection.ENGAGEMENT_STATS.key,
-                    severity = com.theveloper.pixelplay.data.backup.model.Severity.WARNING
+                    severity = com.goldensystem.auris.data.backup.model.Severity.WARNING
                 )
             )
         )

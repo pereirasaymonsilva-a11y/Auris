@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.screens
+package com.goldensystem.auris.presentation.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -37,12 +37,12 @@ import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Watch
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.theveloper.pixelplay.R
-import com.theveloper.pixelplay.presentation.components.AlwaysOnScalingPositionIndicator
-import com.theveloper.pixelplay.presentation.components.WearTopTimeText
-import com.theveloper.pixelplay.presentation.theme.LocalWearPalette
-import com.theveloper.pixelplay.presentation.theme.screenBackgroundColor
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerColor
+import com.goldensystem.auris.R
+import com.goldensystem.auris.presentation.components.AlwaysOnScalingPositionIndicator
+import com.goldensystem.auris.presentation.components.WearTopTimeText
+import com.goldensystem.auris.presentation.theme.LocalWearPalette
+import com.goldensystem.auris.presentation.theme.screenBackgroundColor
+import com.goldensystem.auris.presentation.theme.surfaceContainerColor
 
 /**
  * Root browse screen showing library categories.

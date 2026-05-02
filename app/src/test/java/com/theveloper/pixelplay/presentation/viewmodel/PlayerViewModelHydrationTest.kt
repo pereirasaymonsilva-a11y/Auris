@@ -1,7 +1,7 @@
-package com.theveloper.pixelplay.presentation.viewmodel
+package com.goldensystem.auris.presentation.viewmodel
 
 import com.google.common.truth.Truth.assertThat
-import com.theveloper.pixelplay.data.model.Song
+import com.goldensystem.auris.data.model.Song
 import org.junit.Test
 
 class PlayerViewModelHydrationTest {

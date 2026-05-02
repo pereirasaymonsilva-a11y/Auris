@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data
+package com.goldensystem.auris.data
 
 import android.app.Application
 import android.net.Uri

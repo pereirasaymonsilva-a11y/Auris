@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.screens
+package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
 import android.content.Context
@@ -57,21 +57,21 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.rememberResponsiveColumnState
-import com.theveloper.pixelplay.R
-import com.theveloper.pixelplay.data.TransferState
-import com.theveloper.pixelplay.presentation.components.AlwaysOnScalingPositionIndicator
-import com.theveloper.pixelplay.presentation.components.PlayingEqIcon
-import com.theveloper.pixelplay.presentation.components.WearTopTimeText
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerHighestColor
-import com.theveloper.pixelplay.presentation.theme.LocalWearPalette
-import com.theveloper.pixelplay.presentation.theme.screenBackgroundColor
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerColor
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerHighColor
-import com.theveloper.pixelplay.data.local.LocalSongEntity
-import com.theveloper.pixelplay.presentation.viewmodel.WearDownloadsUiEvent
-import com.theveloper.pixelplay.presentation.viewmodel.WearDownloadsViewModel
-import com.theveloper.pixelplay.presentation.viewmodel.WearPlayerViewModel
-import com.theveloper.pixelplay.shared.WearTransferProgress
+import com.goldensystem.auris.R
+import com.goldensystem.auris.data.TransferState
+import com.goldensystem.auris.presentation.components.AlwaysOnScalingPositionIndicator
+import com.goldensystem.auris.presentation.components.PlayingEqIcon
+import com.goldensystem.auris.presentation.components.WearTopTimeText
+import com.goldensystem.auris.presentation.theme.surfaceContainerHighestColor
+import com.goldensystem.auris.presentation.theme.LocalWearPalette
+import com.goldensystem.auris.presentation.theme.screenBackgroundColor
+import com.goldensystem.auris.presentation.theme.surfaceContainerColor
+import com.goldensystem.auris.presentation.theme.surfaceContainerHighColor
+import com.goldensystem.auris.data.local.LocalSongEntity
+import com.goldensystem.auris.presentation.viewmodel.WearDownloadsUiEvent
+import com.goldensystem.auris.presentation.viewmodel.WearDownloadsViewModel
+import com.goldensystem.auris.presentation.viewmodel.WearPlayerViewModel
+import com.goldensystem.auris.shared.WearTransferProgress
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 

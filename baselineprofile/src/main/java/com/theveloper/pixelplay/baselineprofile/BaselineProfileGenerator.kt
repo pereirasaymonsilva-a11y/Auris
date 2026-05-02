@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.baselineprofile
+package com.goldensystem.auris.baselineprofile
 
 import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.benchmark.macro.junit4.BaselineProfileRule
@@ -24,7 +24,7 @@ class BaselineProfileGenerator {
     @Test
     fun generate() {
         val packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-            ?: "com.theveloper.pixelplay"
+            ?: "com.goldensystem.auris"
 
         rule.collect(
             packageName = packageName,

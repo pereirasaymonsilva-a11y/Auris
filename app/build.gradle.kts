@@ -21,7 +21,7 @@ val enableComposeCompilerReports = providers.gradleProperty("pixelplay.enableCom
     .get()
 
 android {
-    namespace = "com.theveloper.pixelplay"
+    namespace = "com.goldensystem.auris"
     compileSdk = 35
 
     sourceSets {
@@ -48,7 +48,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.theveloper.pixelplay"
+        applicationId = "com.goldensystem.auris"
         minSdk = 29
         targetSdk = 35
         versionCode = (project.findProperty("APP_VERSION_CODE") as String).toInt()

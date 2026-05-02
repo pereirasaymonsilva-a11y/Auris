@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation
+package com.goldensystem.auris.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
@@ -6,16 +6,16 @@ import androidx.navigation.navArgument
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
-import com.theveloper.pixelplay.presentation.screens.BrowseScreen
-import com.theveloper.pixelplay.presentation.screens.DownloadsScreen
-import com.theveloper.pixelplay.presentation.screens.LibraryListScreen
-import com.theveloper.pixelplay.presentation.screens.MoreScreen
-import com.theveloper.pixelplay.presentation.screens.OutputScreen
-import com.theveloper.pixelplay.presentation.screens.PlayerScreen
-import com.theveloper.pixelplay.presentation.screens.QueueScreen
-import com.theveloper.pixelplay.presentation.screens.SongListScreen
-import com.theveloper.pixelplay.presentation.screens.TimerScreen
-import com.theveloper.pixelplay.presentation.screens.VolumeScreen
+import com.goldensystem.auris.presentation.screens.BrowseScreen
+import com.goldensystem.auris.presentation.screens.DownloadsScreen
+import com.goldensystem.auris.presentation.screens.LibraryListScreen
+import com.goldensystem.auris.presentation.screens.MoreScreen
+import com.goldensystem.auris.presentation.screens.OutputScreen
+import com.goldensystem.auris.presentation.screens.PlayerScreen
+import com.goldensystem.auris.presentation.screens.QueueScreen
+import com.goldensystem.auris.presentation.screens.SongListScreen
+import com.goldensystem.auris.presentation.screens.TimerScreen
+import com.goldensystem.auris.presentation.screens.VolumeScreen
 import java.net.URLDecoder
 import java.net.URLEncoder
 

@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.utils
+package com.goldensystem.auris.utils
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -383,12 +383,12 @@ class LyricsUtilsTest {
     fun syncedToLrcString_preservesPairedTranslations() {
         val lrc = LyricsUtils.syncedToLrcString(
             listOf(
-                com.theveloper.pixelplay.data.model.SyncedLine(
+                com.goldensystem.auris.data.model.SyncedLine(
                     time = 10_000,
                     line = "Hello world",
                     translation = "你好世界"
                 ),
-                com.theveloper.pixelplay.data.model.SyncedLine(
+                com.goldensystem.auris.data.model.SyncedLine(
                     time = 20_000,
                     line = "Goodbye"
                 )
@@ -405,7 +405,7 @@ class LyricsUtilsTest {
     fun syncedToLrcString_expandsMultilineTranslationWithTimestampPerLine() {
         val lrc = LyricsUtils.syncedToLrcString(
             listOf(
-                com.theveloper.pixelplay.data.model.SyncedLine(
+                com.goldensystem.auris.data.model.SyncedLine(
                     time = 10_000,
                     line = "Hello world",
                     translation = "你好世界\nby: translator"

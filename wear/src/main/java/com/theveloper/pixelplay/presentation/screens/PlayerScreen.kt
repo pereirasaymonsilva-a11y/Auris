@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.screens
+package com.goldensystem.auris.presentation.screens
 
 import android.graphics.Bitmap
 import android.os.SystemClock
@@ -110,18 +110,18 @@ import com.google.android.horologist.audio.ui.VolumeUiState
 import com.google.android.horologist.audio.ui.volumeRotaryBehavior
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.rememberResponsiveColumnState
-import com.theveloper.pixelplay.R
-import com.theveloper.pixelplay.presentation.components.AlwaysOnScalingPositionIndicator
-import com.theveloper.pixelplay.presentation.components.CurvedVolumeIndicator
-import com.theveloper.pixelplay.presentation.components.outputRouteIcon
-import com.theveloper.pixelplay.presentation.components.WearTopTimeText
-import com.theveloper.pixelplay.presentation.shapes.RoundedStarShape
-import com.theveloper.pixelplay.presentation.theme.LocalWearPalette
-import com.theveloper.pixelplay.presentation.theme.radialBackgroundBrush
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerColor
-import com.theveloper.pixelplay.presentation.viewmodel.WearPlayerViewModel
-import com.theveloper.pixelplay.shared.WearPlayerState
-import com.theveloper.pixelplay.shared.WearVolumeState
+import com.goldensystem.auris.R
+import com.goldensystem.auris.presentation.components.AlwaysOnScalingPositionIndicator
+import com.goldensystem.auris.presentation.components.CurvedVolumeIndicator
+import com.goldensystem.auris.presentation.components.outputRouteIcon
+import com.goldensystem.auris.presentation.components.WearTopTimeText
+import com.goldensystem.auris.presentation.shapes.RoundedStarShape
+import com.goldensystem.auris.presentation.theme.LocalWearPalette
+import com.goldensystem.auris.presentation.theme.radialBackgroundBrush
+import com.goldensystem.auris.presentation.theme.surfaceContainerColor
+import com.goldensystem.auris.presentation.viewmodel.WearPlayerViewModel
+import com.goldensystem.auris.shared.WearPlayerState
+import com.goldensystem.auris.shared.WearVolumeState
 import androidx.core.graphics.ColorUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -1142,7 +1142,7 @@ private fun MainPlayerPage(
                     volumeEnabled = volumeEnabled,
                     deviceEnabled = volumeEnabled,
                     deviceRouteType = if (isWatchOutputSelected) {
-                        com.theveloper.pixelplay.shared.WearVolumeState.ROUTE_TYPE_WATCH
+                        com.goldensystem.auris.shared.WearVolumeState.ROUTE_TYPE_WATCH
                     } else {
                         activeOutputRouteType
                     },
@@ -1610,7 +1610,7 @@ private fun SecondaryControlsRow(
             SecondaryActionButton(
                 icon = outputRouteIcon(deviceRouteType),
                 enabled = deviceEnabled,
-                active = deviceRouteType == com.theveloper.pixelplay.shared.WearVolumeState.ROUTE_TYPE_WATCH,
+                active = deviceRouteType == com.goldensystem.auris.shared.WearVolumeState.ROUTE_TYPE_WATCH,
                 activeColor = deviceActiveColor,
                 raisedInactiveStyle = true,
                 onClick = onOutputClick,

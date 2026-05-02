@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data
+package com.goldensystem.auris.data
 
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -11,16 +11,16 @@ import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
-import com.theveloper.pixelplay.presentation.WearMainActivity
-import com.theveloper.pixelplay.shared.WearBrowseResponse
-import com.theveloper.pixelplay.shared.WearDataPaths
-import com.theveloper.pixelplay.shared.WearFavoriteSyncResponse
-import com.theveloper.pixelplay.shared.WearPlaybackResult
-import com.theveloper.pixelplay.shared.WearPlayerState
-import com.theveloper.pixelplay.shared.WearTransferMetadata
-import com.theveloper.pixelplay.shared.WearTransferProgress
-import com.theveloper.pixelplay.shared.WearTransferRequest
-import com.theveloper.pixelplay.shared.WearVolumeState
+import com.goldensystem.auris.presentation.WearMainActivity
+import com.goldensystem.auris.shared.WearBrowseResponse
+import com.goldensystem.auris.shared.WearDataPaths
+import com.goldensystem.auris.shared.WearFavoriteSyncResponse
+import com.goldensystem.auris.shared.WearPlaybackResult
+import com.goldensystem.auris.shared.WearPlayerState
+import com.goldensystem.auris.shared.WearTransferMetadata
+import com.goldensystem.auris.shared.WearTransferProgress
+import com.goldensystem.auris.shared.WearTransferRequest
+import com.goldensystem.auris.shared.WearVolumeState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

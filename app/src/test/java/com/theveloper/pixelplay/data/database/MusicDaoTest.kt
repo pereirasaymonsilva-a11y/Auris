@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data.database
+package com.goldensystem.auris.data.database
 
 import android.content.Context
 import androidx.room.Room

@@ -1,6 +1,6 @@
-package com.theveloper.pixelplay.data
+package com.goldensystem.auris.data
 
-import com.theveloper.pixelplay.shared.WearLibraryItem
+import com.goldensystem.auris.shared.WearLibraryItem
 
 data class WearLocalQueueState(
     val items: List<WearLibraryItem> = emptyList(),

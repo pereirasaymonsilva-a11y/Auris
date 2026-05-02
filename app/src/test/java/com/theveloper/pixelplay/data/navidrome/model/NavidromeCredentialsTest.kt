@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data.navidrome.model
+package com.goldensystem.auris.data.navidrome.model
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull

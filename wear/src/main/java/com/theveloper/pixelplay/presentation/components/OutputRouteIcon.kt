@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.components
+package com.goldensystem.auris.presentation.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bluetooth
@@ -8,7 +8,7 @@ import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material.icons.rounded.Speaker
 import androidx.compose.material.icons.rounded.Watch
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.theveloper.pixelplay.shared.WearVolumeState
+import com.goldensystem.auris.shared.WearVolumeState
 
 fun outputRouteIcon(routeType: String): ImageVector = when (routeType) {
     WearVolumeState.ROUTE_TYPE_WATCH -> Icons.Rounded.Watch

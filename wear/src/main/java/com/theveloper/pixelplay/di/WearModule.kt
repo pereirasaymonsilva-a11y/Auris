@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.di
+package com.goldensystem.auris.di
 
 import android.app.Application
 import androidx.room.Room
@@ -7,8 +7,8 @@ import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.MessageClient
 import com.google.android.gms.wearable.NodeClient
 import com.google.android.gms.wearable.Wearable
-import com.theveloper.pixelplay.data.local.LocalSongDao
-import com.theveloper.pixelplay.data.local.WearMusicDatabase
+import com.goldensystem.auris.data.local.LocalSongDao
+import com.goldensystem.auris.data.local.WearMusicDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -1,13 +1,13 @@
-package com.theveloper.pixelplay.presentation.viewmodel
+package com.goldensystem.auris.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.theveloper.pixelplay.data.WearLibraryRepository
-import com.theveloper.pixelplay.data.WearLocalPlayerRepository
-import com.theveloper.pixelplay.data.WearOutputTarget
-import com.theveloper.pixelplay.data.WearPlaybackController
-import com.theveloper.pixelplay.data.WearStateRepository
-import com.theveloper.pixelplay.shared.WearLibraryItem
+import com.goldensystem.auris.data.WearLibraryRepository
+import com.goldensystem.auris.data.WearLocalPlayerRepository
+import com.goldensystem.auris.data.WearOutputTarget
+import com.goldensystem.auris.data.WearPlaybackController
+import com.goldensystem.auris.data.WearStateRepository
+import com.goldensystem.auris.shared.WearLibraryItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

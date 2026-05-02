@@ -1,8 +1,8 @@
-package com.theveloper.pixelplay.presentation.components
+package com.goldensystem.auris.presentation.components
 
 import androidx.compose.ui.unit.dp
-import com.theveloper.pixelplay.data.model.SyncedLine
-import com.theveloper.pixelplay.data.model.SyncedWord
+import com.goldensystem.auris.data.model.SyncedLine
+import com.goldensystem.auris.data.model.SyncedWord
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

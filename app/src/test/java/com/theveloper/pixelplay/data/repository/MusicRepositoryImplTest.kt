@@ -1,16 +1,16 @@
-package com.theveloper.pixelplay.data.repository
+package com.goldensystem.auris.data.repository
 
 import android.content.Context
-import com.theveloper.pixelplay.data.database.MusicDao
-import com.theveloper.pixelplay.data.database.SearchHistoryDao
-import com.theveloper.pixelplay.data.database.SongEntity // Necesario para datos de prueba
-import com.theveloper.pixelplay.data.database.AlbumEntity
-import com.theveloper.pixelplay.data.database.ArtistEntity
-import com.theveloper.pixelplay.data.model.Song // Para verificar el mapeo
-import com.theveloper.pixelplay.data.preferences.PlaylistPreferencesRepository
-import com.theveloper.pixelplay.data.preferences.UserPreferencesRepository
-import com.theveloper.pixelplay.data.database.FavoritesDao
-import com.theveloper.pixelplay.data.database.TelegramDao
+import com.goldensystem.auris.data.database.MusicDao
+import com.goldensystem.auris.data.database.SearchHistoryDao
+import com.goldensystem.auris.data.database.SongEntity // Necesario para datos de prueba
+import com.goldensystem.auris.data.database.AlbumEntity
+import com.goldensystem.auris.data.database.ArtistEntity
+import com.goldensystem.auris.data.model.Song // Para verificar el mapeo
+import com.goldensystem.auris.data.preferences.PlaylistPreferencesRepository
+import com.goldensystem.auris.data.preferences.UserPreferencesRepository
+import com.goldensystem.auris.data.database.FavoritesDao
+import com.goldensystem.auris.data.database.TelegramDao
 import dagger.Lazy
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
@@ -39,10 +39,10 @@ class MusicRepositoryImplTest {
     private val mockPlaylistPreferencesRepository: PlaylistPreferencesRepository = mockk(relaxed = true)
     private val mockLyricsRepository: LyricsRepository = mockk(relaxed = true)
     private val mockTelegramDao: TelegramDao = mockk(relaxed = true)
-    private val mockTelegramCacheManager: com.theveloper.pixelplay.data.telegram.TelegramCacheManager = mockk(relaxed = true)
-    private val mockTelegramRepository: com.theveloper.pixelplay.data.telegram.TelegramRepository = mockk(relaxed = true)
-    private val mockTelegramCacheManagerProvider: Lazy<com.theveloper.pixelplay.data.telegram.TelegramCacheManager> = mockk()
-    private val mockTelegramRepositoryProvider: Lazy<com.theveloper.pixelplay.data.telegram.TelegramRepository> = mockk()
+    private val mockTelegramCacheManager: com.goldensystem.auris.data.telegram.TelegramCacheManager = mockk(relaxed = true)
+    private val mockTelegramRepository: com.goldensystem.auris.data.telegram.TelegramRepository = mockk(relaxed = true)
+    private val mockTelegramCacheManagerProvider: Lazy<com.goldensystem.auris.data.telegram.TelegramCacheManager> = mockk()
+    private val mockTelegramRepositoryProvider: Lazy<com.goldensystem.auris.data.telegram.TelegramRepository> = mockk()
     private val mockSongRepository: SongRepository = mockk(relaxed = true)
     private val mockFavoritesDao: FavoritesDao = mockk(relaxed = true)
     private val mockArtistImageRepository: ArtistImageRepository = mockk(relaxed = true)

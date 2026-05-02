@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data
+package com.goldensystem.auris.data
 
 import android.app.Application
 import android.os.SystemClock
@@ -6,13 +6,13 @@ import android.webkit.MimeTypeMap
 import com.google.android.gms.wearable.ChannelClient
 import com.google.android.gms.wearable.MessageClient
 import com.google.android.gms.wearable.NodeClient
-import com.theveloper.pixelplay.data.local.LocalSongDao
-import com.theveloper.pixelplay.data.local.LocalSongEntity
-import com.theveloper.pixelplay.shared.WearDataPaths
-import com.theveloper.pixelplay.shared.WearLibraryState
-import com.theveloper.pixelplay.shared.WearTransferMetadata
-import com.theveloper.pixelplay.shared.WearTransferProgress
-import com.theveloper.pixelplay.shared.WearTransferRequest
+import com.goldensystem.auris.data.local.LocalSongDao
+import com.goldensystem.auris.data.local.LocalSongEntity
+import com.goldensystem.auris.shared.WearDataPaths
+import com.goldensystem.auris.shared.WearLibraryState
+import com.goldensystem.auris.shared.WearTransferMetadata
+import com.goldensystem.auris.shared.WearTransferProgress
+import com.goldensystem.auris.shared.WearTransferRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

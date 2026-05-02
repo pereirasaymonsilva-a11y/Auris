@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay
+package com.goldensystem.auris
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

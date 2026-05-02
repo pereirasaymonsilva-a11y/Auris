@@ -1,11 +1,11 @@
-package com.theveloper.pixelplay.presentation.viewmodel
+package com.goldensystem.auris.presentation.viewmodel
 
 import com.google.common.truth.Truth.assertThat
-import com.theveloper.pixelplay.data.media.SongMetadataEditor
-import com.theveloper.pixelplay.data.model.Lyrics
-import com.theveloper.pixelplay.data.model.Song
-import com.theveloper.pixelplay.data.preferences.UserPreferencesRepository
-import com.theveloper.pixelplay.data.repository.MusicRepository
+import com.goldensystem.auris.data.media.SongMetadataEditor
+import com.goldensystem.auris.data.model.Lyrics
+import com.goldensystem.auris.data.model.Song
+import com.goldensystem.auris.data.preferences.UserPreferencesRepository
+import com.goldensystem.auris.data.repository.MusicRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -69,7 +69,7 @@ class LyricsStateHolderTest {
         holder.fetchLyricsForSong(
             song = song,
             forcePickResults = false,
-            sourcePreference = com.theveloper.pixelplay.data.model.LyricsSourcePreference.API_FIRST
+            sourcePreference = com.goldensystem.auris.data.model.LyricsSourcePreference.API_FIRST
         ) { "Lyrics already available" }
         scope.advanceUntilIdle()
 

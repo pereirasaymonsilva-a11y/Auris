@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.theveloper.pixelplay.baselineprofile"
+    namespace = "com.goldensystem.auris.baselineprofile"
     compileSdk = 35
 
     compileOptions {

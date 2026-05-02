@@ -1,7 +1,7 @@
-package com.theveloper.pixelplay.data
+package com.goldensystem.auris.data
 
 import androidx.mediarouter.media.MediaRouter
-import com.theveloper.pixelplay.shared.WearVolumeState
+import com.goldensystem.auris.shared.WearVolumeState
 
 data class WearAudioOutputRoute(
     val id: String,

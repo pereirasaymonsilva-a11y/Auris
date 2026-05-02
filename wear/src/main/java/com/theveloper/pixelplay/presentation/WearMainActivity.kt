@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation
+package com.goldensystem.auris.presentation
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -7,8 +7,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.ambient.AmbientModeSupport
-import com.theveloper.pixelplay.presentation.theme.WearPixelPlayTheme
-import com.theveloper.pixelplay.presentation.viewmodel.WearPlayerViewModel
+import com.goldensystem.auris.presentation.theme.WearPixelPlayTheme
+import com.goldensystem.auris.presentation.viewmodel.WearPlayerViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

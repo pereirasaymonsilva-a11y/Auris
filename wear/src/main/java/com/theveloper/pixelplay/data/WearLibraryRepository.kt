@@ -1,10 +1,10 @@
-package com.theveloper.pixelplay.data
+package com.goldensystem.auris.data
 
 import android.app.Application
 import com.google.android.gms.wearable.Wearable
-import com.theveloper.pixelplay.shared.WearBrowseRequest
-import com.theveloper.pixelplay.shared.WearBrowseResponse
-import com.theveloper.pixelplay.shared.WearDataPaths
+import com.goldensystem.auris.shared.WearBrowseRequest
+import com.goldensystem.auris.shared.WearBrowseResponse
+import com.goldensystem.auris.shared.WearDataPaths
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await

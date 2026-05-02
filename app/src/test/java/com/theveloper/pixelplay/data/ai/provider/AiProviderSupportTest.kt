@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data.ai.provider
+package com.goldensystem.auris.data.ai.provider
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

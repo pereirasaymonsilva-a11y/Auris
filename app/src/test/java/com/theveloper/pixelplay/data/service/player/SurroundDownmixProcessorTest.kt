@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.data.service.player
+package com.goldensystem.auris.data.service.player
 
 import androidx.media3.common.C
 import androidx.media3.common.audio.AudioProcessor.AudioFormat

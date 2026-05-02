@@ -1,13 +1,13 @@
-package com.theveloper.pixelplay.data
+package com.goldensystem.auris.data
 
 import com.google.android.gms.wearable.MessageClient
 import com.google.android.gms.wearable.NodeClient
-import com.theveloper.pixelplay.data.local.LocalSongDao
-import com.theveloper.pixelplay.shared.WearDataPaths
-import com.theveloper.pixelplay.shared.WearFavoriteSyncRequest
-import com.theveloper.pixelplay.shared.WearFavoriteSyncResponse
-import com.theveloper.pixelplay.shared.WearPlaybackCommand
-import com.theveloper.pixelplay.shared.WearPlaybackResult
+import com.goldensystem.auris.data.local.LocalSongDao
+import com.goldensystem.auris.shared.WearDataPaths
+import com.goldensystem.auris.shared.WearFavoriteSyncRequest
+import com.goldensystem.auris.shared.WearFavoriteSyncResponse
+import com.goldensystem.auris.shared.WearPlaybackCommand
+import com.goldensystem.auris.shared.WearPlaybackResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.utils
+package com.goldensystem.auris.utils
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

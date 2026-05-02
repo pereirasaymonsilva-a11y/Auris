@@ -1,4 +1,4 @@
-package com.theveloper.pixelplay.presentation.screens
+package com.goldensystem.auris.presentation.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -33,21 +33,21 @@ import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
-import com.theveloper.pixelplay.data.WearAudioOutputRoute
-import com.theveloper.pixelplay.R
+import com.goldensystem.auris.data.WearAudioOutputRoute
+import com.goldensystem.auris.R
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.rememberResponsiveColumnState
-import com.theveloper.pixelplay.data.WearOutputTarget
-import com.theveloper.pixelplay.presentation.components.AlwaysOnScalingPositionIndicator
-import com.theveloper.pixelplay.presentation.components.outputRouteIcon
-import com.theveloper.pixelplay.presentation.components.WearTopTimeText
-import com.theveloper.pixelplay.presentation.theme.LocalWearPalette
-import com.theveloper.pixelplay.presentation.theme.screenBackgroundColor
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerColor
-import com.theveloper.pixelplay.presentation.theme.surfaceContainerHighestColor
-import com.theveloper.pixelplay.presentation.viewmodel.WearPlayerViewModel
-import com.theveloper.pixelplay.shared.WearPlayerState
-import com.theveloper.pixelplay.shared.WearVolumeState
+import com.goldensystem.auris.data.WearOutputTarget
+import com.goldensystem.auris.presentation.components.AlwaysOnScalingPositionIndicator
+import com.goldensystem.auris.presentation.components.outputRouteIcon
+import com.goldensystem.auris.presentation.components.WearTopTimeText
+import com.goldensystem.auris.presentation.theme.LocalWearPalette
+import com.goldensystem.auris.presentation.theme.screenBackgroundColor
+import com.goldensystem.auris.presentation.theme.surfaceContainerColor
+import com.goldensystem.auris.presentation.theme.surfaceContainerHighestColor
+import com.goldensystem.auris.presentation.viewmodel.WearPlayerViewModel
+import com.goldensystem.auris.shared.WearPlayerState
+import com.goldensystem.auris.shared.WearVolumeState
 import kotlinx.coroutines.delay
 
 @Composable
