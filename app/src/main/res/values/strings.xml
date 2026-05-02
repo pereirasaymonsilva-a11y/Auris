@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">PixelPlayer</string>
+    <string name="app_name">Auris</string>
     <string name="app_name_change_title">Alteração do Nome do App</string>
-    <string name="app_name_change_message">Alteramos o nome do nosso app de PixelPlay para PixelPlayer devido a uma questão de marca registrada. Continue jogando!</string>
+    <string name="app_name_change_message">Alteramos o nome app de PixelPlayr para Auris devido a uma questão de marca registrada e modificações. Continue Ouvindo!</string>
     <string name="do_not_show_again">Não mostrar novamente</string>
     <string name="dismiss">Dispensar</string>
     <string name="all_files_access_title">Permissão Especial Necessária</string>
-    <string name="all_files_access_description">Para editar metadados de músicas (arquivos .mp3), o PixelPlayer precisa de acesso especial a todos os arquivos. Isso nos permite modificar as tags diretamente. Por favor, conceda esta permissão na próxima tela para ativar a edição de metadados.</string>
+    <string name="all_files_access_description">Para editar metadados de músicas (arquivos .mp3), o Auris precisa de acesso especial a todos os arquivos. Isso nos permite modificar as tags diretamente. Por favor, conceda esta permissão na próxima tela para ativar a edição de metadados.</string>
     <string name="grant_permission_button">Conceder Permissão</string>
     <string name="all_files_access_setting">Acesso a Todos os Arquivos</string>
     <string name="error">Erro</string>
@@ -85,7 +85,7 @@
     <string name="ai_error_api_key">Por favor, configure uma chave de API válida para o provedor de IA selecionado nas Configurações.</string>
     <string name="ai_error_generic">Erro de IA: %s</string>
     <string name="ai_error_quota">O provedor de IA selecionado rejeitou a solicitação porque a conta não tem créditos ou cota disponível.</string>
-    <string name="ai_error_model_unavailable">O modelo de IA selecionado não está mais disponível. O PixelPlayer tentou mudar automaticamente para um modelo compatível.</string>
+    <string name="ai_error_model_unavailable">O modelo de IA selecionado não está mais disponível. O Auris tentou mudar automaticamente para um modelo compatível.</string>
     <string name="ai_no_songs_found">A IA não conseguiu encontrar nenhuma música para o seu comando.</string>
     <string name="ai_prompt_empty">Escreva uma ideia para sua Mix Diária</string>
     <string name="ai_daily_mix_updated">Mix Diária atualizada com IA</string>
@@ -123,7 +123,7 @@
     <string name="playlist_share_failed">Falha ao compartilhar: %1$s</string>
     <string name="playlist_none_to_export">Nenhuma playlist para exportar</string>
     <string name="playlist_export_failed">Falha na exportação: %1$s</string>
-    <string name="playlist_export_folder_display">Música/Exportações PixelPlayer</string>
+    <string name="playlist_export_folder_display">Música/Exportações Auris</string>
     <string name="ai_playlist_gemini_key_required">Por favor, configure sua chave de API do Gemini nas Configurações.</string>
     <string name="error_unknown">Erro desconhecido</string>
 

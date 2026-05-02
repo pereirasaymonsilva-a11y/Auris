@@ -287,9 +287,9 @@ Barra invertida (\) pode ser usada para escapar delimitadores de caractere.</str
     <string name="presentation_batch_g_presets_cd_pin">Fixar</string>
     <string name="presentation_batch_g_presets_cd_rename">Renomear</string>
     <string name="presentation_batch_g_presets_cd_delete">Excluir</string>
-    <string name="presentation_batch_g_beta_sheet_version">Beta 0.6.0</string>
-    <string name="presentation_batch_g_beta_sheet_welcome_title">Bem-vindo ao PixelPlayer 0.6.0-beta</string>
-    <string name="presentation_batch_g_beta_sheet_welcome_body">Este beta agora está focado em estabilidade, desempenho e reprodução entre dispositivos, enquanto entrega novas integrações importantes.</string>
+    <string name="presentation_batch_g_beta_sheet_version">Beta 0.1.0</string>
+    <string name="presentation_batch_g_beta_sheet_welcome_title">Bem-vindo ao Auris 0.1.0-beta</string>
+    <string name="presentation_batch_g_beta_sheet_welcome_body">Esta é a versão beta inicial do Auris. Esta versão ainda está em desenvolvimento; portanto, você pode encontrar bugs indesejados. Caso os encontre, reporte-os para que possamos corrigi-los o mais rápido possível.</string>
     <string name="presentation_batch_g_beta_sheet_expect_title">O que esperar</string>
     <string name="presentation_batch_g_beta_sheet_expect_1">Uso diário mais rápido: inicialização, navegação e interações do player mais suaves em todo o aplicativo.</string>
     <string name="presentation_batch_g_beta_sheet_expect_2">Suporte mais amplo a dispositivos: Android Auto, atualizações do Wear OS e maior confiabilidade do Cast.</string>
@@ -299,9 +299,9 @@ Barra invertida (\) pode ser usada para escapar delimitadores de caractere.</str
     <string name="presentation_batch_g_beta_sheet_report_body">Compartilhe etapas para reproduzir, resultado esperado, resultado real e detalhes do seu dispositivo/SO. Uma breve gravação de tela é muito útil.</string>
     <string name="presentation_batch_g_beta_sheet_open_issues">Issues abertas no GitHub</string>
     <string name="presentation_batch_g_beta_sheet_report_bug">Reportar um bug</string>
-    <string name="presentation_batch_g_beta05_title">Atualização Beta 0.5.0</string>
+    <string name="presentation_batch_g_beta05_title">Atualização beta- 0.1.0</string>
     <string name="presentation_batch_g_beta05_clean_install_title">Instalação limpa recomendada</string>
-    <string name="presentation_batch_g_beta05_clean_install_body">Se você está vindo do beta 0.5.0, esta atualização pode precisar de dados de biblioteca novos em vez de estado antigo em cache.</string>
+    <string name="presentation_batch_g_beta05_clean_install_body">Se você está vindo de uma versão mais antiga do Auris, esta atualização pode precisar de dados de biblioteca novos em vez de estado antigo em cache.</string>
     <string name="presentation_batch_g_beta05_if_wrong_meta_title">Se metadados ou entradas da biblioteca parecerem errados</string>
     <string name="presentation_batch_g_beta05_if_wrong_meta_body">Metadados de música errados, artistas ou álbuns incompatíveis, ou entradas com aparência duplicada geralmente significam que uma instalação limpa é a solução.</string>
     <string name="presentation_batch_g_beta05_dont_show">Não mostrar novamente</string>
@@ -361,7 +361,7 @@ Barra invertida (\) pode ser usada para escapar delimitadores de caractere.</str
     <string name="presentation_batch_g_cast_playing">Reproduzindo</string>
     <string name="presentation_batch_g_cast_paused">Pausado</string>
     <string name="presentation_batch_g_cast_perm_title">Prepare-se para conectar</string>
-    <string name="presentation_batch_g_cast_perm_body">Permita que o PixelPlayer veja seus dispositivos próximos e o Wi‑Fi atual para que possamos manter sua transmissão, áudio Bluetooth e alto-falantes sincronizados.</string>
+    <string name="presentation_batch_g_cast_perm_body">Permita que o Auris veja seus dispositivos próximos e o Wi‑Fi atual para que possamos manter sua transmissão, áudio Bluetooth e alto-falantes sincronizados.</string>
     <string name="presentation_batch_g_cast_perm_nearby_title">Dispositivos próximos</string>
     <string name="presentation_batch_g_cast_perm_nearby_desc">Necessário para ler e controlar seus equipamentos de áudio Bluetooth conectados.</string>
     <string name="presentation_batch_g_cast_perm_location_title">Localização para Wi‑Fi</string>

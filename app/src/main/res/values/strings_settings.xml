@@ -68,7 +68,7 @@
     <string name="setcat_language_label">Idioma do App</string>
     <string name="setcat_language_desc">Escolha o idioma usado na interface do aplicativo.</string>
     <string name="setcat_language_system">Padrão do sistema</string>
-    <string name="setcat_language_english">Inglês</string>
+    <string name="setcat_language_english">português</string>
     <string name="setcat_language_spanish">Espanhol</string>
     <string name="setcat_language_french">Francês</string>
     <string name="setcat_language_russian">Russo</string>
@@ -220,7 +220,7 @@
     <string name="setcat_trigger_crash_title">Acionar Falha de Teste</string>
     <string name="setcat_trigger_crash_subtitle">Simular uma falha para testar o sistema de relatório de falhas.</string>
     <string name="setcat_application">Aplicativo</string>
-    <string name="setcat_about_pixelplayer_title">Sobre o PixelPlayer</string>
+    <string name="setcat_about_pixelplayer_title">Sobre o Auris</string>
     <string name="setcat_about_pixelplayer_subtitle">Versão do aplicativo, créditos e mais.</string>
 
     <string name="backup_summary_none">Nenhuma seção selecionada.</string>
@@ -265,7 +265,7 @@
     <string name="dialog_regenerate_stats_title">Regenerar Estatísticas?</string>
     <string name="dialog_regenerate_stats_body">Isso limpará o cache de estatísticas e forçará um recálculo a partir do histórico do banco de dados.</string>
     <string name="toast_stats_regeneration_started">Regeneração de estatísticas iniciada</string>
-    <string name="backup_file_name_format">PixelPlayer_Backup_%1$d.pxpl</string>
+    <string name="backup_file_name_format">Auris_Backup_%1$d.pxpl</string>
 
     <string name="setcat_regenerate_daily_mix_action">Regenerar Mix Diária</string>
     <string name="setcat_regenerate_stats_action">Regenerar Estatísticas</string>

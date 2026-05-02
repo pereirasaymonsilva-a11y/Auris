@@ -130,7 +130,7 @@ private val CoreMaintainer = Contributor(
     detail = "Building PixelPlayer with direct community feedback.",
     avatarUrl = "https://avatars.githubusercontent.com/u/26845343?v=4",
     iconRes = R.drawable.round_developer_board_24,
-    githubUrl = "https://github.com/theovilardo",
+    githubUrl = "https://github.com/pereirasaymonsilva-a11y",
     telegramUrl = "https://t.me/thevelopersupport",
 )
 

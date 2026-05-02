@@ -5,8 +5,8 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 /**
- * Stable identifiers for each library tab. The [stableKey] value is persisted so it must not
- * change between app versions.
+ * Identificadores estáveis para cada aba da biblioteca. O [stableKey] é persistido,
+ * portanto não deve ser alterado entre versões do app.
  */
 enum class LibraryTabId(
     val stableKey: String,
@@ -15,7 +15,7 @@ enum class LibraryTabId(
 ) {
     Songs(
         stableKey = "SONGS",
-        label = "SONGS",
+        label = "Músicas",
         sortOptions = listOf(
             SortOption.SongTitleAZ,
             SortOption.SongTitleZA,
@@ -31,7 +31,7 @@ enum class LibraryTabId(
     ),
     Albums(
         stableKey = "ALBUMS",
-        label = "ALBUMS",
+        label = "Álbuns",
         sortOptions = listOf(
             SortOption.AlbumTitleAZ,
             SortOption.AlbumTitleZA,
@@ -44,7 +44,7 @@ enum class LibraryTabId(
     ),
     Artists(
         stableKey = "ARTIST",
-        label = "ARTIST",
+        label = "Artistas",
         sortOptions = listOf(
             SortOption.ArtistNameAZ,
             SortOption.ArtistNameZA,
@@ -53,7 +53,7 @@ enum class LibraryTabId(
     ),
     Playlists(
         stableKey = "PLAYLISTS",
-        label = "PLAYLISTS",
+        label = "Playlists",
         sortOptions = listOf(
             SortOption.PlaylistNameAZ,
             SortOption.PlaylistNameZA,
@@ -63,7 +63,7 @@ enum class LibraryTabId(
     ),
     Folders(
         stableKey = "FOLDERS",
-        label = "FOLDERS",
+        label = "Pastas",
         sortOptions = listOf(
             SortOption.FolderNameAZ,
             SortOption.FolderNameZA,
@@ -75,7 +75,7 @@ enum class LibraryTabId(
     ),
     Liked(
         stableKey = "LIKED",
-        label = "LIKED",
+        label = "Curtidas",
         sortOptions = listOf(
             SortOption.LikedSongTitleAZ,
             SortOption.LikedSongTitleZA,
