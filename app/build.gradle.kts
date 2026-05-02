@@ -57,9 +57,21 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // ===== ADICIONADO: configuração de assinatura fixa para debug =====
+    signingConfigs {
+        create("fixedDebug") {
+            storeFile = rootProject.file(".github/keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
+            // ===== ALTERADO: usa a keystore fixa =====
+            signingConfig = signingConfigs.getByName("fixedDebug")
         }
 
         release {
@@ -69,6 +81,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Mantido o signingConfig de debug original para release (pode ser alterado depois)
             signingConfig = signingConfigs.getByName("debug")
         }
 
