@@ -1121,6 +1121,9 @@ class MusicRepositoryImpl @Inject constructor(
             filterMode = storageFilter.toFilterMode()
         )
     }
+    override suspend fun incrementPlayCount(songId: Long) {
+    musicDao.incrementPlayCount(songId)
+    }
 
     override suspend fun getFavoriteSongIdsSorted(
         sortOption: SortOption,
