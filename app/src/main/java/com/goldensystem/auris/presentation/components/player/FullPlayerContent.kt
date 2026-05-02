@@ -1457,6 +1457,7 @@ private fun SongMetadataDisplaySection(
                 artist = currentSong.displayArtist,
                 artistId = currentSong.artistId,
                 artists = currentSongArtists,
+                playCount = currentSong.playCount,   // <-- NOVO: passando o contador
                 expansionFractionProvider = expansionFractionProvider,
                 textColor = textColor,
                 artistTextColor = artistTextColor,
@@ -2110,6 +2111,7 @@ private fun PlayerSongInfo(
     gradientEdgeColor: Color,
     playerViewModel: PlayerViewModel,
     onClickArtist: () -> Unit,
+    playCount: Int = 0,   // <-- NOVO: contador de plays
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -2122,7 +2124,6 @@ private fun PlayerSongInfo(
         fontFamily = GoogleSansRounded,
         color = textColor
     )
-
     val artistStyle = MaterialTheme.typography.titleMedium.copy(
         letterSpacing = 0.sp,
         color = artistTextColor
@@ -2130,21 +2131,15 @@ private fun PlayerSongInfo(
 
     Column(
         horizontalAlignment = Alignment.Start,
-            modifier = modifier
-                .padding(vertical = 4.dp)
-                .fillMaxWidth()
+        modifier = modifier
+            .padding(vertical = 4.dp)
+            .fillMaxWidth()
             .graphicsLayer {
                 val fraction = expansionFractionProvider()
-                alpha = fraction // Or apply specific fade logic if desired
+                alpha = fraction
                 translationY = (1f - fraction) * 24f
             }
     ) {
-        // We pass 1f to AutoScrollingTextOnDemand because the alpha/translation is now handled by the parent Column graphicsLayer
-        // and we want it "fully rendered" but hidden/moved by the layer.
-        // Actually, AutoScrollingTextOnDemand uses expansionFraction to start scrolling only when fully expanded?
-        // Let's check AutoScrollingTextOnDemand. Assuming it uses it for scrolling trigger.
-        // If we want to avoid recomposition, we might need to pass the provider or just 1f if scrolling logic handles itself.
-        // For now, let's pass the current value from provider for logic correctness, but ideally this component should be optimized too.
         AutoScrollingTextOnDemand(
             title,
             titleStyle,
@@ -2153,8 +2148,6 @@ private fun PlayerSongInfo(
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(2.dp))
-
-
 
         AutoScrollingTextOnDemand(
             text = artist,
@@ -2177,20 +2170,30 @@ private fun PlayerSongInfo(
                             }
                         }
                     },
-
-                onLongClick = {
-                    if (isNavigatingToArtist) return@combinedClickable
-                    coroutineScope.launch {
-                        isNavigatingToArtist = true
-                        try {
-                            playerViewModel.triggerArtistNavigationFromPlayer(resolvedArtistId)
-                        } finally {
-                            isNavigatingToArtist = false
+                    onLongClick = {
+                        if (isNavigatingToArtist) return@combinedClickable
+                        coroutineScope.launch {
+                            isNavigatingToArtist = true
+                            try {
+                                playerViewModel.triggerArtistNavigationFromPlayer(resolvedArtistId)
+                            } finally {
+                                isNavigatingToArtist = false
+                            }
                         }
                     }
-                }
-            )
+                )
         )
+
+        // ✅ Contador de plays (aparece somente se maior que 0)
+        if (playCount > 0) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Ouvida $playCount vez(es)",
+                style = MaterialTheme.typography.labelMedium,
+                color = artistTextColor.copy(alpha = 0.8f),
+                modifier = Modifier.padding(start = 2.dp)
+            )
+        }
     }
 }
 

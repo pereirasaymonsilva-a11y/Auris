@@ -209,6 +209,9 @@ interface MusicDao {
     @Query("SELECT id FROM songs WHERE source_type = 3")
     suspend fun getAllGDriveSongIds(): List<Long>
 
+    @Query("UPDATE songs SET play_count = play_count + 1 WHERE id = :songId")
+    suspend fun incrementPlayCount(songId: Long)
+
     @Query("SELECT id FROM songs WHERE source_type = 4")
     suspend fun getAllQqMusicSongIds(): List<Long>
 

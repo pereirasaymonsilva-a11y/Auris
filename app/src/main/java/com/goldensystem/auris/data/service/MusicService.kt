@@ -1056,13 +1056,23 @@ class MusicService : MediaLibraryService() {
         }
 
         override fun onPlaybackStateChanged(playbackState: Int) {
-            Timber.tag(TAG).d("Playback state changed: $playbackState")
-            if (playbackState == Player.STATE_ENDED) {
-                endOfTrackTimerSongId = null
+    Timber.tag(TAG).d("Playback state changed: $playbackState")
+    if (playbackState == Player.STATE_ENDED) {
+        endOfTrackTimerSongId = null
+
+        // ===== NOVO: incrementa contador de plays =====
+        val mediaId = mediaSession?.player?.currentMediaItem?.mediaId
+        val songId = mediaId?.toLongOrNull()
+        if (songId != null) {
+            serviceScope.launch(Dispatchers.IO) {
+                musicRepository.incrementPlayCount(songId)
             }
-            mediaSession?.let { refreshMediaSessionUi(it) }
-            schedulePlaybackSnapshotPersist(immediate = playbackState == Player.STATE_IDLE)
         }
+        // ===============================================
+    }
+    mediaSession?.let { refreshMediaSessionUi(it) }
+    schedulePlaybackSnapshotPersist(immediate = playbackState == Player.STATE_IDLE)
+}
 
         override fun onTimelineChanged(timeline: Timeline, reason: Int) {
             requestWidgetFullUpdate(force = true)

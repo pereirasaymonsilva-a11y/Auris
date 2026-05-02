@@ -36,7 +36,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         AiCacheEntity::class,
         AiUsageEntity::class
     ],
-    version = 40,
+    version = 41,   // <-- AUMENTADO
     exportSchema = true
 )
 abstract class PixelPlayDatabase : RoomDatabase() {
@@ -59,8 +59,6 @@ abstract class PixelPlayDatabase : RoomDatabase() {
 
     companion object {
         // Gap-bridging no-op migrations for missing version ranges.
-        // These versions predate Telegram features; affected tables have since been
-        // recreated by later migrations (e.g. 15→16 drops/recreates album_art_themes).
         val MIGRATION_5_6 = object : Migration(5, 6) {
             override fun migrate(db: SupportSQLiteDatabase) { /* no-op gap bridge */ }
         }
@@ -622,6 +620,13 @@ abstract class PixelPlayDatabase : RoomDatabase() {
                     "CREATE INDEX IF NOT EXISTS index_songs_parent_directory_path_source_type_id " +
                         "ON songs(parent_directory_path, source_type, id)"
                 )
+            }
+        }
+
+        // ===== NOVA MIGRAÇÃO: adiciona coluna play_count =====
+        val MIGRATION_40_41 = object : Migration(40, 41) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE songs ADD COLUMN play_count INTEGER NOT NULL DEFAULT 0")
             }
         }
 
