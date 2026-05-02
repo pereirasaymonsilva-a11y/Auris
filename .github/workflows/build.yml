@@ -24,7 +24,15 @@ jobs:
       - name: Restore debug keystore
         run: |
           mkdir -p .github/keystore
-          echo "${{ secrets.ANDROID_DEBUG_KEYSTORE }}" | base64 -d > .github/keystore/debug.keystore
+          # Remove todos os caracteres que não são válidos em base64
+          CLEAN=$(echo "${{ secrets.ANDROID_DEBUG_KEYSTORE }}" | tr -cd 'A-Za-z0-9+/=')
+          if [ -z "$CLEAN" ]; then
+            echo "ERRO: segredo está vazio ou contém apenas caracteres inválidos!"
+            exit 1
+          fi
+          echo "Tamanho do segredo limpo: ${#CLEAN} caracteres"
+          echo "$CLEAN" | base64 -d > .github/keystore/debug.keystore
+          echo "Keystore restaurada com sucesso."
 
       - name: Build APK
         run: ./gradlew assembleDebug
