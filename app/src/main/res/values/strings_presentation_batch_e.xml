@@ -142,8 +142,8 @@
     <string name="presentation_batch_e_cd_hidden">Oculto</string>
 
     <!-- DailyMixMenu -->
-    <string name="presentation_batch_e_daily_mix_how_title">Como sua Mix Diária é construída</string>
-    <string name="presentation_batch_e_daily_mix_how_body">Sua Mix Diária é construída a partir de suas músicas favoritas e mais reproduzidas. Também adicionamos faixas de artistas e gêneros que você gosta para que você possa descobrir novas músicas.</string>
+    <string name="presentation_batch_e_daily_mix_how_title">Como seu mix Diária é construída</string>
+    <string name="presentation_batch_e_daily_mix_how_body">seu mix Diária é construída a partir de suas músicas favoritas e mais reproduzidas. Também adicionamos faixas de artistas e gêneros que você gosta para que você possa descobrir novas músicas.</string>
     <string name="presentation_batch_e_daily_mix_prompt_label">Diga à IA o que você quer ouvir hoje</string>
     <string name="presentation_batch_e_daily_mix_cost_hint">Usamos uma amostra pequena para manter os custos baixos</string>
     <string name="presentation_batch_e_daily_mix_updating">Atualizando…</string>

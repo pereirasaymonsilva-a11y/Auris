@@ -197,7 +197,7 @@ fun HomeScreen(
         yourMixSongs.isNotEmpty() || isBenchmarkMode
     }
 
-    val yourMixSong: String = "Today's Mix for you"
+    val yourMixSong: String = "Seu mix de cada dia"
 
     // 2) Observar sólo el currentSong (o null) para saber si mostrar padding
     val currentSong by remember(playerViewModel.stablePlayerState) {

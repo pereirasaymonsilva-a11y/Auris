@@ -1,12 +1,12 @@
 # Auris 🎶
 
 <p align="center">
-  <img src="assets/icon.png" alt="Ícone do App" width="128"/>
+  <img src="assets/icon.png" alt="Ícone do Auris" width="128"/>
 </p>
 
 <p align="center">
-  <strong>Um player de música bonito e repleto de recursos para Android</strong><br>
-  Construído com Jetpack Compose e Material Design 3
+  <strong>Um player de música elegante, poderoso e totalmente em português</strong><br>
+  Baseado no PixelPlayer · Construído com Jetpack Compose e Material Design 3
 </p>
 
 <p align="center">
@@ -19,71 +19,67 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/theovilardo/PixelPlayer/releases/latest">
-        <img src="https://img.shields.io/github/v/release/theovilardo/PixelPlayer?include_prereleases&logo=github&style=for-the-badge&label=Última%20versão" alt="Última versão">
+    <a href="https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk/releases/latest">
+        <img src="https://img.shields.io/github/v/release/pereirasaymonsilva-a11y/pixelplayer-apk?include_prereleases&logo=github&style=for-the-badge&label=Última%20versão" alt="Última versão">
     </a>
-    <a href="https://github.com/theovilardo/PixelPlayer/releases">
-        <img src="https://img.shields.io/github/downloads/theovilardo/PixelPlayer/total?logo=github&style=for-the-badge" alt="Total de Downloads">
+    <a href="https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk/releases">
+        <img src="https://img.shields.io/github/downloads/pereirasaymonsilva-a11y/pixelplayer-apk/total?logo=github&style=for-the-badge" alt="Total de Downloads">
     </a>
-    <img src="https://img.shields.io/badge/Android-10%2B-green?style=for-the-badge&logo=android" alt="Android 11+">
+    <img src="https://img.shields.io/badge/Android-11%2B-green?style=for-the-badge&logo=android" alt="Android 11+">
     <img src="https://img.shields.io/badge/Kotlin-100%25-purple?style=for-the-badge&logo=kotlin" alt="Kotlin">
 </p>
 
 ---
 
-## ‼️ AVISO LEGAL
-- Nenhum fork deste projeto receberá suporte. Se você utiliza um fork, peça ao responsável por ele para lhe ajudar.
+## ✨ Sobre o Auris
+
+O **Auris** é uma versão personalizada com carinho a partir do código aberto do **PixelPlayer**, criado por [theovilardo](https://github.com/theovilardo).  
+Ele foi traduzido integralmente para o português (Brasil), ganhou um tema claro em dourado e preto, teve ícones e identidade visual renovados, e agora é mantido como um projeto independente focado na comunidade lusófona.
+
+Se você quer um player de música moderno, com Material You, equalizador, letras sincronizadas, suporte a múltiplos formatos e uma interface fluida, o Auris é para você.
 
 ---
 
-## ✨ Funcionalidades
-
-### 🎨 Interface Moderna (UI/UX)
-- **Material You** – Cores dinâmicas que se adaptam ao seu papel de parede
-- **Animações suaves** – Transições fluidas e microinterações
-- **Interface personalizável** – Arredondamento de cantos e configurações da barra de navegação
-- **Tema escuro/claro** – Alternância automática ou manual
-- **Cores da capa do álbum** – Extração dinâmica de cores da arte do álbum
+## 🎨 Funcionalidades
 
 ### 🎵 Reprodução Poderosa
-- **Media3 ExoPlayer** – Motor de áudio líder da indústria com suporte a FFmpeg
-- **Reprodução em segundo plano** – Total integração com a sessão de mídia
-- **Gerenciamento de fila** – Reordenação por arrastar e soltar
-- **Aleatório e repetição** – Todos os modos de reprodução suportados
-- **Reprodução contínua (gapless)** – Transições perfeitas entre as faixas
-- **Transições personalizadas** – Configure crossfades entre músicas
+- **Media3 ExoPlayer** com suporte a FFmpeg
+- Reprodução em segundo plano com controle total pela notificação
+- Fila com arrastar e soltar, modos aleatório e repetição
+- Transições suaves (gapless) e crossfade personalizável
 
-### 📚 Gerenciamento de Biblioteca
-- **Suporte a múltiplos formatos** – MP3, FLAC, AAC, OGG, WAV e mais
-- **Navegação por** – Músicas, Álbuns, Artistas, Gêneros, Pastas
-- **Interpretação inteligente de artistas** – Separadores configuráveis para faixas com vários artistas
-- **Agrupamento por Artista do Álbum** – Organização adequada dos álbuns
-- **Filtragem de pastas** – Escolha quais diretórios escanear
+### 🖼️ Interface Moderna
+- **Material You** – cores que se adaptam ao seu papel de parede
+- Animações fluidas e microinterações
+- Temas claro e escuro (agora com tema claro dourado exclusivo do Auris)
+- Extração de cores da capa do álbum
 
-### 🔍 Descoberta e Organização
-- **Busca completa** – Pesquise em toda a sua biblioteca
-- **Mistura Diária** – Playlist personalizada baseada nos seus hábitos de escuta (AI)
-- **Playlists** – Crie e gerencie playlists personalizadas
-- **Estatísticas** – Acompanhe seu histórico e hábitos musicais
+### 📚 Biblioteca Completa
+- Suporte a MP3, FLAC, AAC, OGG, WAV, entre outros
+- Navegação por Músicas, Álbuns, Artistas, Gêneros e Pastas
+- Interpretação inteligente de múltiplos artistas (feat., ft., etc.)
+- Agrupamento por Artista do Álbum
 
-### 🎤 Letras
-- **Letras sincronizadas** – Formato LRC via API LRCLIB
-- **Edição de letras** – Modifique ou adicione letras às suas faixas
-- **Exibição em rolagem** – Acompanhe enquanto você ouve
+### 🎤 Letras Sincronizadas
+- Busca automática via LRCLIB
+- Suporte a arquivos .LRC embarcados
+- Edição manual de letras e ajuste de sincronia
 
-### 🖼️ Arte do Artista
-- **Integração com Deezer** – Imagens automáticas de artistas via API Deezer
-- **Cache inteligente** – Cache em memória (LRU) + banco de dados para acesso offline
-- **Ícones de substitutos** – Belos placeholders quando as imagens não estão disponíveis
+### 📊 Estatísticas e Descoberta
+- Estatísticas de escuta detalhadas (hábitos, horários, faixas mais ouvidas)
+- Mix Diária gerada por IA com base no seu histórico
+- Busca completa na biblioteca
 
 ### 📲 Conectividade
-- **Chromecast** – Transmita para sua TV ou caixas inteligentes
-- **Android Auto** – Suporte completo para reprodução no carro (Em breve)
-- **Widgets** – Controle na tela inicial com widgets Glance
+- Chromecast e Bluetooth
+- Widgets com Glance
+- Android Auto (em breve)
 
-### ⚙️ Funcionalidades Avançadas
-- **Editor de Tags** – Edite metadados com TagLib (suporte a MP3, FLAC, M4A)
-- **Playlists com IA** – Gere playlists com o Gemini AI
+### ⚙️ Avançado
+- Editor de tags completo (TagLib)
+- Equalizador de 10 bandas
+- Playlists com IA (Gemini)
+- Backup e restauração
 
 ---
 
@@ -91,117 +87,98 @@
 
 | Categoria | Tecnologia |
 |----------|------------|
-| **Linguagem** | [Kotlin](https://kotlinlang.org/) 100% |
-| **Framework de UI** | [Jetpack Compose](https://developer.android.com/jetpack/compose) |
-| **Design System** | [Material Design 3](https://m3.material.io/) |
-| **Motor de Áudio** | [Media3 ExoPlayer](https://developer.android.com/guide/topics/media/media3) + FFmpeg |
+| **Linguagem** | Kotlin 100% |
+| **UI** | Jetpack Compose + Material Design 3 |
+| **Áudio** | Media3 ExoPlayer + FFmpeg |
 | **Arquitetura** | MVVM com StateFlow/SharedFlow |
-| **Injeção de Dependência** | [Hilt](https://dagger.dev/hilt/) |
-| **Banco de Dados** | [Room](https://developer.android.com/training/data-storage/room) |
-| **Rede** | [Retrofit](https://square.github.io/retrofit/) + OkHttp |
-| **Carregamento de Imagens** | [Coil](https://coil-kt.github.io/coil/) |
+| **Injeção de Dependência** | Hilt |
+| **Banco de Dados** | Room |
+| **Rede** | Retrofit + OkHttp |
+| **Imagens** | Coil |
 | **Assíncrono** | Kotlin Coroutines & Flow |
-| **Tarefas em Segundo Plano** | WorkManager |
-| **Metadados** | [TagLib](https://github.com/nicholaus/taglib-android) |
-| **Widgets** | [Glance](https://developer.android.com/jetpack/compose/glance) |
+| **Widgets** | Glance |
+| **Metadados** | TagLib |
 
 ---
 
 ## 📱 Requisitos
 
-- **Android 11** (API 30) ou superior
-- **4 GB de RAM** recomendados para desempenho fluido
+- Android 11 (API 30) ou superior
+- 4 GB de RAM recomendados
 
 ---
 
-## 🚀 Primeiros Passos
-
-### Pré-requisitos
-
-- Android Studio Ladybug | 2024.2.1 ou mais recente
-- Android SDK 29+
-- JDK 11+
-
-### Instalação
-
-1. **Clone o repositório**
-   ```sh
-   git clone https://github.com/theovilardo/PixelPlayer.git
-```
-
-1. Abra no Android Studio
-   · Abra o Android Studio
-   · Selecione "Open an Existing Project"
-   · Navegue até o diretório clonado
-2. Sincronize e Compile
-   · Aguarde o Gradle sincronizar as dependências
-   · Compile o projeto (Build → Make Project)
-3. Execute
-   · Conecte um dispositivo ou inicie um emulador
-   · Clique em Executar (▶️)
-
----
-
-⬇️ Download
+## ⬇️ Download
 
 <p align="center">
-  <a href="https://github.com/theovilardo/PixelPlayer/releases/latest">
+  <a href="https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk/releases/latest">
     <img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" alt="Baixar no GitHub" height="60">
   </a>
 </p>
 
-<p align="center">
-  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.theveloper.pixelplay%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Ftheovilardo%2FPixelPlayer%22%2C%22author%22%3A%22theovilardo%22%2C%22name%22%3A%22PixelPlayer%22%2C%22supportFixedAPKURL%22%3Afalse%7D">
-    <img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Baixar pelo Obtainium" height="50">
-  </a>
-</p>
+> ⚠️ **Aviso:** Sempre desinstale a versão anterior antes de instalar uma nova atualização do Auris.  
+> O app está em versão beta e podem ocorrer conflitos se instalado por cima.
 
 ---
 
-📂 Estrutura do Projeto
+## 📂 Estrutura do Projeto
 
 ```
-app/src/main/java/com/theveloper/pixelplay/
+
+app/src/main/java/com/goldensystem/auris/
 ├── data/
-│   ├── database/       # Entidades Room, DAOs, migrações
-│   ├── model/          # Modelos de domínio (Song, Album, Artist, etc.)
-│   ├── network/        # Serviços de API (LRCLIB, Deezer)
-│   ├── preferences/    # Preferências via DataStore
+│   ├── database/       # Room (entidades, DAOs, migrações)
+│   ├── model/          # Modelos de domínio (Song, Album, Artist…)
+│   ├── network/        # APIs (LRCLIB, Deezer)
+│   ├── preferences/    # DataStore
 │   ├── repository/     # Repositórios de dados
 │   ├── service/        # MusicService, servidor HTTP
-│   └── worker/         # WorkManager para sincronização
-├── di/                 # Módulos de injeção do Hilt
+│   └── worker/         # WorkManager
+├── di/                 # Módulos Hilt
 ├── presentation/
 │   ├── components/     # Componentes Compose reutilizáveis
 │   ├── navigation/     # Grafo de navegação
-│   ├── screens/        # Composables de tela
+│   ├── screens/        # Telas
 │   └── viewmodel/      # ViewModels
 ├── ui/
-│   ├── glancewidget/   # Widgets da tela inicial
-│   └── theme/          # Cores, tipografia, tematização
+│   ├── glancewidget/   # Widgets
+│   └── theme/          # Tema, cores, tipografia
 └── utils/              # Extensões e utilitários
+
 ```
+
+---
+
+## 🛠️ Como compilar (desenvolvedores)
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk.git
+```
+
+1. Abra no Android Studio (Ladybug ou mais recente).
+2. Sincronize o Gradle e compile (Build → Make Project).
+3. Execute em um dispositivo ou emulador.
 
 ---
 
 🤝 Contribuindo
 
-Contribuições são bem-vindas! Sinta-se à vontade para enviar um Pull Request.
+Contribuições são muito bem-vindas!
+Para sugerir melhorias, abra uma issue ou envie um pull request.
 
-1. Faça um Fork do projeto
-2. Crie seu Branch de funcionalidade (git checkout -b feature/RecursoIncrivel)
-3. Faça commit das suas alterações (git commit -m 'Adiciona um Recurso Incrível')
-4. Faça push para o Branch (git push origin feature/RecursoIncrivel)
+1. Faça um fork do projeto
+2. Crie um branch (git checkout -b feature/MinhaFeature)
+3. Commit suas mudanças (git commit -m 'Adiciona nova feature')
+4. Push para o branch (git push origin feature/MinhaFeature)
 5. Abra um Pull Request
 
 ---
 
 📄 Licença
 
-Este projeto está licenciado sob a Licença MIT – veja o arquivo LICENSE para detalhes.
+Este projeto está licenciado sob a Licença MIT.
+Consulte o arquivo LICENSE para mais informações.
 
----
-
-<p align="center">
-  Feito com ❤️ por <a href="https://github.com/theovilardo">theovilardo</a>
-</p>
+Auris é uma modificação do PixelPlayer, criado por theovilardo.
+Modificações por Saymon Silva Pereira / Golden System Studios (2026).
