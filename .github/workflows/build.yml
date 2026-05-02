@@ -23,6 +23,7 @@ jobs:
 
       - name: Restore debug keystore
         run: |
+          mkdir -p .github/keystore
           echo "${{ secrets.ANDROID_DEBUG_KEYSTORE }}" | base64 -d > .github/keystore/debug.keystore
 
       - name: Build APK
