@@ -126,8 +126,8 @@ private data class Contributor(
 private val CoreMaintainer = Contributor(
     id = "theovilardo",
     displayName = "Theo Vilardo",
-    role = "Creator and maintainer",
-    detail = "Building PixelPlayer with direct community feedback.",
+    role = "Criador original",
+    detail = "Esse e o criador original do pixelplayer.",
     avatarUrl = "https://avatars.githubusercontent.com/u/26845343?v=4",
     iconRes = R.drawable.round_developer_board_24,
     githubUrl = "https://github.com/pereirasaymonsilva-a11y",

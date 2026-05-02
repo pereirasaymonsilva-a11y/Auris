@@ -69,7 +69,7 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix = ".debug"
+            //applicationIdSuffix = ".debug"
             // ===== ALTERADO: usa a keystore fixa =====
             signingConfig = signingConfigs.getByName("fixedDebug")
         }
