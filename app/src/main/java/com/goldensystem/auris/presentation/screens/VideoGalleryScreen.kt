@@ -13,11 +13,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldensystem.auris.R
 import com.goldensystem.auris.data.model.VideoItem
 import com.goldensystem.auris.presentation.viewmodel.VideoGalleryViewModel
 import com.goldensystem.auris.utils.formatDuration
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun VideoGalleryScreen(
@@ -38,7 +38,7 @@ fun VideoGalleryScreen(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = errorMessage ?: "Erro desconhecido",
+                        text = errorMessage ?: "Erro",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -57,7 +57,7 @@ fun VideoGalleryScreen(
         else -> {
             LazyColumn {
                 items(videos) { video ->
-                    VideoItemRow(video, onClick = { onVideoClick(video.filePath) })
+                    VideoItemRow(video, onClick = { onVideoClick(video.contentUri) })
                     HorizontalDivider()
                 }
             }
