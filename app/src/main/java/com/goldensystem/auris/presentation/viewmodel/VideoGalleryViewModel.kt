@@ -1,8 +1,7 @@
 package com.goldensystem.auris.presentation.viewmodel
 
+import android.content.ContentUris
 import android.content.Context
-import android.net.Uri
-import android.os.Environment
 import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,7 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,10 +29,6 @@ class VideoGalleryViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
-    init {
-        loadVideos()
-    }
-
     fun loadVideos() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -43,19 +37,18 @@ class VideoGalleryViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 try {
                     val videoList = mutableListOf<VideoItem>()
-
-                    // Primeira tentativa: MediaStore (rápido)
                     val projection = arrayOf(
                         MediaStore.Video.Media._ID,
                         MediaStore.Video.Media.TITLE,
                         MediaStore.Video.Media.DURATION
                     )
+                    val sortOrder = "${MediaStore.Video.Media.DATE_ADDED} DESC"
                     val cursor = context.contentResolver.query(
                         MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                         projection,
                         null,
                         null,
-                        "${MediaStore.Video.Media.DATE_ADDED} DESC"
+                        sortOrder
                     )
                     cursor?.use {
                         val idCol = it.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
@@ -63,43 +56,23 @@ class VideoGalleryViewModel @Inject constructor(
                         val durationCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
                         while (it.moveToNext()) {
                             val id = it.getLong(idCol)
+                            val contentUri = ContentUris.withAppendedId(
+                                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                                id
+                            ).toString()
                             videoList.add(
                                 VideoItem(
                                     id = id,
                                     title = it.getString(titleCol) ?: "Sem título",
-                                    contentUri = Uri.withAppendedPath(
-                                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                                        id.toString()
-                                    ).toString(),
+                                    contentUri = contentUri,
                                     duration = it.getLong(durationCol)
                                 )
                             )
                         }
                     }
-
-                    // Se o MediaStore não trouxe nada, faz varredura bruta de TODAS as pastas
-                    if (videoList.isEmpty()) {
-                        val root = Environment.getExternalStorageDirectory() // /storage/emulated/0
-                        val videoExtensions = setOf("mp4", "mkv", "avi", "mov", "wmv", "flv", "webm", "3gp")
-                        var tempId = 1L
-
-                        root.walkTopDown().forEach { file ->
-                            if (file.isFile && file.extension.lowercase() in videoExtensions) {
-                                videoList.add(
-                                    VideoItem(
-                                        id = tempId++,
-                                        title = file.nameWithoutExtension,
-                                        contentUri = Uri.fromFile(file).toString(),
-                                        duration = 0L
-                                    )
-                                )
-                            }
-                        }
-                    }
-
                     _videos.value = videoList
                 } catch (e: Exception) {
-                    _errorMessage.value = "Erro: ${e.message}"
+                    _errorMessage.value = "Erro ao carregar vídeos: ${e.message}"
                 } finally {
                     _isLoading.value = false
                 }
