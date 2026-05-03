@@ -130,8 +130,19 @@ private val CoreMaintainer = Contributor(
     detail = "Esse e o criador original do pixelplayer.",
     avatarUrl = "https://avatars.githubusercontent.com/u/26845343?v=4",
     iconRes = R.drawable.round_developer_board_24,
-    githubUrl = "https://github.com/pereirasaymonsilva-a11y",
+    githubUrl = "https://github.com/theovilardo",
     telegramUrl = "https://t.me/thevelopersupport",
+)
+
+private val AurisMaintainer = Contributor(
+    id = "pereirasaymonsilva-a11y",
+    displayName = "Saymon Silva Pereira",
+    role = "Mantenedor do Auris",
+    detail = "Criador da verção modificada do Auris",
+    avatarUrl = "https://avatars.githubusercontent.com/u/255678043?v=4&size=64",
+    iconRes = R.drawable.round_music_note_24,
+    githubUrl = "https://github.com/pereirasaymonsilva-a11y",
+    telegramUrl = "about.scream",
 )
 
 private val PinnedCommunityMembers = listOf(
@@ -171,8 +182,6 @@ private val PinnedAliases = mapOf(
 private fun normalizeHandle(handle: String): String {
     return handle.trim().removePrefix("@").lowercase()
 }
-
-// AboutTopBar removed, replaced by CollapsibleCommonTopBar
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Suppress("UNUSED_PARAMETER")
@@ -392,6 +401,18 @@ fun AboutScreen(
                         .padding(horizontal = 16.dp),
                     showContributionCount = false,
                     onCardClick = CoreMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
+                )
+            }
+
+            item(key = "auris_maintainer_card") {
+                ContributorCard(
+                    contributor = AurisMaintainer,
+                    shape = expressiveListShape(index = 0, count = 1),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    showContributionCount = false,
+                    onCardClick = AurisMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
                 )
             }
 

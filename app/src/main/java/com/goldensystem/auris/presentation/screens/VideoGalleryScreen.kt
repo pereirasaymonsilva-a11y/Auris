@@ -1,0 +1,74 @@
+package com.goldensystem.auris.presentation.screens
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.goldensystem.auris.R
+import com.goldensystem.auris.data.model.VideoItem
+import com.goldensystem.auris.presentation.viewmodel.VideoGalleryViewModel
+import com.goldensystem.auris.utils.formatDuration
+
+@Composable
+fun VideoGalleryScreen(
+    onVideoClick: (String) -> Unit,
+    viewModel: VideoGalleryViewModel = hiltViewModel()
+) {
+    val videos by viewModel.videos
+    val isLoading by viewModel.isLoading
+
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    } else {
+        LazyColumn {
+            items(videos) { video ->
+                VideoItemRow(video, onClick = { onVideoClick(video.filePath) })
+                HorizontalDivider()
+            }
+        }
+    }
+}
+
+@Composable
+fun VideoItemRow(video: VideoItem, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Ícone de vídeo como placeholder (a miniatura real pode ser implementada depois)
+        Icon(
+            painter = painterResource(R.drawable.rounded_play_arrow_24),
+            contentDescription = "Vídeo",
+            modifier = Modifier.size(60.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = video.title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = formatDuration(video.duration),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}

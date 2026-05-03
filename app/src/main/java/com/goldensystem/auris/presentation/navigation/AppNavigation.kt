@@ -56,6 +56,8 @@ import com.goldensystem.auris.presentation.screens.StatsScreen
 import com.goldensystem.auris.presentation.screens.SettingsScreen
 import com.goldensystem.auris.presentation.screens.SettingsCategoryScreen
 import com.goldensystem.auris.presentation.screens.EqualizerScreen
+import com.goldensystem.auris.presentation.screens.VideoGalleryScreen
+import com.goldensystem.auris.presentation.screens.VideoPlayerScreen
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
 import com.goldensystem.auris.presentation.viewmodel.PlaylistViewModel
 import kotlinx.coroutines.flow.first
@@ -593,6 +595,33 @@ fun AppNavigation(
                         onBack = { navController.popBackStack() }
                     )
                 }
+            }
+            // ===== NOVAS ROTAS DE GALERIA DE VÍDEOS =====
+            composable(
+                "video_gallery",
+                enterTransition = { enterTransition() },
+                exitTransition = { exitTransition() },
+                popEnterTransition = { popEnterTransition() },
+                popExitTransition = { popExitTransition() },
+            ) {
+                ScreenWrapper(navController = navController, playerViewModel = playerViewModel) {
+                    VideoGalleryScreen(
+                        onVideoClick = { path ->
+                            navController.navigate("video_player?path=${android.net.Uri.encode(path)}")
+                        }
+                    )
+                }
+            }
+            composable(
+                "video_player?path={path}",
+                arguments = listOf(navArgument("path") { type = NavType.StringType }),
+                enterTransition = { enterTransition() },
+                exitTransition = { exitTransition() },
+                popEnterTransition = { popEnterTransition() },
+                popExitTransition = { popExitTransition() },
+            ) { backStackEntry ->
+                val path = backStackEntry.arguments?.getString("path") ?: return@composable
+                VideoPlayerScreen(filePath = path)
             }
         }
     }

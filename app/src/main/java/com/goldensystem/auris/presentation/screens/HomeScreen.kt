@@ -75,7 +75,7 @@ import com.goldensystem.auris.data.preferences.CollagePattern
 import com.goldensystem.auris.presentation.components.AlbumArtCollage
 import com.goldensystem.auris.presentation.components.BetaInfoBottomSheet
 import com.goldensystem.auris.presentation.components.Beta05CleanInstallDisclaimerDialog
-import com.goldensystem.auris.presentation.components.ChangelogBottomSheet
+// import com.goldensystem.auris.presentation.components.ChangelogBottomSheet  // Removido
 import com.goldensystem.auris.presentation.netease.dashboard.NeteaseDashboardViewModel
 import com.goldensystem.auris.presentation.jellyfin.dashboard.JellyfinDashboardViewModel
 import com.goldensystem.auris.presentation.navidrome.dashboard.NavidromeDashboardViewModel
@@ -215,7 +215,7 @@ fun HomeScreen(
     val bottomPadding = if (currentSong != null) MiniPlayerHeight else 0.dp
 
     var showOptionsBottomSheet by remember { mutableStateOf(false) }
-    var showChangelogBottomSheet by remember { mutableStateOf(false) }
+    // var showChangelogBottomSheet by remember { mutableStateOf(false) }  // Removido
     var showBetaInfoBottomSheet by remember { mutableStateOf(false) }
     var showStreamingProviderSheet by remember { mutableStateOf(false) }
     var cleanInstallDisclaimerDismissedThisSession by rememberSaveable { mutableStateOf(false) }
@@ -242,9 +242,7 @@ fun HomeScreen(
                     onNavigationIconClick = {
                         navController.navigateSafely(Screen.Settings.route)
                     },
-                    onMoreOptionsClick = {
-                        showChangelogBottomSheet = true
-                    },
+                    // onMoreOptionsClick = { showChangelogBottomSheet = true },  // Removido
                     onBetaClick = {
                         showBetaInfoBottomSheet = true
                     },
@@ -253,6 +251,9 @@ fun HomeScreen(
                     },
                     onMenuClick = {
                         // onOpenSidebar() // Disabled
+                    },
+                    onVideoGalleryClick = {             // <-- NOVO PARÂMETRO
+                        navController.navigate("video_gallery")
                     }
                 )
             }
@@ -431,14 +432,15 @@ fun HomeScreen(
             )
         }
     }
-    if (showChangelogBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showChangelogBottomSheet = false },
-            sheetState = sheetState
-        ) {
-            ChangelogBottomSheet()
-        }
-    }
+    // Bloco do changelog removido (comentado)
+    // if (showChangelogBottomSheet) {
+    //     ModalBottomSheet(
+    //         onDismissRequest = { showChangelogBottomSheet = false },
+    //         sheetState = sheetState
+    //     ) {
+    //         ChangelogBottomSheet()
+    //     }
+    // }
     if (showBetaInfoBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = { showBetaInfoBottomSheet = false },

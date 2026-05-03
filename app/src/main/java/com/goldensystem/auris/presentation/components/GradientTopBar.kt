@@ -84,10 +84,10 @@ fun GenreGradientTopBar(
             }
         },
         colors = topAppBarColors(
-            containerColor = Color.Transparent, // Background is handled by the gradient brush
+            containerColor = Color.Transparent,
             scrolledContainerColor = Color.Transparent,
-            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer, // Or a color that contrasts well with your typical gradient
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer // Same as title
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
         )
     )
 }
@@ -97,12 +97,11 @@ fun GenreGradientTopBar(
 @Composable
 fun HomeGradientTopBar(
     onNavigationIconClick: () -> Unit,
-    onMoreOptionsClick: () -> Unit,
     onBetaClick: () -> Unit,
     onTelegramClick: () -> Unit,
     onMenuClick: () -> Unit = {},
+    onVideoGalleryClick: () -> Unit = {},   // <-- NOVO PARÂMETRO
 ) {
-    // 1) Pinta la status bar con el color surface
     val surfaceColor = MaterialTheme.colorScheme.surface
 
     PixelPlayStatusBarStyle(color = surfaceColor)
@@ -112,38 +111,21 @@ fun HomeGradientTopBar(
         Color.Transparent
     ).toImmutableList()
 
-    // Recordar el Brush basado en la lista de colores recordada
     val gradientBrush = remember(gradientColors) {
         Brush.verticalGradient(colors = gradientColors)
     }
 
-
-
-    // 3) TopAppBar con fondo degradado
     TopAppBar(
         modifier = Modifier
             .background(brush = gradientBrush),
-        title = { /* nada, usamos solo acciones */ },
+        title = { },
         navigationIcon = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(start = 12.dp)
             ) {
-                // Hamburger menu button
-//                FilledIconButton(
-//                    colors = IconButtonDefaults.filledIconButtonColors(
-//                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-//                        contentColor = MaterialTheme.colorScheme.onSurface
-//                    ),
-//                    onClick = onMenuClick
-//                ) {
-//                    Icon(
-//                        painter = painterResource(R.drawable.rounded_menu_24),
-//                        contentDescription = "Menu"
-//                    )
-//                }
-                
+                // Hamburger menu button (disabled)
                 // Beta button
                 FilledTonalButton(
                     modifier = Modifier.padding(start = 4.dp),
@@ -176,7 +158,6 @@ fun HomeGradientTopBar(
         actions = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                //horizontalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier.padding(end = 14.dp)
             ) {
                 FilledIconButton(
@@ -191,21 +172,20 @@ fun HomeGradientTopBar(
                          contentDescription = stringResource(R.string.presentation_batch_g_topbar_cd_telegram)
                     )
                 }
-                //Spacer(Modifier.size(8.dp))
+                // Botão da Galeria de Vídeos (substitui o antigo changelog)
                 FilledIconButton(
+                    onClick = onVideoGalleryClick,
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                         contentColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    onClick = onMoreOptionsClick
+                    )
                 ) {
                     Icon(
-                        //modifier = Modifier.size(18.dp),
-                        painter = painterResource(R.drawable.round_newspaper_24),
-                        contentDescription = stringResource(R.string.presentation_batch_g_topbar_cd_changelog)
+                        painter = painterResource(R.drawable.rounded_video_library_24),
+                        contentDescription = "Galeria de Vídeos"
                     )
                 }
-                //Spacer(Modifier.size(8.dp))
+                // Botão de Configurações
                 FilledIconButton(
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -221,7 +201,7 @@ fun HomeGradientTopBar(
             }
         },
         colors = topAppBarColors(
-            containerColor = Color.Transparent // ya pintamos el fondo con el Brush
+            containerColor = Color.Transparent
         )
     )
 }
