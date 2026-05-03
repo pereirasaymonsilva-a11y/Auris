@@ -98,7 +98,7 @@ data class Song(
                 gdriveFileId = null,
                 qqMusicMid = null,
                 navidromeId = null,
-                jellyfinId = null
+                jellyfinId = null,
                 playCount = 0
             )
         }
