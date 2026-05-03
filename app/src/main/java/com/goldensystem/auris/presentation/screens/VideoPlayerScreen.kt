@@ -15,7 +15,7 @@ import androidx.media3.ui.PlayerView
 @Composable
 fun VideoPlayerScreen(filePath: String) {
     val context = LocalContext.current
-    val player = remember {
+    val player = remember(filePath) {
         ExoPlayer.Builder(context).build().apply {
             val uri = Uri.parse(filePath)
             val mediaItem = MediaItem.fromUri(uri)
@@ -25,14 +25,15 @@ fun VideoPlayerScreen(filePath: String) {
         }
     }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(player) {
         onDispose {
             player.release()
         }
     }
 
     AndroidView(
-        factory = { PlayerView(context).apply { this.player = player } },
+        factory = { PlayerView(context) },
+        update = { it.player = player },
         modifier = Modifier.fillMaxSize()
     )
 }

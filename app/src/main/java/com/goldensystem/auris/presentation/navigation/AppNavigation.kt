@@ -1,6 +1,5 @@
 package com.goldensystem.auris.presentation.navigation
 
-import DelimiterConfigScreen
 import com.goldensystem.auris.presentation.screens.WordDelimiterConfigScreen
 import android.annotation.SuppressLint
 import androidx.annotation.OptIn
@@ -12,7 +11,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.goldensystem.auris.R
@@ -596,7 +598,7 @@ fun AppNavigation(
                     )
                 }
             }
-            // ===== NOVAS ROTAS DE GALERIA DE VÍDEOS =====
+            // ===== GALERIA DE VÍDEOS =====
             composable(
                 "video_gallery",
                 enterTransition = { enterTransition() },
@@ -604,13 +606,15 @@ fun AppNavigation(
                 popEnterTransition = { popEnterTransition() },
                 popExitTransition = { popExitTransition() },
             ) {
-                ScreenWrapper(navController = navController, playerViewModel = playerViewModel) {
-                    VideoGalleryScreen(
-                        onVideoClick = { path ->
-                            navController.navigate("video_player?path=${android.net.Uri.encode(path)}")
-                        }
-                    )
-                }
+                VideoGalleryScreen(
+                    onVideoClick = { path ->
+                        // A rota com query string é mantida por simplicidade.
+                        // Se houver risco com paths muito longos ou caracteres especiais,
+                        // migrar para "video_player/{path}" com navArgument.
+                        navController.navigate("video_player?path=${android.net.Uri.encode(path)}")
+                    },
+                    onBack = { navController.popBackStack() }
+                )
             }
             composable(
                 "video_player?path={path}",
@@ -620,7 +624,18 @@ fun AppNavigation(
                 popEnterTransition = { popEnterTransition() },
                 popExitTransition = { popExitTransition() },
             ) { backStackEntry ->
-                val path = backStackEntry.arguments?.getString("path") ?: return@composable
+                val path = backStackEntry.arguments?.getString("path")
+
+                if (path.isNullOrBlank()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = stringResource(R.string.nav_error_video_path_missing))
+                    }
+                    return@composable
+                }
+
                 VideoPlayerScreen(filePath = path)
             }
         }
@@ -638,7 +653,6 @@ private enum class MainRootDirection {
     BACKWARD
 }
 
-// Faster transitions for bottom navigation bar switching
 private const val BOTTOM_NAV_TRANSITION_DURATION = 250
 
 private val MAIN_ROOT_TRANSITION_SPEC =

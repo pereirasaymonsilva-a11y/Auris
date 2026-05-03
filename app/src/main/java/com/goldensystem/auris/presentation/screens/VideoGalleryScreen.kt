@@ -9,6 +9,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,6 +38,7 @@ import com.goldensystem.auris.utils.formatDuration
 @Composable
 fun VideoGalleryScreen(
     onVideoClick: (String) -> Unit,
+    onBack: () -> Unit,
     viewModel: VideoGalleryViewModel = hiltViewModel()
 ) {
     val videos by viewModel.videos.collectAsStateWithLifecycle()
@@ -57,7 +60,6 @@ fun VideoGalleryScreen(
         )
     }
 
-    // Carrega os vídeos automaticamente assim que a permissão é concedida
     LaunchedEffect(hasPermission) {
         if (hasPermission && videos.isEmpty() && !isLoading) {
             viewModel.loadVideos()
@@ -68,75 +70,91 @@ fun VideoGalleryScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
         hasPermission = granted
-        // A chamada loadVideos() é feita automaticamente pelo LaunchedEffect acima
     }
 
-    // Tela de permissão
-    if (!hasPermission) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    painter = painterResource(R.drawable.rounded_play_arrow_24),
-                    contentDescription = null,
-                    modifier = Modifier.size(72.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "O Auris precisa acessar seus vídeos",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Conceda permissão para listar os vídeos do dispositivo.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 32.dp)
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(onClick = { permissionLauncher.launch(permission) }) {
-                    Text("Permitir acesso")
-                }
-            }
-        }
-        return
-    }
-
-    // Conteúdo principal
-    when {
-        isLoading && videos.isEmpty() -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
-        errorMessage != null -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = errorMessage ?: "",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { viewModel.loadVideos() }) {
-                        Text("Tentar novamente")
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Galeria de Vídeos") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voltar"
+                        )
                     }
                 }
-            }
+            )
         }
-        videos.isEmpty() -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Nenhum vídeo encontrado.", style = MaterialTheme.typography.bodyLarge)
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            if (!hasPermission) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            painter = painterResource(R.drawable.rounded_play_arrow_24),
+                            contentDescription = null,
+                            modifier = Modifier.size(72.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "O Auris precisa acessar seus vídeos",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Conceda permissão para listar os vídeos do dispositivo.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 32.dp)
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(onClick = { permissionLauncher.launch(permission) }) {
+                            Text("Permitir acesso")
+                        }
+                    }
+                }
+                return@Box
             }
-        }
-        else -> {
-            LazyColumn {
-                items(videos) { video ->
-                    VideoItemRow(video, onClick = { onVideoClick(video.contentUri) })
-                    HorizontalDivider()
+
+            when {
+                isLoading && videos.isEmpty() -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                errorMessage != null -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = errorMessage ?: "", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = { viewModel.loadVideos() }) { Text("Tentar novamente") }
+                        }
+                    }
+                }
+                videos.isEmpty() -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Nenhum vídeo encontrado.", style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+                else -> {
+                    LazyColumn {
+                        items(
+                            items = videos,
+                            key = { it.id }
+                        ) { video ->
+                            VideoItemRow(video, onClick = { onVideoClick(video.contentUri) })
+                            HorizontalDivider()
+                        }
+                    }
                 }
             }
         }
@@ -155,6 +173,8 @@ fun VideoItemRow(video: VideoItem, onClick: () -> Unit) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(video.contentUri)
+                .videoFrameMillis(1000)
+                .allowHardware(false)
                 .crossfade(true)
                 .build(),
             contentDescription = video.title,

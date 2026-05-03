@@ -185,6 +185,7 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.androidx.core.ktx)
+    implementation("io.coil-kt:coil-video:2.6.0")
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation("androidx.lifecycle:lifecycle-process:2.9.0")

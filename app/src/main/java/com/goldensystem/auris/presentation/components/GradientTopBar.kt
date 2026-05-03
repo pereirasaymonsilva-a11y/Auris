@@ -100,7 +100,7 @@ fun HomeGradientTopBar(
     onBetaClick: () -> Unit,
     onTelegramClick: () -> Unit,
     onMenuClick: () -> Unit = {},
-    onVideoGalleryClick: () -> Unit = {},   // <-- NOVO PARÂMETRO
+    onVideoGalleryClick: () -> Unit = {},
 ) {
     val surfaceColor = MaterialTheme.colorScheme.surface
 
@@ -125,7 +125,6 @@ fun HomeGradientTopBar(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(start = 12.dp)
             ) {
-                // Hamburger menu button (disabled)
                 // Beta button
                 FilledTonalButton(
                     modifier = Modifier.padding(start = 4.dp),
@@ -161,18 +160,17 @@ fun HomeGradientTopBar(
                 modifier = Modifier.padding(end = 14.dp)
             ) {
                 FilledIconButton(
+                    onClick = onTelegramClick,
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                         contentColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    onClick = onTelegramClick
+                    )
                 ) {
                     Icon(
                          imageVector = Icons.Rounded.Cloud,
                          contentDescription = stringResource(R.string.presentation_batch_g_topbar_cd_telegram)
                     )
                 }
-                // Botão da Galeria de Vídeos (substitui o antigo changelog)
                 FilledIconButton(
                     onClick = onVideoGalleryClick,
                     colors = IconButtonDefaults.filledIconButtonColors(
@@ -185,13 +183,12 @@ fun HomeGradientTopBar(
                         contentDescription = "Galeria de Vídeos"
                     )
                 }
-                // Botão de Configurações
                 FilledIconButton(
+                    onClick = onNavigationIconClick,
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                         contentColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    onClick = onNavigationIconClick
+                    )
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.rounded_settings_24),

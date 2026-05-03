@@ -50,7 +50,13 @@ class VideoGalleryViewModel @Inject constructor(
                         null,
                         sortOrder
                     )
-                    cursor?.use {
+
+                    if (cursor == null) {
+                        _errorMessage.value = "Não foi possível acessar os vídeos"
+                        return@withContext
+                    }
+
+                    cursor.use {
                         val idCol = it.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
                         val titleCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.TITLE)
                         val durationCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)

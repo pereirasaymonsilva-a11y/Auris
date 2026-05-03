@@ -9,6 +9,7 @@
     <string name="grant_permission_button">Conceder Permissão</string>
     <string name="all_files_access_setting">Acesso a Todos os Arquivos</string>
     <string name="error">Erro</string>
+    <string name="nav_error_video_path_missing">Erro ao abrir vídeo</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancelar</string>
     <string name="import_file">Importar</string>

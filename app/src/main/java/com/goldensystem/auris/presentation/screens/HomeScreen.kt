@@ -252,7 +252,7 @@ fun HomeScreen(
                     onMenuClick = {
                         // onOpenSidebar() // Disabled
                     },
-                    onVideoGalleryClick = {             // <-- NOVO PARÂMETRO
+                    onVideoGalleryClick = {             // <-- ADICIONE AQUI
                         navController.navigate("video_gallery")
                     }
                 )
