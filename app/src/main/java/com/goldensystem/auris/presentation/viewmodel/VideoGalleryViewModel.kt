@@ -1,10 +1,7 @@
 package com.goldensystem.auris.presentation.viewmodel
 
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import android.provider.MediaStore
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldensystem.auris.data.model.VideoItem
@@ -35,31 +32,11 @@ class VideoGalleryViewModel @Inject constructor(
         loadVideos()
     }
 
-    private fun hasVideoPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.READ_MEDIA_VIDEO
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED
-        }
-    }
-
     fun loadVideos() {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
             try {
-                if (!hasVideoPermission()) {
-                    _errorMessage.value = "Permissão para acessar vídeos não concedida. Conceda nas configurações."
-                    _isLoading.value = false
-                    return@launch
-                }
-
                 withContext(Dispatchers.IO) {
                     val videoList = mutableListOf<VideoItem>()
                     val projection = arrayOf(
