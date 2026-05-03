@@ -754,6 +754,9 @@ class PlayerViewModel @Inject constructor(
         val sortedIds = musicRepository.getSongIdsSorted(sortOption, storageFilter)
         return resolvePlaybackQueueFromSortedIds(sortedIds)
     }
+    suspend fun getSongById(songId: String): Song? {
+    return musicRepository.getSong(songId).first()
+    }
 
     private fun launchLatestFullQueuePlayback(
         song: Song,
