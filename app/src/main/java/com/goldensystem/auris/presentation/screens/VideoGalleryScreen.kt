@@ -1,6 +1,7 @@
 package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
+import coil.request.videoFrameMillis
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -35,6 +36,7 @@ import com.goldensystem.auris.data.model.VideoItem
 import com.goldensystem.auris.presentation.viewmodel.VideoGalleryViewModel
 import com.goldensystem.auris.utils.formatDuration
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoGalleryScreen(
     onVideoClick: (String) -> Unit,
