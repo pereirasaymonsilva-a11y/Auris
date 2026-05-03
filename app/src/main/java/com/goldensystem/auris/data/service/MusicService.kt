@@ -1061,13 +1061,14 @@ class MusicService : MediaLibraryService() {
         endOfTrackTimerSongId = null
 
         // ===== NOVO: incrementa contador de plays =====
-        val mediaId = mediaSession?.player?.currentMediaItem?.mediaId
-        val songId = mediaId?.toLongOrNull()
-        if (songId != null) {
-            serviceScope.launch(Dispatchers.IO) {
-                musicRepository.incrementPlayCount(songId)
-            }
-        }
+val mediaId = mediaSession?.player?.currentMediaItem?.mediaId
+val songId = mediaId?.toLongOrNull()
+if (songId != null) {
+    serviceScope.launch(Dispatchers.IO) {
+        musicRepository.incrementPlayCount(songId)
+        requestWidgetFullUpdate(force = true)
+    }
+}
         // ===============================================
     }
     mediaSession?.let { refreshMediaSessionUi(it) }
