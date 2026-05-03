@@ -234,7 +234,13 @@ fun FullPlayerContent(
         }
     }
 
-    val song = currentSong ?: retainedSong ?: return // Keep the player visible while transitioning
+    val song = currentSong ?: retainedSong ?: return
+    LaunchedEffect(song.id) {
+    val updatedSong = playerViewModel.getSongById(song.id)
+    if (updatedSong != null && updatedSong.playCount > 0) {
+        retainedSong = updatedSong
+    }
+}// Keep the player visible while transitioning
     var showSongInfoBottomSheet by remember { mutableStateOf(false) }
     var showLyricsSheet by remember { mutableStateOf(false) }
     var showArtistPicker by rememberSaveable { mutableStateOf(false) }
