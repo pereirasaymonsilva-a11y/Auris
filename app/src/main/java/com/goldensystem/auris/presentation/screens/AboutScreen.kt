@@ -140,7 +140,7 @@ private val AurisMaintainer = Contributor(
     role = "Mantenedor do Auris",
     detail = "Criador da verção modificada do Auris",
     avatarUrl = "https://avatars.githubusercontent.com/u/255678043?v=4&size=64",
-    iconRes = R.drawable.round_music_note_24,
+    iconRes = R.drawable.ic_music_placeholder,
     githubUrl = "https://github.com/pereirasaymonsilva-a11y",
     telegramUrl = "about.scream",
 )

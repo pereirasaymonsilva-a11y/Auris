@@ -181,7 +181,7 @@ fun HomeGradientTopBar(
                     )
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.rounded_video_library_24),
+                        painter = painterResource(R.drawable.rounded_play_arrow_24),
                         contentDescription = "Galeria de Vídeos"
                     )
                 }

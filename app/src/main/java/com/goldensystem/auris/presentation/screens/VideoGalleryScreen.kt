@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -23,8 +24,8 @@ fun VideoGalleryScreen(
     onVideoClick: (String) -> Unit,
     viewModel: VideoGalleryViewModel = hiltViewModel()
 ) {
-    val videos by viewModel.videos
-    val isLoading by viewModel.isLoading
+    val videos by viewModel.videos.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -49,7 +50,6 @@ fun VideoItemRow(video: VideoItem, onClick: () -> Unit) {
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Ícone de vídeo como placeholder (a miniatura real pode ser implementada depois)
         Icon(
             painter = painterResource(R.drawable.rounded_play_arrow_24),
             contentDescription = "Vídeo",
