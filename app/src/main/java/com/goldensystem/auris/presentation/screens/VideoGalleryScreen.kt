@@ -173,18 +173,18 @@ fun VideoItemRow(video: VideoItem, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(video.contentUri)
-                .videoFrameMillis(1000)
-                .allowHardware(false)
-                .crossfade(true)
-                .placeholder(R.drawable.rounded_play_arrow_24)
-                .error(R.drawable.rounded_broken_image_24)
-                .build(),
-            contentDescription = video.title,
-            modifier = Modifier.size(80.dp, 60.dp),
-            contentScale = ContentScale.Crop
-        )
+    model = ImageRequest.Builder(LocalContext.current)
+        .data(android.net.Uri.parse(video.contentUri)) // <- FORÇA URI
+        .videoFrameMillis(1000)
+        .crossfade(true)
+        .allowHardware(false)
+        .placeholder(R.drawable.rounded_play_arrow_24)
+        .error(R.drawable.rounded_broken_image_24)
+        .build(),
+    contentDescription = video.title,
+    modifier = Modifier.size(80.dp, 60.dp),
+    contentScale = ContentScale.Crop
+)
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
