@@ -1,7 +1,6 @@
 package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
-import coil.request.videoFrameMillis
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -31,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import coil.request.videoFrameMillis
 import com.goldensystem.auris.R
 import com.goldensystem.auris.data.model.VideoItem
 import com.goldensystem.auris.presentation.viewmodel.VideoGalleryViewModel
@@ -178,6 +178,8 @@ fun VideoItemRow(video: VideoItem, onClick: () -> Unit) {
                 .videoFrameMillis(1000)
                 .allowHardware(false)
                 .crossfade(true)
+                .placeholder(R.drawable.rounded_play_arrow_24)
+                .error(R.drawable.rounded_broken_image_24)
                 .build(),
             contentDescription = video.title,
             modifier = Modifier.size(80.dp, 60.dp),

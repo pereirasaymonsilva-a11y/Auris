@@ -596,7 +596,9 @@ class MainActivity : ComponentActivity() {
                 Screen.RecentlyPlayed.route,
                 Screen.DeviceCapabilities.route,
                 Screen.EasterEgg.route,
-                Screen.WordDelimiterConfig.route
+                Screen.WordDelimiterConfig.route,
+                "video_gallery",            // <-- ADICIONADO
+                "video_player"              // <-- ADICIONADO
             )
         }
         val shouldHideNavigationBar by remember(currentRoute, isSearchBarActive) {
@@ -609,7 +611,7 @@ class MainActivity : ComponentActivity() {
                             if (hiddenRoute.contains("{")) {
                                 route.startsWith(hiddenRoute.substringBefore("{"))
                             } else {
-                                route == hiddenRoute
+                                route == hiddenRoute || route?.startsWith(hiddenRoute) == true
                             }
                         }
                     } ?: false
@@ -882,9 +884,16 @@ class MainActivity : ComponentActivity() {
                                 .map { it.currentSong?.id != null }
                                 .distinctUntilChanged()
                         }.collectAsStateWithLifecycle(initialValue = false)
-                        val routesWithHiddenMiniPlayer = remember { setOf(Screen.NavBarCrRad.route) }
+                        val routesWithHiddenMiniPlayer = remember { setOf(
+                            Screen.NavBarCrRad.route,
+                            "video_gallery",            // <-- ADICIONADO
+                            "video_player"              // <-- ADICIONADO
+                        ) }
                         val shouldHideMiniPlayer by remember(currentRoute) {
-                            derivedStateOf { currentRoute in routesWithHiddenMiniPlayer }
+                            derivedStateOf { 
+                                currentRoute in routesWithHiddenMiniPlayer || 
+                                currentRoute?.startsWith("video_player") == true 
+                            }
                         }
 
                         val miniPlayerH = with(density) { MiniPlayerHeight.toPx() }
