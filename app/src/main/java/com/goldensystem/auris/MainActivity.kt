@@ -124,6 +124,8 @@ import com.goldensystem.auris.presentation.navigation.Screen
 import com.goldensystem.auris.presentation.screens.SetupScreen
 import com.goldensystem.auris.presentation.viewmodel.MainViewModel
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
+import com.goldensystem.auris.presentation.viewmodel.UpdateViewModel
+import com.goldensystem.auris.presentation.screens.UpdateScreen
 import com.goldensystem.auris.ui.theme.PixelPlayTheme
 import com.goldensystem.auris.utils.CrashHandler
 import com.goldensystem.auris.utils.AppLocaleManager
@@ -142,6 +144,7 @@ import com.goldensystem.auris.utils.CrashLogData
 import javax.annotation.concurrent.Immutable
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import com.goldensystem.auris.BuildConfig
 
 
 @Immutable
@@ -512,6 +515,19 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // ===== SISTEMA DE ATUALIZAÇÃO =====
+        val updateViewModel: UpdateViewModel = hiltViewModel()
+        val showUpdateOverlay by updateViewModel.showOverlay.collectAsStateWithLifecycle()
+        val updateInfo by updateViewModel.updateInfo.collectAsStateWithLifecycle()
+
+        LaunchedEffect(Unit) {
+            updateViewModel.checkForUpdate(
+                sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vROlVyUqehWPrY1RF1kjzyJvhg9vEhLczC-RDKjaIzg4921EvucjT4Mb7ENj_t4H8JV_SuMoosounr4/pub?output=csv", // ⚠️ substitua pela sua URL real
+                currentVersion = BuildConfig.VERSION_NAME
+            )
+        }
+        // =================================
+
         // Estado para controlar si el indicador de carga puede mostrarse después de un delay
         var canShowLoadingIndicator by remember { mutableStateOf(false) }
         // Track when the loading indicator was first shown for minimum display time
@@ -551,6 +567,15 @@ class MainActivity : ComponentActivity() {
             // Muestra el LoadingOverlay solo si las condiciones se cumplen Y el delay ha pasado
             if (canShowLoadingIndicator) {
                 LoadingOverlay(syncProgress)
+            }
+
+            // Overlay do UpdateScreen
+            if (showUpdateOverlay && updateInfo != null) {
+                UpdateScreen(
+                    updateInfo = updateInfo!!,
+                    onCancelClick = { updateViewModel.dismissUpdate() },
+                    onRemindLaterClick = { updateViewModel.remindLater() }
+                )
             }
         }
         Trace.endSection() // End MainActivity.MainAppContent

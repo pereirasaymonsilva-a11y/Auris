@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- This allows sharing files from cacheDir -->
+    <!-- Permite compartilhar arquivos do cache (usado para content:// URI) -->
     <cache-path
         name="cache"
         path="." />
+    <!-- Permite compartilhar arquivos do diretório files -->
     <files-path
         name="files"
+        path="." />
+    <!-- Permite compartilhar arquivos do armazenamento externo (DownloadManager) -->
+    <external-path
+        name="external_files"
         path="." />
 </paths>
