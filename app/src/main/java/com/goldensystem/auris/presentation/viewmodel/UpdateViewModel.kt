@@ -1,6 +1,7 @@
 package com.goldensystem.auris.presentation.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldensystem.auris.data.model.AppVersionInfo
@@ -41,6 +42,10 @@ class UpdateViewModel @Inject constructor(
                         _updateInfo.value = info
                         _showOverlay.value = true
                     }
+                }
+                .onFailure { throwable ->
+                    // Loga o erro para depuração (visível no Logcat ou Termux)
+                    Log.e("UpdateViewModel", "Falha ao verificar atualização", throwable)
                 }
         }
     }
