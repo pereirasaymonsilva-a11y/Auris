@@ -27,24 +27,32 @@ class UpdateViewModel @Inject constructor(
     private val _showOverlay = MutableStateFlow(false)
     val showOverlay: StateFlow<Boolean> = _showOverlay.asStateFlow()
 
-    fun checkForUpdate(sheetUrl: String, currentVersion: String) {
+    fun checkForUpdate(scriptUrl: String, currentVersion: String) {
         val prefs = context.getSharedPreferences("update", Context.MODE_PRIVATE)
         val remindUntil = prefs.getLong("remind_later_until", 0L)
         val now = System.currentTimeMillis()
 
         // Respeita o "lembrar depois" (usuário pediu para não ver agora)
-        if (now < remindUntil) return
+        if (now < remindUntil) {
+            Log.d("UpdateViewModel", "Ainda dentro do período de 'lembrar depois'")
+            return
+        }
+
+        Log.d("UpdateViewModel", "Iniciando verificação de atualização...")
 
         viewModelScope.launch {
-            updateRepository.fetchAppVersion(sheetUrl)
+            updateRepository.fetchAppVersion(scriptUrl)
                 .onSuccess { info ->
+                    Log.d("UpdateViewModel", "Versão remota: ${info.version}, versão local: $currentVersion")
                     if (isNewerVersion(info.version, currentVersion)) {
+                        Log.d("UpdateViewModel", "Nova versão encontrada!")
                         _updateInfo.value = info
                         _showOverlay.value = true
+                    } else {
+                        Log.d("UpdateViewModel", "App já está atualizado")
                     }
                 }
                 .onFailure { throwable ->
-                    // Loga o erro para depuração (visível no Logcat ou Termux)
                     Log.e("UpdateViewModel", "Falha ao verificar atualização", throwable)
                 }
         }

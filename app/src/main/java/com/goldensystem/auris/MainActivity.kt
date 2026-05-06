@@ -516,14 +516,15 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // ===== SISTEMA DE ATUALIZAÇÃO =====
+        // ===== SISTEMA DE ATUALIZAÇÃO (JSON via Apps Script) =====
         val updateViewModel: UpdateViewModel = hiltViewModel()
         val showUpdateOverlay by updateViewModel.showOverlay.collectAsStateWithLifecycle()
         val updateInfo by updateViewModel.updateInfo.collectAsStateWithLifecycle()
 
         LaunchedEffect(Unit) {
+            delay(1000) // pequeno delay para não travar a inicialização
             updateViewModel.checkForUpdate(
-                sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vROlVyUqehWPrY1RF1kjzyJvhg9vEhLczC-RDKjaIzg4921EvucjT4Mb7ENj_t4H8JV_SuMoosounr4/pub?output=csv", // ⚠️ substitua pela sua URL real
+                scriptUrl = "https://script.google.com/macros/s/AKfycby.../exec", // ⚠️ SUBSTITUA PELA SUA URL REAL DO APPS SCRIPT
                 currentVersion = BuildConfig.VERSION_NAME
             )
         }
