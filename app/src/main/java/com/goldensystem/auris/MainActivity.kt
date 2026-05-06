@@ -524,7 +524,7 @@ class MainActivity : ComponentActivity() {
         LaunchedEffect(Unit) {
             delay(1000) // pequeno delay para não travar a inicialização
             updateViewModel.checkForUpdate(
-                scriptUrl = "https://script.google.com/macros/s/AKfycby.../exec", // ⚠️ SUBSTITUA PELA SUA URL REAL DO APPS SCRIPT
+                scriptUrl = "https://script.google.com/macros/s/AKfycbzTsGXzvoq0vM8jVwJYsQxScgyuB0gKhaCzaXipNvI1W8G9hva8jmFixivYuky71flZ/exec", // ⚠️ SUBSTITUA PELA SUA URL REAL DO APPS SCRIPT
                 currentVersion = BuildConfig.VERSION_NAME
             )
         }
