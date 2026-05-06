@@ -28,17 +28,15 @@ class UpdateViewModel @Inject constructor(
 
     fun checkForUpdate(sheetUrl: String, currentVersion: String) {
         val prefs = context.getSharedPreferences("update", Context.MODE_PRIVATE)
-        val lastCheck = prefs.getLong("last_check", 0L)
         val remindUntil = prefs.getLong("remind_later_until", 0L)
         val now = System.currentTimeMillis()
 
+        // Respeita o "lembrar depois" (usuário pediu para não ver agora)
         if (now < remindUntil) return
-        if (now - lastCheck < 6 * 60 * 60 * 1000) return
 
         viewModelScope.launch {
             updateRepository.fetchAppVersion(sheetUrl)
                 .onSuccess { info ->
-                    prefs.edit().putLong("last_check", now).apply()
                     if (isNewerVersion(info.version, currentVersion)) {
                         _updateInfo.value = info
                         _showOverlay.value = true
@@ -53,6 +51,7 @@ class UpdateViewModel @Inject constructor(
 
     fun remindLater() {
         val prefs = context.getSharedPreferences("update", Context.MODE_PRIVATE)
+        // Lembrar novamente em 2 horas
         prefs.edit().putLong("remind_later_until", System.currentTimeMillis() + 2 * 60 * 60 * 1000).apply()
         _showOverlay.value = false
     }
