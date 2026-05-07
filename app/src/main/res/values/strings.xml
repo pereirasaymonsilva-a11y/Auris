@@ -227,4 +227,18 @@
     <string name="ui_format_percent_d">%1$d%%</string>
     <string name="backup_manifest_schema_v">v%1$d</string>
     <string name="backup_manifest_device_line">%1$s %2$s</string>
+    <!-- Tela Auris? (AboutScreen expandida) -->
+    <string name="about_changelog_title">Novidades da versão</string>
+    <string name="about_changelog_item_1">• Versão 1.0.0: Primeira versão estável do Auris</string>
+    <string name="about_changelog_item_2">• Tema claro personalizado (amarelo dourado e preto)</string>
+    <string name="about_changelog_item_3">• Galeria de vídeos com player integrado</string>
+    <string name="about_changelog_item_4">• Sistema de atualização automática via planilha</string>
+    <string name="about_changelog_item_5">• Tradução completa para português (Brasil)</string>
+    <string name="about_changelog_item_6">• Correções de bugs e melhorias de desempenho</string>
+    <string name="about_feedback_title">Envie sua opinião</string>
+    <string name="about_feedback_subtitle">Reporte bugs, sugira melhorias ou faça um elogio</string>
+    <string name="about_feedback_button">Abrir Central de Feedback</string>
+    <string name="about_donate_title">Apoie o desenvolvimento</string>
+    <string name="about_donate_subtitle">Contribuições ajudam a manter o Auris livre e sem anúncios</string>
+    <string name="about_donate_button">Fazer uma doação</string>
 </resources>
