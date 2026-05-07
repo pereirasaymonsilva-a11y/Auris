@@ -582,8 +582,9 @@ class MainActivity : ComponentActivity() {
         },
         onRemindLaterClick = {
             updateViewModel.remindLater()
-        }
-    )
+          }
+      )
+  }
 }
 
 Trace.endSection()
