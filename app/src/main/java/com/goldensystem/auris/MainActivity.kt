@@ -25,6 +25,7 @@ import androidx.annotation.CallSuper
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import com.goldensystem.auris.data.model.AppVersionInfo
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -572,12 +573,16 @@ class MainActivity : ComponentActivity() {
             }
 
             // Overlay do UpdateScreen
-            if (showUpdateOverlay && updateInfo != null) {
-                UpdateScreen(
-                    updateInfo = updateInfo!!,
-                    onCancelClick = { updateViewModel.dismissUpdate() },
-                    onRemindLaterClick = { updateViewModel.remindLater() }
-                )
+            UpdateScreen(
+    updateInfo = AppVersionInfo(
+        appName = "Auris",
+        version = "99.0.0",
+        id = "999",
+        downloadUrl = "https://google.com"
+    ),
+    onCancelClick = {},
+    onRemindLaterClick = {}
+               )
             }
         }
         Trace.endSection() // End MainActivity.MainAppContent
