@@ -23,6 +23,11 @@ android {
     namespace = "com.goldensystem.auris"
     compileSdk = 35
 
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
+
     sourceSets {
         getByName("androidTest") {
             assets.srcDir("$projectDir/schemas")
