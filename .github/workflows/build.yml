@@ -21,17 +21,18 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Restore debug keystore (from hex)
-        run: |
-          mkdir -p .github/keystore
-          echo -n "${{ secrets.ANDROID_DEBUG_KEYSTORE }}" | xxd -r -p > .github/keystore/debug.keystore
-          echo "Keystore restaurada com sucesso."
+      - name: Restore release keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/my-release-key.keystore
 
-      - name: Build APK
-        run: ./gradlew assembleDebug
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-      - name: Upload APK
+      - name: Upload Release APKs
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/*.apk
+          name: auris-release
+          path: app/build/outputs/apk/release/*.apk
