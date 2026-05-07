@@ -574,15 +574,15 @@ class MainActivity : ComponentActivity() {
     }
 
     // TESTE DO UPDATE SCREEN
+    if (showUpdateOverlay && updateInfo != null) {
     UpdateScreen(
-        updateInfo = AppVersionInfo(
-            appName = "Auris",
-            version = "99.0.0",
-            id = "999",
-            downloadUrl = "https://google.com"
-        ),
-        onCancelClick = {},
-        onRemindLaterClick = {}
+        updateInfo = updateInfo!!,
+        onCancelClick = {
+            updateViewModel.dismissOverlay()
+        },
+        onRemindLaterClick = {
+            updateViewModel.remindLater()
+        }
     )
 }
 
