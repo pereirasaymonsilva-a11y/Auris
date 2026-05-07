@@ -578,7 +578,7 @@ class MainActivity : ComponentActivity() {
     UpdateScreen(
         updateInfo = updateInfo!!,
         onCancelClick = {
-            updateViewModel.dismissOverlay()
+            updateViewModel.dismissUpdate()
         },
         onRemindLaterClick = {
             updateViewModel.remindLater()
