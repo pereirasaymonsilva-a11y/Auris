@@ -565,28 +565,29 @@ class MainActivity : ComponentActivity() {
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
-            MainUI(playerViewModel, navController)
 
-            // Muestra el LoadingOverlay solo si las condiciones se cumplen Y el delay ha pasado
-            if (canShowLoadingIndicator) {
-                LoadingOverlay(syncProgress)
-            }
+    MainUI(playerViewModel, navController)
 
-            // Overlay do UpdateScreen
-            UpdateScreen(
-    updateInfo = AppVersionInfo(
-        appName = "Auris",
-        version = "99.0.0",
-        id = "999",
-        downloadUrl = "https://google.com"
-    ),
-    onCancelClick = {},
-    onRemindLaterClick = {}
-               )
-            }
-        }
-        Trace.endSection() // End MainActivity.MainAppContent
+    // Loading
+    if (canShowLoadingIndicator) {
+        LoadingOverlay(syncProgress)
     }
+
+    // TESTE DO UPDATE SCREEN
+    UpdateScreen(
+        updateInfo = AppVersionInfo(
+            appName = "Auris",
+            version = "99.0.0",
+            id = "999",
+            downloadUrl = "https://google.com"
+        ),
+        onCancelClick = {},
+        onRemindLaterClick = {}
+    )
+}
+
+Trace.endSection()
+}
 
     @androidx.annotation.OptIn(UnstableApi::class)
     @Composable
