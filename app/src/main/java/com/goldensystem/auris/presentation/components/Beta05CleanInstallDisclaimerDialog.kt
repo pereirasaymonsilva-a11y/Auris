@@ -49,7 +49,7 @@ fun Beta05CleanInstallDisclaimerDialog(
     val blockShape = AbsoluteSmoothCornerShape(22.dp, 60)
     val actionShape = AbsoluteSmoothCornerShape(18.dp, 60)
 
-    BasicAlertDialog(onDismissRequest = { /* O usuário não pode fechar sem reiniciar */ }) {
+    BasicAlertDialog(onDismissRequest = { /* Impede fechar clicando fora */ }) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -120,7 +120,7 @@ fun Beta05CleanInstallDisclaimerDialog(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        // Novo texto explicativo
+                        // Texto adicional explicando a necessidade do reinício
                         Text(
                             text = "Para que o Auris funcione corretamente, é necessário reiniciar o aplicativo agora.",
                             style = MaterialTheme.typography.bodyMedium,
@@ -169,6 +169,8 @@ fun Beta05CleanInstallDisclaimerDialog(
                 // Botão de reinicialização forçada
                 Button(
                     onClick = {
+                        // Salva a preferência automaticamente antes de reiniciar
+                        onDismiss(true)
                         val intent = Intent.makeRestartActivityTask(
                             context.packageManager.getLaunchIntentForPackage(context.packageName)?.component
                         )
