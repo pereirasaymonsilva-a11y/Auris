@@ -993,7 +993,7 @@ fun FullPlayerContent(
             isShuffleEnabled = isShuffleEnabled,
             repeatMode = repeatMode,
             isFavoriteProvider = isFavoriteProvider,
-            isPlaybackEnabled = isPlaybackEnabled,
+
             onShuffleToggle = onShuffleToggle,
             onRepeatToggle = onRepeatToggle,
             onFavoriteToggle = onFavoriteToggle
