@@ -81,9 +81,9 @@ android {
 
     buildTypes {
         debug {
-            // Pode usar a fixedDebug ou a debug padrão do sistema; aqui mantemos a fixedDebug se quiser
-            signingConfig = signingConfigs.getByName("fixedDebug")
-        }
+    applicationIdSuffix = ".debug"
+    // signingConfig = signingConfigs.getByName("fixedDebug")
+       }
 
         release {
             isDebuggable = false

@@ -1,6 +1,12 @@
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import android.os.Process
+import android.content.Intent
+import android.widget.Toast
 package com.goldensystem.auris.presentation.components.player
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import android.content.Context
 import android.content.res.Configuration
 import android.net.Uri
@@ -234,6 +240,52 @@ fun FullPlayerContent(
         }
     }
 
+    val context = LocalContext.current
+
+    val safeOnPrevious: () -> Unit = {
+
+        if (currentSong == null) {
+
+            Toast.makeText(context, "Reinicie o app primeiro antes do primeiro uso", Toast.LENGTH_SHORT).show()
+
+        } else {
+
+            onPrevious()
+
+        }
+
+    }
+
+    val safeOnNext: () -> Unit = {
+
+        if (currentSong == null) {
+
+            Toast.makeText(context, "Reinicie o app primeiro antes do primeiro uso", Toast.LENGTH_SHORT).show()
+
+        } else {
+
+            onNext()
+
+        }
+
+    }
+
+    val safeOnShowQueueClicked: () -> Unit = {
+
+        if (currentSong == null) {
+
+            Toast.makeText(context, "Reinicie o app primeiro antes do primeiro uso", Toast.LENGTH_SHORT).show()
+
+        } else {
+
+            safeOnShowQueueClicked()
+
+        }
+
+    }
+
+    val isPlaybackEnabled = currentSong != null
+
     val song = currentSong ?: retainedSong ?: return
     LaunchedEffect(song.id) {
     val updatedSong = playerViewModel.getSongById(song.id)
@@ -401,7 +453,7 @@ fun FullPlayerContent(
 
     val onSongMetadataQueueClick = {
         showSongInfoBottomSheet = true
-        onShowQueueClicked()
+        safeOnShowQueueClicked()
     }
 
     val onSongMetadataArtistClick = {
@@ -883,7 +935,7 @@ fun FullPlayerContent(
                                     .background(playerOnAccentColor.copy(alpha = 0.7f))
                                     .clickable {
                                         showSongInfoBottomSheet = true
-                                        onShowQueueClicked()
+                                        safeOnShowQueueClicked()
                                     },
                                 contentAlignment = Alignment.Center
                             ) {
@@ -965,7 +1017,7 @@ fun FullPlayerContent(
             onPlayPause = {
                 playerViewModel.playPause()
             },
-            onNext = onNext,
+            onNext = safeOnNext,
             onPrev = onPrevious,
             immersiveLyricsEnabled = immersiveLyricsEnabled,
             immersiveLyricsTimeout = immersiveLyricsTimeout,
@@ -1149,13 +1201,14 @@ private fun FullPlayerControlsSection(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             AnimatedPlaybackControls(
                 modifier = Modifier
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 isPlayingProvider = isPlayingProvider,
-                onPrevious = onPrevious,
+                onPrevious = safeOnPrevious,
                 onPlayPause = onPlayPause,
-                onNext = onNext,
+                onNext = safeOnNext,
                 height = 80.dp,
                 pressAnimationSpec = stableControlAnimationSpec,
                 releaseDelay = 220L,
@@ -1167,8 +1220,26 @@ private fun FullPlayerControlsSection(
                 colorNextButton = transportSkipColors.container,
                 tintPreviousIcon = transportSkipColors.content,
                 tintNextIcon = transportSkipColors.content
+            enabled = isPlaybackEnabled,
             )
 
+            if (!isPlaybackEnabled) {
+                Button(
+                    onClick = {
+                        val context = LocalContext.current
+                        val intent = Intent.makeRestartActivityTask(
+                            context.packageManager.getLaunchIntentForPackage(context.packageName)?.component
+                        )
+                        context.startActivity(intent)
+                        Process.killProcess(Process.myPid())
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+                ) {
+                    Text("Reiniciar App")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
             Spacer(modifier = Modifier.height(14.dp))
 
             BottomToggleRow(

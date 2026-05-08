@@ -1,4 +1,4 @@
-name: Build Wear OS APK (Debug)
+name: Build Wear APK (Debug)
 
 on:
   push:

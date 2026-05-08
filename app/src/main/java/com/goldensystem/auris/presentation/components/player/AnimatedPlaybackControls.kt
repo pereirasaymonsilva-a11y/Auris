@@ -73,6 +73,7 @@ fun AnimatedPlaybackControls(
     tintNextIcon: Color = tintOtherIcons,
     playPauseIconSize: Dp = 36.dp,
     iconSize: Dp = 32.dp,
+    enabled: Boolean = true   // <-- NOVO PARÂMETRO
 ) {
     val isPlaying = isPlayingProvider()
     var lastClicked by remember { mutableStateOf<PlaybackButtonType?>(null) }
@@ -83,6 +84,9 @@ fun AnimatedPlaybackControls(
     var playPauseVisualState by remember { mutableStateOf(isPlaying) }
     var pendingPlayPauseState by remember { mutableStateOf<Boolean?>(null) }
     val hapticFeedback = LocalHapticFeedback.current
+
+    // Opacidade reduzida quando desabilitado
+    val disabledAlpha = 0.4f
 
     LaunchedEffect(lastClicked) {
         if (lastClicked != null) {
@@ -141,8 +145,8 @@ fun AnimatedPlaybackControls(
                     .weight(prevWeight)
                     .fillMaxHeight()
                     .clip(CircleShape)
-                    .background(colorPreviousButton)
-                    .clickable {
+                    .background(colorPreviousButton.copy(alpha = if (enabled) 1f else disabledAlpha))
+                    .clickable(enabled = enabled) {
                         lastClicked = PlaybackButtonType.PREVIOUS
                         onPrevious()
                     },
@@ -151,7 +155,7 @@ fun AnimatedPlaybackControls(
                 Icon(
                     imageVector = Icons.Rounded.SkipPrevious,
                     contentDescription = "Anterior",
-                    tint = tintPreviousIcon,
+                    tint = tintPreviousIcon.copy(alpha = if (enabled) 1f else disabledAlpha),
                     modifier = Modifier.size(iconSize)
                 )
             }
@@ -184,8 +188,8 @@ fun AnimatedPlaybackControls(
                     .weight(playWeight)
                     .fillMaxHeight()
                     .clip(playShape)
-                    .background(colorPlayPause)
-                    .clickable {
+                    .background(colorPlayPause.copy(alpha = if (enabled) 1f else disabledAlpha))
+                    .clickable(enabled = enabled) {
                         lastClicked = PlaybackButtonType.PLAY_PAUSE
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onPlayPause()
@@ -194,7 +198,7 @@ fun AnimatedPlaybackControls(
             ) {
                 MorphingPlayPauseIcon(
                     isPlaying = playPauseVisualState,
-                    tint = tintPlayPauseIcon,
+                    tint = tintPlayPauseIcon.copy(alpha = if (enabled) 1f else disabledAlpha),
                     size = playPauseIconSize
                 )
             }
@@ -209,8 +213,8 @@ fun AnimatedPlaybackControls(
                     .weight(nextWeight)
                     .fillMaxHeight()
                     .clip(CircleShape)
-                    .background(colorNextButton)
-                    .clickable {
+                    .background(colorNextButton.copy(alpha = if (enabled) 1f else disabledAlpha))
+                    .clickable(enabled = enabled) {
                         lastClicked = PlaybackButtonType.NEXT
                         onNext()
                     },
@@ -219,7 +223,7 @@ fun AnimatedPlaybackControls(
                 Icon(
                     imageVector = Icons.Rounded.SkipNext,
                     contentDescription = "Siguiente",
-                    tint = tintNextIcon,
+                    tint = tintNextIcon.copy(alpha = if (enabled) 1f else disabledAlpha),
                     modifier = Modifier.size(iconSize)
                 )
             }
