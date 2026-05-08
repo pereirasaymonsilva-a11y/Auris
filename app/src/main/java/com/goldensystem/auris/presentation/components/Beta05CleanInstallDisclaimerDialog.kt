@@ -1,6 +1,7 @@
 package com.goldensystem.auris.presentation.components
 
-import androidx.compose.foundation.clickable
+import android.content.Intent
+import android.os.Process
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,19 +12,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,7 +34,7 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 fun Beta05CleanInstallDisclaimerDialog(
     onDismiss: (dontShowAgain: Boolean) -> Unit
 ) {
-    var dontShowAgain by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val cardShape = AbsoluteSmoothCornerShape(
         cornerRadiusTL = 30.dp,
@@ -52,7 +49,7 @@ fun Beta05CleanInstallDisclaimerDialog(
     val blockShape = AbsoluteSmoothCornerShape(22.dp, 60)
     val actionShape = AbsoluteSmoothCornerShape(18.dp, 60)
 
-    BasicAlertDialog(onDismissRequest = { onDismiss(dontShowAgain) }) {
+    BasicAlertDialog(onDismissRequest = { /* O usuário não pode fechar sem reiniciar */ }) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -123,6 +120,13 @@ fun Beta05CleanInstallDisclaimerDialog(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        // Novo texto explicativo
+                        Text(
+                            text = "Para que o Auris funcione corretamente, é necessário reiniciar o aplicativo agora.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     }
                 }
 
@@ -162,42 +166,25 @@ fun Beta05CleanInstallDisclaimerDialog(
                     }
                 }
 
-                Row(
+                // Botão de reinicialização forçada
+                Button(
+                    onClick = {
+                        val intent = Intent.makeRestartActivityTask(
+                            context.packageManager.getLaunchIntentForPackage(context.packageName)?.component
+                        )
+                        context.startActivity(intent)
+                        Process.killProcess(Process.myPid())
+                    },
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    shape = actionShape,
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { dontShowAgain = !dontShowAgain }
-                            .padding(vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Checkbox(
-                            checked = dontShowAgain,
-                            onCheckedChange = { dontShowAgain = it },
-                        )
-                        Text(
-                            text = stringResource(R.string.presentation_batch_g_beta05_dont_show),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                        )
-                    }
-
-                    Button(
-                        onClick = { onDismiss(dontShowAgain) },
-                        shape = actionShape,
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.rounded_arrow_forward_24),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                        )
-                        Spacer(modifier = Modifier.size(6.dp))
-                        Text(text = stringResource(R.string.presentation_batch_g_beta05_got_it))
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.rounded_arrow_forward_24),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(modifier = Modifier.size(6.dp))
+                    Text(text = "Reiniciar App")
                 }
             }
         }
