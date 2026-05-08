@@ -19,14 +19,14 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
           cache: 'gradle'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build Phone debug APK
-        run: ./gradlew :app:assembleDebug -Ppixelplay.enableAbiSplits=true -Dorg.gradle.java.installations.auto-download=false
+        run: ./gradlew :app:assembleDebug -Ppixelplay.enableAbiSplits=true
 
       - name: Verify Phone split APKs
         run: |
