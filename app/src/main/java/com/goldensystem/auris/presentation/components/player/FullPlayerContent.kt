@@ -1,15 +1,12 @@
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import android.os.Process
-import android.content.Intent
-import android.widget.Toast
 package com.goldensystem.auris.presentation.components.player
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Process
+import android.widget.Toast
 import com.goldensystem.auris.data.model.Lyrics
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -51,6 +48,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ColorScheme
@@ -61,8 +60,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LoadingIndicator
-// import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults // Removed
-// import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState // Removed
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -242,58 +239,31 @@ fun FullPlayerContent(
 
     val context = LocalContext.current
 
+    // Wrappers que verificam se há música atual
     val safeOnPrevious: () -> Unit = {
-
         if (currentSong == null) {
-
             Toast.makeText(context, "Reinicie o app primeiro antes do primeiro uso", Toast.LENGTH_SHORT).show()
-
         } else {
-
             onPrevious()
-
         }
-
     }
-
     val safeOnNext: () -> Unit = {
-
         if (currentSong == null) {
-
             Toast.makeText(context, "Reinicie o app primeiro antes do primeiro uso", Toast.LENGTH_SHORT).show()
-
         } else {
-
             onNext()
-
         }
-
     }
-
     val safeOnShowQueueClicked: () -> Unit = {
-
         if (currentSong == null) {
-
             Toast.makeText(context, "Reinicie o app primeiro antes do primeiro uso", Toast.LENGTH_SHORT).show()
-
         } else {
-
-            safeOnShowQueueClicked()
-
+            onShowQueueClicked()
         }
-
     }
-
     val isPlaybackEnabled = currentSong != null
 
-    val song = currentSong ?: retainedSong ?: return
-    LaunchedEffect(song.id) {
-    val updatedSong = playerViewModel.getSongById(song.id)
-    if (updatedSong != null && updatedSong.playCount > 0) {
-        retainedSong = updatedSong
-        }
-    }
-    
+    val song = currentSong ?: retainedSong ?: return // Keep the player visible while transitioning
     var showSongInfoBottomSheet by remember { mutableStateOf(false) }
     var showLyricsSheet by remember { mutableStateOf(false) }
     var showArtistPicker by rememberSaveable { mutableStateOf(false) }
@@ -325,7 +295,6 @@ fun FullPlayerContent(
     var showFetchLyricsDialog by remember { mutableStateOf(false) }
     var totalDrag by remember { mutableStateOf(0f) }
 
-    val context = LocalContext.current
     val fileImportScope = rememberCoroutineScope()
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
@@ -778,13 +747,10 @@ fun FullPlayerContent(
                     navigationIcon = {
                         Box(
                             modifier = Modifier
-                                // Ancho total = 14dp de padding + 42dp del botón
                                 .width(56.dp)
                                 .height(42.dp),
-                            // 2. Alinea el contenido (el botón) al final (derecha) y centrado verticalmente
                             contentAlignment = Alignment.CenterEnd
                         ) {
-                            // 3. Tu botón circular original, sin cambios
                             Box(
                                 modifier = Modifier
                                     .size(42.dp)
@@ -951,7 +917,6 @@ fun FullPlayerContent(
             }
         }
     ) { paddingValues ->
-        // MD3: 方向变化时先 alpha=0 再淡入新布局，避免双布局同时测量导致错位
         var contentVisible by remember(isLandscape) { mutableStateOf(false) }
         LaunchedEffect(isLandscape) { contentVisible = true }
         val contentAlpha by animateFloatAsState(
@@ -1017,7 +982,7 @@ fun FullPlayerContent(
             onPlayPause = {
                 playerViewModel.playPause()
             },
-            onNext = safeOnNext,
+            onNext = onNext,
             onPrev = onPrevious,
             immersiveLyricsEnabled = immersiveLyricsEnabled,
             immersiveLyricsTimeout = immersiveLyricsTimeout,
@@ -1177,6 +1142,7 @@ private fun FullPlayerControlsSection(
         tween<Float>(durationMillis = 240, easing = FastOutSlowInEasing)
     }
     val shouldDelay = loadingTweaks.delayAll || loadingTweaks.delayControls
+    val context = LocalContext.current
 
     DelayedContent(
         shouldDelay = shouldDelay,
@@ -1201,14 +1167,13 @@ private fun FullPlayerControlsSection(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             AnimatedPlaybackControls(
                 modifier = Modifier
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 isPlayingProvider = isPlayingProvider,
-                onPrevious = safeOnPrevious,
+                onPrevious = onPrevious,
                 onPlayPause = onPlayPause,
-                onNext = safeOnNext,
+                onNext = onNext,
                 height = 80.dp,
                 pressAnimationSpec = stableControlAnimationSpec,
                 releaseDelay = 220L,
@@ -1220,13 +1185,13 @@ private fun FullPlayerControlsSection(
                 colorNextButton = transportSkipColors.container,
                 tintPreviousIcon = transportSkipColors.content,
                 tintNextIcon = transportSkipColors.content
-            enabled = isPlaybackEnabled,
             )
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             if (!isPlaybackEnabled) {
                 Button(
                     onClick = {
-                        val context = LocalContext.current
                         val intent = Intent.makeRestartActivityTask(
                             context.packageManager.getLaunchIntentForPackage(context.packageName)?.component
                         )
@@ -1234,13 +1199,15 @@ private fun FullPlayerControlsSection(
                         Process.killProcess(Process.myPid())
                     },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    )
                 ) {
                     Text("Reiniciar App")
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
-            Spacer(modifier = Modifier.height(14.dp))
 
             BottomToggleRow(
                 modifier = Modifier
@@ -1535,7 +1502,6 @@ private fun SongMetadataDisplaySection(
                 artist = currentSong.displayArtist,
                 artistId = currentSong.artistId,
                 artists = currentSongArtists,
-                playCount = currentSong.playCount,   // <-- NOVO: passando o contador
                 expansionFractionProvider = expansionFractionProvider,
                 textColor = textColor,
                 artistTextColor = artistTextColor,
@@ -2189,7 +2155,6 @@ private fun PlayerSongInfo(
     gradientEdgeColor: Color,
     playerViewModel: PlayerViewModel,
     onClickArtist: () -> Unit,
-    playCount: Int = 0,   // <-- NOVO: contador de plays
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -2202,6 +2167,7 @@ private fun PlayerSongInfo(
         fontFamily = GoogleSansRounded,
         color = textColor
     )
+
     val artistStyle = MaterialTheme.typography.titleMedium.copy(
         letterSpacing = 0.sp,
         color = artistTextColor
@@ -2209,15 +2175,21 @@ private fun PlayerSongInfo(
 
     Column(
         horizontalAlignment = Alignment.Start,
-        modifier = modifier
-            .padding(vertical = 4.dp)
-            .fillMaxWidth()
+            modifier = modifier
+                .padding(vertical = 4.dp)
+                .fillMaxWidth()
             .graphicsLayer {
                 val fraction = expansionFractionProvider()
-                alpha = fraction
+                alpha = fraction // Or apply specific fade logic if desired
                 translationY = (1f - fraction) * 24f
             }
     ) {
+        // We pass 1f to AutoScrollingTextOnDemand because the alpha/translation is now handled by the parent Column graphicsLayer
+        // and we want it "fully rendered" but hidden/moved by the layer.
+        // Actually, AutoScrollingTextOnDemand uses expansionFraction to start scrolling only when fully expanded?
+        // Let's check AutoScrollingTextOnDemand. Assuming it uses it for scrolling trigger.
+        // If we want to avoid recomposition, we might need to pass the provider or just 1f if scrolling logic handles itself.
+        // For now, let's pass the current value from provider for logic correctness, but ideally this component should be optimized too.
         AutoScrollingTextOnDemand(
             title,
             titleStyle,
@@ -2226,6 +2198,8 @@ private fun PlayerSongInfo(
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(2.dp))
+
+
 
         AutoScrollingTextOnDemand(
             text = artist,
@@ -2248,30 +2222,20 @@ private fun PlayerSongInfo(
                             }
                         }
                     },
-                    onLongClick = {
-                        if (isNavigatingToArtist) return@combinedClickable
-                        coroutineScope.launch {
-                            isNavigatingToArtist = true
-                            try {
-                                playerViewModel.triggerArtistNavigationFromPlayer(resolvedArtistId)
-                            } finally {
-                                isNavigatingToArtist = false
-                            }
+
+                onLongClick = {
+                    if (isNavigatingToArtist) return@combinedClickable
+                    coroutineScope.launch {
+                        isNavigatingToArtist = true
+                        try {
+                            playerViewModel.triggerArtistNavigationFromPlayer(resolvedArtistId)
+                        } finally {
+                            isNavigatingToArtist = false
                         }
                     }
-                )
-        )
-
-        // ✅ Contador de plays (aparece somente se maior que 0)
-        if (playCount > 0) {
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = "Ouvida $playCount vez(es)",
-                style = MaterialTheme.typography.labelMedium,
-                color = artistTextColor.copy(alpha = 0.8f),
-                modifier = Modifier.padding(start = 2.dp)
+                }
             )
-        }
+        )
     }
 }
 
