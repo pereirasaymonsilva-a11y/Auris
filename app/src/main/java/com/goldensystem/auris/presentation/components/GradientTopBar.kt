@@ -125,7 +125,7 @@ fun HomeGradientTopBar(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(start = 12.dp)
             ) {
-                // Beta button
+                // Botão "Auris?" (antigo BETA)
                 FilledTonalButton(
                     modifier = Modifier.padding(start = 4.dp),
                     shape = CircleShape,
@@ -141,14 +141,9 @@ fun HomeGradientTopBar(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = stringResource(R.string.presentation_batch_g_topbar_beta_letter),
+                            text = "Auris?",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Black
-                        )
-                        Text(
-                            text = stringResource(R.string.presentation_batch_g_topbar_beta),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }

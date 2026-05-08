@@ -40,9 +40,7 @@ import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material.icons.rounded.LinearScale
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Rectangle
-import androidx.compose.material.icons.rounded.Title
 import androidx.compose.material.icons.rounded.ViewCarousel
-import androidx.compose.material.icons.rounded.BlurOn
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -197,8 +195,7 @@ fun ExperimentalSettingsScreen(
                         modifier = Modifier.padding(horizontal = 0.dp)
                     ) {
                         Column(
-                            modifier = Modifier
-                                .fillMaxSize(),
+                            modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             val loadingTweaks = uiState.fullPlayerLoadingTweaks
@@ -212,111 +209,7 @@ fun ExperimentalSettingsScreen(
                             }
                             val canUseTriggerMode = isAnyDelayEnabled && placeholdersEnabled
 
-                            SwitchSettingItem(
-                                title = stringResource(R.string.presentation_batch_f_exp_animated_lyrics_title),
-                                subtitle = stringResource(R.string.presentation_batch_f_exp_animated_lyrics_subtitle),
-                                checked = uiState.useAnimatedLyrics,
-                                onCheckedChange = settingsViewModel::setUseAnimatedLyrics,
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Rounded.MusicNote,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.secondary
-                                    )
-                                }
-                            )
-
-                            AnimatedVisibility(
-                                visible = uiState.useAnimatedLyrics,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
-                            ) {
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    SwitchSettingItem(
-                                        title = stringResource(R.string.presentation_batch_f_exp_lyric_blur_title),
-                                        subtitle = stringResource(R.string.presentation_batch_f_exp_lyric_blur_subtitle),
-                                        checked = uiState.animatedLyricsBlurEnabled,
-                                        onCheckedChange = settingsViewModel::setAnimatedLyricsBlurEnabled,
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Rounded.BlurOn,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.secondary
-                                            )
-                                        }
-                                    )
-
-                                    AnimatedVisibility(
-                                        visible = uiState.animatedLyricsBlurEnabled,
-                                        enter = fadeIn() + expandVertically(),
-                                        exit = fadeOut() + shrinkVertically()
-                                    ) {
-                                        Surface(
-                                            color = MaterialTheme.colorScheme.surfaceContainer,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clip(RoundedCornerShape(10.dp))
-                                        ) {
-                                            Column(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(16.dp),
-                                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                                            ) {
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Outlined.LinearScale,
-                                                        contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.secondary
-                                                    )
-
-                                                    Column(modifier = Modifier.weight(1f)) {
-                                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                                            Text(
-                                                                text = stringResource(R.string.presentation_batch_f_exp_blur_strength),
-                                                                style = MaterialTheme.typography.titleMedium,
-                                                                color = MaterialTheme.colorScheme.onSurface,
-                                                                modifier = Modifier.padding(end = 8.dp)
-                                                            )
-                                                            Surface(
-                                                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                                                shape = RoundedCornerShape(16.dp),
-                                                                modifier = Modifier.height(24.dp)
-                                                            ) {
-                                                                val strengthText = stringResource(
-                                                                    R.string.presentation_batch_f_exp_blur_strength_value,
-                                                                    uiState.animatedLyricsBlurStrength
-                                                                )
-                                                                Text(
-                                                                    text = strengthText,
-                                                                    style = MaterialTheme.typography.labelSmall,
-                                                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                                                )
-                                                            }
-                                                        }
-                                                        Text(
-                                                            text = stringResource(R.string.presentation_batch_f_exp_blur_strength_subtitle),
-                                                            style = MaterialTheme.typography.bodyMedium,
-                                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                        )
-                                                    }
-                                                }
-
-                                                Slider(
-                                                    value = uiState.animatedLyricsBlurStrength,
-                                                    onValueChange = { settingsViewModel.setAnimatedLyricsBlurStrength(it) },
-                                                    valueRange = 0.1f..2.0f,
-                                                    steps = 10
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            // ---------- Animated lyrics e blur foram removidos ----------
 
                             Surface(
                                 color = MaterialTheme.colorScheme.surfaceContainer,
@@ -693,21 +586,21 @@ fun ExperimentalSettingsScreen(
                     }
                 }
             }
-            
+
             // Divider for new section
-            item(key = "divider_visuals") { 
+            item(key = "divider_visuals") {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                 ) {
-                     Text(
+                    Text(
                         text = stringResource(R.string.presentation_batch_f_exp_visual_quality),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f)
                     )
-                     androidx.compose.material3.HorizontalDivider(
+                    androidx.compose.material3.HorizontalDivider(
                         modifier = Modifier
                             .weight(3f)
                             .padding(start = 8.dp),
@@ -718,12 +611,12 @@ fun ExperimentalSettingsScreen(
 
             item(key = "visual_tweaks_section") {
                 val albumArtQuality = uiState.albumArtQuality
-                
-                 SettingsSection(
+
+                SettingsSection(
                     title = stringResource(R.string.presentation_batch_f_exp_album_art_resolution),
                     icon = {
                         Icon(
-                            imageVector = Icons.Rounded.MusicNote, // Or Image/Photo icon
+                            imageVector = Icons.Rounded.MusicNote,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -738,54 +631,49 @@ fun ExperimentalSettingsScreen(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                           // Quality Selector using a Dialog or a custom Picker?
-                           // Using a series of Radio Buttons or a clickable list item that opens a dialog is common.
-                           // For simplicity and quick access as requested ("selector or slider"), let's use a segmented style or a simple list of options.
-                           
-                           // Using a loop to create selectable items for each enum value
-                           AlbumArtQuality.entries.forEach { quality ->
-                               val isSelected = quality == albumArtQuality
-                               val qualityLine = albumArtQualityLine(quality)
-                               
-                               Surface(
-                                   color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                                   shape = RoundedCornerShape(12.dp),
-                                   modifier = Modifier.fillMaxWidth(),
-                                   onClick = { settingsViewModel.setAlbumArtQuality(quality) }
-                               ) {
-                                   Row(
-                                       modifier = Modifier
-                                           .padding(horizontal = 16.dp, vertical = 12.dp)
-                                           .fillMaxWidth(),
-                                       verticalAlignment = Alignment.CenterVertically,
-                                       horizontalArrangement = Arrangement.SpaceBetween
-                                   ) {
-                                       Column(modifier = Modifier.weight(1f)) {
-                                           Text(
-                                               text = qualityLine.substringBefore(" - "),
-                                               style = MaterialTheme.typography.bodyLarge,
-                                               color = MaterialTheme.colorScheme.onSurface,
-                                               fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
-                                           )
-                                           qualityLine.substringAfter(" - ", "").takeIf { it.isNotEmpty() }?.let { desc ->
+                            AlbumArtQuality.entries.forEach { quality ->
+                                val isSelected = quality == albumArtQuality
+                                val qualityLine = albumArtQualityLine(quality)
+
+                                Surface(
+                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = { settingsViewModel.setAlbumArtQuality(quality) }
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                                            .fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = qualityLine.substringBefore(" - "),
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
+                                            )
+                                            qualityLine.substringAfter(" - ", "").takeIf { it.isNotEmpty() }?.let { desc ->
                                                 Text(
-                                                   text = desc,
-                                                   style = MaterialTheme.typography.bodySmall,
-                                                   color = MaterialTheme.colorScheme.onSurfaceVariant
-                                               )
-                                           }
-                                       }
-                                       
-                                       if (isSelected) {
+                                                    text = desc,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+
+                                        if (isSelected) {
                                             Icon(
-                                                imageVector = Icons.Rounded.LinearScale, // Check icon
+                                                imageVector = Icons.Rounded.LinearScale,
                                                 contentDescription = stringResource(R.string.presentation_batch_f_cd_selected),
                                                 tint = MaterialTheme.colorScheme.primary
                                             )
-                                       }
-                                   }
-                               }
-                           }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

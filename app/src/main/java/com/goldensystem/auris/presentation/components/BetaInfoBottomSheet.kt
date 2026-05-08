@@ -3,337 +3,186 @@ package com.goldensystem.auris.presentation.components
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.BugReport
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.goldensystem.auris.R
-import com.goldensystem.auris.presentation.components.subcomps.SineWaveLine
-import com.goldensystem.auris.ui.theme.ExpTitleTypography
-import com.goldensystem.auris.ui.theme.GoogleSansRounded
-import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val issuesUrl = "https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk/issues"
-    val reportUrl = "https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk/issues/new/choose"
+    val feedbackUrl = "https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk/issues/new/choose"
+    val donateUrl = "https://github.com/sponsors/pereirasaymonsilva-a11y"
 
-    val fabCornerRadius = 18.dp
-
-    Box(
-        modifier = Modifier.fillMaxSize()
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        contentPadding = PaddingValues(top = 24.dp, bottom = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        LazyColumn(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            contentPadding = PaddingValues(top = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item(key = "header") {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(R.string.presentation_batch_g_beta_sheet_version),
-                        fontFamily = GoogleSansRounded,
-                        style = ExpTitleTypography.displaySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SineWaveLine(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(26.dp)
-                            .padding(horizontal = 8.dp),
-                        animate = true,
-                        color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.75f),
-                        alpha = 0.95f,
-                        strokeWidth = 4.dp,
-                        amplitude = 4.dp,
-                        waves = 7.6f,
-                        phase = 0f
-                    )
-                }
-            }
-
-            item(key = "welcome") {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = AbsoluteSmoothCornerShape(
-                        cornerRadiusTR = fabCornerRadius,
-                        cornerRadiusTL = fabCornerRadius,
-                        cornerRadiusBL = fabCornerRadius,
-                        cornerRadiusBR = fabCornerRadius,
-                        smoothnessAsPercentTR = 60,
-                        smoothnessAsPercentTL = 60,
-                        smoothnessAsPercentBL = 60,
-                        smoothnessAsPercentBR = 60
-                    ),
-                    //tonalElevation = 2.dp,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(42.dp)
-                                .background(
-                                    brush = Brush.linearGradient(
-                                        listOf(
-                                            MaterialTheme.colorScheme.primary,
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.65f)
-                                        )
-                                    ),
-                                    shape = CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(R.string.presentation_batch_h_beta_glyph),
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Black
-                            )
-                        }
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.presentation_batch_g_beta_sheet_welcome_title),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = stringResource(R.string.presentation_batch_g_beta_sheet_welcome_body),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-
-            item(key = "what-to-expect") {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = AbsoluteSmoothCornerShape(
-                        cornerRadiusTR = fabCornerRadius,
-                        cornerRadiusTL = fabCornerRadius,
-                        cornerRadiusBL = fabCornerRadius,
-                        cornerRadiusBR = fabCornerRadius,
-                        smoothnessAsPercentTR = 60,
-                        smoothnessAsPercentTL = 60,
-                        smoothnessAsPercentBL = 60,
-                        smoothnessAsPercentBR = 60
-                    ),
-                    tonalElevation = 2.dp,
-                    color = MaterialTheme.colorScheme.surfaceContainerLow
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Rounded.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.presentation_batch_g_beta_sheet_expect_title),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                        Text(
-                            text = stringResource(R.string.presentation_batch_g_beta_sheet_expect_1),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+        // ---------- Changelog ----------
+        item(key = "changelog") {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                )
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.Info,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = stringResource(R.string.presentation_batch_g_beta_sheet_expect_2),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = stringResource(R.string.presentation_batch_g_beta_sheet_expect_3),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = stringResource(R.string.presentation_batch_g_beta_sheet_expect_4),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = stringResource(R.string.about_changelog_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
                     }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(text = "• " + stringResource(R.string.about_changelog_item_1), style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "• " + stringResource(R.string.about_changelog_item_2), style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "• " + stringResource(R.string.about_changelog_item_3), style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "• " + stringResource(R.string.about_changelog_item_4), style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "• " + stringResource(R.string.about_changelog_item_5), style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "• " + stringResource(R.string.about_changelog_item_6), style = MaterialTheme.typography.bodyMedium)
                 }
-            }
-
-            item(key = "report-issue") {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = AbsoluteSmoothCornerShape(
-                        cornerRadiusTR = fabCornerRadius,
-                        cornerRadiusTL = fabCornerRadius,
-                        cornerRadiusBL = fabCornerRadius,
-                        cornerRadiusBR = fabCornerRadius,
-                        smoothnessAsPercentTR = 60,
-                        smoothnessAsPercentTL = 60,
-                        smoothnessAsPercentBL = 60,
-                        smoothnessAsPercentBR = 60
-                    ),
-                    tonalElevation = 2.dp,
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Rounded.BugReport,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.presentation_batch_g_beta_sheet_report_title),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                        Text(
-                            text = stringResource(R.string.presentation_batch_g_beta_sheet_report_body),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Button(
-                                onClick = { launchUrl(context, issuesUrl) },
-                                // Eliminamos height fija y usamos contentPadding
-                                modifier = Modifier.fillMaxWidth(),
-                                contentPadding = PaddingValues(vertical = 16.dp),
-                                shape = AbsoluteSmoothCornerShape(
-                                    cornerRadiusTR = fabCornerRadius,
-                                    cornerRadiusTL = fabCornerRadius,
-                                    cornerRadiusBL = fabCornerRadius,
-                                    cornerRadiusBR = fabCornerRadius,
-                                    smoothnessAsPercentTR = 60,
-                                    smoothnessAsPercentTL = 60,
-                                    smoothnessAsPercentBL = 60,
-                                    smoothnessAsPercentBR = 60
-                                ),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.github),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = stringResource(R.string.presentation_batch_g_beta_sheet_open_issues))
-                            }
-                            FilledTonalButton(
-                                onClick = { launchUrl(context, reportUrl) },
-                                // Eliminamos height fija y usamos contentPadding
-                                modifier = Modifier.fillMaxWidth(),
-                                contentPadding = PaddingValues(vertical = 16.dp),
-                                shape = AbsoluteSmoothCornerShape(
-                                    cornerRadiusTR = fabCornerRadius,
-                                    cornerRadiusTL = fabCornerRadius,
-                                    cornerRadiusBL = fabCornerRadius,
-                                    cornerRadiusBR = fabCornerRadius,
-                                    smoothnessAsPercentTR = 60,
-                                    smoothnessAsPercentTL = 60,
-                                    smoothnessAsPercentBL = 60,
-                                    smoothnessAsPercentBR = 60
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.AutoAwesome,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(text = stringResource(R.string.presentation_batch_g_beta_sheet_report_bug))
-                            }
-                        }
-                    }
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(38.dp))
             }
         }
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .height(30.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        listOf(
-                            Color.Transparent,
-                            MaterialTheme.colorScheme.surfaceContainerLow
-                        )
-                    )
-                )
-        ) {
 
+        // ---------- Feedback ----------
+        item(key = "feedback") {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                )
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.BugReport,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.about_feedback_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.about_feedback_subtitle),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedButton(
+                        onClick = { launchUrl(context, feedbackUrl) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(Icons.Rounded.BugReport, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.about_feedback_button))
+                    }
+                }
+            }
+        }
+
+        // ---------- Doação ----------
+        item(key = "donate") {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                )
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.VolunteerActivism,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.about_donate_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Text(
+                        text = "Ajude no desenvolvimento do Auris ❤️",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.about_donate_subtitle),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = { launchUrl(context, donateUrl) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Icon(Icons.Rounded.FavoriteBorder, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.about_donate_button))
+                    }
+                }
+            }
         }
     }
 }
@@ -345,6 +194,6 @@ private fun launchUrl(context: Context, url: String) {
     try {
         context.startActivity(intent)
     } catch (_: ActivityNotFoundException) {
-        // Swallow the error; caller does not need to handle it here.
+        // Silently ignore if no browser is available.
     }
 }
