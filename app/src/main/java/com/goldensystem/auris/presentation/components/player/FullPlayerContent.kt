@@ -203,20 +203,16 @@ fun FullPlayerContent(
     carouselStyle: String,
     loadingTweaks: FullPlayerLoadingTweaks,
     isSheetDragGestureActive: Boolean = false,
-    playerViewModel: PlayerViewModel, // For stable state like totalDuration and lyrics
-    // State Providers
+    playerViewModel: PlayerViewModel,
     currentPositionProvider: () -> Long,
     isPlayingProvider: () -> Boolean,
     playWhenReadyProvider: () -> Boolean,
     isFavoriteProvider: () -> Boolean,
-    isPlaybackEnabled: Boolean,
     repeatModeProvider: () -> Int,
     isShuffleEnabledProvider: () -> Boolean,
     totalDurationProvider: () -> Long,
     lyricsProvider: () -> Lyrics? = { null }, 
-    // State
     isCastConnecting: Boolean = false,
-    // Event Handlers
     onPlayPause: () -> Unit,
     onSeek: (Long) -> Unit,
     onNext: () -> Unit,
@@ -240,7 +236,6 @@ fun FullPlayerContent(
 
     val context = LocalContext.current
 
-    // Wrappers que verificam se há música atual
     val safeOnPrevious: () -> Unit = {
         if (currentSong == null) {
             Toast.makeText(context, "Reinicie o app primeiro antes do primeiro uso", Toast.LENGTH_SHORT).show()
@@ -264,16 +259,13 @@ fun FullPlayerContent(
     }
     val isPlaybackEnabled = currentSong != null
 
-    val song = currentSong ?: retainedSong ?: return // Keep the player visible while transitioning
+    val song = currentSong ?: retainedSong ?: return
     var showSongInfoBottomSheet by remember { mutableStateOf(false) }
     var showLyricsSheet by remember { mutableStateOf(false) }
     var showArtistPicker by rememberSaveable { mutableStateOf(false) }
     
     val lyricsSearchUiState by playerViewModel.lyricsSearchUiState.collectAsStateWithLifecycle()
 
-    // Single subscription — replaces 11 independent collectAsStateWithLifecycle calls.
-    // distinctUntilChanged in the ViewModel ensures this only emits when something
-    // actually changed, batching multiple rapid updates into one recomposition.
     val fullPlayerSlice by playerViewModel.fullPlayerSlice.collectAsStateWithLifecycle()
     val currentSongArtists = fullPlayerSlice.currentSongArtists
     val lyricsSyncOffset = fullPlayerSlice.lyricsSyncOffset
@@ -332,8 +324,6 @@ fun FullPlayerContent(
         }
     )
 
-    // totalDurationValue is derived from stablePlayerState, so it's fine.
-    // OPTIMIZATION: Use passed provider instead of collecting flow
     val totalDurationValue = totalDurationProvider()
 
     val playerOnBaseColor = LocalMaterialTheme.current.onPrimaryContainer
@@ -353,15 +343,11 @@ fun FullPlayerContent(
     val isLandscape =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-
-    // Lógica para el botón de Lyrics en el reproductor expandido
     val onLyricsClick = {
         val lyrics = lyricsProvider()
         if (lyrics?.synced.isNullOrEmpty() && lyrics?.plain.isNullOrEmpty()) {
-            // Si no hay letra, mostramos el diálogo para buscar
             showFetchLyricsDialog = true
         } else {
-            // Si hay letra, mostramos el sheet directamente
             showLyricsSheet = true
         }
     }
@@ -374,9 +360,8 @@ fun FullPlayerContent(
         ) {
             FetchLyricsDialog(
                 uiState = lyricsSearchUiState,
-                currentSong = song, // Use 'song' which is derived from args/retained
+                currentSong = song,
                 onConfirm = { forcePick ->
-                    // El usuario confirma, iniciamos la búsqueda
                     playerViewModel.fetchLyricsForCurrentSong(forcePick)
                 },
                 onPickResult = { result ->
@@ -386,7 +371,6 @@ fun FullPlayerContent(
                     playerViewModel.searchLyricsManually(title, artist)
                 },
                 onDismiss = {
-                    // El usuario cancela o cierra el diálogo
                     showFetchLyricsDialog = false
                     playerViewModel.resetLyricsSearchState()
                 },
@@ -397,7 +381,6 @@ fun FullPlayerContent(
         }
     }
 
-    // Observador para reaccionar al resultado de la búsqueda de letras
     LaunchedEffect(lyricsSearchUiState) {
         when (val state = lyricsSearchUiState) {
             is LyricsSearchUiState.Success -> {
@@ -496,8 +479,6 @@ fun FullPlayerContent(
             if (predictedTargetSongId != null) {
                 pendingCarouselSongId = predictedTargetSongId
 
-                // Start the pager motion before MediaController listeners fan out
-                // the full track transition state updates through the player UI.
                 withFrameNanos { }
             }
 
@@ -577,9 +558,9 @@ fun FullPlayerContent(
             placeholderColor = placeholderColor,
             placeholderOnColor = placeholderOnColor,
             isPlayingProvider = isPlayingProvider,
-            onPrevious = onPreviousWithOptimisticCarousel,
+            onPrevious = safeOnPrevious,
             onPlayPause = onPlayPause,
-            onNext = onNextWithOptimisticCarousel,
+            onNext = safeOnNext,
             transportPlayPauseColors = transportPlayPauseColors,
             transportSkipColors = transportSkipButtonColors,
             isShuffleEnabledProvider = isShuffleEnabledProvider,
@@ -645,7 +626,6 @@ fun FullPlayerContent(
 
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false)
-                // Check condition AFTER the down event occurs
                 val isFullyExpanded = currentSheetState == PlayerSheetState.EXPANDED && expansionFractionProvider() >= 0.99f
 
                 if (!isFullyExpanded) {
@@ -655,11 +635,9 @@ fun FullPlayerContent(
                 val bottomGestureBoundaryY =
                     (size.height.toFloat() - queueGestureBottomExclusionPx).coerceAtLeast(0f)
                 if (down.position.y >= bottomGestureBoundaryY) {
-                    // Let the system Home/back gesture win near the bottom edge.
                     return@awaitEachGesture
                 }
 
-                // Proceed with gesture logic
                 var dragConsumedByQueue = false
                 val velocityTracker = VelocityTracker()
                 var totalDrag = 0f
@@ -689,13 +667,11 @@ fun FullPlayerContent(
                     totalDrag < -(queueDragActivationThresholdPx * 2f) &&
                     velocity < quickFlickVelocityThreshold
                 ) {
-                    // Treat short/fast upward flick as queue-open intent.
                     onQueueRelease(totalDrag, velocity)
                 }
             }
         },
         topBar = {
-            // MD3: TopAppBar 在竖屏时滑入，横屏时向上滑出淡出
             AnimatedVisibility(
                 visible = !isLandscape,
                 enter = fadeIn(animationSpec = tween(350, easing = FastOutSlowInEasing)) +
@@ -712,7 +688,6 @@ fun FullPlayerContent(
                 TopAppBar(
                     modifier = Modifier.graphicsLayer {
                         val fraction = expansionFractionProvider()
-                        // TopBar should always fade in smoothly, ignoring delayAll to avoid empty UI
                         val startThreshold = 0f
                         val endThreshold = 1f
                         alpha = ((fraction - startThreshold) / (endThreshold - startThreshold)).coerceIn(0f, 1f)
@@ -993,7 +968,6 @@ fun FullPlayerContent(
             isShuffleEnabled = isShuffleEnabled,
             repeatMode = repeatMode,
             isFavoriteProvider = isFavoriteProvider,
-
             onShuffleToggle = onShuffleToggle,
             onRepeatToggle = onRepeatToggle,
             onFavoriteToggle = onFavoriteToggle
@@ -1146,6 +1120,7 @@ private fun FullPlayerControlsSection(
         tween<Float>(durationMillis = 240, easing = FastOutSlowInEasing)
     }
     val shouldDelay = loadingTweaks.delayAll || loadingTweaks.delayControls
+
     val context = LocalContext.current
 
     DelayedContent(
@@ -1223,7 +1198,6 @@ private fun FullPlayerControlsSection(
                 isShuffleTransitionInProgress = shuffleTransitionInProgress,
                 repeatMode = repeatModeProvider(),
                 isFavoriteProvider = isFavoriteProvider,
-            isPlaybackEnabled = isPlaybackEnabled,
                 onShuffleToggle = onShuffleToggle,
                 onRepeatToggle = onRepeatToggle,
                 onFavoriteToggle = onFavoriteToggle
@@ -1617,7 +1591,6 @@ private fun SongMetadataDisplaySection(
                 }
             }
         } else {
-            // Portrait Mode: Just the Lyrics button (Queue is in TopBar)
             FilledIconButton(
                 modifier = Modifier
                     .size(width = 48.dp, height = 48.dp),
@@ -1722,7 +1695,6 @@ private fun PlayerProgressBarSection(
     }
     val durationForCalc = displayDurationValue.coerceAtLeast(1L)
     
-    // Pass isVisible to rememberSmoothProgress
     val (smoothProgressState, _) = rememberSmoothProgress(
         isPlayingProvider = isPlayingProvider,
         currentPositionProvider = currentPositionProvider,
@@ -1733,29 +1705,22 @@ private fun PlayerProgressBarSection(
     )
 
     var sliderDragValue by remember { mutableStateOf<Float?>(null) }
-    // Optimistic Seek: Holds the target position immediately after seek to prevent snap-back
     var optimisticPosition by remember { mutableStateOf<Long?>(null) }
 
-    // Reset seek state on song change to avoid stale position from previous song
     LaunchedEffect(songId) {
         sliderDragValue = null
         optimisticPosition = null
     }
 
-    // Clear optimistic position ONLY when the SMOOTH (visual) progress catches up
-    // using raw position causes a jump because smooth progress might lag behind raw.
     LaunchedEffect(optimisticPosition) {
         val target = optimisticPosition
         if (target != null) {
             val start = System.currentTimeMillis()
             
             while (optimisticPosition != null) {
-                // Check if the current VISUAL progress (smoothState) corresponds to the target
-                // We use the derived state value which falls back to smoothProgressState
                 val currentVisual = smoothProgressState.value
                 val currentVisualMs = (currentVisual * durationForCalc).toLong()
                 
-                // If visual is close enough (within 500ms visual distance)
                 if (kotlin.math.abs(currentVisualMs - target) < 500 || (System.currentTimeMillis() - start) > 2000) {
                      optimisticPosition = null
                 }
@@ -1769,7 +1734,6 @@ private fun PlayerProgressBarSection(
         derivedStateOf { shouldRunRealtimeUpdates && isPlayingProvider() }
     }
 
-    // Always drive the thumb from smoothed progress to avoid visual jumps from 500ms raw ticks.
     val animatedProgressState = remember(
         sliderDragValue,
         optimisticPosition,
@@ -1786,9 +1750,6 @@ private fun PlayerProgressBarSection(
              }
         }
     }
-
-    // No LaunchedEffect/snapshotFlow needed anymore. 
-    // smoothProgressState is already 60fps animated.
 
     val effectivePositionState = remember(durationForCalc, animatedProgressState, isVisible, displayDurationValue) {
         derivedStateOf {
@@ -1831,11 +1792,6 @@ private fun PlayerProgressBarSection(
                 .fillMaxWidth()
                 .heightIn(min = 70.dp)
         ) {
-            // Isolated Slider Component
-            // Wrapped in a Box with detectVerticalDragGestures to prevent the outer
-            // playerSheetVerticalDragGesture from intercepting slider touches. If the
-            // user's drag has a vertical component, the inner handler absorbs it (consuming
-            // the events) so the sheet-collapse gesture never activates in this area.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1863,7 +1819,6 @@ private fun PlayerProgressBarSection(
                 )
             }
 
-            // Isolated Time Labels
             EfficientTimeLabels(
                 positionState = effectivePositionState,
                 duration = displayDurationValue,
@@ -2185,16 +2140,10 @@ private fun PlayerSongInfo(
                 .fillMaxWidth()
             .graphicsLayer {
                 val fraction = expansionFractionProvider()
-                alpha = fraction // Or apply specific fade logic if desired
+                alpha = fraction
                 translationY = (1f - fraction) * 24f
             }
     ) {
-        // We pass 1f to AutoScrollingTextOnDemand because the alpha/translation is now handled by the parent Column graphicsLayer
-        // and we want it "fully rendered" but hidden/moved by the layer.
-        // Actually, AutoScrollingTextOnDemand uses expansionFraction to start scrolling only when fully expanded?
-        // Let's check AutoScrollingTextOnDemand. Assuming it uses it for scrolling trigger.
-        // If we want to avoid recomposition, we might need to pass the provider or just 1f if scrolling logic handles itself.
-        // For now, let's pass the current value from provider for logic correctness, but ideally this component should be optimized too.
         AutoScrollingTextOnDemand(
             title,
             titleStyle,
@@ -2307,19 +2256,19 @@ private fun MetadataPlaceholder(
             modifier = Modifier
                 .weight(1f)
                 .align(Alignment.CenterVertically),
-            verticalArrangement = Arrangement.spacedBy(6.dp) //2.dp
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             PlaceholderBox(
                 modifier = Modifier
                     .fillMaxWidth(0.72f)
-                    .height(27.dp), //30.dp
+                    .height(27.dp),
                 cornerRadius = 8.dp,
                 color = color
             )
             PlaceholderBox(
                 modifier = Modifier
                     .fillMaxWidth(0.46f)
-                    .height(17.dp), //20.dp
+                    .height(17.dp),
                 cornerRadius = 8.dp,
                 color = onColor
             )
@@ -2388,7 +2337,6 @@ private fun ProgressPlaceholder(
                 cornerRadius = 3.dp,
                 color = onColor.copy(alpha = 0.15f)
             )
-            // Keep active segment in the layout tree but invisible to avoid visual noise.
             PlaceholderBox(
                 modifier = Modifier
                     .fillMaxWidth(0.34f)
@@ -2397,7 +2345,6 @@ private fun ProgressPlaceholder(
                 cornerRadius = 3.dp,
                 color = color
             )
-            // Keep thumb slot aligned but fully transparent.
             PlaceholderBox(
                 modifier = Modifier
                     .padding(start = 92.dp)
@@ -2564,7 +2511,6 @@ private fun BottomToggleRow(
     isShuffleTransitionInProgress: Boolean,
     repeatMode: Int,
     isFavoriteProvider: () -> Boolean,
-    isPlaybackEnabled: Boolean,
     onShuffleToggle: () -> Unit,
     onRepeatToggle: () -> Unit,
     onFavoriteToggle: () -> Unit
