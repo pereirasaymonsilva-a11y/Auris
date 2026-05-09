@@ -1,6 +1,7 @@
 package com.goldensystem.auris.presentation.viewmodel
 
 import android.annotation.SuppressLint
+import com.goldensystem.auris.data.repository.AurisOnlineRepository
 import android.app.Activity
 import android.content.ComponentName
 import android.net.Uri
@@ -251,7 +252,8 @@ class PlayerViewModel @Inject constructor(
     val multiSelectionStateHolder: MultiSelectionStateHolder,
     val playlistSelectionStateHolder: PlaylistSelectionStateHolder,
     private val sessionToken: SessionToken,
-    private val mediaControllerFactory: com.goldensystem.auris.data.media.MediaControllerFactory
+    private val mediaControllerFactory: com.goldensystem.auris.data.media.MediaControllerFactory,
+    private val aurisOnlineRepository: AurisOnlineRepository,
 ) : ViewModel() {
 
     private val _playerUiState = MutableStateFlow(PlayerUiState())
@@ -4772,6 +4774,17 @@ class PlayerViewModel @Inject constructor(
             _sheetState.value = PlayerSheetState.EXPANDED
         }
     }
+    
+    fun syncAurisOnline() {
+    viewModelScope.launch {
+        try {
+            aurisOnlineRepository.syncSongs()
+            sendToast("Auris Online sincronizado!")
+        } catch (e: Exception) {
+            sendToast("Erro ao sincronizar: ${e.message}")
+        }
+    }
+}
 
     private var pendingBatchGenreEdit: Pair<List<Song>, String>? = null
 

@@ -6,14 +6,8 @@
 
 package com.goldensystem.auris.presentation.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import android.widget.Toast
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,21 +16,13 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Sync
+import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
@@ -59,6 +46,7 @@ import com.goldensystem.auris.data.model.LibraryTabId
 import com.goldensystem.auris.data.model.Song
 import com.goldensystem.auris.data.model.SortOption
 import com.goldensystem.auris.data.model.StorageFilter
+import com.goldensystem.auris.data.repository.AurisOnlineRepository
 import com.goldensystem.auris.presentation.components.ExpressiveScrollBar
 import com.goldensystem.auris.presentation.components.MiniPlayerHeight
 import com.goldensystem.auris.presentation.components.PlaylistContainer
@@ -71,6 +59,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
@@ -105,9 +94,7 @@ fun LibraryAlbumsTab(
         }
     }
 
-    var lastHandledAlbumSortKey by remember {
-        mutableStateOf(currentAlbumSortOption.storageKey)
-    }
+    var lastHandledAlbumSortKey by remember { mutableStateOf(currentAlbumSortOption.storageKey) }
     var pendingAlbumSortScrollReset by remember { mutableStateOf(false) }
     var albumSortSawRefreshLoading by remember { mutableStateOf(false) }
 
@@ -139,8 +126,6 @@ fun LibraryAlbumsTab(
         pendingAlbumSortScrollReset = false
     }
 
-    // P2-3: Debounce 150ms to avoid firing on every scroll frame.
-    // Reduced prefetchCount from 10 to 4 to lower memory/IO pressure.
     LaunchedEffect(albums, gridState, listState, isListView) {
         if (isListView) {
             snapshotFlow { listState.layoutInfo }
@@ -487,9 +472,7 @@ fun LibraryArtistsTab(
             )
         }
     }
-    var lastHandledArtistSortKey by remember {
-        mutableStateOf(currentArtistSortOption.storageKey)
-    }
+    var lastHandledArtistSortKey by remember { mutableStateOf(currentArtistSortOption.storageKey) }
     var pendingArtistSortScrollReset by remember { mutableStateOf(false) }
     var artistSortSawRefreshLoading by remember { mutableStateOf(false) }
 
@@ -582,9 +565,7 @@ fun LibraryArtistsTab(
         }
 
         else -> {
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ) {
+            Box(modifier = Modifier.fillMaxSize()) {
                 val genresPullToRefreshState = rememberPullToRefreshState()
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,

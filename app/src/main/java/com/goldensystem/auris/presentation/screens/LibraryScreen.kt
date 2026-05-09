@@ -63,6 +63,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material.icons.rounded.ViewModule
+import androidx.compose.material.icons.rounded.Sync                     // <-- NOVO IMPORT
+import androidx.compose.material3.IconButton                          // <-- NOVO IMPORT
 import com.goldensystem.auris.presentation.components.ToggleSegmentButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -1245,43 +1247,65 @@ fun LibraryScreen(
                                     )
                                 }
                             } else {
-                                LibraryActionRow(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(end = 4.dp),
-                                    onMainActionClick = {
-                                        when (tabTitles.getOrNull(currentTabIndex)?.toLibraryTabIdOrNull()) {
-                                            LibraryTabId.PLAYLISTS -> showPlaylistCreationTypeDialog = true
-                                            LibraryTabId.LIKED -> playerViewModel.shuffleFavoriteSongs()
-                                            LibraryTabId.ALBUMS -> playerViewModel.shuffleRandomAlbum()
-                                            LibraryTabId.ARTISTS -> playerViewModel.shuffleRandomArtist()
-                                            else -> playerViewModel.shuffleAllSongs()
+                                // ======================================================
+                                // AQUI COMEÇA A ALTERAÇÃO: Botão de sincronização Auris Online
+                                // ======================================================
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    LibraryActionRow(
+                                        modifier = Modifier.weight(1f),
+                                        onMainActionClick = {
+                                            when (tabTitles.getOrNull(currentTabIndex)?.toLibraryTabIdOrNull()) {
+                                                LibraryTabId.PLAYLISTS -> showPlaylistCreationTypeDialog = true
+                                                LibraryTabId.LIKED -> playerViewModel.shuffleFavoriteSongs()
+                                                LibraryTabId.ALBUMS -> playerViewModel.shuffleRandomAlbum()
+                                                LibraryTabId.ARTISTS -> playerViewModel.shuffleRandomArtist()
+                                                else -> playerViewModel.shuffleAllSongs()
+                                            }
+                                        },
+                                        iconRotation = iconRotation,
+                                        showSortButton = sanitizedSortOptions.isNotEmpty(),
+                                        showLocateButton = showLocateButton,
+                                        onSortClick = { playerViewModel.showSortingSheet() },
+                                        onLocateClick = { locateAction?.invoke() },
+                                        isPlaylistTab = currentTabId == LibraryTabId.PLAYLISTS,
+                                        isFoldersTab = currentTabId == LibraryTabId.FOLDERS && (!playerUiState.isFoldersPlaylistView || playerUiState.currentFolder != null),
+                                        onImportM3uClick = { m3uImportLauncher.launch("audio/x-mpegurl") },
+                                        currentFolder = playerUiState.currentFolder,
+                                        folderRootPath = playerUiState.folderSourceRootPath.ifBlank {
+                                            Environment.getExternalStorageDirectory().path
+                                        },
+                                        folderRootLabel = playerUiState.folderSource.displayName,
+                                        onFolderClick = { playerViewModel.navigateToFolder(it) },
+                                        onNavigateBack = { playerViewModel.navigateBackFolder() },
+                                        isShuffleEnabled = isShuffleEnabled,
+                                        showStorageFilterButton = currentTabId == LibraryTabId.SONGS ||
+                                                currentTabId == LibraryTabId.ALBUMS ||
+                                                currentTabId == LibraryTabId.ARTISTS ||
+                                                currentTabId == LibraryTabId.LIKED ||
+                                                (ENABLE_FOLDERS_STORAGE_FILTER && currentTabId == LibraryTabId.FOLDERS),
+                                        currentStorageFilter = playerUiState.currentStorageFilter,
+                                        onStorageFilterClick = { playerViewModel.toggleStorageFilter() }
+                                    )
+                                    // Botão de sincronização do Auris Online (visível apenas quando filtro Online está ativo)
+                                    if (playerUiState.currentStorageFilter == StorageFilter.ONLINE) {
+                                        IconButton(
+                                            onClick = { playerViewModel.syncAurisOnline() },
+                                            modifier = Modifier.size(48.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Sync,
+                                                contentDescription = "Sincronizar Auris Online",
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
                                         }
-                                    },
-                                    iconRotation = iconRotation,
-                                    showSortButton = sanitizedSortOptions.isNotEmpty(),
-                                    showLocateButton = showLocateButton,
-                                    onSortClick = { playerViewModel.showSortingSheet() },
-                                    onLocateClick = { locateAction?.invoke() },
-                                    isPlaylistTab = currentTabId == LibraryTabId.PLAYLISTS,
-                                    isFoldersTab = currentTabId == LibraryTabId.FOLDERS && (!playerUiState.isFoldersPlaylistView || playerUiState.currentFolder != null),
-                                    onImportM3uClick = { m3uImportLauncher.launch("audio/x-mpegurl") },
-                                    currentFolder = playerUiState.currentFolder,
-                                    folderRootPath = playerUiState.folderSourceRootPath.ifBlank {
-                                        Environment.getExternalStorageDirectory().path
-                                    },
-                                    folderRootLabel = playerUiState.folderSource.displayName,
-                                    onFolderClick = { playerViewModel.navigateToFolder(it) },
-                                    onNavigateBack = { playerViewModel.navigateBackFolder() },
-                                    isShuffleEnabled = isShuffleEnabled,
-                                    showStorageFilterButton = currentTabId == LibraryTabId.SONGS ||
-                                            currentTabId == LibraryTabId.ALBUMS ||
-                                            currentTabId == LibraryTabId.ARTISTS ||
-                                            currentTabId == LibraryTabId.LIKED ||
-                                            (ENABLE_FOLDERS_STORAGE_FILTER && currentTabId == LibraryTabId.FOLDERS),
-                                    currentStorageFilter = playerUiState.currentStorageFilter,
-                                    onStorageFilterClick = { playerViewModel.toggleStorageFilter() }
-                                )
+                                    }
+                                }
+                                // ======================================================
+                                // FIM DA ALTERAÇÃO
+                                // ======================================================
                             }
                         }
 

@@ -77,10 +77,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.goldensystem.auris.R
 import com.goldensystem.auris.presentation.components.CollapsibleCommonTopBar
 import com.goldensystem.auris.presentation.components.MiniPlayerHeight
-import com.goldensystem.auris.presentation.netease.auth.NeteaseLoginActivity
 import com.goldensystem.auris.presentation.jellyfin.auth.JellyfinLoginActivity
 import com.goldensystem.auris.presentation.navidrome.auth.NavidromeLoginActivity
-import com.goldensystem.auris.presentation.qqmusic.auth.QqMusicLoginActivity
 import com.goldensystem.auris.presentation.telegram.auth.TelegramLoginActivity
 import com.goldensystem.auris.presentation.viewmodel.AccountsViewModel
 import com.goldensystem.auris.presentation.viewmodel.ExternalAccountUiModel
@@ -92,8 +90,6 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 @Composable
 fun AccountsScreen(
     onBackClick: () -> Unit,
-    onOpenNeteaseDashboard: () -> Unit = {},
-    onOpenQqMusicDashboard: () -> Unit = {},
     onOpenNavidromeDashboard: () -> Unit = {},
     onOpenJellyfinDashboard: () -> Unit = {},
     viewModel: AccountsViewModel = hiltViewModel()
@@ -207,19 +203,12 @@ fun AccountsScreen(
                             openService(
                                 context = context,
                                 service = account.service,
-                                onOpenNeteaseDashboard = onOpenNeteaseDashboard,
-                                onOpenQqMusicDashboard = onOpenQqMusicDashboard,
                                 onOpenNavidromeDashboard = onOpenNavidromeDashboard,
-                                onOpenJellyfinDashboard = onOpenJellyfinDashboard,
-                                preferNeteaseDashboard = true
+                                onOpenJellyfinDashboard = onOpenJellyfinDashboard
                             )
                         },
                         onLogout = { viewModel.logout(account.service) },
-                        painter = if (account.service == ExternalServiceAccount.NETEASE) {
-                            painterResource(R.drawable.netease_cloud_music_logo_icon_206716__1_)
-                        } else if (account.service == ExternalServiceAccount.QQ_MUSIC) {
-                            painterResource(R.drawable.qq_music)
-                        } else if (account.service == ExternalServiceAccount.TELEGRAM) {
+                        painter = if (account.service == ExternalServiceAccount.TELEGRAM) {
                             painterResource(R.drawable.telegram)
                         } else null
                     )
@@ -232,11 +221,8 @@ fun AccountsScreen(
                             openService(
                                 context = context,
                                 service = service,
-                                onOpenNeteaseDashboard = onOpenNeteaseDashboard,
-                                onOpenQqMusicDashboard = onOpenQqMusicDashboard,
                                 onOpenNavidromeDashboard = onOpenNavidromeDashboard,
-                                onOpenJellyfinDashboard = onOpenJellyfinDashboard,
-                                preferNeteaseDashboard = false
+                                onOpenJellyfinDashboard = onOpenJellyfinDashboard
                             )
                         }
                     )
@@ -363,84 +349,84 @@ private fun ConnectedAccountCard(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
-    modifier = Modifier.fillMaxWidth(),
-    verticalAlignment = Alignment.CenterVertically
-) {
-    if (account.service == ExternalServiceAccount.NAVIDROME) {
-        ServiceIcon(
-            service = account.service,
-            tint = palette.iconTint,
-            modifier = Modifier
-                .width(48.dp)
-                .height(40.dp)
-        )
-    } else {
-        Surface(
-            shape = AbsoluteSmoothCornerShape(16.dp, 60),
-            color = palette.iconContainer
-        ) {
-            if (painter != null) {
-                Icon(
-                    painter = painter,
-                    contentDescription = null,
-                    tint = palette.iconTint,
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .size(20.dp)
-                )
-            } else {
-                ServiceIcon(
-                    service = account.service,
-                    tint = palette.iconTint,
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .size(20.dp)
-                )
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (account.service == ExternalServiceAccount.NAVIDROME) {
+                    ServiceIcon(
+                        service = account.service,
+                        tint = palette.iconTint,
+                        modifier = Modifier
+                            .width(48.dp)
+                            .height(40.dp)
+                    )
+                } else {
+                    Surface(
+                        shape = AbsoluteSmoothCornerShape(16.dp, 60),
+                        color = palette.iconContainer
+                    ) {
+                        if (painter != null) {
+                            Icon(
+                                painter = painter,
+                                contentDescription = null,
+                                tint = palette.iconTint,
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .size(20.dp)
+                            )
+                        } else {
+                            ServiceIcon(
+                                service = account.service,
+                                tint = palette.iconTint,
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .size(20.dp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.size(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = account.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = account.accountLabel,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Surface(
+                    shape = AbsoluteSmoothCornerShape(12.dp, 60),
+                    color = if (isComingSoon) {
+                        MaterialTheme.colorScheme.secondaryContainer
+                    } else {
+                        palette.statusContainer
+                    }
+                ) {
+                    Text(
+                        text = if (isComingSoon) statusSoon else statusConnected,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (isComingSoon) {
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                        } else {
+                            palette.statusTint
+                        },
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                    )
+                }
             }
-        }
-    }
-
-    Spacer(Modifier.size(12.dp))
-
-    Column(modifier = Modifier.weight(1f)) {
-        Text(
-            text = account.title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = account.accountLabel,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-
-    Surface(
-        shape = AbsoluteSmoothCornerShape(12.dp, 60),
-        color = if (isComingSoon) {
-            MaterialTheme.colorScheme.secondaryContainer
-        } else {
-            palette.statusContainer
-        }
-    ) {
-        Text(
-            text = if (isComingSoon) statusSoon else statusConnected,
-            style = MaterialTheme.typography.labelMedium,
-            color = if (isComingSoon) {
-                MaterialTheme.colorScheme.onSecondaryContainer
-            } else {
-                palette.statusTint
-            },
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-        )
-    }
-}
 
             Surface(
                 shape = AbsoluteSmoothCornerShape(14.dp, 60),
@@ -551,8 +537,6 @@ private fun EmptyAccountsCard(
             disconnectedServices.forEach { service ->
                 val isComingSoon = service == ExternalServiceAccount.GOOGLE_DRIVE
                 val painter = when (service) {
-                    ExternalServiceAccount.NETEASE -> painterResource(R.drawable.netease_cloud_music_logo_icon_206716__1_)
-                    ExternalServiceAccount.QQ_MUSIC -> painterResource(R.drawable.qq_music)
                     ExternalServiceAccount.TELEGRAM -> painterResource(R.drawable.telegram)
                     else -> null
                 }
@@ -620,22 +604,6 @@ private fun servicePalette(service: ExternalServiceAccount): ServicePalette {
             primaryActionContainer = MaterialTheme.colorScheme.secondaryContainer,
             primaryActionTint = MaterialTheme.colorScheme.onSecondaryContainer
         )
-        ExternalServiceAccount.NETEASE -> ServicePalette(
-            iconContainer = MaterialTheme.colorScheme.errorContainer,
-            iconTint = MaterialTheme.colorScheme.onErrorContainer,
-            statusContainer = Color(0xFFFFE3E1),
-            statusTint = Color(0xFF7A1D16),
-            primaryActionContainer = MaterialTheme.colorScheme.errorContainer,
-            primaryActionTint = MaterialTheme.colorScheme.onErrorContainer
-        )
-        ExternalServiceAccount.QQ_MUSIC -> ServicePalette(
-            iconContainer = MaterialTheme.colorScheme.tertiaryContainer,
-            iconTint = MaterialTheme.colorScheme.onTertiaryContainer,
-            statusContainer = Color(0xFFFFF0C7),
-            statusTint = Color(0xFF704900),
-            primaryActionContainer = MaterialTheme.colorScheme.tertiaryContainer,
-            primaryActionTint = MaterialTheme.colorScheme.onTertiaryContainer
-        )
         ExternalServiceAccount.NAVIDROME -> ServicePalette(
             iconContainer = Color.White,
             iconTint = Color.Unspecified,
@@ -659,10 +627,9 @@ private fun accountIcon(service: ExternalServiceAccount): ImageVector {
     return when (service) {
         ExternalServiceAccount.TELEGRAM -> Icons.AutoMirrored.Rounded.Send
         ExternalServiceAccount.GOOGLE_DRIVE -> Icons.Rounded.CloudQueue
-        ExternalServiceAccount.NETEASE -> Icons.Rounded.MusicNote
-        ExternalServiceAccount.QQ_MUSIC -> Icons.Rounded.MusicNote
         ExternalServiceAccount.NAVIDROME -> Icons.Rounded.CloudQueue
         ExternalServiceAccount.JELLYFIN -> Icons.Rounded.CloudQueue
+        else -> Icons.Rounded.CloudQueue
     }
 }
 
@@ -681,7 +648,7 @@ private fun ServiceIcon(service: ExternalServiceAccount, tint: Color, modifier: 
                 modifier = Modifier
                     .size(32.dp)
             )
-            
+
             // Navidrome icon (Top) - Closer horizontal offset, no outer container
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_navidrome),
@@ -714,21 +681,17 @@ private fun serviceDisplayName(service: ExternalServiceAccount): String {
     return when (service) {
         ExternalServiceAccount.TELEGRAM -> stringResource(R.string.presentation_batch_b_service_telegram)
         ExternalServiceAccount.GOOGLE_DRIVE -> stringResource(R.string.auth_gdrive_title)
-        ExternalServiceAccount.NETEASE -> stringResource(R.string.presentation_batch_b_service_netease)
-        ExternalServiceAccount.QQ_MUSIC -> stringResource(R.string.screen_qq_music_dashboard_title)
         ExternalServiceAccount.NAVIDROME -> stringResource(R.string.cd_subsonic_logo)
         ExternalServiceAccount.JELLYFIN -> stringResource(R.string.auth_jellyfin_title)
+        else -> ""
     }
 }
 
 private fun openService(
     context: Context,
     service: ExternalServiceAccount,
-    onOpenNeteaseDashboard: () -> Unit,
-    onOpenQqMusicDashboard: () -> Unit,
     onOpenNavidromeDashboard: () -> Unit,
-    onOpenJellyfinDashboard: () -> Unit,
-    preferNeteaseDashboard: Boolean
+    onOpenJellyfinDashboard: () -> Unit
 ) {
     when (service) {
         ExternalServiceAccount.TELEGRAM -> {
@@ -740,45 +703,11 @@ private fun openService(
         ExternalServiceAccount.GOOGLE_DRIVE -> {
             Toast.makeText(context, context.getString(R.string.accounts_google_drive_soon), Toast.LENGTH_SHORT).show()
         }
-        ExternalServiceAccount.NETEASE -> {
-            if (preferNeteaseDashboard) {
-                onOpenNeteaseDashboard()
-            } else {
-                safeStartActivity(
-                    context = context,
-                    intent = Intent(context, NeteaseLoginActivity::class.java)
-                )
-            }
-        }
-        ExternalServiceAccount.QQ_MUSIC -> {
-            if (preferNeteaseDashboard) {
-                onOpenQqMusicDashboard()
-            } else {
-                safeStartActivity(
-                    context = context,
-                    intent = Intent(context, QqMusicLoginActivity::class.java)
-                )
-            }
-        }
         ExternalServiceAccount.NAVIDROME -> {
-            if (preferNeteaseDashboard) {
-                onOpenNavidromeDashboard()
-            } else {
-                safeStartActivity(
-                    context = context,
-                    intent = Intent(context, NavidromeLoginActivity::class.java)
-                )
-            }
+            onOpenNavidromeDashboard()
         }
         ExternalServiceAccount.JELLYFIN -> {
-            if (preferNeteaseDashboard) {
-                onOpenJellyfinDashboard()
-            } else {
-                safeStartActivity(
-                    context = context,
-                    intent = Intent(context, JellyfinLoginActivity::class.java)
-                )
-            }
+            onOpenJellyfinDashboard()
         }
     }
 }
