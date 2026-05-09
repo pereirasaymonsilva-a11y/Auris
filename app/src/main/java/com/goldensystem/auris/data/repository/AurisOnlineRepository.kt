@@ -1,6 +1,8 @@
 package com.goldensystem.auris.data.repository
 
 import android.util.Log
+import com.goldensystem.auris.data.database.AlbumEntity
+import com.goldensystem.auris.data.database.ArtistEntity
 import com.goldensystem.auris.data.database.MusicDao
 import com.goldensystem.auris.data.database.SongEntity
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +24,27 @@ class AurisOnlineRepository @Inject constructor(
 
     suspend fun syncSongs(): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+            // Garantir que exista um álbum e um artista com ID 0 para evitar violação de FK
+            musicDao.insertAlbums(listOf(
+                AlbumEntity(
+                    id = 0L,
+                    title = "Auris Online",
+                    artistName = "Auris Online",
+                    artistId = 0L,
+                    albumArtUriString = null,
+                    dateAdded = 0L,
+                    year = null
+                )
+            ))
+            musicDao.insertArtists(listOf(
+                ArtistEntity(
+                    id = 0L,
+                    name = "Auris Online",
+                    imageUrl = null,
+                    customImageUri = null
+                )
+            ))
+
             Log.d("AurisOnline", "Iniciando sincronização, URL=$scriptUrl")
             val client = okHttpClient.newBuilder()
                 .connectTimeout(15, TimeUnit.SECONDS)
@@ -44,6 +67,7 @@ class AurisOnlineRepository @Inject constructor(
 
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
+                // Gera um ID único negativo para não conflitar com os locais (positivos)
                 val id = -(i + 1).toLong() * 1000000L + obj.optString("id", i.toString()).hashCode().toLong()
                 entities.add(
                     SongEntity(
@@ -51,8 +75,8 @@ class AurisOnlineRepository @Inject constructor(
                         title = obj.optString("title", "Sem título"),
                         artistName = obj.optString("artist", "Desconhecido"),
                         albumName = obj.optString("album", ""),
-                        albumId = 0L,
-                        artistId = 0L,
+                        albumId = 0L,           // FK satisfeita pelo placeholder
+                        artistId = 0L,          // FK satisfeita pelo placeholder
                         contentUriString = obj.optString("mp3Url", ""),
                         albumArtUriString = obj.optString("coverUrl", null),
                         duration = obj.optLong("duration", 0L),
@@ -68,17 +92,15 @@ class AurisOnlineRepository @Inject constructor(
                         mimeType = "audio/mpeg",
                         bitrate = null,
                         sampleRate = null,
-                        sourceType = 7
+                        sourceType = 7  // Auris Online
                     )
                 )
             }
 
-            Log.d("AurisOnline", "Entidades criadas: ${entities.size}")
             musicDao.deleteAurisOnlineSongs()
-            Log.d("AurisOnline", "Músicas antigas removidas")
             musicDao.insertSongs(entities)
-            Log.d("AurisOnline", "Inserção concluída com sucesso. Total inserido: ${entities.size}")
 
+            Log.d("AurisOnline", "Sincronização concluída com sucesso")
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e("AurisOnline", "Falha na sincronização", e)
