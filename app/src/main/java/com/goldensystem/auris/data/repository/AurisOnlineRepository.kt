@@ -16,7 +16,7 @@ class AurisOnlineRepository @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val musicDao: MusicDao
 ) {
-    // ⚠️ SUBSTITUA PELA URL DO SEU APPS SCRIPT
+    // ⚠️ SUBSTITUA PELA URL REAL DO SEU APPS SCRIPT
     private val scriptUrl = "https://script.google.com/macros/s/AKfycbyHt5qIgRp_Nw2gUog5eKxFJ6BVXYK9_ie1xrn3GsHMVi3tuyzMgQu8q2bfjLvau9OW6g/exec"
 
     suspend fun syncSongs(): Result<Unit> = withContext(Dispatchers.IO) {
@@ -34,28 +34,31 @@ class AurisOnlineRepository @Inject constructor(
 
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
-                val id = "auris_" + obj.optString("id", i.toString())
                 songs.add(
                     Song(
-                        id = id,
+                        id = "auris_" + obj.optString("id", i.toString()),
                         title = obj.optString("title", "Sem título"),
                         artist = obj.optString("artist", "Desconhecido"),
                         album = obj.optString("album", ""),
-                        albumId = 0,
-                        artistId = 0,
-                        duration = obj.optLong("duration", 0),
+                        albumId = 0L,
+                        artistId = 0L,
+                        duration = obj.optLong("duration", 0L),
                         dateAdded = System.currentTimeMillis(),
-                        data = obj.optString("mp3Url"),
-                        size = 0,
+                        path = obj.optString("mp3Url", ""),
+                        mimeType = "audio/mpeg",
+                        bitrate = 0,
+                        sampleRate = 0,
+                        size = 0L,
+                        dateModified = System.currentTimeMillis(),
                         albumArtUriString = obj.optString("coverUrl", null),
-                        contentUriString = obj.optString("mp3Url")
+                        contentUriString = obj.optString("mp3Url", "")
                     )
                 )
             }
 
-            // Remove músicas antigas do Auris Online e insere as novas
+            // Remove músicas antigas e insere as novas usando o DAO
             musicDao.deleteAurisOnlineSongs()
-            musicDao.insertSongs(songs)
+            musicDao.insertAll(songs)
 
             Result.success(Unit)
         } catch (e: Exception) {

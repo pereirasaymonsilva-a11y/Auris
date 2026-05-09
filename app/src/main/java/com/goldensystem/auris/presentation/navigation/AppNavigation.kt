@@ -232,10 +232,6 @@ fun AppNavigation(
                 ScreenWrapper(navController = navController, playerViewModel = playerViewModel) {
                     AccountsScreen(
                         onBackClick = { navController.popBackStack() },
-                        onOpenNeteaseDashboard = {
-                            navController.navigateSafely(Screen.NeteaseDashboard.route)
-                        },
-                        onOpenQqMusicDashboard = {
                             navController.navigateSafely(Screen.QqMusicDashboard.route)
                         },
                         onOpenNavidromeDashboard = {

@@ -75,7 +75,6 @@ import com.goldensystem.auris.data.preferences.CollagePattern
 import com.goldensystem.auris.presentation.components.AlbumArtCollage
 import com.goldensystem.auris.presentation.components.BetaInfoBottomSheet
 import com.goldensystem.auris.presentation.components.Beta05CleanInstallDisclaimerDialog
-import com.goldensystem.auris.presentation.netease.dashboard.NeteaseDashboardViewModel
 import com.goldensystem.auris.presentation.jellyfin.dashboard.JellyfinDashboardViewModel
 import com.goldensystem.auris.presentation.navidrome.dashboard.NavidromeDashboardViewModel
 import com.goldensystem.auris.presentation.qqmusic.dashboard.QqMusicDashboardViewModel
@@ -115,7 +114,7 @@ fun HomeScreen(
     playerViewModel: PlayerViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     neteaseViewModel: NeteaseDashboardViewModel = hiltViewModel(),
-    qqMusicViewModel: QqMusicDashboardViewModel = hiltViewModel(),
+    onOpenSidebar: () -> Unit)
     navidromeViewModel: NavidromeDashboardViewModel = hiltViewModel(),
     jellyfinViewModel: JellyfinDashboardViewModel = hiltViewModel(),
     onOpenSidebar: () -> Unit
@@ -349,16 +348,6 @@ fun HomeScreen(
 
     if (showStreamingProviderSheet) {
         val isNeteaseLoggedIn by neteaseViewModel.isLoggedIn.collectAsStateWithLifecycle()
-        val isQqMusicLoggedIn by qqMusicViewModel.isLoggedIn.collectAsStateWithLifecycle()
-        val isNavidromeLoggedIn by navidromeViewModel.isLoggedIn.collectAsStateWithLifecycle()
-        val isJellyfinLoggedIn by jellyfinViewModel.isLoggedIn.collectAsStateWithLifecycle()
-        StreamingProviderSheet(
-            onDismissRequest = { showStreamingProviderSheet = false },
-            isNeteaseLoggedIn = isNeteaseLoggedIn,
-            onNavigateToNeteaseDashboard = { navController.navigateSafely(Screen.NeteaseDashboard.route) },
-            isQqMusicLoggedIn = isQqMusicLoggedIn,
-            onNavigateToQqMusicDashboard = { navController.navigateSafely(Screen.QqMusicDashboard.route) },
-            isNavidromeLoggedIn = isNavidromeLoggedIn,
             onNavigateToNavidromeDashboard = { navController.navigateSafely(Screen.NavidromeDashboard.route) },
             isJellyfinLoggedIn = isJellyfinLoggedIn,
             onNavigateToJellyfinDashboard = { navController.navigateSafely(Screen.JellyfinDashboard.route) }

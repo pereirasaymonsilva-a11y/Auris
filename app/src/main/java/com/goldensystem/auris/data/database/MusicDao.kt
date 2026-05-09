@@ -90,6 +90,9 @@ interface MusicDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAlbumsIgnoreConflicts(albums: List<AlbumEntity>): List<Long>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(songs: List<Song>)
 
     @Update
     suspend fun updateAlbums(albums: List<AlbumEntity>)
@@ -171,6 +174,9 @@ interface MusicDao {
 
     @Query("SELECT id FROM songs WHERE source_type = 0")
     suspend fun getAllMediaStoreSongIds(): List<Long>
+    
+    @Query("DELETE FROM songs WHERE id LIKE 'auris_%'")
+    suspend fun deleteAurisOnlineSongs()
 
     @Query("DELETE FROM songs WHERE id IN (:songIds)")
     suspend fun deleteSongsByIds(songIds: List<Long>)
