@@ -1292,7 +1292,11 @@ fun LibraryScreen(
                                     // Botão de sincronização do Auris Online (visível apenas quando filtro Online está ativo)
                                     if (playerUiState.currentStorageFilter == StorageFilter.ONLINE) {
                                         IconButton(
-                                            onClick = { playerViewModel.syncAurisOnline() },
+                                            onClick = {
+                                                playerViewModel.syncAurisOnline()
+                                                allSongsLazyPagingItems.refresh()
+                                                albumsLazyPagingItems.refresh()
+                                            },
                                             modifier = Modifier.size(48.dp)
                                         ) {
                                             Icon(
@@ -1760,8 +1764,6 @@ fun LibraryScreen(
             }
         }
     }
-
-
 
     PlaylistCreationTypeDialog(
         visible = showPlaylistCreationTypeDialog,

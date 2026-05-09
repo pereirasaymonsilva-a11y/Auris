@@ -1,5 +1,6 @@
 package com.goldensystem.auris.data.repository
 
+import android.util.Log
 import com.goldensystem.auris.data.database.MusicDao
 import com.goldensystem.auris.data.database.SongEntity
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +31,7 @@ class AurisOnlineRepository @Inject constructor(
             if (!response.isSuccessful) throw Exception("Erro HTTP ${response.code}")
             val body = response.body?.string() ?: throw Exception("Resposta vazia")
             val array = JSONArray(body)
+            Log.d("AurisOnline", "Recebidos ${array.length()} itens da planilha")
             val entities = mutableListOf<SongEntity>()
 
             for (i in 0 until array.length()) {
@@ -69,6 +71,7 @@ class AurisOnlineRepository @Inject constructor(
 
             Result.success(Unit)
         } catch (e: Exception) {
+            Log.e("AurisOnline", "Falha na sincronização", e)
             Result.failure(e)
         }
     }
