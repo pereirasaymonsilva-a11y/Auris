@@ -1,5 +1,6 @@
 package com.goldensystem.auris.presentation.components
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Process
 import androidx.compose.foundation.layout.Arrangement
@@ -12,21 +13,30 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.goldensystem.auris.R
 import com.goldensystem.auris.ui.theme.GoogleSansRounded
+import kotlinx.coroutines.delay
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,18 +45,26 @@ fun Beta05CleanInstallDisclaimerDialog(
     onDismiss: (dontShowAgain: Boolean) -> Unit
 ) {
     val context = LocalContext.current
+    val activity = context as? Activity
     val prefs = context.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
 
-    val cardShape = AbsoluteSmoothCornerShape(
-        cornerRadiusTL = 30.dp,
-        cornerRadiusTR = 30.dp,
-        cornerRadiusBL = 30.dp,
-        cornerRadiusBR = 30.dp,
-        smoothnessAsPercentTL = 60,
-        smoothnessAsPercentTR = 60,
-        smoothnessAsPercentBL = 60,
-        smoothnessAsPercentBR = 60,
-    )
+    var entendi by remember { mutableStateOf(false) }
+    var contando by remember { mutableStateOf(false) }
+    var segundosRestantes by remember { mutableIntStateOf(5) }
+
+    LaunchedEffect(contando) {
+        if (contando) {
+            delay(100)
+            while (segundosRestantes > 0) {
+                delay(1000L)
+                segundosRestantes--
+            }
+            activity?.finishAffinity()
+            Process.killProcess(Process.myPid())
+        }
+    }
+
+    val cardShape = AbsoluteSmoothCornerShape(30.dp, 60)
     val blockShape = AbsoluteSmoothCornerShape(22.dp, 60)
     val actionShape = AbsoluteSmoothCornerShape(18.dp, 60)
 
@@ -60,103 +78,105 @@ fun Beta05CleanInstallDisclaimerDialog(
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             tonalElevation = 8.dp,
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 18.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                // Título "Atualização beta-0.1.0" removido
-
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = blockShape,
-                    color = MaterialTheme.colorScheme.surfaceContainer,
+            if (contando) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 14.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.presentation_batch_g_beta05_clean_install_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontFamily = GoogleSansRounded,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            text = stringResource(R.string.presentation_batch_g_beta05_clean_install_body),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Text(
-                            text = "Para que o Auris funcione corretamente, é necessário reiniciar o aplicativo agora.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(48.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "Aguarde $segundosRestantes segundos...",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = GoogleSansRounded,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "O aplicativo será fechado para que a configuração seja concluída.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
                 }
-
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = blockShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 18.dp, vertical = 18.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = blockShape,
+                        color = MaterialTheme.colorScheme.surfaceContainer,
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.rounded_manage_search_24),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .padding(top = 2.dp)
-                                .size(18.dp),
-                        )
                         Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 14.dp, vertical = 14.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             Text(
-                                text = stringResource(R.string.presentation_batch_g_beta05_if_wrong_meta_title),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold,
+                                text = stringResource(R.string.presentation_batch_g_beta05_clean_install_title),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontFamily = GoogleSansRounded,
+                                fontWeight = FontWeight.Bold,
                             )
                             Text(
-                                text = stringResource(R.string.presentation_batch_g_beta05_if_wrong_meta_body),
-                                style = MaterialTheme.typography.bodySmall,
+                                text = "Antes de utilizar o aplicativo pela primeira vez, reinicie-o para evitar falhas na listagem de músicas da biblioteca.",
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = "Reinicie o app e aproveite o mundo das músicas! 🎧",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
-                }
 
-                Button(
-                    onClick = {
-                        prefs.edit()
-                            .putBoolean("beta_05_clean_install_disclaimer_dismissed", true)
-                            .commit()
-
-                        val intent = Intent.makeRestartActivityTask(
-                            context.packageManager.getLaunchIntentForPackage(context.packageName)?.component
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Checkbox(
+                            checked = entendi,
+                            onCheckedChange = { entendi = it }
                         )
-                        context.startActivity(intent)
-                        Process.killProcess(Process.myPid())
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = actionShape,
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.rounded_arrow_forward_24),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Spacer(modifier = Modifier.size(6.dp))
-                    Text(text = "Reiniciar App")
+                        Text(
+                            text = "Entendi",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                        )
+                    }
+
+                    Button(
+                        onClick = {
+                            prefs.edit()
+                                .putBoolean("beta_05_clean_install_disclaimer_dismissed", true)
+                                .commit()
+                            contando = true
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = actionShape,
+                        enabled = entendi
+                    ) {
+                        Text(
+                            text = "Reiniciar App",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         }
