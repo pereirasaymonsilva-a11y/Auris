@@ -232,8 +232,6 @@ fun AppNavigation(
                 ScreenWrapper(navController = navController, playerViewModel = playerViewModel) {
                     AccountsScreen(
                         onBackClick = { navController.popBackStack() },
-                            navController.navigateSafely(Screen.QqMusicDashboard.route)
-                        },
                         onOpenNavidromeDashboard = {
                             navController.navigateSafely(Screen.NavidromeDashboard.route)
                         },
@@ -544,32 +542,6 @@ fun AppNavigation(
                 }
             }
             composable(
-                Screen.NeteaseDashboard.route,
-                enterTransition = { enterTransition() },
-                exitTransition = { exitTransition() },
-                popEnterTransition = { popEnterTransition() },
-                popExitTransition = { popExitTransition() },
-            ) {
-                ScreenWrapper(navController = navController, playerViewModel = playerViewModel) {
-                    com.goldensystem.auris.presentation.netease.dashboard.NeteaseDashboardScreen(
-                        onBack = { navController.popBackStack() }
-                    )
-                }
-            }
-            composable(
-                Screen.QqMusicDashboard.route,
-                enterTransition = { enterTransition() },
-                exitTransition = { exitTransition() },
-                popEnterTransition = { popEnterTransition() },
-                popExitTransition = { popExitTransition() },
-            ) {
-                ScreenWrapper(navController = navController, playerViewModel = playerViewModel) {
-                    com.goldensystem.auris.presentation.qqmusic.dashboard.QqMusicDashboardScreen(
-                        onBack = { navController.popBackStack() }
-                    )
-                }
-            }
-            composable(
                 Screen.NavidromeDashboard.route,
                 enterTransition = { enterTransition() },
                 exitTransition = { exitTransition() },
@@ -605,9 +577,6 @@ fun AppNavigation(
             ) {
                 VideoGalleryScreen(
                     onVideoClick = { path ->
-                        // A rota com query string é mantida por simplicidade.
-                        // Se houver risco com paths muito longos ou caracteres especiais,
-                        // migrar para "video_player/{path}" com navArgument.
                         navController.navigate("video_player?path=${android.net.Uri.encode(path)}")
                     },
                     onBack = { navController.popBackStack() }
