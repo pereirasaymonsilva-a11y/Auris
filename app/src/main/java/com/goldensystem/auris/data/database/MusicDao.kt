@@ -91,9 +91,6 @@ interface MusicDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAlbumsIgnoreConflicts(albums: List<AlbumEntity>): List<Long>
     
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(songs: List<Song>)
-
     @Update
     suspend fun updateAlbums(albums: List<AlbumEntity>)
 
