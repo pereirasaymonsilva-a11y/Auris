@@ -4777,11 +4777,12 @@ class PlayerViewModel @Inject constructor(
     
     fun syncAurisOnline() {
     viewModelScope.launch {
-        try {
-            aurisOnlineRepository.syncSongs()
+        val result = aurisOnlineRepository.syncSongs()
+        if (result.isSuccess) {
             sendToast("Auris Online sincronizado!")
-        } catch (e: Exception) {
-            sendToast("Erro ao sincronizar: ${e.message}")
+        } else {
+            val errorMsg = result.exceptionOrNull()?.message ?: "Erro desconhecido"
+            sendToast("Erro ao sincronizar: $errorMsg")
         }
     }
 }

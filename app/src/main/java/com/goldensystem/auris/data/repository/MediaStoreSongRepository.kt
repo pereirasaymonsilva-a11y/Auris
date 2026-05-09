@@ -481,7 +481,7 @@ class MediaStoreSongRepository @Inject constructor(
                                 allowedParentDirs = allowedParentDirs,
                                 applyDirectoryFilter = applyDirectoryFilter,
                                 sortOrder = sortOption.storageKey,
-                                filterMode = storageFilter.value
+                                filterMode = storageFilter.toFilterMode()  // <-- CORRIGIDO
                             )
                         }
                     ).flow
@@ -514,7 +514,7 @@ class MediaStoreSongRepository @Inject constructor(
                                 allowedParentDirs = allowedParentDirs,
                                 applyDirectoryFilter = applyDirectoryFilter,
                                 sortOrder = sortOption.storageKey,
-                                filterMode = storageFilter.value
+                                filterMode = storageFilter.toFilterMode()  // <-- CORRIGIDO
                             )
                         }
                     ).flow
@@ -535,7 +535,7 @@ class MediaStoreSongRepository @Inject constructor(
         musicDao.getFavoriteSongsList(
             allowedParentDirs = allowedParentDirs,
             applyDirectoryFilter = applyDirectoryFilter,
-            filterMode = storageFilter.value
+            filterMode = storageFilter.toFilterMode()  // <-- CORRIGIDO
         )
             .map { entity -> entity.toSong().copy(isFavorite = true) }
     }
@@ -558,9 +558,18 @@ class MediaStoreSongRepository @Inject constructor(
                 musicDao.getFavoriteSongCount(
                     allowedParentDirs = allowedDirs,
                     applyDirectoryFilter = applyFilter,
-                    filterMode = storageFilter.value
+                    filterMode = storageFilter.toFilterMode()  // <-- CORRIGIDO
                 )
             }
         }
+    }
+
+    // =====================================================
+    // MÉTODO PRIVADO ADICIONADO
+    // =====================================================
+    private fun com.goldensystem.auris.data.model.StorageFilter.toFilterMode(): Int = when (this) {
+        com.goldensystem.auris.data.model.StorageFilter.ALL -> 0
+        com.goldensystem.auris.data.model.StorageFilter.OFFLINE -> 1
+        com.goldensystem.auris.data.model.StorageFilter.ONLINE -> 2
     }
 }

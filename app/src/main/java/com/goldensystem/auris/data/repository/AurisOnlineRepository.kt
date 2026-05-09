@@ -22,21 +22,28 @@ class AurisOnlineRepository @Inject constructor(
 
     suspend fun syncSongs(): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+            Log.d("AurisOnline", "Iniciando sincronização, URL=$scriptUrl")
             val client = okHttpClient.newBuilder()
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
                 .build()
             val request = Request.Builder().url(scriptUrl).build()
             val response = client.newCall(request).execute()
-            if (!response.isSuccessful) throw Exception("Erro HTTP ${response.code}")
-            val body = response.body?.string() ?: throw Exception("Resposta vazia")
+            if (!response.isSuccessful) {
+                Log.e("AurisOnline", "Erro HTTP ${response.code}")
+                return@withContext Result.failure(Exception("Erro HTTP ${response.code}"))
+            }
+            val body = response.body?.string() ?: run {
+                Log.e("AurisOnline", "Resposta vazia")
+                return@withContext Result.failure(Exception("Resposta vazia"))
+            }
+            Log.d("AurisOnline", "Resposta recebida: $body")
             val array = JSONArray(body)
             Log.d("AurisOnline", "Recebidos ${array.length()} itens da planilha")
             val entities = mutableListOf<SongEntity>()
 
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
-                // Gera um ID único negativo para não conflitar com os locais (positivos)
                 val id = -(i + 1).toLong() * 1000000L + obj.optString("id", i.toString()).hashCode().toLong()
                 entities.add(
                     SongEntity(
@@ -61,13 +68,16 @@ class AurisOnlineRepository @Inject constructor(
                         mimeType = "audio/mpeg",
                         bitrate = null,
                         sampleRate = null,
-                        sourceType = 7  // Auris Online
+                        sourceType = 7
                     )
                 )
             }
 
+            Log.d("AurisOnline", "Entidades criadas: ${entities.size}")
             musicDao.deleteAurisOnlineSongs()
+            Log.d("AurisOnline", "Músicas antigas removidas")
             musicDao.insertSongs(entities)
+            Log.d("AurisOnline", "Inserção concluída com sucesso. Total inserido: ${entities.size}")
 
             Result.success(Unit)
         } catch (e: Exception) {
