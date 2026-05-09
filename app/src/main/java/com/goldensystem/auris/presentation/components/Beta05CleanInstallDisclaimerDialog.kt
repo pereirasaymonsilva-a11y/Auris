@@ -41,12 +41,11 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Beta05CleanInstallDisclaimerDialog(
-    onDismiss: (dontShowAgain: Boolean) -> Unit,
-    onEntendiMarcado: () -> Unit   // <-- NOVO PARÂMETRO
+    onDismiss: (dontShowAgain: Boolean) -> Unit
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
-    var jaSalvou by remember { mutableStateOf(false) } // Garante que salvamos só uma vez
+    val prefs = context.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
 
     var entendi by remember { mutableStateOf(false) }
     var contando by remember { mutableStateOf(false) }
@@ -151,14 +150,7 @@ fun Beta05CleanInstallDisclaimerDialog(
                     ) {
                         Checkbox(
                             checked = entendi,
-                            onCheckedChange = { marcado ->
-                                entendi = marcado
-                                // Salva a flag NO MOMENTO em que a caixa é marcada
-                                if (marcado && !jaSalvou) {
-                                    jaSalvou = true
-                                    onEntendiMarcado()
-                                }
-                            }
+                            onCheckedChange = { entendi = it }
                         )
                         Text(
                             text = "Entendi",
@@ -169,7 +161,9 @@ fun Beta05CleanInstallDisclaimerDialog(
 
                     Button(
                         onClick = {
-                            // NÃO SALVA MAIS AQUI, pois já foi salvo na checkbox
+                            prefs.edit()
+                                .putBoolean("beta_05_clean_install_disclaimer_dismissed", true)
+                                .commit()
                             contando = true
                         },
                         modifier = Modifier.fillMaxWidth(),
