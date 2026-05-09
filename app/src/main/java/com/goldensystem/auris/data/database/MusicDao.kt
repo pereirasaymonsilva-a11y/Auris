@@ -172,7 +172,7 @@ interface MusicDao {
     @Query("SELECT id FROM songs WHERE source_type = 0")
     suspend fun getAllMediaStoreSongIds(): List<Long>
     
-    @Query("DELETE FROM songs WHERE id LIKE 'auris_%'")
+    @Query("DELETE FROM songs WHERE source_type = 7")
     suspend fun deleteAurisOnlineSongs()
 
     @Query("DELETE FROM songs WHERE id IN (:songIds)")

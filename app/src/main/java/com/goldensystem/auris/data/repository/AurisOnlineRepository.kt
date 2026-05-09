@@ -16,7 +16,7 @@ class AurisOnlineRepository @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val musicDao: MusicDao
 ) {
-    // ⚠️ COLOQUE SUA URL REAL AQUI
+    // ⚠️ SUBSTITUA PELA SUA URL REAL
     private val scriptUrl = "https://script.google.com/macros/s/AKfycbyHt5qIgRp_Nw2gUog5eKxFJ6BVXYK9_ie1xrn3GsHMVi3tuyzMgQu8q2bfjLvau9OW6g/exec"
 
     suspend fun syncSongs(): Result<Unit> = withContext(Dispatchers.IO) {
@@ -34,35 +34,32 @@ class AurisOnlineRepository @Inject constructor(
 
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
+                // Gera um ID único negativo para não conflitar com os locais (positivos)
+                val id = -(i + 1).toLong() * 1000000L + obj.optString("id", i.toString()).hashCode().toLong()
                 entities.add(
                     SongEntity(
-                        id = ("auris_" + obj.optString("id", i.toString())).toLong(),
+                        id = id,
                         title = obj.optString("title", "Sem título"),
                         artistName = obj.optString("artist", "Desconhecido"),
                         albumName = obj.optString("album", ""),
                         albumId = 0L,
                         artistId = 0L,
-                        duration = obj.optLong("duration", 0L),
-                        dateAdded = System.currentTimeMillis(),
-                        filePath = obj.optString("mp3Url", ""),
-                        mimeType = "audio/mpeg",
-                        bitrate = 0,
-                        sampleRate = 0,
-                        size = 0L,
-                        dateModified = System.currentTimeMillis(),
-                        albumArtUriString = obj.optString("coverUrl", null),
                         contentUriString = obj.optString("mp3Url", ""),
+                        albumArtUriString = obj.optString("coverUrl", null),
+                        duration = obj.optLong("duration", 0L),
                         genre = null,
-                        trackNumber = 0,
-                        discNumber = 0,
-                        year = 0,
-                        lyrics = null,
+                        filePath = obj.optString("mp3Url", ""),
+                        parentDirectoryPath = "",
                         isFavorite = false,
-                        telegramChatId = null,
-                        telegramFileId = null,
-                        artistsJson = null,
-                        sourceType = 0,
-                        playCount = 0
+                        lyrics = null,
+                        trackNumber = 0,
+                        discNumber = null,
+                        year = 0,
+                        dateAdded = System.currentTimeMillis(),
+                        mimeType = "audio/mpeg",
+                        bitrate = null,
+                        sampleRate = null,
+                        sourceType = 7  // Auris Online
                     )
                 )
             }
