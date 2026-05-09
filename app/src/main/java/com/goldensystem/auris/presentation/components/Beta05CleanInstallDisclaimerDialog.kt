@@ -35,6 +35,7 @@ fun Beta05CleanInstallDisclaimerDialog(
     onDismiss: (dontShowAgain: Boolean) -> Unit
 ) {
     val context = LocalContext.current
+    val prefs = context.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
 
     val cardShape = AbsoluteSmoothCornerShape(
         cornerRadiusTL = 30.dp,
@@ -65,6 +66,8 @@ fun Beta05CleanInstallDisclaimerDialog(
                     .padding(horizontal = 18.dp, vertical = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
+                // Título "Atualização beta-0.1.0" removido
+
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = blockShape,
@@ -76,39 +79,6 @@ fun Beta05CleanInstallDisclaimerDialog(
                             .padding(horizontal = 14.dp, vertical = 14.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            Surface(
-                                shape = AbsoluteSmoothCornerShape(12.dp, 60),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.presentation_batch_g_beta05_title),
-                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                )
-                            }
-
-                            Surface(
-                                shape = AbsoluteSmoothCornerShape(16.dp, 60),
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.rounded_dataset_24),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    modifier = Modifier
-                                        .padding(10.dp)
-                                        .size(18.dp),
-                                )
-                            }
-                        }
-
                         Text(
                             text = stringResource(R.string.presentation_batch_g_beta05_clean_install_title),
                             style = MaterialTheme.typography.titleLarge,
@@ -120,7 +90,6 @@ fun Beta05CleanInstallDisclaimerDialog(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        // Texto adicional explicando a necessidade do reinício
                         Text(
                             text = "Para que o Auris funcione corretamente, é necessário reiniciar o aplicativo agora.",
                             style = MaterialTheme.typography.bodyMedium,
@@ -166,11 +135,12 @@ fun Beta05CleanInstallDisclaimerDialog(
                     }
                 }
 
-                // Botão de reinicialização forçada
                 Button(
                     onClick = {
-                        // Salva a preferência automaticamente antes de reiniciar
-                        onDismiss(true)
+                        prefs.edit()
+                            .putBoolean("beta_05_clean_install_disclaimer_dismissed", true)
+                            .commit()
+
                         val intent = Intent.makeRestartActivityTask(
                             context.packageManager.getLaunchIntentForPackage(context.packageName)?.component
                         )
