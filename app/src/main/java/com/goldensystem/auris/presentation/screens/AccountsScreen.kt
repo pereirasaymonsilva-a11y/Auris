@@ -620,6 +620,14 @@ private fun servicePalette(service: ExternalServiceAccount): ServicePalette {
             primaryActionContainer = Color(0xFFE3F2FD),
             primaryActionTint = Color(0xFF1565C0)
         )
+        else -> ServicePalette(
+            iconContainer = MaterialTheme.colorScheme.surfaceContainerHighest,
+            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+            statusContainer = MaterialTheme.colorScheme.surfaceContainerHighest,
+            statusTint = MaterialTheme.colorScheme.onSurfaceVariant,
+            primaryActionContainer = MaterialTheme.colorScheme.surfaceContainerHighest,
+            primaryActionTint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -640,7 +648,6 @@ private fun ServiceIcon(service: ExternalServiceAccount, tint: Color, modifier: 
             modifier = modifier,
             contentAlignment = Alignment.CenterStart
         ) {
-            // Subsonic icon (Bottom) - No outer container
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_subsonic),
                 contentDescription = null,
@@ -649,14 +656,13 @@ private fun ServiceIcon(service: ExternalServiceAccount, tint: Color, modifier: 
                     .size(32.dp)
             )
 
-            // Navidrome icon (Top) - Closer horizontal offset, no outer container
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_navidrome),
                 contentDescription = null,
                 tint = Color.Unspecified,
                 modifier = Modifier
                     .size(32.dp)
-                    .offset(x = 16.dp) // Closer overlap offset (was 24dp)
+                    .offset(x = 16.dp)
             )
         }
     } else if (service == ExternalServiceAccount.JELLYFIN) {
@@ -709,6 +715,7 @@ private fun openService(
         ExternalServiceAccount.JELLYFIN -> {
             onOpenJellyfinDashboard()
         }
+        else -> {} // nenhuma ação para NETEASE/QQ_MUSIC
     }
 }
 
