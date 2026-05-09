@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import androidx.sqlite.db.SimpleSQLiteQuery
 import com.goldensystem.auris.utils.AudioMeta
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -58,8 +57,6 @@ private const val SONG_DETAIL_PROJECTION = """
     songs.play_count AS play_count
 """
 
-// Projection for list queries: excludes lyrics to prevent CursorWindow overflow (2MB limit)
-// when loading large libraries. Lyrics are only needed for the Now Playing screen (getSongById).
 private const val SONG_LIST_PROJECTION = """
     id, title, artist_name, artist_id, album_artist, album_name, album_id,
     content_uri_string, album_art_uri_string, duration, genre, file_path,
@@ -81,7 +78,6 @@ data class DeviceCapabilitySongRow(
 @Dao
 interface MusicDao {
 
-    // --- Insert Operations ---
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertSongsIgnoreConflicts(songs: List<SongEntity>): List<Long>
 
@@ -139,8 +135,6 @@ interface MusicDao {
         }
     }
 
-
-
     @Transaction
     suspend fun insertMusicData(songs: List<SongEntity>, albums: List<AlbumEntity>, artists: List<ArtistEntity>) {
         insertArtists(artists)
@@ -155,7 +149,6 @@ interface MusicDao {
         clearAllArtists()
     }
 
-    // --- Clear Operations ---
     @Query("DELETE FROM songs")
     suspend fun clearAllSongs()
 
@@ -165,7 +158,6 @@ interface MusicDao {
     @Query("DELETE FROM artists")
     suspend fun clearAllArtists()
 
-    // --- Incremental Sync Operations ---
     @Query("SELECT id FROM songs")
     suspend fun getAllSongIds(): List<Long>
 
@@ -294,10 +286,6 @@ interface MusicDao {
         deleteSongsAndRelatedData(songIds)
     }
 
-    /**
-     * Incrementally sync music data: upsert new/modified songs and remove deleted ones.
-     * More efficient than clear-and-replace for large libraries with few changes.
-     */
     @Transaction
     suspend fun incrementalSyncMusicData(
         songs: List<SongEntity>,
@@ -306,9 +294,6 @@ interface MusicDao {
         crossRefs: List<SongArtistCrossRef>,
         deletedSongIds: List<Long>
     ) {
-        // Protect cloud songs from deletion during generic media scan
-        // Only allow explicit deletions if the list is non-empty.
-        // During general refresh, deletedSongIds strictly contains local MediaStore IDs only.
         if (deletedSongIds.isNotEmpty()) {
             deletedSongIds.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
                 deleteCrossRefsBySongIds(chunk)
@@ -318,16 +303,13 @@ interface MusicDao {
             }
         }
 
-        // Upsert artists, albums, and songs.
         insertArtists(artists)
         insertAlbums(albums)
 
-        // Insert songs in chunks to allow concurrent reads
         songs.chunked(SONG_BATCH_SIZE).forEach { chunk ->
             insertSongs(chunk)
         }
 
-        // Delete old cross-refs for updated songs and insert new ones
         val updatedSongIds = songs.map { it.id }
         updatedSongIds.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
             deleteCrossRefsBySongIds(chunk)
@@ -336,17 +318,13 @@ interface MusicDao {
             insertSongArtistCrossRefs(chunk)
         }
 
-        // Clean up orphaned albums and artists
         deleteOrphanedAlbums()
         deleteOrphanedArtists()
     }
 
-    // --- Directory Helper ---
     @Query("SELECT DISTINCT parent_directory_path FROM songs")
     suspend fun getDistinctParentDirectories(): List<String>
 
-    // --- Song Queries ---
-    // Updated getSongs to include Telegram songs (negative IDs) regardless of directory filter
     @Query("SELECT " + SONG_LIST_PROJECTION + """
         FROM songs
         WHERE (:applyDirectoryFilter = 0 OR id < 0 OR parent_directory_path IN (:allowedParentDirs))
@@ -360,12 +338,6 @@ interface MusicDao {
     @Query("SELECT " + SONG_LIST_PROJECTION + " FROM songs WHERE id IN (:songIds)")
     suspend fun getSongsByIdsListSimple(songIds: List<Long>): List<SongEntity>
 
-    /**
-     * Resolves the unified-table song id for a given content URI. Used when the
-     * currently-playing song was loaded from a non-unified source (e.g. raw Telegram
-     * repository Songs whose ids are "chatId_messageId" strings) and we need the
-     * matching negative-Long id to position the song inside the library list.
-     */
     @Query("SELECT id FROM songs WHERE content_uri_string = :contentUri LIMIT 1")
     suspend fun getSongIdByContentUri(contentUri: String): Long?
 
@@ -481,10 +453,9 @@ interface MusicDao {
     """)
     suspend fun getDeviceCapabilitySongRows(): List<DeviceCapabilitySongRow>
 
-    /**
-     * Returns random songs for efficient shuffle without loading all songs into memory.
-     * Uses SQLite RANDOM() for true randomness.
-     */
+    // =======================================================
+    // CORREÇÕES APLICADAS (OR id < 0) NAS QUERIES ABAIXO
+    // =======================================================
     @Query("""
         SELECT *, play_count FROM songs
         WHERE (:applyDirectoryFilter = 0 OR id < 0 OR parent_directory_path IN (:allowedParentDirs))
@@ -573,7 +544,7 @@ interface MusicDao {
 
     @Query("""
         SELECT id FROM songs
-        WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
+        WHERE (:applyDirectoryFilter = 0 OR id < 0 OR parent_directory_path IN (:allowedParentDirs))
         AND (
             :filterMode = 0
             OR (
@@ -610,7 +581,7 @@ interface MusicDao {
     @Query("""
         SELECT songs.id FROM songs
         INNER JOIN favorites ON songs.id = favorites.songId AND favorites.isFavorite = 1
-        WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
+        WHERE (:applyDirectoryFilter = 0 OR songs.id < 0 OR songs.parent_directory_path IN (:allowedParentDirs))
         AND (
             :filterMode = 0
             OR (
@@ -641,14 +612,9 @@ interface MusicDao {
         filterMode: Int
     ): List<Long>
 
-    // --- Paginated Queries for Large Libraries ---
-    /**
-     * Returns a PagingSource for songs, enabling efficient pagination for large libraries.
-     * Room auto-generates the PagingSource implementation.
-     */
     @Query("""
         SELECT *, play_count FROM songs
-        WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
+        WHERE (:applyDirectoryFilter = 0 OR id < 0 OR parent_directory_path IN (:allowedParentDirs))
         AND (
             :filterMode = 0
             OR (
@@ -672,8 +638,6 @@ interface MusicDao {
             CASE WHEN :sortOrder = 'song_date_added_asc' THEN date_added END ASC,
             CASE WHEN :sortOrder = 'song_duration' THEN duration END DESC,
             CASE WHEN :sortOrder = 'song_duration_asc' THEN duration END ASC,
-
-            -- Secondary sort falls back to title for consistency (case-insensitive)
             title COLLATE NOCASE ASC,
             id ASC
     """)
@@ -724,15 +688,10 @@ interface MusicDao {
         offset: Int
     ): List<SongEntity>
 
-    // --- Paginated Favorites Queries ---
-    /**
-     * Returns a PagingSource for favorite songs, enabling efficient pagination.
-     * Joins songs with favorites table and supports multi-sort.
-     */
     @Query("""
         SELECT songs.*, songs.play_count FROM songs
         INNER JOIN favorites ON songs.id = favorites.songId AND favorites.isFavorite = 1
-        WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
+        WHERE (:applyDirectoryFilter = 0 OR songs.id < 0 OR songs.parent_directory_path IN (:allowedParentDirs))
         AND (
             :filterMode = 0
             OR (
@@ -763,13 +722,10 @@ interface MusicDao {
         filterMode: Int
     ): PagingSource<Int, SongEntity>
 
-    /**
-     * Returns all favorite songs as a list (for playback queue when shuffling).
-     */
     @Query("""
         SELECT songs.*, songs.play_count FROM songs
         INNER JOIN favorites ON songs.id = favorites.songId AND favorites.isFavorite = 1
-        WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
+        WHERE (:applyDirectoryFilter = 0 OR songs.id < 0 OR songs.parent_directory_path IN (:allowedParentDirs))
         AND (
             :filterMode = 0
             OR (
@@ -827,13 +783,10 @@ interface MusicDao {
         offset: Int
     ): List<SongEntity>
 
-    /**
-     * Returns the count of favorite songs (reactive).
-     */
     @Query("""
         SELECT COUNT(*) FROM songs
         INNER JOIN favorites ON songs.id = favorites.songId AND favorites.isFavorite = 1
-        WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
+        WHERE (:applyDirectoryFilter = 0 OR songs.id < 0 OR songs.parent_directory_path IN (:allowedParentDirs))
         AND (
             :filterMode = 0
             OR (
@@ -852,14 +805,10 @@ interface MusicDao {
         filterMode: Int
     ): Flow<Int>
 
-    // --- Paginated Search Query ---
-    /**
-     * Returns a PagingSource for search results, enabling efficient pagination for large result sets.
-     */
     @Query("""
         SELECT songs.*, songs.play_count FROM songs
         INNER JOIN songs_fts ON songs_fts.rowid = songs.id
-        WHERE (:applyDirectoryFilter = 0 OR songs.parent_directory_path IN (:allowedParentDirs))
+        WHERE (:applyDirectoryFilter = 0 OR songs.id < 0 OR songs.parent_directory_path IN (:allowedParentDirs))
         AND songs_fts MATCH :matchQuery
         ORDER BY songs.title ASC
     """)
@@ -879,9 +828,6 @@ interface MusicDao {
         applyDirectoryFilter = applyDirectoryFilter
     )
 
-    /**
-     * Search songs with a result limit for non-paginated contexts (FTS).
-     */
     @Query("""
         SELECT songs.*, songs.play_count FROM songs
         INNER JOIN songs_fts ON songs_fts.rowid = songs.id
@@ -897,9 +843,6 @@ interface MusicDao {
         limit: Int
     ): Flow<List<SongEntity>>
 
-    /**
-     * LIKE-based fallback search for songs that FTS tokenization may miss.
-     */
     @Query("""
         SELECT *, play_count FROM songs
         WHERE (:applyDirectoryFilter = 0 OR id < 0 OR parent_directory_path IN (:allowedParentDirs))
@@ -940,13 +883,9 @@ interface MusicDao {
         }
     }
 
-    // --- Paginated Genre Query ---
-    /**
-     * Returns a PagingSource for songs in a specific genre.
-     */
     @Query("""
         SELECT *, play_count FROM songs
-        WHERE (:applyDirectoryFilter = 0 OR parent_directory_path IN (:allowedParentDirs))
+        WHERE (:applyDirectoryFilter = 0 OR id < 0 OR parent_directory_path IN (:allowedParentDirs))
         AND genre LIKE :genreName
         ORDER BY title ASC
     """)
@@ -956,7 +895,7 @@ interface MusicDao {
         applyDirectoryFilter: Boolean
     ): PagingSource<Int, SongEntity>
 
-    // --- Album Queries ---
+    // --- Album Queries (inalteradas) ---
     @Query("""
         SELECT
             albums.id AS id,
@@ -1156,7 +1095,6 @@ interface MusicDao {
     @Query("SELECT COUNT(*) FROM albums")
     fun getAlbumCount(): Flow<Int>
 
-    // Version of getAlbums that returns a List for one-shot reads
     @Query("""
         SELECT
             albums.id AS id,
@@ -1325,9 +1263,6 @@ interface MusicDao {
         offset: Int
     ): List<ArtistEntity>
 
-    /**
-     * Unfiltered list of all artists (including those only reachable via cross-refs).
-     */
     @Query("SELECT * FROM artists ORDER BY name ASC")
     fun getAllArtistsRaw(): Flow<List<ArtistEntity>>
 
@@ -1340,7 +1275,6 @@ interface MusicDao {
     @Query("SELECT COUNT(*) FROM artists")
     fun getArtistCount(): Flow<Int>
 
-    // Version of getArtists that returns a List for one-shot reads
     @Query("""
         SELECT DISTINCT artists.* FROM artists
         INNER JOIN songs ON artists.id = songs.artist_id
@@ -1352,9 +1286,6 @@ interface MusicDao {
         applyDirectoryFilter: Boolean
     ): List<ArtistEntity>
 
-    /**
-     * Unfiltered list of all artists (one-shot).
-     */
     @Query("SELECT * FROM artists ORDER BY name ASC")
     suspend fun getAllArtistsListRaw(): List<ArtistEntity>
 
@@ -1375,7 +1306,6 @@ interface MusicDao {
         applyDirectoryFilter: Boolean
     ): Flow<List<ArtistEntity>>
 
-    // --- Artist Image Operations ---
     @Query("SELECT image_url FROM artists WHERE id = :artistId")
     suspend fun getArtistImageUrl(artistId: Long): String?
 
@@ -1394,7 +1324,6 @@ interface MusicDao {
     @Query("SELECT MAX(id) FROM artists")
     suspend fun getMaxArtistId(): Long?
 
-    // --- Artist Custom Image Operations ---
     @Query("UPDATE artists SET custom_image_uri = :uri WHERE id = :artistId")
     suspend fun updateArtistCustomImage(artistId: Long, uri: String?)
 
@@ -1402,7 +1331,6 @@ interface MusicDao {
     suspend fun getArtistCustomImage(artistId: Long): String?
 
     // --- Genre Queries ---
-    // Example: Get all songs for a specific genre
     @Query("""
         SELECT *, play_count FROM songs
         WHERE (:applyDirectoryFilter = 0 OR id < 0 OR parent_directory_path IN (:allowedParentDirs))
@@ -1426,7 +1354,6 @@ interface MusicDao {
         applyDirectoryFilter: Boolean
     ): Flow<List<SongEntity>>
 
-    // Example: Get all unique genre names
     @Query("SELECT DISTINCT genre FROM songs WHERE genre IS NOT NULL AND genre != '' ORDER BY genre ASC")
     fun getUniqueGenres(): Flow<List<String>>
 
@@ -1453,8 +1380,6 @@ interface MusicDao {
         applyDirectoryFilter: Boolean
     ): Flow<Boolean>
 
-    // --- Combined Queries (Potentially useful for more complex scenarios) ---
-    // E.g., Get all album art URIs from songs (could be useful for theme preloading from SSoT)
     @Query("SELECT DISTINCT album_art_uri_string FROM songs WHERE album_art_uri_string IS NOT NULL")
     fun getAllUniqueAlbumArtUrisFromSongs(): Flow<List<String>>
 
@@ -1464,17 +1389,15 @@ interface MusicDao {
     @Query("DELETE FROM artists WHERE NOT EXISTS (SELECT 1 FROM song_artist_cross_ref WHERE song_artist_cross_ref.artist_id = artists.id)")
     suspend fun deleteOrphanedArtists()
 
-    // --- Favorite Operations ---
     @Query("UPDATE songs SET is_favorite = :isFavorite WHERE id = :songId")
     suspend fun setFavoriteStatus(songId: Long, isFavorite: Boolean)
 
     @Query("SELECT is_favorite FROM songs WHERE id = :songId")
     suspend fun getFavoriteStatus(songId: Long): Boolean?
 
-    // Transaction to toggle favorite status
     @Transaction
     suspend fun toggleFavoriteStatus(songId: Long): Boolean {
-        val currentStatus = getFavoriteStatus(songId) ?: false // Default to false if not found (should not happen for existing song)
+        val currentStatus = getFavoriteStatus(songId) ?: false
         val newStatus = !currentStatus
         setFavoriteStatus(songId, newStatus)
         return newStatus
@@ -1577,8 +1500,6 @@ interface MusicDao {
     """)
     suspend fun getAudioMetadataById(id: Long): AudioMeta?
 
-    // ===== Song-Artist Cross Reference (Junction Table) Operations =====
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertSongArtistCrossRefs(crossRefs: List<SongArtistCrossRef>)
 
@@ -1597,9 +1518,6 @@ interface MusicDao {
     @Query("DELETE FROM song_artist_cross_ref WHERE artist_id = :artistId")
     suspend fun deleteCrossRefsForArtist(artistId: Long)
 
-    /**
-     * Get all artists for a specific song using the junction table.
-     */
     @Query("""
         SELECT artists.* FROM artists
         INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
@@ -1608,9 +1526,6 @@ interface MusicDao {
     """)
     fun getArtistsForSong(songId: Long): Flow<List<ArtistEntity>>
 
-    /**
-     * Get all artists for a specific song (one-shot).
-     */
     @Query("""
         SELECT artists.* FROM artists
         INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
@@ -1619,9 +1534,6 @@ interface MusicDao {
     """)
     suspend fun getArtistsForSongList(songId: Long): List<ArtistEntity>
 
-    /**
-     * Get all songs for a specific artist using the junction table.
-     */
     @Query("""
         SELECT songs.*, songs.play_count FROM songs
         INNER JOIN song_artist_cross_ref ON songs.id = song_artist_cross_ref.song_id
@@ -1630,9 +1542,6 @@ interface MusicDao {
     """)
     fun getSongsForArtist(artistId: Long): Flow<List<SongEntity>>
 
-    /**
-     * Get all songs for a specific artist (one-shot).
-     */
     @Query("""
         SELECT songs.*, songs.play_count FROM songs
         INNER JOIN song_artist_cross_ref ON songs.id = song_artist_cross_ref.song_id
@@ -1641,15 +1550,9 @@ interface MusicDao {
     """)
     suspend fun getSongsForArtistList(artistId: Long): List<SongEntity>
 
-    /**
-     * Get the cross-references for a specific song.
-     */
     @Query("SELECT * FROM song_artist_cross_ref WHERE song_id = :songId")
     suspend fun getCrossRefsForSong(songId: Long): List<SongArtistCrossRef>
 
-    /**
-     * Get the primary artist for a song.
-     */
     @Query("""
         SELECT artists.id AS artist_id, artists.name FROM artists
         INNER JOIN song_artist_cross_ref ON artists.id = song_artist_cross_ref.artist_id
@@ -1658,15 +1561,9 @@ interface MusicDao {
     """)
     suspend fun getPrimaryArtistForSong(songId: Long): PrimaryArtistInfo?
 
-    /**
-     * Get song count for an artist from the junction table.
-     */
     @Query("SELECT COUNT(*) FROM song_artist_cross_ref WHERE artist_id = :artistId")
     suspend fun getSongCountForArtist(artistId: Long): Int
 
-    /**
-     * Get all artists with their song counts computed from the junction table.
-     */
     @Query("""
         SELECT artists.id, artists.name, artists.image_url, artists.custom_image_uri,
                COUNT(DISTINCT song_artist_cross_ref.song_id) AS track_count
@@ -1677,9 +1574,6 @@ interface MusicDao {
     """)
     fun getArtistsWithSongCounts(): Flow<List<ArtistEntity>>
 
-    /**
-     * Get all artists with song counts, filtered by allowed directories.
-     */
     @Query("""
         SELECT artists.id, artists.name, artists.image_url, artists.custom_image_uri,
                COUNT(DISTINCT songs.id) AS track_count
@@ -1707,9 +1601,6 @@ interface MusicDao {
         filterMode: Int
     ): Flow<List<ArtistEntity>>
 
-    /**
-     * Clear all music data including cross-references.
-     */
     @Transaction
     suspend fun clearAllMusicDataWithCrossRefs() {
         clearAllSongArtistCrossRefs()
@@ -1718,10 +1609,6 @@ interface MusicDao {
         clearAllArtists()
     }
 
-    /**
-     * Insert music data with cross-references in a single transaction.
-     * Uses chunked inserts for cross-refs to avoid SQLite variable limits.
-     */
     @Transaction
     suspend fun insertMusicDataWithCrossRefs(
         songs: List<SongEntity>,
@@ -1732,8 +1619,6 @@ interface MusicDao {
         insertArtists(artists)
         insertAlbums(albums)
         insertSongs(songs)
-        // Insert cross-refs in chunks to avoid SQLite variable limit.
-        // Each SongArtistCrossRef has 3 fields, so batch size is calculated accordingly.
         crossRefs.chunked(CROSS_REF_BATCH_SIZE).forEach { chunk ->
             insertSongArtistCrossRefs(chunk)
         }
@@ -1746,10 +1631,6 @@ interface MusicDao {
         artists: List<ArtistEntity>,
         crossRefs: List<SongArtistCrossRef>
     ) {
-        // Save current cloud songs before clearing to prevent accidental data loss
-        // Only clear if we have new songs to insert, or we are explicitly asked to REBUILD everything.
-        // We handle this logic at the worker/repository level to be more precise.
-
         clearAllSongArtistCrossRefs()
         clearAllSongs()
         clearAllAlbums()
@@ -1764,19 +1645,9 @@ interface MusicDao {
     }
 
     companion object {
-        /**
-         * SQLite has a limit on the number of variables per statement (default 999, higher in newer versions).
-         * Each SongArtistCrossRef insert uses 3 variables (songId, artistId, isPrimary).
-         * The batch size is calculated so that batchSize * 3 <= SQLITE_MAX_VARIABLE_NUMBER.
-         */
-        private const val SQLITE_MAX_VARIABLE_NUMBER = 999 // Increase if you know your SQLite version supports more
+        private const val SQLITE_MAX_VARIABLE_NUMBER = 999
         private const val CROSS_REF_FIELDS_PER_OBJECT = 3
         val CROSS_REF_BATCH_SIZE: Int = SQLITE_MAX_VARIABLE_NUMBER / CROSS_REF_FIELDS_PER_OBJECT
-
-        /**
-         * Batch size for song inserts during incremental sync.
-         * Allows database reads to interleave with writes for better UX.
-         */
         const val SONG_BATCH_SIZE = 500
     }
 }
