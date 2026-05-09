@@ -365,12 +365,15 @@ fun HomeScreen(
         )
     }
 
+    // ---------- DIÁLOGO DE PRIMEIRA INSTALAÇÃO ----------
     if (shouldShowCleanInstallDisclaimer) {
-        LaunchedEffect(Unit) {
-            settingsViewModel.setBeta05CleanInstallDisclaimerDismissed(true)
-        }
         Beta05CleanInstallDisclaimerDialog(
-            onDismiss = { dontShowAgain -> cleanInstallDisclaimerDismissedThisSession = true }
+            onDismiss = { dontShowAgain ->
+                cleanInstallDisclaimerDismissedThisSession = true
+            },
+            onEntendiMarcado = {
+                settingsViewModel.setBeta05CleanInstallDisclaimerDismissed(true)
+            }
         )
     }
 }
