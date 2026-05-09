@@ -370,6 +370,9 @@ fun HomeScreen(
         Beta05CleanInstallDisclaimerDialog(
             onDismiss = { dontShowAgain ->
                 cleanInstallDisclaimerDismissedThisSession = true
+                if (dontShowAgain) {
+                    settingsViewModel.setBeta05CleanInstallDisclaimerDismissed(true)
+                }
             }
         )
     }
