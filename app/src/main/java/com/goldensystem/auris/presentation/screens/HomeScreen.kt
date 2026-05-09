@@ -75,7 +75,6 @@ import com.goldensystem.auris.data.preferences.CollagePattern
 import com.goldensystem.auris.presentation.components.AlbumArtCollage
 import com.goldensystem.auris.presentation.components.BetaInfoBottomSheet
 import com.goldensystem.auris.presentation.components.Beta05CleanInstallDisclaimerDialog
-// import com.goldensystem.auris.presentation.components.ChangelogBottomSheet  // Removido
 import com.goldensystem.auris.presentation.netease.dashboard.NeteaseDashboardViewModel
 import com.goldensystem.auris.presentation.jellyfin.dashboard.JellyfinDashboardViewModel
 import com.goldensystem.auris.presentation.navidrome.dashboard.NavidromeDashboardViewModel
@@ -107,7 +106,6 @@ import kotlinx.coroutines.launch
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import androidx.compose.ui.res.stringResource
 
-// Modern HomeScreen with collapsible top bar and staggered grid layout
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,7 +121,6 @@ fun HomeScreen(
     onOpenSidebar: () -> Unit
 ) {
     val context = LocalContext.current
-    // DETECTAR MODO BENCHMARK
     val isBenchmarkMode = remember {
         (context as? android.app.Activity)?.intent?.getBooleanExtra("is_benchmark", false) ?: false
     }
@@ -146,27 +143,18 @@ fun HomeScreen(
         }
     }
     val recentSongIds = remember(playbackHistory) {
-        collectRecentlyPlayedSongIds(
-            playbackHistory = playbackHistory,
-            maxItems = 64
-        )
+        collectRecentlyPlayedSongIds(playbackHistory = playbackHistory, maxItems = 64)
     }
     val recentlyPlayedSourceSongsInitialValue = remember(recentSongIds) {
         if (recentSongIds.isEmpty()) persistentListOf<Song>() else null
     }
     val recentlyPlayedSourceSongs by remember(recentSongIds, playerViewModel) {
-        playerViewModel.observeSongs(recentSongIds)
-            .map<List<Song>, List<Song>?> { it }
+        playerViewModel.observeSongs(recentSongIds).map<List<Song>, List<Song>?> { it }
     }.collectAsStateWithLifecycle(initialValue = recentlyPlayedSourceSongsInitialValue)
     val latestRecentlyPlayedSongs = remember(playbackHistory, recentlyPlayedSourceSongs) {
         val sourceSongs = recentlyPlayedSourceSongs ?: return@remember emptyList()
-        mapRecentlyPlayedSongs(
-            playbackHistory = playbackHistory,
-            songs = sourceSongs,
-            maxItems = 64
-        )
+        mapRecentlyPlayedSongs(playbackHistory = playbackHistory, songs = sourceSongs, maxItems = 64)
     }
-    // Keep the visible Home snapshot stable and only refresh it once the screen is off-screen.
     var recentlyPlayedSongs by remember { mutableStateOf(latestRecentlyPlayedSongs) }
     val latestRecentlyPlayedSongsState = rememberUpdatedState(latestRecentlyPlayedSongs)
 
@@ -184,97 +172,64 @@ fun HomeScreen(
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     val recentlyPlayedQueue = remember(recentlyPlayedSongs) {
         recentlyPlayedSongs.map { it.song }.toImmutableList()
     }
 
-    ReportDrawnWhen {
-        yourMixSongs.isNotEmpty() || isBenchmarkMode
-    }
+    ReportDrawnWhen { yourMixSongs.isNotEmpty() || isBenchmarkMode }
 
     val yourMixSong: String = "Seu mix de cada dia"
 
-    // 2) Observar sólo el currentSong (o null) para saber si mostrar padding
     val currentSong by remember(playerViewModel.stablePlayerState) {
         playerViewModel.stablePlayerState.map { it.currentSong }
     }.collectAsStateWithLifecycle(initialValue = null)
 
-    // 3) Observe shuffle state for sync
     val isShuffleEnabled by remember(playerViewModel.stablePlayerState) {
-        playerViewModel.stablePlayerState
-            .map { it.isShuffleEnabled }
-            .distinctUntilChanged()
+        playerViewModel.stablePlayerState.map { it.isShuffleEnabled }.distinctUntilChanged()
     }.collectAsStateWithLifecycle(initialValue = false)
 
-    // Padding inferior si hay canción en reproducción
     val bottomPadding = if (currentSong != null) MiniPlayerHeight else 0.dp
 
     var showOptionsBottomSheet by remember { mutableStateOf(false) }
-    // var showChangelogBottomSheet by remember { mutableStateOf(false) }  // Removido
     var showBetaInfoBottomSheet by remember { mutableStateOf(false) }
     var showStreamingProviderSheet by remember { mutableStateOf(false) }
     var cleanInstallDisclaimerDismissedThisSession by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val betaSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    LocalContext.current
 
     val weeklyStats by statsViewModel.weeklyOverview.collectAsStateWithLifecycle()
-
-    // Drawer state for sidebar
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val shouldShowCleanInstallDisclaimer =
         settingsUiState.beta05CleanInstallDisclaimerDismissed == false &&
             !cleanInstallDisclaimerDismissedThisSession
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 HomeGradientTopBar(
-                    onNavigationIconClick = {
-                        navController.navigateSafely(Screen.Settings.route)
-                    },
-                    // onMoreOptionsClick = { showChangelogBottomSheet = true },  // Removido
-                    onBetaClick = {
-                        showBetaInfoBottomSheet = true
-                    },
-                    onTelegramClick = {
-                         showStreamingProviderSheet = true
-                    },
-                    onMenuClick = {
-                        // onOpenSidebar() // Disabled
-                    },
-                    onVideoGalleryClick = {             // <-- ADICIONE AQUI
-                        navController.navigate("video_gallery")
-                    }
+                    onNavigationIconClick = { navController.navigateSafely(Screen.Settings.route) },
+                    onBetaClick = { showBetaInfoBottomSheet = true },
+                    onTelegramClick = { showStreamingProviderSheet = true },
+                    onMenuClick = { },
+                    onVideoGalleryClick = { navController.navigate("video_gallery") }
                 )
             }
         ) { innerPadding ->
             LazyColumn(
                 state = rememberLazyListState(),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
+                modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
                 contentPadding = PaddingValues(
                     top = innerPadding.calculateTopPadding(),
-                    bottom = paddingValuesParent.calculateBottomPadding()
-                            + 38.dp + bottomPadding
+                    bottom = paddingValuesParent.calculateBottomPadding() + 38.dp + bottomPadding
                 ),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // Your Mix
-                item(
-                    key = "your_mix_header",
-                    contentType = "your_mix_header"
-                ) {
+                item(key = "your_mix_header", contentType = "your_mix_header") {
                     YourMixHeader(
                         song = yourMixSong,
                         isShuffleEnabled = isShuffleEnabled,
@@ -286,7 +241,7 @@ fun HomeScreen(
                                     playerViewModel.playSongsShuffled(
                                         songsToPlay = yourMixSongs,
                                         queueName = "Your Mix",
-                                        startAtZero = true,
+                                        startAtZero = true
                                     )
                                 }
                             }
@@ -294,26 +249,18 @@ fun HomeScreen(
                     )
                 }
 
-                // Collage
                 if (yourMixSongs.isNotEmpty()) {
-                    item(
-                        key = "album_art_collage",
-                        contentType = "album_art_collage"
-                    ) {
+                    item(key = "album_art_collage", contentType = "album_art_collage") {
                         val basePattern = settingsUiState.collagePattern
                         val isAutoRotate = settingsUiState.collageAutoRotate
                         val patterns = remember { CollagePattern.entries }
-
                         val activePattern = if (isAutoRotate) {
                             var rotationIndex by rememberSaveable { mutableIntStateOf(-1) }
                             LaunchedEffect(Unit) { rotationIndex++ }
-                            remember(rotationIndex) {
-                                patterns[rotationIndex.coerceAtLeast(0) % patterns.size]
-                            }
+                            remember(rotationIndex) { patterns[rotationIndex.coerceAtLeast(0) % patterns.size] }
                         } else {
                             basePattern
                         }
-
                         AlbumArtCollage(
                             modifier = Modifier.fillMaxWidth(),
                             songs = yourMixSongs,
@@ -331,98 +278,59 @@ fun HomeScreen(
                     }
                 }
 
-                // Daily Mix
                 if (dailyMixSongs.isNotEmpty()) {
-                    item(
-                        key = "daily_mix_section",
-                        contentType = "daily_mix_section"
-                    ) {
+                    item(key = "daily_mix_section", contentType = "daily_mix_section") {
                         DailyMixSection(
                             songs = dailyMixSongs,
-                            onClickOpen = {
-                                navController.navigateSafely(Screen.DailyMixScreen.route)
-                            },
-                            onNavigateToAlbum = { song ->
-                                navController.navigateSafely(Screen.AlbumDetail.createRoute(song.albumId))
-                            },
-                            onNavigateToArtist = { song ->
-                                navController.navigateSafely(Screen.ArtistDetail.createRoute(song.artistId))
-                            },
-                            onNavigateToGenre = { song ->
-                                song.genre?.let {
-                                    navController.navigateSafely(Screen.GenreDetail.createRoute(java.net.URLEncoder.encode(it, "UTF-8")))
-                                }
-                            },
+                            onClickOpen = { navController.navigateSafely(Screen.DailyMixScreen.route) },
+                            onNavigateToAlbum = { song -> navController.navigateSafely(Screen.AlbumDetail.createRoute(song.albumId)) },
+                            onNavigateToArtist = { song -> navController.navigateSafely(Screen.ArtistDetail.createRoute(song.artistId)) },
+                            onNavigateToGenre = { song -> song.genre?.let { navController.navigateSafely(Screen.GenreDetail.createRoute(java.net.URLEncoder.encode(it, "UTF-8"))) } },
                             playerViewModel = playerViewModel
                         )
                     }
                 }
 
                 if (recentlyPlayedSongs.size >= RecentlyPlayedSectionMinSongsToShow) {
-                    item(
-                        key = "recently_played_section",
-                        contentType = "recently_played_section"
-                    ) {
+                    item(key = "recently_played_section", contentType = "recently_played_section") {
                         RecentlyPlayedSection(
                             songs = recentlyPlayedSongs,
                             onSongClick = { song ->
                                 if (recentlyPlayedQueue.isNotEmpty()) {
-                                    playerViewModel.playSongs(
-                                        songsToPlay = recentlyPlayedQueue,
-                                        startSong = song,
-                                        queueName = "Recently Played"
-                                    )
+                                    playerViewModel.playSongs(songsToPlay = recentlyPlayedQueue, startSong = song, queueName = "Recently Played")
                                 }
                             },
-                            onOpenAllClick = {
-                                navController.navigateSafely(Screen.RecentlyPlayed.route)
-                            },
+                            onOpenAllClick = { navController.navigateSafely(Screen.RecentlyPlayed.route) },
                             currentSongId = currentSong?.id,
                             contentPadding = PaddingValues(start = 8.dp, end = 24.dp)
                         )
                     }
                 }
 
-                item(
-                    key = "listening_stats_preview",
-                    contentType = "listening_stats_preview"
-                ) {
-                    StatsOverviewCard(
-                        summary = weeklyStats,
-                        onClick = { navController.navigateSafely(Screen.Stats.route) }
-                    )
+                item(key = "listening_stats_preview", contentType = "listening_stats_preview") {
+                    StatsOverviewCard(summary = weeklyStats, onClick = { navController.navigateSafely(Screen.Stats.route) })
                 }
             }
         }
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .height(170.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colorStops = arrayOf(
-                            0.0f to Color.Transparent,
-                            0.2f to Color.Transparent,
-                            0.8f to MaterialTheme.colorScheme.surfaceContainerLowest,
-                            1.0f to MaterialTheme.colorScheme.surfaceContainerLowest
-                        )
+            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).height(170.dp).background(
+                brush = Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0.0f to Color.Transparent,
+                        0.2f to Color.Transparent,
+                        0.8f to MaterialTheme.colorScheme.surfaceContainerLowest,
+                        1.0f to MaterialTheme.colorScheme.surfaceContainerLowest
                     )
                 )
-        ) {
-
-        }
+            )
+        )
     }
+
     if (showOptionsBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showOptionsBottomSheet = false },
-            sheetState = sheetState
-        ) {
+        ModalBottomSheet(onDismissRequest = { showOptionsBottomSheet = false }, sheetState = sheetState) {
             HomeOptionsBottomSheet(
                 onNavigateToMashup = {
-                    scope.launch {
-                        sheetState.hide()
-                    }.invokeOnCompletion {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
                         if (!sheetState.isVisible) {
                             showOptionsBottomSheet = false
                             navController.navigateSafely(Screen.DJSpace.route)
@@ -432,24 +340,13 @@ fun HomeScreen(
             )
         }
     }
-    // Bloco do changelog removido (comentado)
-    // if (showChangelogBottomSheet) {
-    //     ModalBottomSheet(
-    //         onDismissRequest = { showChangelogBottomSheet = false },
-    //         sheetState = sheetState
-    //     ) {
-    //         ChangelogBottomSheet()
-    //     }
-    // }
+
     if (showBetaInfoBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showBetaInfoBottomSheet = false },
-            sheetState = betaSheetState,
-            //contentWindowInsets = { WindowInsets.statusBars.only(WindowInsets.statusBars) }
-        ) {
+        ModalBottomSheet(onDismissRequest = { showBetaInfoBottomSheet = false }, sheetState = betaSheetState) {
             BetaInfoBottomSheet()
         }
     }
+
     if (showStreamingProviderSheet) {
         val isNeteaseLoggedIn by neteaseViewModel.isLoggedIn.collectAsStateWithLifecycle()
         val isQqMusicLoggedIn by qqMusicViewModel.isLoggedIn.collectAsStateWithLifecycle()
@@ -458,31 +355,22 @@ fun HomeScreen(
         StreamingProviderSheet(
             onDismissRequest = { showStreamingProviderSheet = false },
             isNeteaseLoggedIn = isNeteaseLoggedIn,
-            onNavigateToNeteaseDashboard = {
-                navController.navigateSafely(Screen.NeteaseDashboard.route)
-            },
+            onNavigateToNeteaseDashboard = { navController.navigateSafely(Screen.NeteaseDashboard.route) },
             isQqMusicLoggedIn = isQqMusicLoggedIn,
-            onNavigateToQqMusicDashboard = {
-                navController.navigateSafely(Screen.QqMusicDashboard.route)
-            },
+            onNavigateToQqMusicDashboard = { navController.navigateSafely(Screen.QqMusicDashboard.route) },
             isNavidromeLoggedIn = isNavidromeLoggedIn,
-            onNavigateToNavidromeDashboard = {
-                navController.navigateSafely(Screen.NavidromeDashboard.route)
-            },
+            onNavigateToNavidromeDashboard = { navController.navigateSafely(Screen.NavidromeDashboard.route) },
             isJellyfinLoggedIn = isJellyfinLoggedIn,
-            onNavigateToJellyfinDashboard = {
-                navController.navigateSafely(Screen.JellyfinDashboard.route)
-            }
+            onNavigateToJellyfinDashboard = { navController.navigateSafely(Screen.JellyfinDashboard.route) }
         )
     }
+
     if (shouldShowCleanInstallDisclaimer) {
+        LaunchedEffect(Unit) {
+            settingsViewModel.setBeta05CleanInstallDisclaimerDismissed(true)
+        }
         Beta05CleanInstallDisclaimerDialog(
-            onDismiss = { dontShowAgain ->
-                cleanInstallDisclaimerDismissedThisSession = true
-                if (dontShowAgain) {
-                    settingsViewModel.setBeta05CleanInstallDisclaimerDismissed(true)
-                }
-            }
+            onDismiss = { dontShowAgain -> cleanInstallDisclaimerDismissedThisSession = true }
         )
     }
 }
@@ -496,66 +384,30 @@ fun YourMixHeader(
 ) {
     val buttonCorners = 68.dp
     val colors = MaterialTheme.colorScheme
-
     val titleStyle = rememberYourMixTitleStyle()
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(256.dp)
-            .padding(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(top = 48.dp, start = 12.dp)
-        ) {
-            // Your Mix Title
-            Text(
-                text = stringResource(R.string.home_your_mix_title),
-                style = titleStyle,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-            )
-
-            // Artist/Song subtitle
-            Text(
-                text = song,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                modifier = Modifier.padding(start = 8.dp)
-            )
+    Box(modifier = Modifier.fillMaxWidth().height(256.dp).padding(16.dp)) {
+        Column(modifier = Modifier.align(Alignment.TopStart).padding(top = 48.dp, start = 12.dp)) {
+            Text(text = stringResource(R.string.home_your_mix_title), style = titleStyle, color = MaterialTheme.colorScheme.onSurface)
+            Text(text = song, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f), modifier = Modifier.padding(start = 8.dp))
         }
-        // Play Button - color changes based on shuffle state
         LargeExtendedFloatingActionButton(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 12.dp),
+            modifier = Modifier.align(Alignment.BottomEnd).padding(end = 12.dp),
             onClick = onPlayShuffled,
             containerColor = if (isShuffleEnabled) colors.primary else colors.tertiaryContainer,
             contentColor = if (isShuffleEnabled) colors.onPrimary else colors.onTertiaryContainer,
             shape = AbsoluteSmoothCornerShape(
-                cornerRadiusTL = buttonCorners,
-                smoothnessAsPercentTR = 60,
-                cornerRadiusBR = buttonCorners,
-                smoothnessAsPercentTL = 60,
-                cornerRadiusBL = buttonCorners,
-                smoothnessAsPercentBR = 60,
-                cornerRadiusTR = buttonCorners,
-                smoothnessAsPercentBL = 60,
+                cornerRadiusTL = buttonCorners, smoothnessAsPercentTR = 60,
+                cornerRadiusBR = buttonCorners, smoothnessAsPercentTL = 60,
+                cornerRadiusBL = buttonCorners, smoothnessAsPercentBR = 60,
+                cornerRadiusTR = buttonCorners, smoothnessAsPercentBL = 60
             )
         ) {
-            Icon(
-                painter = painterResource(R.drawable.rounded_shuffle_24),
-                contentDescription = stringResource(R.string.cd_shuffle_play),
-                modifier = Modifier.size(36.dp)
-            )
+            Icon(painter = painterResource(R.drawable.rounded_shuffle_24), contentDescription = stringResource(R.string.cd_shuffle_play), modifier = Modifier.size(36.dp))
         }
     }
 }
 
-
-// SongListItem (modificado para aceptar parámetros individuales)
 @Composable
 fun SongListItemFavs(
     modifier: Modifier = Modifier,
@@ -572,64 +424,28 @@ fun SongListItemFavs(
     val contentColor = if (isCurrentSong) colors.primary else colors.onSurface
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
         shape = RoundedCornerShape(cardCorners),
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(0.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(0.9f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SmartImage(
-                    model = albumArtUrl,
-                    contentDescription = stringResource(R.string.cd_album_art_for_title, title),
-                    contentScale = ContentScale.Crop,
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.size(48.dp)
-                )
+        Row(modifier = Modifier.padding(12.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(modifier = Modifier.weight(0.9f), verticalAlignment = Alignment.CenterVertically) {
+                SmartImage(model = albumArtUrl, contentDescription = stringResource(R.string.cd_album_art_for_title, title), contentScale = ContentScale.Crop, shape = RoundedCornerShape(8.dp), modifier = Modifier.size(48.dp))
                 Spacer(Modifier.width(16.dp))
                 Column(modifier = Modifier) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = if (isCurrentSong) FontWeight.Bold else FontWeight.Normal,
-                        color = contentColor,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = artist, style = MaterialTheme.typography.bodyMedium,
-                        color = contentColor.copy(alpha = 0.7f),
-                        maxLines = 1, overflow = TextOverflow.Ellipsis
-                    )
+                    Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = if (isCurrentSong) FontWeight.Bold else FontWeight.Normal, color = contentColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(text = artist, style = MaterialTheme.typography.bodyMedium, color = contentColor.copy(alpha = 0.7f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
             Spacer(Modifier.width(16.dp))
             if (isCurrentSong) {
-                PlayingEqIcon(
-                    modifier = Modifier
-                        .weight(0.1f)
-                        .padding(start = 8.dp)
-                        .size(width = 18.dp, height = 16.dp), // similar al tamaño del ícono
-                    color = colors.primary,
-                    isPlaying = isPlaying  // o conectalo a tu estado real de reproducción
-                )
+                PlayingEqIcon(modifier = Modifier.weight(0.1f).padding(start = 8.dp).size(width = 18.dp, height = 16.dp), color = colors.primary, isPlaying = isPlaying)
             }
         }
     }
 }
 
-// Wrapper Composable for SongListItemFavs to isolate state observation
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun SongListItemFavsWrapper(
@@ -638,15 +454,10 @@ fun SongListItemFavsWrapper(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Collect the stablePlayerState once
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsStateWithLifecycle()
-
-    // Derive isThisSongPlaying using remember
     val isThisSongPlaying = remember(song.id, stablePlayerState.currentSong?.id, stablePlayerState.isPlaying) {
         song.id == stablePlayerState.currentSong?.id
     }
-
-    // Call the presentational composable
     SongListItemFavs(
         modifier = modifier,
         cardCorners = 0.dp,
@@ -658,7 +469,6 @@ fun SongListItemFavsWrapper(
         onClick = onClick
     )
 }
-
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
