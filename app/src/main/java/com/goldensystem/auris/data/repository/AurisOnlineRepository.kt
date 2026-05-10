@@ -32,14 +32,16 @@ class AurisOnlineRepository @Inject constructor(
                     artistName = "Auris Online",
                     artistId = 0L,
                     albumArtUriString = null,
+                    songCount = 0,     // obrigatório
                     dateAdded = 0L,
-                    year = null
+                    year = 0           // obrigatório
                 )
             ))
             musicDao.insertArtists(listOf(
                 ArtistEntity(
                     id = 0L,
                     name = "Auris Online",
+                    trackCount = 0,    // obrigatório
                     imageUrl = null,
                     customImageUri = null
                 )
@@ -75,8 +77,8 @@ class AurisOnlineRepository @Inject constructor(
                         title = obj.optString("title", "Sem título"),
                         artistName = obj.optString("artist", "Desconhecido"),
                         albumName = obj.optString("album", ""),
-                        albumId = 0L,           // FK satisfeita pelo placeholder
-                        artistId = 0L,          // FK satisfeita pelo placeholder
+                        albumId = 0L,
+                        artistId = 0L,
                         contentUriString = obj.optString("mp3Url", ""),
                         albumArtUriString = obj.optString("coverUrl", null),
                         duration = obj.optLong("duration", 0L),
