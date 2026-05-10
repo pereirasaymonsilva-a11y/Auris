@@ -1,11 +1,12 @@
 package com.goldensystem.auris.data.service.roku
 
 import android.util.Log
-import com.sun.net.httpserver.HttpServer
 import java.io.File
 import java.io.FileInputStream
 import java.io.OutputStream
 import java.net.InetSocketAddress
+import java.net.ServerSocket
+import java.net.Socket
 import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,101 +18,109 @@ class RokuHttpServer @Inject constructor() {
         private const val THREAD_POOL_SIZE = 4
     }
 
-    private var server: HttpServer? = null
+    private var serverSocket: ServerSocket? = null
     private var currentFile: File? = null
+    private var isRunning = false
 
-    /**
-     * Inicia o servidor HTTP em uma porta disponível e prepara o arquivo a ser servido.
-     * @param audioFile O arquivo de áudio a ser transmitido.
-     * @return O endereço completo (URL) que o Roku deve usar para acessar o fluxo, ou null se falhar.
-     */
     fun start(audioFile: File): String? {
-        stop() // Para qualquer servidor anterior
-
+        stop()
         return try {
             val port = findAvailablePort()
-            val address = InetSocketAddress(port)
-            server = HttpServer.create(address, 0).apply {
-                createContext("/stream") { exchange ->
+            serverSocket = ServerSocket(port)
+            isRunning = true
+            currentFile = audioFile
+
+            val executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE)
+            executor.execute {
+                while (isRunning) {
                     try {
-                        val file = currentFile
-                        if (file == null || !file.exists()) {
-                            val response = "Arquivo não encontrado".toByteArray()
-                            exchange.sendResponseHeaders(404, response.size.toLong())
-                            exchange.responseBody.use { it.write(response) }
-                            return@createContext
-                        }
-
-                        val mimeType = when (file.extension.lowercase()) {
-                            "mp3" -> "audio/mpeg"
-                            "m4a" -> "audio/mp4"
-                            "aac" -> "audio/aac"
-                            "wav" -> "audio/wav"
-                            "flac" -> "audio/flac"
-                            "ogg" -> "audio/ogg"
-                            else -> "audio/mpeg"
-                        }
-
-                        exchange.responseHeaders.set("Content-Type", mimeType)
-                        exchange.responseHeaders.set("Accept-Ranges", "bytes")
-                        exchange.sendResponseHeaders(200, file.length())
-
-                        FileInputStream(file).use { input ->
-                            exchange.responseBody.use { output ->
-                                input.copyTo(output)
-                            }
-                        }
+                        val client = serverSocket?.accept() ?: break
+                        executor.execute { handleClient(client) }
                     } catch (e: Exception) {
-                        Log.e(TAG, "Erro ao servir arquivo", e)
-                        try {
-                            exchange.sendResponseHeaders(500, -1)
-                        } catch (_: Exception) {}
+                        if (isRunning) Log.e(TAG, "Erro ao aceitar cliente", e)
+                        break
                     }
                 }
-                executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE)
-                start()
             }
-            currentFile = audioFile
+
             val streamUrl = "http://${getLocalIpAddress()}:$port/stream"
-            Log.d(TAG, "Servidor iniciado em $streamUrl")
+            Log.d(TAG, "Servidor HTTP iniciado em $streamUrl")
             streamUrl
         } catch (e: Exception) {
-            Log.e(TAG, "Falha ao iniciar servidor HTTP", e)
+            Log.e(TAG, "Falha ao iniciar servidor", e)
             null
         }
     }
 
-    /**
-     * Para o servidor HTTP.
-     */
     fun stop() {
+        isRunning = false
         try {
-            server?.stop(0)
-            server = null
-            currentFile = null
-            Log.d(TAG, "Servidor parado")
+            serverSocket?.close()
         } catch (e: Exception) {
             Log.e(TAG, "Erro ao parar servidor", e)
         }
+        serverSocket = null
+        currentFile = null
     }
 
-    /**
-     * Encontra uma porta disponível no dispositivo.
-     */
-    private fun findAvailablePort(): Int {
-        return try {
-            val socket = java.net.ServerSocket(0)
-            val port = socket.localPort
-            socket.close()
-            port
+    private fun handleClient(socket: Socket) {
+        try {
+            val input = socket.getInputStream()
+            val output = socket.getOutputStream()
+
+            // Lê a primeira linha (ex: GET /stream HTTP/1.1)
+            val reader = input.bufferedReader()
+            val requestLine = reader.readLine() ?: return
+
+            if (requestLine.startsWith("GET")) {
+                val file = currentFile
+                if (file == null || !file.exists()) {
+                    val response = "HTTP/1.1 404 Not Found\r\n\r\n".toByteArray()
+                    output.write(response)
+                    output.flush()
+                    return
+                }
+
+                val mimeType = when (file.extension.lowercase()) {
+                    "mp3" -> "audio/mpeg"
+                    "m4a" -> "audio/mp4"
+                    "aac" -> "audio/aac"
+                    "wav" -> "audio/wav"
+                    "flac" -> "audio/flac"
+                    "ogg" -> "audio/ogg"
+                    else -> "audio/mpeg"
+                }
+
+                val fileLength = file.length()
+                val headers = "HTTP/1.1 200 OK\r\n" +
+                        "Content-Type: $mimeType\r\n" +
+                        "Content-Length: $fileLength\r\n" +
+                        "Accept-Ranges: bytes\r\n" +
+                        "Connection: close\r\n\r\n"
+
+                output.write(headers.toByteArray())
+                FileInputStream(file).use { inputStream ->
+                    inputStream.copyTo(output)
+                }
+                output.flush()
+            }
         } catch (e: Exception) {
-            9876 // Porta fallback
+            Log.e(TAG, "Erro ao processar requisição", e)
+        } finally {
+            try {
+                socket.close()
+            } catch (_: Exception) {}
         }
     }
 
-    /**
-     * Obtém o endereço IP local do dispositivo na rede Wi-Fi.
-     */
+    private fun findAvailablePort(): Int {
+        return try {
+            ServerSocket(0).use { it.localPort }
+        } catch (e: Exception) {
+            9876
+        }
+    }
+
     private fun getLocalIpAddress(): String {
         return try {
             val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
@@ -128,7 +137,6 @@ class RokuHttpServer @Inject constructor() {
             }
             "127.0.0.1"
         } catch (e: Exception) {
-            Log.e(TAG, "Erro ao obter IP", e)
             "127.0.0.1"
         }
     }

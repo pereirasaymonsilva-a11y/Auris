@@ -1,9 +1,9 @@
 package com.goldensystem.auris.data.service.roku
 
 import android.content.Context
-import android.media.MediaRouter
 import android.util.Log
 import androidx.mediarouter.media.MediaRouteDescriptor
+import androidx.mediarouter.media.MediaRouteDiscoveryRequest
 import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteProviderDescriptor
 import androidx.mediarouter.media.MediaRouter
@@ -17,13 +17,13 @@ import javax.inject.Singleton
 
 @Singleton
 class RokuMediaRouteProvider @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @ApplicationContext context: Context,
     private val discoveryService: RokuDiscoveryService
 ) : MediaRouteProvider(context) {
 
     companion object {
         private const val TAG = "RokuMediaRouteProvider"
-        private const val CATEGORY = MediaRouter.Category.ROUTE_TYPE_REMOTE_AUDIO_VIDEO.toString()
+        private const val CATEGORY_REMOTE_PLAYBACK = "android.media.intent.category.REMOTE_PLAYBACK"
     }
 
     private val scope = CoroutineScope(Dispatchers.Main)
@@ -33,20 +33,19 @@ class RokuMediaRouteProvider @Inject constructor(
         startDiscovery()
     }
 
-    override fun onDiscoveryRequestChanged(request: DiscoveryRequest?) {
-        // Podemos usar a solicitação de descoberta para filtrar, mas por enquanto vamos publicar todos os Rokus
-        publishRoutes()
+    override fun onDiscoveryRequestChanged(request: MediaRouteDiscoveryRequest?) {
         if (request?.isActive == true) {
             discoveryService.startScanning()
         } else {
             discoveryService.stopScanning()
         }
+        publishRoutes()
     }
 
     private fun startDiscovery() {
         discoveryJob?.cancel()
         discoveryJob = scope.launch {
-            discoveryService.devices.collect { devices ->
+            discoveryService.devices.collect { _ ->
                 publishRoutes()
             }
         }
@@ -61,7 +60,7 @@ class RokuMediaRouteProvider @Inject constructor(
                 device.friendlyName
             )
                 .setDescription("Roku")
-                .addControlCategory(CATEGORY)
+                .addControlCategory(CATEGORY_REMOTE_PLAYBACK)
                 .setPlaybackType(MediaRouter.RouteInfo.PLAYBACK_TYPE_REMOTE)
                 .setVolumeHandling(MediaRouter.RouteInfo.PLAYBACK_VOLUME_FIXED)
                 .setCanDisconnect(true)
