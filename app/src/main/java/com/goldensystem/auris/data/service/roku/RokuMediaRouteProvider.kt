@@ -5,51 +5,31 @@ import android.content.IntentFilter
 import android.util.Log
 import androidx.mediarouter.media.MediaControlIntent
 import androidx.mediarouter.media.MediaRouteDescriptor
-import androidx.mediarouter.media.MediaRouteDiscoveryRequest
 import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteProviderDescriptor
 import androidx.mediarouter.media.MediaRouter
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class RokuMediaRouteProvider(context: Context) : MediaRouteProvider(context) {
+class RokuMediaRouteProvider(
+    private val context: Context,
+    private val discoveryService: RokuDiscoveryService
+) : MediaRouteProvider(context) {
 
     companion object {
         private const val TAG = "RokuMediaRouteProvider"
     }
 
-    @EntryPoint
-    @InstallIn(SingletonComponent::class)
-    interface RokuMediaRouteProviderEntryPoint {
-        fun discoveryService(): RokuDiscoveryService
-    }
-
     private val scope = CoroutineScope(Dispatchers.Main)
     private var discoveryJob: Job? = null
 
-    // Inicialização preguiçosa para evitar problemas de ordem no construtor
-    private val discoveryService: RokuDiscoveryService by lazy {
-        val entryPoint = EntryPointAccessors.fromApplication(
-            context.applicationContext,
-            RokuMediaRouteProviderEntryPoint::class.java
-        )
-        entryPoint.discoveryService()
-    }
-
     init {
-        // Aguarda um pequeno ciclo para que o objeto esteja completamente construído
-        scope.launch {
-            startDiscovery()
-        }
+        startDiscovery()
     }
 
-    override fun onDiscoveryRequestChanged(request: MediaRouteDiscoveryRequest?) {
+    override fun onDiscoveryRequestChanged(request: androidx.mediarouter.media.MediaRouteDiscoveryRequest?) {
         if (request != null) {
             discoveryService.startScanning()
         } else {
@@ -74,7 +54,6 @@ class RokuMediaRouteProvider(context: Context) : MediaRouteProvider(context) {
             val controlFilter = IntentFilter().apply {
                 addCategory(MediaControlIntent.CATEGORY_REMOTE_PLAYBACK)
             }
-
             MediaRouteDescriptor.Builder(
                 "roku_${device.serialNumber}",
                 device.friendlyName
@@ -86,7 +65,6 @@ class RokuMediaRouteProvider(context: Context) : MediaRouteProvider(context) {
                 .setCanDisconnect(true)
                 .build()
         }
-
         val providerDescriptor = MediaRouteProviderDescriptor.Builder()
             .addRoutes(routeDescriptors)
             .build()
