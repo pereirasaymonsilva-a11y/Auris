@@ -13,6 +13,8 @@ import androidx.core.content.ContextCompat
 import com.goldensystem.auris.data.model.LibraryTabId
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
+import com.goldensystem.auris.data.service.roku.RokuCastManager
+import com.goldensystem.auris.data.service.roku.RokuDevice
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -254,6 +256,7 @@ class PlayerViewModel @Inject constructor(
     private val sessionToken: SessionToken,
     private val mediaControllerFactory: com.goldensystem.auris.data.media.MediaControllerFactory,
     private val aurisOnlineRepository: AurisOnlineRepository,
+    private val rokuCastManager: RokuCastManager,
 ) : ViewModel() {
 
     private val _playerUiState = MutableStateFlow(PlayerUiState())
@@ -1829,6 +1832,26 @@ class PlayerViewModel @Inject constructor(
                 }
             }
         }
+        
+        // Observar mudanças na rota de mídia para conectar ao Roku
+viewModelScope.launch {
+    castStateHolder.selectedRoute.collect { route ->
+        if (route != null && route.id.startsWith("roku_")) {
+            val currentSong = stablePlayerState.value.currentSong
+            if (currentSong != null) {
+                // Extrair informações do dispositivo Roku da rota
+                val rokuDevice = RokuDevice(
+                    serialNumber = route.id.removePrefix("roku_"),
+                    friendlyName = route.name,
+                    ipAddress = "" // O IP será obtido internamente pelo RokuCastManager
+                )
+                rokuCastManager.connectAndPlay(rokuDevice, currentSong)
+            }
+        } else if (route == null || route.isDefault) {
+            rokuCastManager.disconnect()
+        }
+    }
+}
 
         // Initialize connectivity monitoring (WiFi/Bluetooth)
         connectivityStateHolder.initialize()
@@ -4249,6 +4272,7 @@ class PlayerViewModel @Inject constructor(
         connectivityStateHolder.onCleared()
         queueUndoStateHolder.onCleared()
         playlistDismissUndoStateHolder.onCleared()
+        rokuCastManager.onCleared()
     }
 
     // Sleep Timer Control Functions - delegated to SleepTimerStateHolder
