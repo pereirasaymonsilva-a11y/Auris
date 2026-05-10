@@ -28,9 +28,7 @@ class RokuCastService : MediaRouteProviderService() {
         provider = RokuMediaRouteProvider(applicationContext, discoveryService)
     }
 
-    override fun onBind(intent: Intent?) = super.onBind(intent)
-
-    override fun onGetMediaRouteProvider(): MediaRouteProvider = provider
+    override fun onCreateMediaRouteProvider(): MediaRouteProvider? = provider
 
     override fun onUnbind(intent: Intent?): Boolean {
         provider.stopDiscovery()
