@@ -9,33 +9,42 @@ import androidx.mediarouter.media.MediaRouteDiscoveryRequest
 import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteProviderDescriptor
 import androidx.mediarouter.media.MediaRouter
-import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class RokuMediaRouteProvider @Inject constructor(
-    @ApplicationContext context: Context,
-    private val discoveryService: RokuDiscoveryService
-) : MediaRouteProvider(context) {
+class RokuMediaRouteProvider(context: Context) : MediaRouteProvider(context) {
 
     companion object {
         private const val TAG = "RokuMediaRouteProvider"
     }
 
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface RokuMediaRouteProviderEntryPoint {
+        fun discoveryService(): RokuDiscoveryService
+    }
+
     private val scope = CoroutineScope(Dispatchers.Main)
     private var discoveryJob: Job? = null
+    private lateinit var discoveryService: RokuDiscoveryService
 
-    init {
+    override fun onCreate() {
+        super.onCreate()
+        val entryPoint = EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            RokuMediaRouteProviderEntryPoint::class.java
+        )
+        discoveryService = entryPoint.discoveryService()
         startDiscovery()
     }
 
     override fun onDiscoveryRequestChanged(request: MediaRouteDiscoveryRequest?) {
-        // Se o request não é nulo, o sistema está pedindo descoberta ativa; caso contrário, paramos.
         if (request != null) {
             discoveryService.startScanning()
         } else {
@@ -57,7 +66,6 @@ class RokuMediaRouteProvider @Inject constructor(
     private fun publishRoutes() {
         val devices = discoveryService.devices.value
         val routeDescriptors = devices.map { device ->
-            // Criar um IntentFilter com a categoria de reprodução remota
             val controlFilter = IntentFilter().apply {
                 addCategory(MediaControlIntent.CATEGORY_REMOTE_PLAYBACK)
             }
@@ -67,12 +75,13 @@ class RokuMediaRouteProvider @Inject constructor(
                 device.friendlyName
             )
                 .setDescription("Roku")
-                .addControlFilter(controlFilter)             // <-- trocado de addControlCategory para addControlFilter
+                .addControlFilter(controlFilter)
                 .setPlaybackType(MediaRouter.RouteInfo.PLAYBACK_TYPE_REMOTE)
                 .setVolumeHandling(MediaRouter.RouteInfo.PLAYBACK_VOLUME_FIXED)
                 .setCanDisconnect(true)
                 .build()
         }
+
         val providerDescriptor = MediaRouteProviderDescriptor.Builder()
             .addRoutes(routeDescriptors)
             .build()
