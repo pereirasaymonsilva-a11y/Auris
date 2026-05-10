@@ -1,7 +1,9 @@
 package com.goldensystem.auris.data.service.roku
 
 import android.content.Context
+import android.content.IntentFilter
 import android.util.Log
+import androidx.mediarouter.media.MediaControlIntent
 import androidx.mediarouter.media.MediaRouteDescriptor
 import androidx.mediarouter.media.MediaRouteDiscoveryRequest
 import androidx.mediarouter.media.MediaRouteProvider
@@ -23,7 +25,6 @@ class RokuMediaRouteProvider @Inject constructor(
 
     companion object {
         private const val TAG = "RokuMediaRouteProvider"
-        private const val CATEGORY_REMOTE_PLAYBACK = "android.media.intent.category.REMOTE_PLAYBACK"
     }
 
     private val scope = CoroutineScope(Dispatchers.Main)
@@ -34,7 +35,8 @@ class RokuMediaRouteProvider @Inject constructor(
     }
 
     override fun onDiscoveryRequestChanged(request: MediaRouteDiscoveryRequest?) {
-        if (request?.isActive == true) {
+        // Se o request não é nulo, o sistema está pedindo descoberta ativa; caso contrário, paramos.
+        if (request != null) {
             discoveryService.startScanning()
         } else {
             discoveryService.stopScanning()
@@ -45,7 +47,7 @@ class RokuMediaRouteProvider @Inject constructor(
     private fun startDiscovery() {
         discoveryJob?.cancel()
         discoveryJob = scope.launch {
-            discoveryService.devices.collect { _ ->
+            discoveryService.devices.collect {
                 publishRoutes()
             }
         }
@@ -55,12 +57,17 @@ class RokuMediaRouteProvider @Inject constructor(
     private fun publishRoutes() {
         val devices = discoveryService.devices.value
         val routeDescriptors = devices.map { device ->
+            // Criar um IntentFilter com a categoria de reprodução remota
+            val controlFilter = IntentFilter().apply {
+                addCategory(MediaControlIntent.CATEGORY_REMOTE_PLAYBACK)
+            }
+
             MediaRouteDescriptor.Builder(
                 "roku_${device.serialNumber}",
                 device.friendlyName
             )
                 .setDescription("Roku")
-                .addControlCategory(CATEGORY_REMOTE_PLAYBACK)
+                .addControlFilter(controlFilter)             // <-- trocado de addControlCategory para addControlFilter
                 .setPlaybackType(MediaRouter.RouteInfo.PLAYBACK_TYPE_REMOTE)
                 .setVolumeHandling(MediaRouter.RouteInfo.PLAYBACK_VOLUME_FIXED)
                 .setCanDisconnect(true)
