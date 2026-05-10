@@ -32,16 +32,21 @@ class RokuMediaRouteProvider(context: Context) : MediaRouteProvider(context) {
 
     private val scope = CoroutineScope(Dispatchers.Main)
     private var discoveryJob: Job? = null
-    private lateinit var discoveryService: RokuDiscoveryService
 
-    override fun onCreate() {
-        super.onCreate()
+    // Inicialização preguiçosa para evitar problemas de ordem no construtor
+    private val discoveryService: RokuDiscoveryService by lazy {
         val entryPoint = EntryPointAccessors.fromApplication(
             context.applicationContext,
             RokuMediaRouteProviderEntryPoint::class.java
         )
-        discoveryService = entryPoint.discoveryService()
-        startDiscovery()
+        entryPoint.discoveryService()
+    }
+
+    init {
+        // Aguarda um pequeno ciclo para que o objeto esteja completamente construído
+        scope.launch {
+            startDiscovery()
+        }
     }
 
     override fun onDiscoveryRequestChanged(request: MediaRouteDiscoveryRequest?) {
