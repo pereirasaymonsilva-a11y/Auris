@@ -370,15 +370,21 @@ fun CastBottomSheet(
                     CastSheetContent(
                         state = uiState,
                         onSelectDevice = { id ->
-                            when {
-                                id.startsWith("bluetooth_") -> {
-                                    val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    context.startActivity(intent)
-                                }
-                                else -> routes.firstOrNull { it.id == id }?.let { playerViewModel.selectRoute(it) }
-                            }
-                        },
+    when {
+        id.startsWith("bluetooth_") -> {
+            val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        }
+        id.startsWith("roku_") -> {
+            // Pular a lógica de Cast normal; usar RokuCastManager diretamente
+            routes.firstOrNull { it.id == id }?.let { route ->
+                playerViewModel.connectToRoku(route)
+            }
+        }
+        else -> routes.firstOrNull { it.id == id }?.let { playerViewModel.selectRoute(it) }
+    }
+},
                         onDisconnect = {
                             playerViewModel.disconnect()
                             onDismiss()

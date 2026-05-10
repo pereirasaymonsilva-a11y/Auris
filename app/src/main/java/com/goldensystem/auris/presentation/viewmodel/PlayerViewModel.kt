@@ -4811,6 +4811,16 @@ viewModelScope.launch {
     }
 }
 
+    fun connectToRoku(route: MediaRouter.RouteInfo) {
+    val currentSong = stablePlayerState.value.currentSong ?: return
+    val rokuDevice = RokuDevice(
+        serialNumber = route.id.removePrefix("roku_"),
+        friendlyName = route.name,
+        ipAddress = "" // o RokuCastManager pega o IP internamente do discoveryService
+    )
+    rokuCastManager.connectAndPlay(rokuDevice, currentSong)
+}
+
     private var pendingBatchGenreEdit: Pair<List<Song>, String>? = null
 
     fun batchEditGenre(songs: List<Song>, newGenre: String) {
