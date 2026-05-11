@@ -327,15 +327,6 @@
                 android:name="autoStoreLocales"
                 android:value="true" />
         </service>
-        
-        <service
-    android:name="com.goldensystem.auris.data.service.roku.RokuCastService"
-    android:exported="true"
-    android:label="Roku Cast Service">
-    <intent-filter>
-        <action android:name="android.media.MediaRouteProviderService" />
-    </intent-filter>
-        </service>
 
     </application>
 
