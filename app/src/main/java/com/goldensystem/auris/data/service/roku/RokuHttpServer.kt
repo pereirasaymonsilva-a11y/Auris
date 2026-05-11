@@ -20,6 +20,7 @@ class RokuHttpServer @Inject constructor(
     companion object {
         private const val TAG = "RokuHttpServer"
         private const val THREAD_POOL_SIZE = 4
+        private const val PORT = 9876
     }
 
     private var serverSocket: ServerSocket? = null
@@ -29,10 +30,9 @@ class RokuHttpServer @Inject constructor(
     fun start(audioFile: File): String? {
         stop()
         return try {
-            val port = findAvailablePort()
             serverSocket = ServerSocket().apply {
                 reuseAddress = true
-                bind(InetSocketAddress("0.0.0.0", port))
+                bind(InetSocketAddress("0.0.0.0", PORT))
             }
             isRunning = true
             currentFile = audioFile
@@ -51,7 +51,7 @@ class RokuHttpServer @Inject constructor(
             }
 
             val ip = getLocalIpAddress()
-            val streamUrl = "http://$ip:$port/stream"
+            val streamUrl = "http://$ip:$PORT/stream"
             Log.d(TAG, "Servidor HTTP iniciado em $streamUrl")
             streamUrl
         } catch (e: Exception) {
@@ -75,60 +75,100 @@ class RokuHttpServer @Inject constructor(
         try {
             val input = socket.getInputStream()
             val output = socket.getOutputStream()
-
             val reader = input.bufferedReader()
             val requestLine = reader.readLine() ?: return
-            Log.d(TAG, "Requisição recebida: $requestLine")
+            Log.d(TAG, "Requisição: $requestLine")
 
             if (requestLine.startsWith("GET")) {
                 val file = currentFile
                 if (file == null || !file.exists() || !file.canRead()) {
-                    Log.e(TAG, "Arquivo não encontrado ou sem permissão: ${file?.absolutePath}")
                     val response = "HTTP/1.1 404 Not Found\r\n\r\n".toByteArray()
                     output.write(response)
                     output.flush()
                     return
                 }
 
-                val mimeType = when (file.extension.lowercase()) {
-                    "mp3" -> "audio/mpeg"
-                    "m4a" -> "audio/mp4"
-                    "aac" -> "audio/aac"
-                    "wav" -> "audio/wav"
-                    "flac" -> "audio/flac"
-                    "ogg" -> "audio/ogg"
-                    else -> "audio/mpeg"
+                val mimeType = getMimeType(file.extension)
+                val fileLength = file.length()
+
+                // Verifica se o cliente pediu um range
+                var rangeStart = 0L
+                var rangeEnd = fileLength - 1
+                var isRangeRequest = false
+
+                // Lê todos os cabeçalhos para encontrar "Range: bytes=..."
+                var line = reader.readLine()
+                while (!line.isNullOrBlank()) {
+                    if (line.startsWith("Range:", ignoreCase = true)) {
+                        val rangeValue = line.substringAfter(":").trim()
+                        if (rangeValue.startsWith("bytes=")) {
+                            val parts = rangeValue.removePrefix("bytes=").split("-")
+                            if (parts.isNotEmpty()) {
+                                rangeStart = parts[0].toLongOrNull() ?: 0L
+                                if (parts.size > 1 && parts[1].isNotBlank()) {
+                                    rangeEnd = parts[1].toLongOrNull() ?: (fileLength - 1)
+                                }
+                                isRangeRequest = true
+                            }
+                        }
+                    }
+                    line = reader.readLine()
                 }
 
-                val fileLength = file.length()
-                val headers = "HTTP/1.1 200 OK\r\n" +
-                        "Content-Type: $mimeType\r\n" +
-                        "Content-Length: $fileLength\r\n" +
-                        "Accept-Ranges: bytes\r\n" +
-                        "Connection: close\r\n\r\n"
-
-                output.write(headers.toByteArray())
-                FileInputStream(file).use { inputStream ->
-                    inputStream.copyTo(output)
+                if (isRangeRequest) {
+                    // Responde com 206 Partial Content
+                    rangeEnd = minOf(rangeEnd, fileLength - 1)
+                    val contentLength = rangeEnd - rangeStart + 1
+                    val headers = "HTTP/1.1 206 Partial Content\r\n" +
+                            "Content-Type: $mimeType\r\n" +
+                            "Content-Range: bytes $rangeStart-$rangeEnd/$fileLength\r\n" +
+                            "Content-Length: $contentLength\r\n" +
+                            "Accept-Ranges: bytes\r\n" +
+                            "Connection: close\r\n\r\n"
+                    output.write(headers.toByteArray())
+                    FileInputStream(file).use { fis ->
+                        fis.skip(rangeStart)
+                        val buffer = ByteArray(8192)
+                        var bytesLeft = contentLength
+                        while (bytesLeft > 0) {
+                            val bytesRead = fis.read(buffer, 0, minOf(buffer.size.toLong(), bytesLeft).toInt())
+                            if (bytesRead == -1) break
+                            output.write(buffer, 0, bytesRead)
+                            bytesLeft -= bytesRead
+                        }
+                    }
+                } else {
+                    // Responde com 200 OK (arquivo completo)
+                    val headers = "HTTP/1.1 200 OK\r\n" +
+                            "Content-Type: $mimeType\r\n" +
+                            "Content-Length: $fileLength\r\n" +
+                            "Accept-Ranges: bytes\r\n" +
+                            "Connection: close\r\n\r\n"
+                    output.write(headers.toByteArray())
+                    FileInputStream(file).use { it.copyTo(output) }
                 }
                 output.flush()
             }
         } catch (e: Exception) {
             Log.e(TAG, "Erro ao processar requisição", e)
         } finally {
-            try {
-                socket.close()
-            } catch (_: Exception) {}
+            try { socket.close() } catch (_: Exception) {}
         }
     }
 
-    private fun findAvailablePort(): Int {
-        return try {
-            ServerSocket(0).use { it.localPort }
-        } catch (e: Exception) {
-            9876
+    private fun getMimeType(extension: String): String {
+        return when (extension.lowercase()) {
+            "mp3" -> "audio/mpeg"
+            "m4a" -> "audio/mp4"
+            "aac" -> "audio/aac"
+            "wav" -> "audio/wav"
+            "flac" -> "audio/flac"
+            "ogg" -> "audio/ogg"
+            else -> "audio/mpeg"
         }
     }
+
+    private fun findAvailablePort(): Int = 9876 // Porta fixa
 
     private fun getLocalIpAddress(): String {
         try {
