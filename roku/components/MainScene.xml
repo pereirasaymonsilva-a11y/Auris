@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="MainScene" extends="Scene">
+    <script type="text/brightscript" uri="pkg:/source/main.brs" />
+    <children>
+        <Label id="statusLabel" text="Auris Receiver pronto" translation="[0,0]" color="0xFFFFFF" />
+    </children>
+</component>
