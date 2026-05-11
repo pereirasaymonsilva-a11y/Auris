@@ -4496,7 +4496,7 @@ viewModelScope.launch(Dispatchers.IO) {
         }
     }
     
-    fun syncAurisOnline() {
+        fun syncAurisOnline() {
     viewModelScope.launch {
         val result = aurisOnlineRepository.syncSongs()
         if (result.isSuccess) {
@@ -4509,24 +4509,25 @@ viewModelScope.launch(Dispatchers.IO) {
 }
 
     fun connectToRoku(device: RokuDevice) {
-    val currentSong = stablePlayerState.value.currentSong
-    if (currentSong == null) {
-        sendToast("Nenhuma música tocando")
-        return
-    }
-    if (currentSong.path.isBlank() || !java.io.File(currentSong.path).exists()) {
-        sendToast("Somente músicas locais são suportadas")
-        return
-    }
-    viewModelScope.launch {
-        val result = rokuCastManager.castToDevice(device, currentSong)
-        if (result.isSuccess) {
-            sendToast("Tocando no Roku: ${device.name}")
-        } else {
-            sendToast("Falha: ${result.exceptionOrNull()?.message}")
+        val currentSong = stablePlayerState.value.currentSong
+        if (currentSong == null) {
+            sendToast("Nenhuma música tocando")
+            return
+        }
+        if (currentSong.path.isBlank() || !java.io.File(currentSong.path).exists()) {
+            sendToast("Somente músicas locais são suportadas")
+            return
+        }
+        viewModelScope.launch {
+            val result = rokuCastManager.castToDevice(device, currentSong)
+            if (result.isSuccess) {
+                sendToast("Tocando no Roku: ${device.name}")
+            } else {
+                sendToast("Falha: ${result.exceptionOrNull()?.message}")
+            }
         }
     }
-}
+} // <-- este fecha-chaves é o fim da classe
 
     private var pendingBatchGenreEdit: Pair<List<Song>, String>? = null
 
