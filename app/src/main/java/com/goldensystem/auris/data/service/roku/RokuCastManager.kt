@@ -24,7 +24,7 @@ class RokuCastManager @Inject constructor(
 ) {
     companion object {
         private const val TAG = "RokuCastManager"
-        private const val CONNECTION_TIMEOUT_MS = 15_000L // 15 segundos máximo
+        private const val CONNECTION_TIMEOUT_MS = 15_000L
     }
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -36,64 +36,54 @@ class RokuCastManager @Inject constructor(
     private val _connectedDevice = MutableStateFlow<RokuDevice?>(null)
     val connectedDevice: StateFlow<RokuDevice?> = _connectedDevice.asStateFlow()
 
-    fun connectAndPlay(device: RokuDevice, song: Song) {
+    suspend fun connectAndPlay(device: RokuDevice, song: Song): Result<Unit> {
         connectionJob?.cancel()
-        connectionJob = scope.launch {
-            _connectionState.value = RokuConnectionState.CONNECTING
-            _connectedDevice.value = device
+        _connectionState.value = RokuConnectionState.CONNECTING
+        _connectedDevice.value = device
 
-            try {
-                // Timeout geral para evitar "conectando para sempre"
-                withTimeout(CONNECTION_TIMEOUT_MS) {
-                    // Verificar se o dispositivo está acessível
-                    if (!controlService.isDeviceReachable(device)) {
-                        Log.w(TAG, "Dispositivo Roku inacessível: ${device.friendlyName}")
-                        setDisconnected()
-                        return@withTimeout
-                    }
-
-                    // Obter o arquivo de áudio local
-                    val audioFile = getAudioFile(song)
-                    if (audioFile == null) {
-                        Log.e(TAG, "Arquivo de áudio não encontrado para a música: ${song.title}")
-                        setDisconnected()
-                        return@withTimeout
-                    }
-
-                    // Iniciar o servidor HTTP local
-                    val streamUrl = httpServer.start(audioFile)
-                    if (streamUrl == null) {
-                        Log.e(TAG, "Falha ao iniciar servidor HTTP")
-                        setDisconnected()
-                        return@withTimeout
-                    }
-
-                    // Enviar o comando de reprodução ao Roku
-                    val result = controlService.playStream(
-                        device = device,
-                        streamUrl = streamUrl,
-                        title = song.title,
-                        format = getAudioFormat(song)
-                    )
-
-                    if (result.isSuccess) {
-                        _connectionState.value = RokuConnectionState.PLAYING
-                        Log.d(TAG, "Reprodução iniciada no Roku: ${device.friendlyName}")
-                    } else {
-                        Log.e(TAG, "Falha ao iniciar reprodução no Roku: ${result.exceptionOrNull()?.message}")
-                        httpServer.stop()
-                        setDisconnected()
-                    }
+        try {
+            withTimeout(CONNECTION_TIMEOUT_MS) {
+                if (!controlService.isDeviceReachable(device)) {
+                    setDisconnected()
+                    return Result.failure(Exception("Roku inacessível"))
                 }
-            } catch (e: TimeoutCancellationException) {
-                Log.e(TAG, "Timeout ao conectar ao Roku")
-                httpServer.stop()
-                setDisconnected()
-            } catch (e: Exception) {
-                Log.e(TAG, "Erro na conexão com o Roku", e)
-                httpServer.stop()
-                setDisconnected()
+
+                val audioFile = getAudioFile(song)
+                if (audioFile == null) {
+                    setDisconnected()
+                    return Result.failure(Exception("Arquivo de áudio não encontrado (apenas músicas locais são suportadas)"))
+                }
+
+                val streamUrl = httpServer.start(audioFile)
+                if (streamUrl == null) {
+                    setDisconnected()
+                    return Result.failure(Exception("Falha ao iniciar servidor HTTP"))
+                }
+
+                val result = controlService.playStream(
+                    device = device,
+                    streamUrl = streamUrl,
+                    title = song.title,
+                    format = getAudioFormat(song)
+                )
+
+                if (result.isSuccess) {
+                    _connectionState.value = RokuConnectionState.PLAYING
+                    Result.success(Unit)
+                } else {
+                    httpServer.stop()
+                    setDisconnected()
+                    Result.failure(result.exceptionOrNull() ?: Exception("Erro ao iniciar reprodução"))
+                }
             }
+        } catch (e: TimeoutCancellationException) {
+            httpServer.stop()
+            setDisconnected()
+            Result.failure(Exception("Tempo limite excedido"))
+        } catch (e: Exception) {
+            httpServer.stop()
+            setDisconnected()
+            Result.failure(e)
         }
     }
 

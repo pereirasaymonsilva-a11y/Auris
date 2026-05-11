@@ -4504,9 +4504,27 @@ class PlayerViewModel @Inject constructor(
 }
 
     fun connectToRoku(device: RokuDevice) {
-        val currentSong = stablePlayerState.value.currentSong ?: return
-        rokuCastManager.connectAndPlay(device, currentSong)
+    val currentSong = stablePlayerState.value.currentSong
+    if (currentSong == null) {
+        sendToast("Nenhuma música tocando")
+        return
     }
+
+    if (currentSong.path.isBlank() || !java.io.File(currentSong.path).exists()) {
+        sendToast("Somente músicas locais são suportadas no Roku")
+        return
+    }
+
+    viewModelScope.launch {
+        val result = rokuCastManager.connectAndPlay(device, currentSong)
+        if (result.isSuccess) {
+            sendToast("Tocando no Roku: ${device.friendlyName}")
+        } else {
+            val errorMsg = result.exceptionOrNull()?.message ?: "Erro desconhecido"
+            sendToast("Falha: $errorMsg")
+        }
+    }
+}
 
     private var pendingBatchGenreEdit: Pair<List<Song>, String>? = null
 
