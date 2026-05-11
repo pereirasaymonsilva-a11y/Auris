@@ -32,15 +32,14 @@ class RokuControlService @Inject constructor(
                     .url(url)
                     .post("".toRequestBody())
                     .build()
-                val response = client.newCall(request).execute()
-                if (response.isSuccessful) {
-                    Result.success(Unit)
-                } else {
-                    Log.w(TAG, "Falha ao enviar comando '$key': HTTP ${response.code}")
-                    Result.failure(Exception("Erro HTTP ${response.code}"))
+                client.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        Result.success(Unit)
+                    } else {
+                        Result.failure(Exception("Erro HTTP ${response.code}"))
+                    }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Erro ao enviar comando '$key'", e)
                 Result.failure(e)
             }
         }
@@ -49,39 +48,62 @@ class RokuControlService @Inject constructor(
     suspend fun playStream(
         device: RokuDevice,
         streamUrl: String,
-        title: String? = null,
-        format: String = "mp3"
+        title: String? = null
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
-            try {
-                // Converte a URL para o formato que o Roku entende
-                // Exemplo: http://192.168.1.100:1234/stream
-                val encodedUrl = URLEncoder.encode(streamUrl, "UTF-8")
-                val encodedTitle = if (title != null) URLEncoder.encode(title, "UTF-8") else ""
+            val encodedUrl = URLEncoder.encode(streamUrl, "UTF-8")
+            val encodedTitle = URLEncoder.encode(title ?: "", "UTF-8")
 
-                // Comando correto: /input/15985 com parâmetros
-                val rokuUrl = "http://${device.ipAddress}:${device.port}/input/15985?" +
-                        "t=v&u=$encodedUrl&videoName=$encodedTitle"
+            // Tenta primeiro com o parâmetro "u" (mais comum em firmwares recentes)
+            var result = tryPlayStream(device, encodedUrl, encodedTitle, useUrlParam = false)
+            if (result.isSuccess) {
+                return@withContext result
+            }
+            Log.w(TAG, "Falha com parâmetro 'u', tentando com 'url'...")
 
-                Log.d(TAG, "Enviando comando playStream: $rokuUrl")
+            // Se falhar, tenta com o parâmetro "url" (firmwares mais antigos)
+            result = tryPlayStream(device, encodedUrl, encodedTitle, useUrlParam = true)
+            if (result.isSuccess) {
+                return@withContext result
+            }
+            Log.e(TAG, "Ambas as tentativas de playStream falharam")
+            result // Retorna o último erro
+        }
+    }
 
-                val request = Request.Builder()
-                    .url(rokuUrl)
-                    .post("".toRequestBody())
-                    .build()
-                val response = client.newCall(request).execute()
+    private suspend fun tryPlayStream(
+        device: RokuDevice,
+        encodedUrl: String,
+        encodedTitle: String,
+        useUrlParam: Boolean
+    ): Result<Unit> {
+        val paramName = if (useUrlParam) "url" else "u"
+        val rokuUrl = "http://${device.ipAddress}:${device.port}/input/15985?" +
+                "t=a" +
+                "&$paramName=$encodedUrl" +
+                "&videoName=$encodedTitle"
+
+        Log.d(TAG, "Tentando playStream com '$paramName': $rokuUrl")
+
+        val request = Request.Builder()
+            .url(rokuUrl)
+            .post("".toRequestBody())
+            .build()
+
+        return try {
+            client.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
-                    Log.d(TAG, "Stream iniciado com sucesso em ${device.friendlyName}")
+                    Log.d(TAG, "Stream iniciado com sucesso em ${device.friendlyName} (usando '$paramName')")
                     Result.success(Unit)
                 } else {
                     val errorBody = response.body?.string() ?: ""
-                    Log.e(TAG, "Falha ao iniciar stream: HTTP ${response.code} body=$errorBody")
+                    Log.e(TAG, "Falha ao iniciar stream com '$paramName': HTTP ${response.code} body=$errorBody")
                     Result.failure(Exception("Erro HTTP ${response.code}: $errorBody"))
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Erro ao iniciar stream", e)
-                Result.failure(e)
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Erro ao iniciar stream com '$paramName'", e)
+            Result.failure(e)
         }
     }
 

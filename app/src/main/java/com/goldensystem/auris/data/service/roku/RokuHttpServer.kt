@@ -6,6 +6,7 @@ import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.FileInputStream
+import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.Executors
@@ -29,7 +30,10 @@ class RokuHttpServer @Inject constructor(
         stop()
         return try {
             val port = findAvailablePort()
-            serverSocket = ServerSocket(port)
+            serverSocket = ServerSocket().apply {
+                reuseAddress = true
+                bind(InetSocketAddress("0.0.0.0", port))
+            }
             isRunning = true
             currentFile = audioFile
 
@@ -142,7 +146,6 @@ class RokuHttpServer @Inject constructor(
         } catch (e: Exception) {
             Log.e(TAG, "Falha ao obter IP via WifiManager", e)
         }
-        // Fallback: percorre interfaces de rede
         try {
             val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
             while (interfaces.hasMoreElements()) {

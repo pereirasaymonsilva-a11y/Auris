@@ -60,11 +60,12 @@ class RokuCastManager @Inject constructor(
                     return@withTimeout Result.failure<Unit>(Exception("Falha ao iniciar servidor HTTP"))
                 }
 
+                Log.d(TAG, "Tentando iniciar stream: $streamUrl")
+
                 val result = controlService.playStream(
                     device = device,
                     streamUrl = streamUrl,
-                    title = song.title,
-                    format = getAudioFormat(song)
+                    title = song.title
                 )
 
                 if (result.isSuccess) {
@@ -103,21 +104,21 @@ class RokuCastManager @Inject constructor(
     }
 
     private fun getAudioFile(song: Song): File? {
-    if (song.path.isBlank()) {
-        Log.e(TAG, "Caminho do arquivo vazio para ${song.title}")
-        return null
+        if (song.path.isBlank()) {
+            Log.e(TAG, "Caminho do arquivo vazio para ${song.title}")
+            return null
+        }
+        val file = File(song.path)
+        if (!file.exists()) {
+            Log.e(TAG, "Arquivo não existe: ${file.absolutePath}")
+            return null
+        }
+        if (!file.canRead()) {
+            Log.e(TAG, "Sem permissão de leitura: ${file.absolutePath}")
+            return null
+        }
+        return file
     }
-    val file = File(song.path)
-    if (!file.exists()) {
-        Log.e(TAG, "Arquivo não existe: ${file.absolutePath}")
-        return null
-    }
-    if (!file.canRead()) {
-        Log.e(TAG, "Sem permissão de leitura: ${file.absolutePath}")
-        return null
-    }
-    return file
-}
 
     private fun getAudioFormat(song: Song): String {
         return when {
