@@ -55,7 +55,7 @@ Se você quer um player de música moderno, com Material You, equalizador, letra
 - Extração de cores da capa do álbum
 
 ### 📚 Biblioteca Completa
-- Suporte a MP3, FLAC, AAC, OGG, WAV, entre outros
+- Suporte a MP3, FLAC, AAC, OGG, WAV, MP4 entre outros
 - Navegação por Músicas, Álbuns, Artistas, Gêneros e Pastas
 - Interpretação inteligente de múltiplos artistas (feat., ft., etc.)
 - Agrupamento por Artista do Álbum
