@@ -390,6 +390,10 @@ dependencies {
 
     // Encrypted credentials storage
     implementation(libs.androidx.security.crypto)
+
+    //roku
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }
 
 tasks.withType<Test> {

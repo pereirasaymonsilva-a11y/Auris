@@ -1,8 +1,9 @@
 package com.goldensystem.auris.presentation.viewmodel
 
+import com.goldensystem.auris.cast.roku.RokuCastManager
+import com.goldensystem.auris.cast.roku.RokuDevice
+import kotlinx.coroutines.flow.MutableStateFlow
 import android.annotation.SuppressLint
-import com.goldensystem.auris.data.service.roku.RokuDiscoveryService
-import com.goldensystem.auris.data.service.roku.RokuDevice
 import com.goldensystem.auris.data.repository.AurisOnlineRepository
 import android.app.Activity
 import android.content.ComponentName
@@ -15,7 +16,6 @@ import androidx.core.content.ContextCompat
 import com.goldensystem.auris.data.model.LibraryTabId
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
-import com.goldensystem.auris.data.service.roku.RokuCastManager
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -257,12 +257,9 @@ class PlayerViewModel @Inject constructor(
     private val sessionToken: SessionToken,
     private val mediaControllerFactory: com.goldensystem.auris.data.media.MediaControllerFactory,
     private val aurisOnlineRepository: AurisOnlineRepository,
-    private val rokuDiscoveryService: RokuDiscoveryService,
     private val rokuCastManager: RokuCastManager,
-) : ViewModel() {
-
-    val rokuDevices: StateFlow<List<RokuDevice>> = rokuDiscoveryService.devices
-
+    private val _rokuDevices = MutableStateFlow<List<RokuDevice>>(emptyList())
+    val rokuDevices: StateFlow<List<RokuDevice>> = _rokuDevices.asStateFlow()
     private val _playerUiState = MutableStateFlow(PlayerUiState())
     val playerUiState: StateFlow<PlayerUiState> = _playerUiState.asStateFlow()
 
@@ -1687,7 +1684,15 @@ class PlayerViewModel @Inject constructor(
         }, ContextCompat.getMainExecutor(context))
 
         castStateHolder.startDiscovery()
-        rokuDiscoveryService.startScanning()
+        // Descobre dispositivos Roku na rede
+viewModelScope.launch(Dispatchers.IO) {
+    try {
+        val devices = rokuCastManager.discoverDevices()
+        _rokuDevices.value = devices
+    } catch (_: Exception) {
+        // Silencioso, sem descoberta
+    }
+}
 
         viewModelScope.launch {
             castStateHolder.selectedRoute.collect { route ->
@@ -4005,8 +4010,7 @@ class PlayerViewModel @Inject constructor(
         connectivityStateHolder.onCleared()
         queueUndoStateHolder.onCleared()
         playlistDismissUndoStateHolder.onCleared()
-        rokuCastManager.onCleared()
-        rokuDiscoveryService.stopScanning()
+        rokuCastManager.stopServer()
     }
 
     fun setSleepTimer(durationMinutes: Int) {
@@ -4509,19 +4513,16 @@ class PlayerViewModel @Inject constructor(
         sendToast("Nenhuma música tocando")
         return
     }
-
     if (currentSong.path.isBlank() || !java.io.File(currentSong.path).exists()) {
-        sendToast("Somente músicas locais são suportadas no Roku")
+        sendToast("Somente músicas locais são suportadas")
         return
     }
-
     viewModelScope.launch {
-        val result = rokuCastManager.connectAndPlay(device, currentSong)
+        val result = rokuCastManager.castToDevice(device, currentSong)
         if (result.isSuccess) {
-            sendToast("Tocando no Roku: ${device.friendlyName}")
+            sendToast("Tocando no Roku: ${device.name}")
         } else {
-            val errorMsg = result.exceptionOrNull()?.message ?: "Erro desconhecido"
-            sendToast("Falha: $errorMsg")
+            sendToast("Falha: ${result.exceptionOrNull()?.message}")
         }
     }
 }
