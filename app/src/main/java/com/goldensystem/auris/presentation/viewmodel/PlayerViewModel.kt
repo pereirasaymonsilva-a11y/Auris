@@ -4496,17 +4496,17 @@ viewModelScope.launch(Dispatchers.IO) {
         }
     }
     
-        fun syncAurisOnline() {
-    viewModelScope.launch {
-        val result = aurisOnlineRepository.syncSongs()
-        if (result.isSuccess) {
-            sendToast("Auris Online sincronizado!")
-        } else {
-            val errorMsg = result.exceptionOrNull()?.message ?: "Erro desconhecido"
-            sendToast("Erro ao sincronizar: $errorMsg")
+            fun syncAurisOnline() {
+        viewModelScope.launch {
+            val result = aurisOnlineRepository.syncSongs()
+            if (result.isSuccess) {
+                sendToast("Auris Online sincronizado!")
+            } else {
+                val errorMsg = result.exceptionOrNull()?.message ?: "Erro desconhecido"
+                sendToast("Erro ao sincronizar: $errorMsg")
+            }
         }
     }
-}
 
     fun connectToRoku(device: RokuDevice) {
         val currentSong = stablePlayerState.value.currentSong
@@ -4527,7 +4527,6 @@ viewModelScope.launch(Dispatchers.IO) {
             }
         }
     }
-} // <-- este fecha-chaves é o fim da classe
 
     private var pendingBatchGenreEdit: Pair<List<Song>, String>? = null
 
@@ -4557,83 +4556,69 @@ viewModelScope.launch(Dispatchers.IO) {
     }
 
     private suspend fun performBatchEditGenre(songs: List<Song>, newGenre: String) {
-            Log.d("PlayerViewModel", "Starting batch genre update for ${songs.size} songs to '$newGenre'")
-            _toastEvents.emit(context.getString(R.string.player_updating_n_songs, songs.size))
+        Log.d("PlayerViewModel", "Starting batch genre update for ${songs.size} songs to '$newGenre'")
+        _toastEvents.emit(context.getString(R.string.player_updating_n_songs, songs.size))
 
-            var successCount = 0
-            var failCount = 0
+        var successCount = 0
+        var failCount = 0
 
-            songs.forEach { song ->
-                val sourceSong = if (song.lyrics != null) {
-                    song
-                } else {
-                    withContext(Dispatchers.IO) {
-                        musicRepository.getSong(song.id).first()
-                    } ?: song
-                }
+        songs.forEach { song ->
+            val sourceSong = if (song.lyrics != null) {
+                song
+            } else {
+                withContext(Dispatchers.IO) {
+                    musicRepository.getSong(song.id).first()
+                } ?: song
+            }
 
-                val result = metadataEditStateHolder.saveMetadata(
-                    song = sourceSong,
-                    newTitle = sourceSong.title,
-                    newArtist = sourceSong.artist,
-                    newAlbum = sourceSong.album,
-                    newGenre = newGenre,
-                    newLyrics = sourceSong.lyrics ?: "",
-                    newTrackNumber = sourceSong.trackNumber,
-                    newDiscNumber =  sourceSong.discNumber,
-                    coverArtUpdate = null
-                )
+            val result = metadataEditStateHolder.saveMetadata(
+                song = sourceSong,
+                newTitle = sourceSong.title,
+                newArtist = sourceSong.artist,
+                newAlbum = sourceSong.album,
+                newGenre = newGenre,
+                newLyrics = sourceSong.lyrics ?: "",
+                newTrackNumber = sourceSong.trackNumber,
+                newDiscNumber =  sourceSong.discNumber,
+                coverArtUpdate = null
+            )
 
-                if (result.success && result.updatedSong != null) {
-                    successCount++
-                    val updatedSong = result.updatedSong
-
-                    libraryStateHolder.updateSong(updatedSong)
-
-                    if (playbackStateHolder.stablePlayerState.value.currentSong?.id == song.id) {
-                        playbackStateHolder.updateStablePlayerState { it.copy(currentSong = updatedSong) }
-                        val controller = playbackStateHolder.mediaController
-                        if (controller != null) {
-                            val idx = controller.currentMediaItemIndex
-                            if (idx != C.INDEX_UNSET) {
-                                controller.replaceMediaItem(idx, MediaItemBuilder.build(updatedSong))
-                            }
+            if (result.success && result.updatedSong != null) {
+                successCount++
+                val updatedSong = result.updatedSong
+                libraryStateHolder.updateSong(updatedSong)
+                if (playbackStateHolder.stablePlayerState.value.currentSong?.id == song.id) {
+                    playbackStateHolder.updateStablePlayerState { it.copy(currentSong = updatedSong) }
+                    val controller = playbackStateHolder.mediaController
+                    if (controller != null) {
+                        val idx = controller.currentMediaItemIndex
+                        if (idx != C.INDEX_UNSET) {
+                            controller.replaceMediaItem(idx, MediaItemBuilder.build(updatedSong))
                         }
                     }
-                } else {
-                    failCount++
                 }
-            }
-
-            if (failCount == 0) {
-                _toastEvents.emit(context.getString(R.string.player_batch_genre_updated_all, successCount))
             } else {
-                _toastEvents.emit(
-                    context.getString(R.string.player_batch_genre_updated_partial, successCount, failCount),
-                )
+                failCount++
             }
+        }
+
+        if (failCount == 0) {
+            _toastEvents.emit(context.getString(R.string.player_batch_genre_updated_all, successCount))
+        } else {
+            _toastEvents.emit(
+                context.getString(R.string.player_batch_genre_updated_partial, successCount, failCount),
+            )
+        }
     }
 
     val customGenres: StateFlow<Set<String>> = userPreferencesRepository.customGenresFlow
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptySet()
-        )
+        .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = emptySet())
 
     val customGenreIcons: StateFlow<Map<String, Int>> = userPreferencesRepository.customGenreIconsFlow
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyMap()
-        )
+        .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = emptyMap())
 
     val isGenreGridView: StateFlow<Boolean> = userPreferencesRepository.isGenreGridViewFlow
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = true
-        )
+        .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = true)
 
     fun toggleGenreViewMode() {
         viewModelScope.launch {
@@ -4645,58 +4630,5 @@ viewModelScope.launch(Dispatchers.IO) {
         viewModelScope.launch {
             userPreferencesRepository.addCustomGenre(genre, iconResId)
         }
-    }
-}
-
-internal fun Song.withRepositoryHydration(repositorySong: Song): Song {
-    if (id != repositorySong.id) return this
-
-    val hydratedArtworkUri = when {
-        repositorySong.albumArtUriString.isNullOrBlank() -> albumArtUriString
-        albumArtUriString.isNullOrBlank() -> repositorySong.albumArtUriString
-        areEquivalentArtworkUrisForSong(id, albumArtUriString, repositorySong.albumArtUriString) ->
-            albumArtUriString
-        else -> repositorySong.albumArtUriString
-    }
-
-    return repositorySong.copy(
-        contentUriString = repositorySong.contentUriString.ifBlank { contentUriString },
-        albumArtUriString = hydratedArtworkUri,
-        duration = repositorySong.duration.takeIf { it > 0L } ?: duration,
-        lyrics = repositorySong.lyrics ?: lyrics
-    )
-}
-
-internal fun areEquivalentArtworkUrisForSong(
-    songId: String,
-    firstUri: String?,
-    secondUri: String?
-): Boolean {
-    if (firstUri == secondUri) return true
-    if (firstUri.isNullOrBlank() || secondUri.isNullOrBlank()) return false
-
-    val targetSongId = songId.toLongOrNull() ?: return false
-
-    fun resolveUriSongId(uri: String): Long? {
-        return LocalArtworkUri.parseSongId(uri)
-            ?: SharedArtworkContentProvider.parseSongId(uri)
-    }
-
-    val firstSongId = resolveUriSongId(firstUri)
-    val secondSongId = resolveUriSongId(secondUri)
-    return firstSongId == targetSongId && secondSongId == targetSongId
-}
-
-internal fun Song.improvesLyricsLookupComparedTo(previousSong: Song): Boolean {
-    return (previousSong.lyrics.isNullOrBlank() && !lyrics.isNullOrBlank()) ||
-        (previousSong.path.isBlank() && path.isNotBlank()) ||
-        (previousSong.contentUriString.isBlank() && contentUriString.isNotBlank())
-}
-
-internal fun parsePersistedLyrics(rawLyrics: String?): Lyrics? {
-    val normalizedLyrics = rawLyrics?.trim()?.takeIf { it.isNotBlank() } ?: return null
-    val parsedLyrics = LyricsUtils.parseLyrics(normalizedLyrics)
-    return parsedLyrics.takeIf {
-        !it.synced.isNullOrEmpty() || !it.plain.isNullOrEmpty()
     }
 }
