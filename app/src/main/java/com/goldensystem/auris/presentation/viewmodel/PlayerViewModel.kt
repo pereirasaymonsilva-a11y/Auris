@@ -261,9 +261,11 @@ class PlayerViewModel @Inject constructor(
 
     private val _rokuDevices = MutableStateFlow<List<RokuDevice>>(emptyList())
     val rokuDevices: StateFlow<List<RokuDevice>> = _rokuDevices.asStateFlow()
+    
+    
 
     private val _playerUiState = MutableStateFlow(PlayerUiState())
-
+    val playerUiState: StateFlow<PlayerUiState> = _playerUiState.asStateFlow()
     val queueFlow: StateFlow<ImmutableList<Song>> = _playerUiState
         .map { it.currentPlaybackQueue }
         .distinctUntilChanged()
