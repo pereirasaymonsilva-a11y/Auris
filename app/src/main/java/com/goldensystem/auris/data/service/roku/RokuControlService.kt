@@ -16,9 +16,9 @@ class RokuControlService @Inject constructor(
     private val okHttpClient: OkHttpClient
 ) {
     companion object {
-        private const val TAG = "RokuControl"
-        private const val RECEIVER_PORT = 8061
-    }
+    private const val TAG = "RokuControl"
+    private const val RECEIVER_PORT = 80  // ← Porta 80, sem bloqueios
+}
 
     private val client = okHttpClient.newBuilder()
         .connectTimeout(5, TimeUnit.SECONDS)
