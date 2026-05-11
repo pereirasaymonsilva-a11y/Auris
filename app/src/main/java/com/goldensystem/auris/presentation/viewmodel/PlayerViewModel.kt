@@ -2,7 +2,6 @@ package com.goldensystem.auris.presentation.viewmodel
 
 import com.goldensystem.auris.cast.roku.RokuCastManager
 import com.goldensystem.auris.cast.roku.RokuDevice
-import kotlinx.coroutines.flow.MutableStateFlow
 import android.annotation.SuppressLint
 import com.goldensystem.auris.data.repository.AurisOnlineRepository
 import android.app.Activity
@@ -257,11 +256,13 @@ class PlayerViewModel @Inject constructor(
     private val sessionToken: SessionToken,
     private val mediaControllerFactory: com.goldensystem.auris.data.media.MediaControllerFactory,
     private val aurisOnlineRepository: AurisOnlineRepository,
-    private val rokuCastManager: RokuCastManager,
+        private val rokuCastManager: RokuCastManager,
+) : ViewModel() {
+
     private val _rokuDevices = MutableStateFlow<List<RokuDevice>>(emptyList())
     val rokuDevices: StateFlow<List<RokuDevice>> = _rokuDevices.asStateFlow()
+
     private val _playerUiState = MutableStateFlow(PlayerUiState())
-    val playerUiState: StateFlow<PlayerUiState> = _playerUiState.asStateFlow()
 
     val queueFlow: StateFlow<ImmutableList<Song>> = _playerUiState
         .map { it.currentPlaybackQueue }
