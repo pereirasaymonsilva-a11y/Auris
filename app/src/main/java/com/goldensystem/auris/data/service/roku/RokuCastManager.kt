@@ -60,7 +60,7 @@ class RokuCastManager @Inject constructor(
                     return@withTimeout Result.failure<Unit>(Exception("Falha ao iniciar servidor HTTP"))
                 }
 
-                Log.d(TAG, "Tentando iniciar stream: $streamUrl")
+                Log.d(TAG, "URL do stream que será enviada ao Roku: $streamUrl")
 
                 val result = controlService.playStream(
                     device = device,
@@ -118,17 +118,6 @@ class RokuCastManager @Inject constructor(
             return null
         }
         return file
-    }
-
-    private fun getAudioFormat(song: Song): String {
-        return when {
-            song.mimeType?.contains("m4a") == true -> "m4a"
-            song.mimeType?.contains("aac") == true -> "aac"
-            song.mimeType?.contains("flac") == true -> "flac"
-            song.mimeType?.contains("ogg") == true -> "ogg"
-            song.mimeType?.contains("wav") == true -> "wav"
-            else -> "mp3"
-        }
     }
 
     fun onCleared() {

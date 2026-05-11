@@ -54,56 +54,39 @@ class RokuControlService @Inject constructor(
             val encodedUrl = URLEncoder.encode(streamUrl, "UTF-8")
             val encodedTitle = URLEncoder.encode(title ?: "", "UTF-8")
 
-            // Tenta primeiro com o parâmetro "u" (mais comum em firmwares recentes)
-            var result = tryPlayStream(device, encodedUrl, encodedTitle, useUrlParam = false)
-            if (result.isSuccess) {
-                return@withContext result
-            }
-            Log.w(TAG, "Falha com parâmetro 'u', tentando com 'url'...")
+            // Lista de variações de parâmetros para tentar
+            val attempts = listOf(
+                "t=a&u=$encodedUrl&videoName=$encodedTitle",
+                "t=a&url=$encodedUrl&videoName=$encodedTitle",
+                "t=a&u=$encodedUrl",
+                "t=a&url=$encodedUrl",
+                "t=a&songUrl=$encodedUrl"
+            )
 
-            // Se falhar, tenta com o parâmetro "url" (firmwares mais antigos)
-            result = tryPlayStream(device, encodedUrl, encodedTitle, useUrlParam = true)
-            if (result.isSuccess) {
-                return@withContext result
-            }
-            Log.e(TAG, "Ambas as tentativas de playStream falharam")
-            result // Retorna o último erro
-        }
-    }
+            for (params in attempts) {
+                val rokuUrl = "http://${device.ipAddress}:${device.port}/input/15985?$params"
+                Log.d(TAG, "Tentando playStream: $rokuUrl")
 
-    private suspend fun tryPlayStream(
-        device: RokuDevice,
-        encodedUrl: String,
-        encodedTitle: String,
-        useUrlParam: Boolean
-    ): Result<Unit> {
-        val paramName = if (useUrlParam) "url" else "u"
-        val rokuUrl = "http://${device.ipAddress}:${device.port}/input/15985?" +
-                "t=a" +
-                "&$paramName=$encodedUrl" +
-                "&videoName=$encodedTitle"
+                val request = Request.Builder()
+                    .url(rokuUrl)
+                    .post("".toRequestBody())
+                    .build()
 
-        Log.d(TAG, "Tentando playStream com '$paramName': $rokuUrl")
-
-        val request = Request.Builder()
-            .url(rokuUrl)
-            .post("".toRequestBody())
-            .build()
-
-        return try {
-            client.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    Log.d(TAG, "Stream iniciado com sucesso em ${device.friendlyName} (usando '$paramName')")
-                    Result.success(Unit)
-                } else {
-                    val errorBody = response.body?.string() ?: ""
-                    Log.e(TAG, "Falha ao iniciar stream com '$paramName': HTTP ${response.code} body=$errorBody")
-                    Result.failure(Exception("Erro HTTP ${response.code}: $errorBody"))
+                try {
+                    client.newCall(request).execute().use { response ->
+                        if (response.isSuccessful) {
+                            Log.d(TAG, "Sucesso com parâmetros: $params")
+                            return@withContext Result.success(Unit)
+                        } else {
+                            Log.w(TAG, "Falha (${response.code}) para: $params")
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Exceção para $params: ${e.message}")
                 }
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Erro ao iniciar stream com '$paramName'", e)
-            Result.failure(e)
+
+            Result.failure(Exception("Todas as tentativas de playStream falharam (404/outros). Verifique se o canal Roku Media Player está instalado."))
         }
     }
 
