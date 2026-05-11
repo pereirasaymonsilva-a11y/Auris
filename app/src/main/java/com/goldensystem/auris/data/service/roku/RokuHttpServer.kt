@@ -1,10 +1,11 @@
 package com.goldensystem.auris.data.service.roku
 
+import android.content.Context
+import android.net.wifi.WifiManager
 import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.FileInputStream
-import java.io.OutputStream
-import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.Executors
@@ -12,7 +13,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RokuHttpServer @Inject constructor() {
+class RokuHttpServer @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
     companion object {
         private const val TAG = "RokuHttpServer"
         private const val THREAD_POOL_SIZE = 4
@@ -43,7 +46,8 @@ class RokuHttpServer @Inject constructor() {
                 }
             }
 
-            val streamUrl = "http://${getLocalIpAddress()}:$port/stream"
+            val ip = getLocalIpAddress()
+            val streamUrl = "http://$ip:$port/stream"
             Log.d(TAG, "Servidor HTTP iniciado em $streamUrl")
             streamUrl
         } catch (e: Exception) {
@@ -68,13 +72,14 @@ class RokuHttpServer @Inject constructor() {
             val input = socket.getInputStream()
             val output = socket.getOutputStream()
 
-            // Lê a primeira linha (ex: GET /stream HTTP/1.1)
             val reader = input.bufferedReader()
             val requestLine = reader.readLine() ?: return
+            Log.d(TAG, "Requisição recebida: $requestLine")
 
             if (requestLine.startsWith("GET")) {
                 val file = currentFile
-                if (file == null || !file.exists()) {
+                if (file == null || !file.exists() || !file.canRead()) {
+                    Log.e(TAG, "Arquivo não encontrado ou sem permissão: ${file?.absolutePath}")
                     val response = "HTTP/1.1 404 Not Found\r\n\r\n".toByteArray()
                     output.write(response)
                     output.flush()
@@ -122,7 +127,23 @@ class RokuHttpServer @Inject constructor() {
     }
 
     private fun getLocalIpAddress(): String {
-        return try {
+        try {
+            val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            val ipInt = wifiManager?.connectionInfo?.ipAddress ?: 0
+            if (ipInt != 0) {
+                return String.format(
+                    "%d.%d.%d.%d",
+                    ipInt and 0xff,
+                    ipInt shr 8 and 0xff,
+                    ipInt shr 16 and 0xff,
+                    ipInt shr 24 and 0xff
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Falha ao obter IP via WifiManager", e)
+        }
+        // Fallback: percorre interfaces de rede
+        try {
             val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
             while (interfaces.hasMoreElements()) {
                 val networkInterface = interfaces.nextElement()
@@ -135,9 +156,9 @@ class RokuHttpServer @Inject constructor() {
                     }
                 }
             }
-            "127.0.0.1"
         } catch (e: Exception) {
-            "127.0.0.1"
+            Log.e(TAG, "Erro ao varrer interfaces", e)
         }
+        return "127.0.0.1"
     }
 }

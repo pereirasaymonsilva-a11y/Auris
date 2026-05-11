@@ -103,11 +103,9 @@ class RokuCastManager @Inject constructor(
     }
 
     private fun getAudioFile(song: Song): File? {
-        if (song.path.isNotBlank()) {
-            val file = File(song.path)
-            if (file.exists()) return file
-        }
-        return null
+        if (song.path.isBlank()) return null
+        val file = File(song.path)
+        return if (file.exists() && file.canRead()) file else null
     }
 
     private fun getAudioFormat(song: Song): String {
