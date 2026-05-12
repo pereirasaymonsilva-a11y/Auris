@@ -246,7 +246,14 @@ fun CastBottomSheet(
     add(
         CastDeviceUi(
             id = "roku_${roku.ip}",
-            name = roku.name
+            name = roku.name,
+            deviceType = MediaRouter.RouteInfo.DEVICE_TYPE_TV,
+            playbackType = MediaRouter.RouteInfo.PLAYBACK_TYPE_REMOTE,
+            connectionState = MediaRouter.RouteInfo.CONNECTION_STATE_CONNECTED,
+            volumeHandling = MediaRouter.RouteInfo.PLAYBACK_VOLUME_FIXED,
+            volume = 0,
+            volumeMax = 0,
+            isSelected = false
         )
     )
 }

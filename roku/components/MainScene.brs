@@ -13,17 +13,23 @@ sub init()
     m.configTask.observeField("status", "onConfigStatusChanged")
     m.configTask.observeField("configJson", "onConfigJsonChanged")
 
-    ' Troque este endereço pelo IP do celular/servidor Android durante o teste.
-    ' O contrato mínimo esperado é um JSON com streamUrl, title, artist, album, cover, lyrics e mime.
-    m.configTask.configUrl = "http://192.168.0.5:9876/roku/config"
+    ' Recebe automaticamente a URL enviada pelo Android
+info = CreateObject("roAppInfo")
+configUrl = info.GetValue("config")
+
+if configUrl <> invalid and configUrl <> "" then
+    m.configTask.configUrl = configUrl
     m.configTask.control = "RUN"
+else
+    m.status.text = "Config URL ausente"
+end if
 end sub
 
 sub showIdleState()
     m.title.text = "Auris Receiver"
     m.artist.text = "Aguardando conexão..."
     m.album.text = ""
-    m.status.text = "Pronto"
+    m.status.text = "Esperando"
     m.lyrics.text = ""
     m.cover.uri = ""
 end sub

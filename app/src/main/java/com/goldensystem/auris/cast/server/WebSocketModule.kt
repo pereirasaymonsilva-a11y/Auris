@@ -26,7 +26,7 @@ fun Routing.configureWebSockets(sessionManager: SessionManager) {
             incoming.consumeEach { frame ->
                 if (frame is Frame.Text) {
                     val text = frame.readText()
-                    if (text.contains(""type":"state"")) {
+                    if (text.contains("\"type\":\"state\"")) {
                         val stateMsg = Json.decodeFromString<StateMessage>(text)
                         session.updateState(stateMsg)
                     }
