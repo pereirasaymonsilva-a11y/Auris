@@ -260,11 +260,14 @@ class PlayerViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _rokuDevices = MutableStateFlow<List<RokuDevice>>(emptyList())
-    val rokuDevices: StateFlow<List<RokuDevice>> = _rokuDevices.asStateFlow
+val rokuDevices: StateFlow<List<RokuDevice>> = _rokuDevices.asStateFlow()
+
+init {
     viewModelScope.launch(Dispatchers.IO) {
-    try {
-        _rokuDevices.value = rokuCastManager.discoverDevices()
-    } catch (_: Exception) { }
+        try {
+            _rokuDevices.value = rokuCastManager.discoverDevices()
+        } catch (_: Exception) { }
+    }
 }
     
     
