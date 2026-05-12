@@ -243,20 +243,20 @@ fun CastBottomSheet(
     val devices = buildList {
         if (isWifiEnabled) {
             rokuDevices.forEach { roku ->
-                add(
-                    CastDeviceUi(
-                        id = "roku_${roku.serialNumber}",
-                        name = roku.friendlyName,
-                        deviceType = MediaRouter.RouteInfo.DEVICE_TYPE_TV,
-                        playbackType = MediaRouter.RouteInfo.PLAYBACK_TYPE_REMOTE,
-                        connectionState = MediaRouter.RouteInfo.CONNECTION_STATE_DISCONNECTED,
-                        volumeHandling = MediaRouter.RouteInfo.PLAYBACK_VOLUME_FIXED,
-                        volume = 0,
-                        volumeMax = 0,
-                        isSelected = false
-                    )
-                )
-            }
+    add(
+        CastDeviceUi(
+            id = "roku_${roku.ip}",          // <-- alterado
+            name = roku.name,                // <-- alterado
+            deviceType = MediaRouter.RouteInfo.DEVICE_TYPE_TV,
+            playbackType = MediaRouter.RouteInfo.PLAYBACK_TYPE_REMOTE,
+            connectionState = MediaRouter.RouteInfo.CONNECTION_STATE_DISCONNECTED,
+            volumeHandling = MediaRouter.RouteInfo.PLAYBACK_VOLUME_FIXED,
+            volume = 0,
+            volumeMax = 0,
+            isSelected = false
+        )
+    )
+}
 
             addAll(
                 availableRoutes.map { route ->
@@ -399,12 +399,12 @@ fun CastBottomSheet(
                                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                     context.startActivity(intent)
                                 }
-                                id.startsWith("roku_") -> {
-                                    val serial = id.removePrefix("roku_")
-                                    rokuDevices.firstOrNull { it.serialNumber == serial }?.let { roku ->
-                                        playerViewModel.connectToRoku(roku)
-                                    }
-                                }
+                                idid.startsWith("roku_") -> {
+    val ip = id.removePrefix("roku_")
+    rokuDevices.firstOrNull { it.ip == ip }?.let { roku ->
+        playerViewModel.connectToRoku(roku)
+    }
+}
                                 else -> routes.firstOrNull { it.id == id }?.let { playerViewModel.selectRoute(it) }
                             }
                         },
