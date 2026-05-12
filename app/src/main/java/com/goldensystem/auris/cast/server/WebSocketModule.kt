@@ -2,12 +2,10 @@ package com.goldensystem.auris.cast.server
 
 import com.goldensystem.auris.cast.protocol.StateMessage
 import com.goldensystem.auris.cast.session.SessionManager
-import io.ktor.server.routing.Routing
-import io.ktor.server.websocket.webSocket
-import io.ktor.websocket.CloseReason
-import io.ktor.websocket.Frame
+import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
+import io.ktor.websocket.*
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 fun Routing.configureWebSockets(sessionManager: SessionManager) {
