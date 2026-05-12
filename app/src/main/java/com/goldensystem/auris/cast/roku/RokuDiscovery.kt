@@ -5,8 +5,11 @@ import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object RokuDiscovery {
+@Singleton
+class RokuDiscovery @Inject constructor() {
 
     suspend fun discover(): List<RokuDevice> = withContext(Dispatchers.IO) {
         val devices = mutableListOf<RokuDevice>()

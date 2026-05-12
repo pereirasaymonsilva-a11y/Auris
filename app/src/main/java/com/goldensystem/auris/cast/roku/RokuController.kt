@@ -4,10 +4,11 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.URLEncoder
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class RokuController(
-    private val rokuIp: String
-) {
+@Singleton
+class RokuController @Inject constructor() {
     private val client = OkHttpClient()
 
     fun launchReceiver(rokuIp: String, wsUrl: String) {
@@ -22,7 +23,7 @@ class RokuController(
         client.newCall(request).execute().use { }
     }
 
-    fun play(audioUrl: String) {
+    fun play(rokuIp: String, audioUrl: String) {
         val encoded = URLEncoder.encode(audioUrl, "UTF-8")
         val url = "http://$rokuIp:8060/input/15985?t=p&u=$encoded"
 
@@ -34,15 +35,15 @@ class RokuController(
         client.newCall(request).execute().use { }
     }
 
-    fun playPause() {
-        keypress("Play")
+    fun playPause(rokuIp: String) {
+        keypress(rokuIp, "Play")
     }
 
-    fun home() {
-        keypress("Home")
+    fun home(rokuIp: String) {
+        keypress(rokuIp, "Home")
     }
 
-    private fun keypress(key: String) {
+    private fun keypress(rokuIp: String, key: String) {
         val request = Request.Builder()
             .url("http://$rokuIp:8060/keypress/$key")
             .post("".toRequestBody())
