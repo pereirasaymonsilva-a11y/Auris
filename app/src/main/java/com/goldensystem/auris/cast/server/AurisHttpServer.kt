@@ -67,12 +67,9 @@ private fun Routing.audioRoute(file: File, song: Song) {
             call.respondText("404: Not Found", status = HttpStatusCode.NotFound)
             return@get
         }
-        call.respondFile(
-            file = file,
-            configure = {
-                contentType(ContentType.parse(song.mimeType ?: "audio/mpeg"))
-            }
-        )
+        call.response.header("Content-Type", (song.mimeType ?: "audio/mpeg"))
+        call.response.header("Accept-Ranges", "bytes")
+        call.respondFile(file)
     }
 }
 
