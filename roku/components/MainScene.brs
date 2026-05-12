@@ -13,13 +13,23 @@ sub init()
     m.configTask.observeField("status", "onConfigStatusChanged")
     m.configTask.observeField("configJson", "onConfigJsonChanged")
 
-    ' Recebe automaticamente a URL enviada pelo Android
-info = CreateObject("roAppInfo")
-configUrl = info.GetValue("config")
+    launchArgs = m.global.launchArgs
 
-if configUrl <> invalid and configUrl <> "" then
-    m.configTask.configUrl = configUrl
-    m.configTask.control = "RUN"
+if launchArgs <> invalid and launchArgs.DoesExist("ws") then
+    wsUrl = launchArgs.ws
+
+    httpUrl = wsUrl.Replace("ws://", "http://")
+
+    q = Instr(1, httpUrl, "/ws?")
+    
+    if q > 0 then
+        baseUrl = Left(httpUrl, q - 1)
+
+        m.configTask.configUrl = baseUrl + "/roku/config"
+        m.configTask.control = "RUN"
+    else
+        m.status.text = "WS inválido"
+    end if
 else
     m.status.text = "Config URL ausente"
 end if

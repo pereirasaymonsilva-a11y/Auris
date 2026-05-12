@@ -44,6 +44,7 @@ class AurisHttpServer @Inject constructor(
                 audioRoute(currentFile!!, song)
                 coverRoute(song)
                 lyricsRoute(song)
+                rokuConfigRoute(song)
             }
         }.start(wait = false)
 
@@ -88,5 +89,29 @@ private fun Routing.lyricsRoute(song: Song) {
     get("/lyrics") {
         val lyrics = song.lyrics ?: ""
         call.respondText(lyrics)
+    }
+}
+
+private fun Routing.rokuConfigRoute(song: Song) {
+    get("/roku/config") {
+
+        val baseUrl = "http://${NetworkUtils.getStaticLocalIp()}:9876"
+
+        val json = """
+        {
+            "streamUrl":"$baseUrl/audio",
+            "title":"${song.title}",
+            "artist":"${song.artist}",
+            "album":"${song.album}",
+            "cover":"$baseUrl/cover",
+            "lyrics":"$baseUrl/lyrics",
+            "mime":"${song.mimeType ?: "audio/mpeg"}"
+        }
+        """.trimIndent()
+
+        call.respondText(
+            json,
+            ContentType.Application.Json
+        )
     }
 }
