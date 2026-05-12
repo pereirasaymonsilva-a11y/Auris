@@ -188,8 +188,7 @@ fun CastBottomSheet(
     val trackVolume by playerViewModel.trackVolume.collectAsStateWithLifecycle()
     val isPlaying = playerViewModel.stablePlayerState.collectAsStateWithLifecycle().value.isPlaying
     val context = LocalContext.current
-    val rokuDevices by playerViewModel.rokuDevices.collectAsStateWithLifecycle()
-
+    
     val rokuDevices by playerViewModel.rokuDevices.collectAsStateWithLifecycle()
 
     val requiredPermissions = remember {

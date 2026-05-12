@@ -4661,3 +4661,29 @@ internal fun parsePersistedLyrics(rawLyrics: String?): Lyrics? {
         !it.synced.isNullOrEmpty() || !it.plain.isNullOrEmpty()
     }
 }
+
+internal fun Song.improvesLyricsLookupComparedTo(previousSong: Song): Boolean {
+    return (previousSong.lyrics.isNullOrBlank() && !lyrics.isNullOrBlank()) ||
+        (previousSong.path.isBlank() && path.isNotBlank()) ||
+        (previousSong.contentUriString.isBlank() && contentUriString.isNotBlank())
+}
+
+internal fun areEquivalentArtworkUrisForSong(
+    songId: String,
+    firstUri: String?,
+    secondUri: String?
+): Boolean {
+    if (firstUri == secondUri) return true
+    if (firstUri.isNullOrBlank() || secondUri.isNullOrBlank()) return false
+
+    val targetSongId = songId.toLongOrNull() ?: return false
+
+    fun resolveUriSongId(uri: String): Long? {
+        return LocalArtworkUri.parseSongId(uri)
+            ?: SharedArtworkContentProvider.parseSongId(uri)
+    }
+
+    val firstSongId = resolveUriSongId(firstUri)
+    val secondSongId = resolveUriSongId(secondUri)
+    return firstSongId == targetSongId && secondSongId == targetSongId
+}
