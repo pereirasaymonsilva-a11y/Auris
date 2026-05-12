@@ -937,7 +937,7 @@ class PlayerViewModel @Inject constructor(
                     }
 
                     val hydratedSong = currentSong.withRepositoryHydration(repositorySong)
-                    val persistedLyrics = parsePersistedLyrics(hydratedSong.lyrics)
+                   val persistedLyrics: Lyrics? = parsePersistedLyrics(hydratedSong.lyrics)
                     val shouldApplyPersistedLyrics = currentState.lyrics == null && persistedLyrics != null
                     val shouldRefreshSong = hydratedSong != currentSong
                     val shouldReloadLyrics =
@@ -4628,9 +4628,36 @@ viewModelScope.launch(Dispatchers.IO) {
         }
     }
 
-    fun addCustomGenre(genre: String, iconResId: Int? = null) {
+        fun addCustomGenre(genre: String, iconResId: Int? = null) {
         viewModelScope.launch {
             userPreferencesRepository.addCustomGenre(genre, iconResId)
         }
+    }
+}
+
+internal fun Song.withRepositoryHydration(repositorySong: Song): Song {
+    if (id != repositorySong.id) return this
+
+    val hydratedArtworkUri = when {
+        repositorySong.albumArtUriString.isNullOrBlank() -> albumArtUriString
+        albumArtUriString.isNullOrBlank() -> repositorySong.albumArtUriString
+        areEquivalentArtworkUrisForSong(id, albumArtUriString, repositorySong.albumArtUriString) ->
+            albumArtUriString
+        else -> repositorySong.albumArtUriString
+    }
+
+    return repositorySong.copy(
+        contentUriString = repositorySong.contentUriString.ifBlank { contentUriString },
+        albumArtUriString = hydratedArtworkUri,
+        duration = repositorySong.duration.takeIf { it > 0L } ?: duration,
+        lyrics = repositorySong.lyrics ?: lyrics
+    )
+}
+
+internal fun parsePersistedLyrics(rawLyrics: String?): Lyrics? {
+    val normalizedLyrics = rawLyrics?.trim()?.takeIf { it.isNotBlank() } ?: return null
+    val parsedLyrics = LyricsUtils.parseLyrics(normalizedLyrics)
+    return parsedLyrics.takeIf {
+        !it.synced.isNullOrEmpty() || !it.plain.isNullOrEmpty()
     }
 }

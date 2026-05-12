@@ -4,6 +4,7 @@ import android.Manifest
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
+ import com.goldensystem.auris.cast.roku.RokuDevice
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
@@ -187,6 +188,7 @@ fun CastBottomSheet(
     val trackVolume by playerViewModel.trackVolume.collectAsStateWithLifecycle()
     val isPlaying = playerViewModel.stablePlayerState.collectAsStateWithLifecycle().value.isPlaying
     val context = LocalContext.current
+    val rokuDevices by playerViewModel.rokuDevices.collectAsStateWithLifecycle()
 
     val rokuDevices by playerViewModel.rokuDevices.collectAsStateWithLifecycle()
 
