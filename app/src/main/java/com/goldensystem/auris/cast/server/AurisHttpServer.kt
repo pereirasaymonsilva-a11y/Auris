@@ -6,7 +6,7 @@ import com.goldensystem.auris.data.model.Song
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
-import io.ktor.server.netty.Netty
+import io.ktor.server.cio.CIO
 import io.ktor.server.plugins.compression.Compression
 import io.ktor.server.plugins.partialcontent.PartialContent
 import io.ktor.server.response.*
@@ -29,7 +29,7 @@ class AurisHttpServer @Inject constructor(
         stop()
         currentFile = audioFile
 
-        server = embeddedServer(Netty, port = port) {
+        server = embeddedServer(CIO, port = port) {
             install(WebSockets) {
                 pingPeriod = Duration.ofSeconds(15)
                 timeout = Duration.ofSeconds(30)
