@@ -358,6 +358,13 @@ dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.cio)
     implementation(libs.kotlinx.coroutines.core)
+    implementation("io.ktor:ktor-server-core:2.3.7")
+    implementation("io.ktor:ktor-server-netty:2.3.7")
+    implementation("io.ktor:ktor-server-websockets:2.3.7")
+    implementation("io.ktor:ktor-server-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+    implementation("io.ktor:ktor-server-partial-content:2.3.7")
+    implementation("io.ktor:ktor-server-compression:2.3.7")
 
     implementation(libs.androidx.ui.text.google.fonts)
 
@@ -392,8 +399,9 @@ dependencies {
     implementation(libs.androidx.security.crypto)
 
     //roku
-    implementation("org.nanohttpd:nanohttpd:2.3.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    
 }
 
 tasks.withType<Test> {

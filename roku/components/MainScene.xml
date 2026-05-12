@@ -1,7 +1,60 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <component name="MainScene" extends="Scene">
-    <script type="text/brightscript" uri="pkg:/source/main.brs" />
     <children>
-        <Label id="statusLabel" text="Auris Receiver pronto" translation="[0,0]" color="0xFFFFFF" />
+        <Rectangle
+            id="bg"
+            color="0x101010FF"
+            translation="[0,0]"
+            width="1920"
+            height="1080" />
+
+        <Poster
+            id="cover"
+            translation="[80,80]"
+            width="520"
+            height="520"
+            loadDisplayMode="scaleToFit" />
+
+        <Label
+            id="title"
+            translation="[650,120]"
+            width="1180"
+            height="80" />
+
+        <Label
+            id="artist"
+            translation="[650,210]"
+            width="1180"
+            height="60" />
+
+        <Label
+            id="album"
+            translation="[650,280]"
+            width="1180"
+            height="60" />
+
+        <Label
+            id="status"
+            translation="[650,360]"
+            width="1180"
+            height="40" />
+
+        <Label
+            id="lyrics"
+            translation="[80,650]"
+            width="1760"
+            height="320"
+            numLines="8" />
+
+        <Video
+            id="player"
+            translation="[0,0]"
+            width="1"
+            height="1"
+            visible="false" />
+
+        <AurisConfigTask id="configTask" />
     </children>
+
+    <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
 </component>

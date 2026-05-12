@@ -4,19 +4,25 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.URLEncoder
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class RokuController @Inject constructor() {
+class RokuController(
+    private val rokuIp: String
+) {
+    private val client = OkHttpClient()
 
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(5, TimeUnit.SECONDS)
-        .build()
+    fun launchReceiver(rokuIp: String, wsUrl: String) {
+        val encodedWs = URLEncoder.encode(wsUrl, "UTF-8")
+        val url = "http://$rokuIp:8060/launch/dev?ws=$encodedWs"
 
-    fun play(rokuIp: String, audioUrl: String) {
+        val request = Request.Builder()
+            .url(url)
+            .post("".toRequestBody())
+            .build()
+
+        client.newCall(request).execute().use { }
+    }
+
+    fun play(audioUrl: String) {
         val encoded = URLEncoder.encode(audioUrl, "UTF-8")
         val url = "http://$rokuIp:8060/input/15985?t=p&u=$encoded"
 
@@ -25,23 +31,23 @@ class RokuController @Inject constructor() {
             .post("".toRequestBody())
             .build()
 
-        client.newCall(request).execute().close()
+        client.newCall(request).execute().use { }
     }
 
-    fun playPause(rokuIp: String) {
-        keypress(rokuIp, "Play")
+    fun playPause() {
+        keypress("Play")
     }
 
-    fun home(rokuIp: String) {
-        keypress(rokuIp, "Home")
+    fun home() {
+        keypress("Home")
     }
 
-    private fun keypress(rokuIp: String, key: String) {
+    private fun keypress(key: String) {
         val request = Request.Builder()
             .url("http://$rokuIp:8060/keypress/$key")
             .post("".toRequestBody())
             .build()
 
-        client.newCall(request).execute().close()
+        client.newCall(request).execute().use { }
     }
 }

@@ -5,11 +5,8 @@ import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class RokuDiscovery @Inject constructor() {
+object RokuDiscovery {
 
     suspend fun discover(): List<RokuDevice> = withContext(Dispatchers.IO) {
         val devices = mutableListOf<RokuDevice>()
@@ -20,7 +17,6 @@ class RokuDiscovery @Inject constructor() {
             MAN: "ssdp:discover"
             ST: roku:ecp
             MX: 3
-            
         """.trimIndent()
 
         val socket = DatagramSocket()
@@ -33,21 +29,26 @@ class RokuDiscovery @Inject constructor() {
             1900
         )
 
-        try {
-            socket.send(packet)
-            val buffer = ByteArray(4096)
+        socket.send(packet)
 
+        val buffer = ByteArray(4096)
+
+        try {
             while (true) {
                 val response = DatagramPacket(buffer, buffer.size)
                 socket.receive(response)
-                val ip = response.address.hostAddress
 
+                val ip = response.address.hostAddress
                 if (devices.none { it.ip == ip }) {
-                    devices.add(RokuDevice(ip = ip, name = "Roku ($ip)"))
+                    devices.add(
+                        RokuDevice(
+                            ip = ip,
+                            name = "Roku ($ip)"
+                        )
+                    )
                 }
             }
         } catch (_: Exception) {
-            // Timeout — fim da descoberta
         } finally {
             socket.close()
         }

@@ -4,7 +4,7 @@ import android.Manifest
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
- import com.goldensystem.auris.cast.roku.RokuDevice
+import com.goldensystem.auris.cast.roku.RokuDevice
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
@@ -245,19 +245,11 @@ fun CastBottomSheet(
             rokuDevices.forEach { roku ->
     add(
         CastDeviceUi(
-            id = "roku_${roku.ip}",          // <-- alterado
-            name = roku.name,                // <-- alterado
-            deviceType = MediaRouter.RouteInfo.DEVICE_TYPE_TV,
-            playbackType = MediaRouter.RouteInfo.PLAYBACK_TYPE_REMOTE,
-            connectionState = MediaRouter.RouteInfo.CONNECTION_STATE_DISCONNECTED,
-            volumeHandling = MediaRouter.RouteInfo.PLAYBACK_VOLUME_FIXED,
-            volume = 0,
-            volumeMax = 0,
-            isSelected = false
+            id = "roku_${roku.ip}",
+            name = roku.name
         )
     )
 }
-
             addAll(
                 availableRoutes.map { route ->
                     val isRouteActive = activeRoute?.id == route.id
@@ -401,8 +393,11 @@ fun CastBottomSheet(
                                 }
                                 id.startsWith("roku_") -> {
     val ip = id.removePrefix("roku_")
-    rokuDevices.firstOrNull { it.ip == ip }?.let { roku ->
-        playerViewModel.connectToRoku(roku)
+
+    rokuDevices.firstOrNull {
+        it.ip == ip
+    }?.let {
+        playerViewModel.connectToRoku(it)
     }
 }
                                 else -> routes.firstOrNull { it.id == id }?.let { playerViewModel.selectRoute(it) }
