@@ -399,7 +399,7 @@ fun CastBottomSheet(
                                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                     context.startActivity(intent)
                                 }
-                                idid.startsWith("roku_") -> {
+                                id.startsWith("roku_") -> {
     val ip = id.removePrefix("roku_")
     rokuDevices.firstOrNull { it.ip == ip }?.let { roku ->
         playerViewModel.connectToRoku(roku)
