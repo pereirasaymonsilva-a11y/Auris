@@ -158,7 +158,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import com.goldensystem.auris.data.service.roku.RokuDevice
 
 // ... (resto do código permanece exatamente igual ao que você já tem, mas com a adição dos Rokus na lista)
 // Para evitar uma resposta enorme, mantive apenas as importações corrigidas.
