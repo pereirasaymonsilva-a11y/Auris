@@ -602,13 +602,15 @@ fun AppNavigation(
                     return@composable
                 }
 
-                VideoPlayerScreen(
-    fileUri = videoUri,
-    onBack = { navController.popBackStack() }
-)
-            }
-        }
-    }
+                composable(
+    route = "video_player/{videoUri}",
+    arguments = listOf(navArgument("videoUri") { type = NavType.StringType })
+) { backStackEntry ->
+    val videoUri = backStackEntry.arguments?.getString("videoUri") ?: return@composable
+    VideoPlayerScreen(
+        fileUri = videoUri,
+        onBack = { navController.popBackStack() }
+    )
 }
 
 private fun String.toRoute(): String = when (this) {

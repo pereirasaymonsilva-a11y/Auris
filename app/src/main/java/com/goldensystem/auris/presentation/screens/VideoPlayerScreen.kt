@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.BrightnessHigh
 import androidx.compose.material.icons.outlined.VolumeUp
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -58,6 +57,7 @@ import coil.request.videoFrameMillis
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoPlayerScreen(
     fileUri: String,
@@ -104,7 +104,8 @@ fun VideoPlayerScreen(
                 override fun onPlaybackStateChanged(state: Int) {
                     isBuffering = (state == Player.STATE_BUFFERING)
                     if (state == Player.STATE_READY) {
-                        duration = player.duration.coerceAtLeast(0L)
+                        // CORREÇÃO: usar duration direto, sem player.
+                        duration = duration.coerceAtLeast(0L)
                         showThumbnail = false
                     }
                 }
@@ -204,7 +205,7 @@ fun VideoPlayerScreen(
         AndroidView(
             factory = { ctx ->
                 PlayerView(ctx).apply {
-                    this.player = player   // <-- ATRIBUIÇÃO CORRIGIDA
+                    this.player = player   // Atribuição correta
                     useController = false
                     resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     keepScreenOn = true
@@ -405,9 +406,7 @@ fun VideoPlayerScreen(
                         thumb = {
                             SliderDefaults.Thumb(
                                 interactionSource = remember { MutableInteractionSource() },
-                                colors = SliderDefaults.colors(
-                                    thumbColor = Color.White
-                                )
+                                colors = SliderDefaults.colors(thumbColor = Color.White)
                             )
                         },
                         valueRange = 0f..(duration.toFloat().coerceAtLeast(1f))
@@ -436,6 +435,7 @@ fun VideoPlayerScreen(
             }
         }
 
+        // Camada unificada de gestos
         Box(
             modifier = Modifier
                 .fillMaxSize()

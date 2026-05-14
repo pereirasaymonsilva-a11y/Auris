@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
 import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,8 +14,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,7 +27,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.VideoLibrary
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,7 +35,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -329,7 +327,8 @@ private fun VideoCard(
     video: VideoItem,
     onClick: () -> Unit
 ) {
-    var isPressed by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.96f else 1f,
         animationSpec = spring(
@@ -346,31 +345,19 @@ private fun VideoCard(
                 scaleX = scale
                 scaleY = scale
             }
-            .pointerInput(onClick) {
-                detectTapGestures(
-                    onPress = {
-                        isPressed = true
-                        val released = tryAwaitRelease()
-                        isPressed = false
-                        if (released) onClick()
-                    }
-                )
-            }
-            .indication(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(bounded = true)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
             ),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp)
-        ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            // Thumbnail
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -381,7 +368,7 @@ private fun VideoCard(
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(Uri.parse(video.contentUri))
-                        .videoFrameMillis(1000)   // <-- corrigido
+                        .videoFrameMillis(1000)
                         .crossfade(true)
                         .allowHardware(false)
                         .build(),
@@ -390,6 +377,7 @@ private fun VideoCard(
                     contentScale = ContentScale.Crop
                 )
 
+                // Gradiente overlay
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -405,14 +393,12 @@ private fun VideoCard(
                         )
                 )
 
+                // Ícone de play central com fundo circular
                 Box(
                     modifier = Modifier
                         .align(Alignment.Center)
                         .size(56.dp)
-                        .background(
-                            Color.Black.copy(alpha = 0.35f),
-                            CircleShape
-                        ),
+                        .background(Color.Black.copy(alpha = 0.35f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -423,6 +409,7 @@ private fun VideoCard(
                     )
                 }
 
+                // Duração
                 Surface(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -442,6 +429,7 @@ private fun VideoCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Título
             Text(
                 text = video.title,
                 style = MaterialTheme.typography.titleMedium,
@@ -453,6 +441,7 @@ private fun VideoCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
+            // Linha secundária (duração, resolução, tamanho)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -463,28 +452,12 @@ private fun VideoCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (video.resolution.isNotBlank()) {
-                    Text(
-                        text = "•",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
-                    Text(
-                        text = video.resolution,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text("•", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                    Text(video.resolution, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 if (video.size > 0) {
-                    Text(
-                        text = "•",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
-                    Text(
-                        text = formatFileSize(LocalContext.current, video.size),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text("•", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                    Text(formatFileSize(LocalContext.current, video.size), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
