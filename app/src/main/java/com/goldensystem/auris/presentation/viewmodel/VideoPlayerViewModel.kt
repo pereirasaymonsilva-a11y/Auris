@@ -24,7 +24,7 @@ import javax.inject.Inject
 
 enum class PlayerState { IDLE, BUFFERING, READY, ENDED, ERROR }
 
-data class PlayerUiState(
+data class VideoPlayerUiState(
     val currentVideo: VideoItem = VideoItem.EMPTY,
     val queue: VideoQueue = VideoQueue.EMPTY,
     val playerState: PlayerState = PlayerState.IDLE,
@@ -43,9 +43,9 @@ class VideoPlayerViewModel @Inject constructor(
     private val queue: VideoQueue = savedStateHandle.get<VideoQueue>("queue") ?: VideoQueue.EMPTY
 
     private val _uiState = MutableStateFlow(
-        PlayerUiState(queue = queue, currentVideo = queue.current ?: VideoItem.EMPTY)
+        VideoPlayerUiState(queue = queue, currentVideo = queue.current ?: VideoItem.EMPTY)
     )
-    val uiState: StateFlow<PlayerUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<VideoPlayerUiState> = _uiState.asStateFlow()
 
     var exoPlayer: ExoPlayer? = null
         private set

@@ -1,6 +1,8 @@
 package com.goldensystem.auris.presentation.screens
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -44,7 +46,6 @@ import com.goldensystem.auris.utils.VideoUtils
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoGalleryScreen(
-    onVideoClick: (VideoItem) -> Unit = {},
     onOpenPlayerWithQueue: (VideoQueue) -> Unit,
     onBack: () -> Unit,
     viewModel: VideoGalleryViewModel = hiltViewModel()
@@ -94,9 +95,7 @@ fun VideoGalleryScreen(
                             items(state.displayVideos, key = { it.id }) { video ->
                                 VideoGridItem(
                                     video = video,
-                                    onClick = {
-                                        onOpenPlayerWithQueue(viewModel.buildQueue(video))
-                                    }
+                                    onClick = { onOpenPlayerWithQueue(viewModel.buildQueue(video)) }
                                 )
                             }
                         }
@@ -182,21 +181,9 @@ private fun GalleryTopBar(
 @Composable
 private fun ContextTabs(current: QueueContext, onChange: (QueueContext) -> Unit) {
     TabRow(selectedTabIndex = current.ordinal) {
-        Tab(
-            selected = current == QueueContext.ALL,
-            onClick = { onChange(QueueContext.ALL) },
-            text = { Text("Todos") }
-        )
-        Tab(
-            selected = current == QueueContext.RECENT,
-            onClick = { onChange(QueueContext.RECENT) },
-            text = { Text("Recentes") }
-        )
-        Tab(
-            selected = current == QueueContext.FOLDER,
-            onClick = { onChange(QueueContext.FOLDER) },
-            text = { Text("Pastas") }
-        )
+        Tab(selected = current == QueueContext.ALL, onClick = { onChange(QueueContext.ALL) }, text = { Text("Todos") })
+        Tab(selected = current == QueueContext.RECENT, onClick = { onChange(QueueContext.RECENT) }, text = { Text("Recentes") })
+        Tab(selected = current == QueueContext.FOLDER, onClick = { onChange(QueueContext.FOLDER) }, text = { Text("Pastas") })
     }
 }
 

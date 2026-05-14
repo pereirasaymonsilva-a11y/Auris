@@ -3,6 +3,8 @@ package com.goldensystem.auris.data.model
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
+enum class QueueContext { ALL, RECENT, FOLDER, SEARCH }
+
 @Parcelize
 data class VideoQueue(
     val videos: List<VideoItem>,
