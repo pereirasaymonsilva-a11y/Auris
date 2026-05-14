@@ -2,6 +2,8 @@ package com.goldensystem.auris.presentation.viewmodel
 
 import android.app.Application
 import android.net.Uri
+import com.goldensystem.auris.utils.VideoUtils.safeSeekBy
+import com.goldensystem.auris.utils.VideoUtils.safeSeekTo
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
