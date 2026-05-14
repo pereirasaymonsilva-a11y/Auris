@@ -11,8 +11,11 @@ object AppLanguage {
     const val RUSSIAN = "ru"
     const val CHINESE = "zh-CN"
     const val INDONESIAN = "in"
+    const val PORTUGUESE = "pt"          // NOVA constante
 
-    val supportedLanguageTags: Set<String> = setOf(SYSTEM, ENGLISH, SPANISH, CHINESE, INDONESIAN, FRENCH, RUSSIAN)
+    val supportedLanguageTags: Set<String> = setOf(
+        SYSTEM, ENGLISH, SPANISH, CHINESE, INDONESIAN, FRENCH, RUSSIAN, PORTUGUESE
+    )
 
     fun getLanguageOptions(context: Context): Map<String, String> {
         return mapOf(
@@ -22,7 +25,8 @@ object AppLanguage {
             FRENCH to context.getString(R.string.setcat_language_french),
             RUSSIAN to context.getString(R.string.setcat_language_russian),
             CHINESE to context.getString(R.string.setcat_language_chinese),
-            INDONESIAN to context.getString(R.string.setcat_language_indonesian)
+            INDONESIAN to context.getString(R.string.setcat_language_indonesian),
+            PORTUGUESE to context.getString(R.string.setcat_language_portuguese)  // NOVA linha
         )
     }
 

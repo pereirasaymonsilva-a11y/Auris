@@ -15,6 +15,7 @@
     <string name="search">搜索</string>
 
     <string name="lyrics">歌词</string>
+    
     <string name="close_lyrics_sheet">关闭歌词面板</string>
     <string name="loading_lyrics">正在加载歌词…</string>
     <string name="cant_find_lyrics">找不到这首歌的歌词。</string>

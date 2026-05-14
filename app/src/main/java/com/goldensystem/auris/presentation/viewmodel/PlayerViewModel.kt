@@ -1,7 +1,5 @@
 package com.goldensystem.auris.presentation.viewmodel
 
-import com.goldensystem.auris.cast.roku.RokuCastManager
-import com.goldensystem.auris.cast.roku.RokuDevice
 import android.annotation.SuppressLint
 import com.goldensystem.auris.data.repository.AurisOnlineRepository
 import android.app.Activity
@@ -255,22 +253,7 @@ class PlayerViewModel @Inject constructor(
     val playlistSelectionStateHolder: PlaylistSelectionStateHolder,
     private val sessionToken: SessionToken,
     private val mediaControllerFactory: com.goldensystem.auris.data.media.MediaControllerFactory,
-    private val aurisOnlineRepository: AurisOnlineRepository,
-        private val rokuCastManager: RokuCastManager,
 ) : ViewModel() {
-
-    private val _rokuDevices = MutableStateFlow<List<RokuDevice>>(emptyList())
-val rokuDevices: StateFlow<List<RokuDevice>> = _rokuDevices.asStateFlow()
-
-init {
-    viewModelScope.launch(Dispatchers.IO) {
-        try {
-            _rokuDevices.value = rokuCastManager.discoverDevices()
-        } catch (_: Exception) { }
-    }
-}
-    
-    
 
     private val _playerUiState = MutableStateFlow(PlayerUiState())
     val playerUiState: StateFlow<PlayerUiState> = _playerUiState.asStateFlow()
@@ -1695,15 +1678,6 @@ init {
         }, ContextCompat.getMainExecutor(context))
 
         castStateHolder.startDiscovery()
-        // Descobre dispositivos Roku na rede
-viewModelScope.launch(Dispatchers.IO) {
-    try {
-        val devices = rokuCastManager.discoverDevices()
-        _rokuDevices.value = devices
-    } catch (_: Exception) {
-        // Silencioso, sem descoberta
-    }
-}
 
         viewModelScope.launch {
             castStateHolder.selectedRoute.collect { route ->
@@ -4021,7 +3995,6 @@ viewModelScope.launch(Dispatchers.IO) {
         connectivityStateHolder.onCleared()
         queueUndoStateHolder.onCleared()
         playlistDismissUndoStateHolder.onCleared()
-        rokuCastManager.stopServer()
     }
 
     fun setSleepTimer(durationMinutes: Int) {
@@ -4514,27 +4487,6 @@ viewModelScope.launch(Dispatchers.IO) {
             } else {
                 val errorMsg = result.exceptionOrNull()?.message ?: "Erro desconhecido"
                 sendToast("Erro ao sincronizar: $errorMsg")
-            }
-        }
-    }
-
-    fun connectToRoku(device: RokuDevice) {
-        val currentSong = stablePlayerState.value.currentSong
-        if (currentSong == null) {
-            sendToast("Nenhuma música tocando")
-            return
-        }
-        if (currentSong.path.isBlank() || !java.io.File(currentSong.path).exists()) {
-            sendToast("Somente músicas locais são suportadas")
-            return
-        }
-        viewModelScope.launch {
-            val result = rokuCastManager.castToDevice(device, currentSong)
-            if (result.isSuccess) {
-                sendToast("Tocando no Roku: ${device.name}")
-            } else {
-                sendToast("Falha: ${result.exceptionOrNull()?.message}")
-                rokuCastManager.stopServer()
             }
         }
     }

@@ -4,7 +4,6 @@ import android.Manifest
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
-import com.goldensystem.auris.cast.roku.RokuDevice
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
@@ -159,11 +158,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-// ... (resto do código permanece exatamente igual ao que você já tem, mas com a adição dos Rokus na lista)
-// Para evitar uma resposta enorme, mantive apenas as importações corrigidas.
-// O corpo do arquivo é idêntico ao seu CastBottomSheet original, com apenas DUAS mudanças:
-// 1. Adicionada a linha: val rokuDevices by playerViewModel.rokuDevices.collectAsStateWithLifecycle()
-// 2. No buildList { ... }, adicionados os rokuDevices.forEach { ... } ANTES dos availableRoutes.
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -187,8 +181,6 @@ fun CastBottomSheet(
     val trackVolume by playerViewModel.trackVolume.collectAsStateWithLifecycle()
     val isPlaying = playerViewModel.stablePlayerState.collectAsStateWithLifecycle().value.isPlaying
     val context = LocalContext.current
-    
-    val rokuDevices by playerViewModel.rokuDevices.collectAsStateWithLifecycle()
 
     val requiredPermissions = remember {
         buildList {
@@ -242,21 +234,6 @@ fun CastBottomSheet(
 
     val devices = buildList {
         if (isWifiEnabled) {
-            rokuDevices.forEach { roku ->
-    add(
-        CastDeviceUi(
-            id = "roku_${roku.ip}",
-            name = roku.name,
-            deviceType = MediaRouter.RouteInfo.DEVICE_TYPE_TV,
-            playbackType = MediaRouter.RouteInfo.PLAYBACK_TYPE_REMOTE,
-            connectionState = MediaRouter.RouteInfo.CONNECTION_STATE_CONNECTED,
-            volumeHandling = MediaRouter.RouteInfo.PLAYBACK_VOLUME_FIXED,
-            volume = 0,
-            volumeMax = 0,
-            isSelected = false
-        )
-    )
-}
             addAll(
                 availableRoutes.map { route ->
                     val isRouteActive = activeRoute?.id == route.id
@@ -398,16 +375,7 @@ fun CastBottomSheet(
                                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                     context.startActivity(intent)
                                 }
-                                id.startsWith("roku_") -> {
-    val ip = id.removePrefix("roku_")
-
-    rokuDevices.firstOrNull {
-        it.ip == ip
-    }?.let {
-        playerViewModel.connectToRoku(it)
-    }
-}
-                                else -> routes.firstOrNull { it.id == id }?.let { playerViewModel.selectRoute(it) }
+                     else -> routes.firstOrNull { it.id == id }?.let { playerViewModel.selectRoute(it) }
                             }
                         },
                         onDisconnect = {

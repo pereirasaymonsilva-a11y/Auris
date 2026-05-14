@@ -1,82 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Library list errors -->
-    <string name="library_error_loading_songs">Erro ao carregar músicas</string>
-    <string name="library_error_loading_albums">Erro ao carregar álbuns</string>
-    <string name="library_error_loading_artists">Erro ao carregar artistas</string>
-    <string name="library_retry">Tentar novamente</string>
+    <string name="library_error_loading_songs">Error loading songs</string>
+    <string name="library_error_loading_albums">Error loading albums</string>
+    <string name="library_error_loading_artists">Error loading artists</string>
+    <string name="library_retry">Retry</string>
 
     <!-- Library empty (paginated) -->
-    <string name="library_no_songs_in_library_message">Nenhuma música encontrada na sua biblioteca.</string>
-    <string name="library_no_songs_rescan_hint">Tente reescaniar sua biblioteca nas configurações se você tiver músicas no seu dispositivo.</string>
-    <string name="cd_no_songs_in_library">Nenhuma música encontrada</string>
+    <string name="library_no_songs_in_library_message">No songs found in your library.</string>
+    <string name="library_no_songs_rescan_hint">Try rescanning your library in settings if you have songs on your device.</string>
+    <string name="cd_no_songs_in_library">No songs found</string>
 
     <!-- Library action row -->
-    <string name="library_action_new">Nova</string>
-    <string name="cd_create_new_playlist">Criar nova playlist</string>
-    <string name="cd_import_m3u_playlist">Importar playlist M3U</string>
-    <string name="cd_locate_current_song">Localizar música atual</string>
-    <string name="library_storage_filter_all_songs">Todas as músicas</string>
+    <string name="library_action_new">New</string>
+    <string name="cd_create_new_playlist">Create new playlist</string>
+    <string name="cd_import_m3u_playlist">Import M3U playlist</string>
+    <string name="cd_locate_current_song">Locate current song</string>
+    <string name="library_storage_filter_all_songs">All songs</string>
     <string name="library_storage_filter_online">Online</string>
     <string name="library_storage_filter_offline">Offline</string>
-    <string name="cd_sort_options">Opções de ordenação</string>
+    <string name="cd_sort_options">Sort options</string>
 
     <!-- Fetch lyrics (manual search fields) -->
-    <string name="lyrics_synced_badge">SINCRONIZADA</string>
-    <string name="song_field_artist_optional">Artista (opcional)</string>
+    <string name="lyrics_synced_badge">SYNCED</string>
+    <string name="song_field_artist_optional">Artist (optional)</string>
 
     <!-- Song picker -->
-    <string name="song_picker_title">Adicionar músicas</string>
-    <string name="cd_confirm_add_songs">Adicionar músicas selecionadas</string>
-    <string name="song_picker_action_add">Adicionar</string>
-    <string name="song_picker_search_label">Pesquisar músicas…</string>
-    <string name="song_picker_error_load_failed">Falha ao carregar músicas</string>
-    <string name="song_picker_load_more">Carregar mais</string>
+    <string name="song_picker_title">Add songs</string>
+    <string name="cd_confirm_add_songs">Add selected songs</string>
+    <string name="song_picker_action_add">Add</string>
+    <string name="song_picker_search_label">Search songs…</string>
+    <string name="song_picker_error_load_failed">Failed to load songs</string>
+    <string name="song_picker_load_more">Load more</string>
 
     <!-- AI playlist sheet -->
-    <string name="cd_ai">IA</string>
-    <string name="ai_playlist_headline_perfect">Perfeitamente Selecionada</string>
-    <string name="ai_playlist_headline_daily_mix">Mix Diária</string>
-    <string name="ai_playlist_subtitle_journey_ready">Sua jornada sonora está pronta</string>
-    <string name="ai_playlist_subtitle_generator">Gerador de Playlist com IA</string>
-    <string name="ai_playlist_description">Descreva a vibe, o clima ou a atividade e deixe a IA selecionar a playlist perfeita da sua biblioteca.</string>
-    <string name="ai_playlist_section_size">Tamanho da playlist</string>
-    <string name="ai_playlist_min_songs">Mín. músicas</string>
-    <string name="ai_playlist_max_songs">Máx. músicas</string>
-    <string name="ai_playlist_prompt_placeholder">Ex. vibes de noite tranquila, energia de treino animada…</string>
-    <string name="ai_playlist_tap_to_retry">Toque para Tentar Novamente</string>
-    <string name="ai_playlist_status_default">Jornada sonora sintetizada!</string>
-    <string name="ai_playlist_generating">Gerando…</string>
-    <string name="ai_playlist_ready_to_play">Pronto para Reproduzir</string>
-    <string name="ai_playlist_generate">Gerar Playlist</string>
+    <string name="cd_ai">AI</string>
+    <string name="ai_playlist_headline_perfect">Perfectly Curated</string>
+    <string name="ai_playlist_headline_daily_mix">Daily Mix</string>
+    <string name="ai_playlist_subtitle_journey_ready">Your sonic journey is ready</string>
+    <string name="ai_playlist_subtitle_generator">AI Playlist Generator</string>
+    <string name="ai_playlist_description">Describe the vibe, mood or activity and let AI curate the perfect playlist from your library.</string>
+    <string name="ai_playlist_section_size">Playlist size</string>
+    <string name="ai_playlist_min_songs">Min. songs</string>
+    <string name="ai_playlist_max_songs">Max. songs</string>
+    <string name="ai_playlist_prompt_placeholder">e.g. quiet night vibes, upbeat workout energy…</string>
+    <string name="ai_playlist_tap_to_retry">Tap to Retry</string>
+    <string name="ai_playlist_status_default">Sonic journey synthesized!</string>
+    <string name="ai_playlist_generating">Generating…</string>
+    <string name="ai_playlist_ready_to_play">Ready to Play</string>
+    <string name="ai_playlist_generate">Generate Playlist</string>
     
     <!-- Library Empty State -->
-    <string name="lib_empty_songs_all_title">Nenhuma música ainda</string>
-    <string name="lib_empty_songs_all_subtitle">Adicione música ao seu dispositivo ou sincronize uma fonte na nuvem para começar a ouvir.</string>
-    <string name="lib_empty_songs_offline_title">Nenhuma música local encontrada</string>
-    <string name="lib_empty_songs_offline_subtitle">Tente outro filtro de fonte ou reescaneie a biblioteca do seu dispositivo.</string>
-    <string name="lib_empty_songs_online_title">Nenhuma música na nuvem encontrada</string>
-    <string name="lib_empty_songs_online_subtitle">Sincronize músicas do Telegram ou NetEase, ou mude para fonte local.</string>
-    <string name="lib_empty_albums_all_title">Nenhum álbum disponível</string>
-    <string name="lib_empty_albums_all_subtitle">Os álbuns aparecerão aqui assim que sua biblioteca tiver faixas agrupadas.</string>
-    <string name="lib_empty_albums_offline_title">Nenhum álbum local encontrado</string>
-    <string name="lib_empty_albums_offline_subtitle">Músicas locais são necessárias para construir grupos de álbuns locais.</string>
-    <string name="lib_empty_albums_online_title">Nenhum álbum na nuvem encontrado</string>
-    <string name="lib_empty_albums_online_subtitle">Músicas na nuvem com dados de álbum aparecerão aqui após a sincronização.</string>
-    <string name="lib_empty_artists_all_title">Nenhum artista disponível</string>
-    <string name="lib_empty_artists_all_subtitle">Os artistas são mostrados depois que as músicas são indexadas de qualquer fonte.</string>
-    <string name="lib_empty_artists_offline_title">Nenhum artista local encontrado</string>
-    <string name="lib_empty_artists_offline_subtitle">Nenhum metadado de artista está disponível para músicas locais no momento.</string>
-    <string name="lib_empty_artists_online_title">Nenhum artista na nuvem encontrado</string>
-    <string name="lib_empty_artists_online_subtitle">As entradas de artistas na nuvem aparecem quando as músicas remotas são sincronizadas.</string>
-    <string name="lib_empty_liked_all_title">Nenhuma música curtida ainda</string>
-    <string name="lib_empty_liked_all_subtitle">Toque no ícone do coração enquanto reproduz uma música para salvá-la aqui.</string>
-    <string name="lib_empty_liked_offline_title">Nenhuma música local curtida</string>
-    <string name="lib_empty_liked_offline_subtitle">Altere o filtro de fonte ou curta músicas do seu dispositivo.</string>
-    <string name="lib_empty_liked_online_title">Nenhuma música na nuvem curtida</string>
-    <string name="lib_empty_liked_online_subtitle">Curta faixas do Telegram ou NetEase para vê-las nesta visualização.</string>
-    <string name="lib_empty_folders_title">Nenhuma pasta encontrada</string>
-    <string name="lib_empty_folders_subtitle">Pastas do armazenamento interno com música aparecerão aqui.</string>
-    <string name="lib_empty_playlists_title">Nenhuma playlist ainda</string>
-    <string name="lib_empty_playlists_subtitle">Crie sua primeira playlist para organizar sua biblioteca.</string>
+    <string name="lib_empty_songs_all_title">No songs yet</string>
+    <string name="lib_empty_songs_all_subtitle">Add music to your device or sync a cloud source to start listening.</string>
+    <string name="lib_empty_songs_offline_title">No local songs found</string>
+    <string name="lib_empty_songs_offline_subtitle">Try another source filter or rescan your device library.</string>
+    <string name="lib_empty_songs_online_title">No cloud songs found</string>
+    <string name="lib_empty_songs_online_subtitle">Sync songs from Telegram or NetEase, or switch to local source.</string>
+    <string name="lib_empty_albums_all_title">No albums available</string>
+    <string name="lib_empty_albums_all_subtitle">Albums will appear here once your library has grouped tracks.</string>
+    <string name="lib_empty_albums_offline_title">No local albums found</string>
+    <string name="lib_empty_albums_offline_subtitle">Local songs are required to build local album groups.</string>
+    <string name="lib_empty_albums_online_title">No cloud albums found</string>
+    <string name="lib_empty_albums_online_subtitle">Cloud songs with album data will appear here after syncing.</string>
+    <string name="lib_empty_artists_all_title">No artists available</string>
+    <string name="lib_empty_artists_all_subtitle">Artists are shown after songs are indexed from any source.</string>
+    <string name="lib_empty_artists_offline_title">No local artists found</string>
+    <string name="lib_empty_artists_offline_subtitle">No artist metadata is available for local songs right now.</string>
+    <string name="lib_empty_artists_online_title">No cloud artists found</string>
+    <string name="lib_empty_artists_online_subtitle">Cloud artist entries appear when remote songs are synced.</string>
+    <string name="lib_empty_liked_all_title">No liked songs yet</string>
+    <string name="lib_empty_liked_all_subtitle">Tap the heart icon while playing a song to save it here.</string>
+    <string name="lib_empty_liked_offline_title">No local liked songs</string>
+    <string name="lib_empty_liked_offline_subtitle">Change the source filter or like songs from your device.</string>
+    <string name="lib_empty_liked_online_title">No cloud liked songs</string>
+    <string name="lib_empty_liked_online_subtitle">Like tracks from Telegram or NetEase to see them in this view.</string>
+    <string name="lib_empty_folders_title">No folders found</string>
+    <string name="lib_empty_folders_subtitle">Folders from internal storage with music will appear here.</string>
+    <string name="lib_empty_playlists_title">No playlists yet</string>
+    <string name="lib_empty_playlists_subtitle">Create your first playlist to organize your library.</string>
 </resources>
