@@ -576,41 +576,29 @@ fun AppNavigation(
                 popExitTransition = { popExitTransition() },
             ) {
                 VideoGalleryScreen(
-                    onVideoClick = { path ->
-                        navController.navigate("video_player?path=${android.net.Uri.encode(path)}")
+                    onVideoClick = { uri ->
+                        navController.navigate("video_player/${android.net.Uri.encode(uri)}")
                     },
                     onBack = { navController.popBackStack() }
                 )
             }
+            // ===== PLAYER DE VÍDEO =====
             composable(
-                "video_player?path={path}",
-                arguments = listOf(navArgument("path") { type = NavType.StringType }),
+                route = "video_player/{videoUri}",
+                arguments = listOf(navArgument("videoUri") { type = NavType.StringType }),
                 enterTransition = { enterTransition() },
                 exitTransition = { exitTransition() },
                 popEnterTransition = { popEnterTransition() },
                 popExitTransition = { popExitTransition() },
             ) { backStackEntry ->
-                val path = backStackEntry.arguments?.getString("path")
-
-                if (path.isNullOrBlank()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = stringResource(R.string.nav_error_video_path_missing))
-                    }
-                    return@composable
-                }
-
-                composable(
-    route = "video_player/{videoUri}",
-    arguments = listOf(navArgument("videoUri") { type = NavType.StringType })
-) { backStackEntry ->
-    val videoUri = backStackEntry.arguments?.getString("videoUri") ?: return@composable
-    VideoPlayerScreen(
-        fileUri = videoUri,
-        onBack = { navController.popBackStack() }
-    )
+                val videoUri = backStackEntry.arguments?.getString("videoUri") ?: return@composable
+                VideoPlayerScreen(
+                    fileUri = videoUri,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+        }
+    }
 }
 
 private fun String.toRoute(): String = when (this) {
