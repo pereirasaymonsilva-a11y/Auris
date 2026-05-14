@@ -10,8 +10,13 @@ import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.VideoLibrary
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,19 +39,16 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.request.videoFrameMillis
-import com.goldensystem.auris.R
 import com.goldensystem.auris.data.model.VideoItem
 import com.goldensystem.auris.presentation.viewmodel.VideoGalleryViewModel
 import com.goldensystem.auris.utils.formatDuration
@@ -300,7 +303,6 @@ private fun VideoGrid(
             items = videos,
             key = { it.id }
         ) { video ->
-            // Animação de entrada premium: fade-in + slide vertical
             var visible by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) {
                 visible = true
@@ -331,8 +333,8 @@ private fun VideoCard(
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.96f else 1f,
         animationSpec = spring(
-            dampingRatio = 0.6f,
-            stiffness = 400f
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
         ),
         label = "videoCardScale"
     )
@@ -340,12 +342,10 @@ private fun VideoCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .animateItemPlacement()
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            // Ripple material e toque corrigido
             .pointerInput(onClick) {
                 detectTapGestures(
                     onPress = {
@@ -371,7 +371,6 @@ private fun VideoCard(
         Column(
             modifier = Modifier.padding(12.dp)
         ) {
-            // Thumbnail Box
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -379,11 +378,10 @@ private fun VideoCard(
                     .clip(RoundedCornerShape(14.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             ) {
-                // Thumbnail Image
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(Uri.parse(video.contentUri))
-                        .videoFramePercent(0.1)
+                        .videoFrameMillis(1000)   // <-- corrigido
                         .crossfade(true)
                         .allowHardware(false)
                         .build(),
@@ -392,7 +390,6 @@ private fun VideoCard(
                     contentScale = ContentScale.Crop
                 )
 
-                // Gradiente overlay escuro (metade inferior)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -408,7 +405,6 @@ private fun VideoCard(
                         )
                 )
 
-                // Círculo escuro atrás do ícone de play (refinamento)
                 Box(
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -427,7 +423,6 @@ private fun VideoCard(
                     )
                 }
 
-                // Caixa de duração no canto inferior direito
                 Surface(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -447,7 +442,6 @@ private fun VideoCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Informações do vídeo
             Text(
                 text = video.title,
                 style = MaterialTheme.typography.titleMedium,
@@ -459,7 +453,6 @@ private fun VideoCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Linha secundária com duração, resolução e tamanho
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)

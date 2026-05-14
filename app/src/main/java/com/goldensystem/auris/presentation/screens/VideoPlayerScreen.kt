@@ -7,11 +7,13 @@ import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.BrightnessHigh
 import androidx.compose.material.icons.outlined.VolumeUp
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -63,7 +66,6 @@ fun VideoPlayerScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // Estados do player
     var isPlaying by remember { mutableStateOf(true) }
     var currentPosition by remember { mutableStateOf(0L) }
     var duration by remember { mutableStateOf(0L) }
@@ -73,10 +75,7 @@ fun VideoPlayerScreen(
     var showControls by remember { mutableStateOf(true) }
     var showThumbnail by remember { mutableStateOf(true) }
 
-    // Double-tap feedback
     var doubleTapFeedback by remember { mutableStateOf<Pair<Float, Float>?>(null) }
-
-    // Bounce no play/pause
     var toggleBounce by remember { mutableStateOf(false) }
     val bounceScale by animateFloatAsState(
         targetValue = if (toggleBounce) 0.9f else 1f,
@@ -88,11 +87,9 @@ fun VideoPlayerScreen(
         finishedListener = { toggleBounce = false }
     )
 
-    // Feedback visual de brilho/volume
     var adjustmentFeedback by remember { mutableStateOf<AdjustmentType?>(null) }
     var adjustmentValue by remember { mutableFloatStateOf(0f) }
 
-    // Player
     val player = remember {
         ExoPlayer.Builder(context).build().apply {
             val uri = Uri.parse(fileUri)
@@ -115,7 +112,6 @@ fun VideoPlayerScreen(
         }
     }
 
-    // Atualização contínua da posição (funciona mesmo pausado, evita loop quebrado)
     LaunchedEffect(player) {
         while (isActive) {
             if (!isSeeking) {
@@ -126,7 +122,6 @@ fun VideoPlayerScreen(
         }
     }
 
-    // Ciclo de vida
     DisposableEffect(player) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -142,7 +137,6 @@ fun VideoPlayerScreen(
         }
     }
 
-    // Fullscreen e ocultar barras
     val window = (context as? android.app.Activity)?.window
     LaunchedEffect(Unit) {
         window?.let {
@@ -166,12 +160,10 @@ fun VideoPlayerScreen(
         }
     }
 
-    // Função centralizada para revelar controles (evita conflitos e piscadas)
     fun revealControls() {
         showControls = true
     }
 
-    // Auto‑hide dos controles (respeita interações)
     var isDragging by remember { mutableStateOf(false) }
     LaunchedEffect(showControls, isSeeking, isDragging) {
         if (showControls && !isSeeking && !isDragging) {
@@ -182,7 +174,6 @@ fun VideoPlayerScreen(
 
     BackHandler { onBack() }
 
-    // Animação de entrada cinematográfica (alpha + escala)
     var enterAnimation by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         enterAnimation = true
@@ -198,7 +189,6 @@ fun VideoPlayerScreen(
         label = "enterScale"
     )
 
-    // Variável auxiliar para gesto vertical (captura X inicial)
     var dragStartX by remember { mutableFloatStateOf(0f) }
 
     Box(
@@ -211,11 +201,10 @@ fun VideoPlayerScreen(
                 scaleY = enterScale
             }
     ) {
-        // Player View com resizeMode FIT
         AndroidView(
             factory = { ctx ->
                 PlayerView(ctx).apply {
-                    player = this@apply.player
+                    this.player = player   // <-- ATRIBUIÇÃO CORRIGIDA
                     useController = false
                     resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     keepScreenOn = true
@@ -226,7 +215,6 @@ fun VideoPlayerScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-        // Thumbnail inicial com frame de 1s (evita tela preta)
         if (showThumbnail) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
@@ -245,7 +233,6 @@ fun VideoPlayerScreen(
             )
         }
 
-        // Overlay gradiente
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -260,7 +247,6 @@ fun VideoPlayerScreen(
                 )
         )
 
-        // Buffering
         if (isBuffering && !showThumbnail) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
@@ -269,7 +255,6 @@ fun VideoPlayerScreen(
             )
         }
 
-        // Double‑tap animado
         doubleTapFeedback?.let { (offsetX, offsetY) ->
             AnimatedVisibility(
                 visible = true,
@@ -292,7 +277,6 @@ fun VideoPlayerScreen(
             }
         }
 
-        // Indicador visual de brilho/volume
         adjustmentFeedback?.let { type ->
             Box(
                 modifier = Modifier
@@ -338,14 +322,12 @@ fun VideoPlayerScreen(
             }
         }
 
-        // Camada de controles com animação
         AnimatedVisibility(
             visible = showControls,
             enter = fadeIn(tween(300)) + slideInVertically(initialOffsetY = { it / 8 }, animationSpec = tween(300)),
             exit = fadeOut(tween(300)) + slideOutVertically(targetOffsetY = { it / 8 }, animationSpec = tween(300))
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                // Botão voltar flutuante
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier
@@ -363,7 +345,6 @@ fun VideoPlayerScreen(
                     )
                 }
 
-                // Play/Pause central com bounce
                 Box(
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -394,7 +375,6 @@ fun VideoPlayerScreen(
                     }
                 }
 
-                // Controles inferiores
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -424,8 +404,10 @@ fun VideoPlayerScreen(
                         ),
                         thumb = {
                             SliderDefaults.Thumb(
-                                modifier = Modifier.size(16.dp),
-                                colors = SliderDefaults.colors(thumbColor = Color.White)
+                                interactionSource = remember { MutableInteractionSource() },
+                                colors = SliderDefaults.colors(
+                                    thumbColor = Color.White
+                                )
                             )
                         },
                         valueRange = 0f..(duration.toFloat().coerceAtLeast(1f))
@@ -454,7 +436,6 @@ fun VideoPlayerScreen(
             }
         }
 
-        // Camada UNIFICADA de gestos (tap/double tap + vertical drag)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -483,7 +464,6 @@ fun VideoPlayerScreen(
                             val delta = -dragAmount / size.height.toFloat()
                             val halfWidth = size.width / 2f
                             if (dragStartX < halfWidth) {
-                                // Brilho
                                 val current = window?.attributes?.screenBrightness ?: 0.5f
                                 val new = (current + delta).coerceIn(0.01f, 1.0f)
                                 window?.attributes = window?.attributes?.apply {
@@ -491,7 +471,6 @@ fun VideoPlayerScreen(
                                 }
                                 adjustmentValue = new
                             } else {
-                                // Volume
                                 val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
                                 val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
                                 val currentVol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
@@ -499,7 +478,6 @@ fun VideoPlayerScreen(
                                 audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVol, 0)
                                 adjustmentValue = newVol.toFloat() / maxVol.toFloat()
                             }
-                            // Mantém o tipo de feedback
                             adjustmentFeedback = if (dragStartX < halfWidth)
                                 AdjustmentType.BRIGHTNESS else AdjustmentType.VOLUME
                         },

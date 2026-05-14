@@ -602,7 +602,10 @@ fun AppNavigation(
                     return@composable
                 }
 
-                VideoPlayerScreen(filePath = path)
+                VideoPlayerScreen(
+    fileUri = videoUri,
+    onBack = { navController.popBackStack() }
+)
             }
         }
     }
