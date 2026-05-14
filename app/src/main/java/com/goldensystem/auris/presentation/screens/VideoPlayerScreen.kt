@@ -1,19 +1,19 @@
 package com.goldensystem.auris.presentation.screens
 
+import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.media.AudioManager
-import android.net.Uri
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,207 +30,112 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.request.videoFrameMillis
+import com.goldensystem.auris.presentation.viewmodel.PlayerState
+import com.goldensystem.auris.presentation.viewmodel.VideoPlayerViewModel
+import com.goldensystem.auris.utils.VideoUtils
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoPlayerScreen(
-    fileUri: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    var isPlaying by remember { mutableStateOf(true) }
-    var currentPosition by remember { mutableStateOf(0L) }
-    var duration by remember { mutableStateOf(0L) }
-    var isSeeking by remember { mutableStateOf(false) }
-    var seekPosition by remember { mutableStateOf(0f) }
-    var isBuffering by remember { mutableStateOf(false) }
     var showControls by remember { mutableStateOf(true) }
-    var showThumbnail by remember { mutableStateOf(true) }
-
     var doubleTapFeedback by remember { mutableStateOf<Pair<Float, Float>?>(null) }
-    var toggleBounce by remember { mutableStateOf(false) }
-    val bounceScale by animateFloatAsState(
-        targetValue = if (toggleBounce) 0.9f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "bounce",
-        finishedListener = { toggleBounce = false }
-    )
-
-    var adjustmentFeedback by remember { mutableStateOf<AdjustmentType?>(null) }
+    var adjustmentType by remember { mutableStateOf<AdjustmentType?>(null) }
     var adjustmentValue by remember { mutableFloatStateOf(0f) }
 
-    val player = remember {
-        ExoPlayer.Builder(context).build().apply {
-            val uri = Uri.parse(fileUri)
-            val mediaItem = MediaItem.fromUri(uri)
-            setMediaItem(mediaItem)
-            prepare()
-            playWhenReady = true
-            addListener(object : Player.Listener {
-                override fun onIsPlayingChanged(playing: Boolean) {
-                    isPlaying = playing
-                }
-                override fun onPlaybackStateChanged(state: Int) {
-                    isBuffering = (state == Player.STATE_BUFFERING)
-                    if (state == Player.STATE_READY) {
-                        // CORREÇÃO: usar duration direto, sem player.
-                        duration = duration.coerceAtLeast(0L)
-                        showThumbnail = false
-                    }
-                }
-            })
+    LaunchedEffect(state.currentVideo) {
+        val orientation = if (state.currentVideo.isLandscape) {
+            ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
-    }
-
-    LaunchedEffect(player) {
-        while (isActive) {
-            if (!isSeeking) {
-                currentPosition = player.currentPosition
-                duration = player.duration.coerceAtLeast(0L)
-            }
-            delay(500)
-        }
-    }
-
-    DisposableEffect(player) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_PAUSE -> player.playWhenReady = false
-                Lifecycle.Event.ON_RESUME -> { if (isPlaying) player.playWhenReady = true }
-                else -> {}
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            player.release()
-        }
-    }
-
-    val window = (context as? android.app.Activity)?.window
-    LaunchedEffect(Unit) {
-        window?.let {
-            WindowCompat.setDecorFitsSystemWindows(it, false)
-            val controller = WindowInsetsControllerCompat(it, it.decorView)
-            controller.hide(WindowInsetsCompat.Type.systemBars())
-            controller.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            it.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
+        (context as? Activity)?.requestedOrientation = orientation
     }
 
     DisposableEffect(Unit) {
         onDispose {
-            window?.let {
-                val controller = WindowInsetsControllerCompat(it, it.decorView)
-                controller.show(WindowInsetsCompat.Type.systemBars())
-                WindowCompat.setDecorFitsSystemWindows(it, true)
-                it.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            }
+            (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
 
-    fun revealControls() {
-        showControls = true
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> viewModel.onPause()
+                Lifecycle.Event.ON_RESUME -> viewModel.onResume()
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    var isDragging by remember { mutableStateOf(false) }
-    LaunchedEffect(showControls, isSeeking, isDragging) {
-        if (showControls && !isSeeking && !isDragging) {
-            delay(3000)
+    BackHandler {
+        (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        onBack()
+    }
+
+    LaunchedEffect(showControls) {
+        if (showControls) {
+            delay(2500)
             showControls = false
         }
     }
-
-    BackHandler { onBack() }
-
-    var enterAnimation by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        enterAnimation = true
-    }
-    val enterAlpha by animateFloatAsState(
-        targetValue = if (enterAnimation) 1f else 0f,
-        animationSpec = tween(500),
-        label = "enterAlpha"
-    )
-    val enterScale by animateFloatAsState(
-        targetValue = if (enterAnimation) 1f else 0.92f,
-        animationSpec = tween(500),
-        label = "enterScale"
-    )
-
-    var dragStartX by remember { mutableFloatStateOf(0f) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-            .graphicsLayer {
-                alpha = enterAlpha
-                scaleX = enterScale
-                scaleY = enterScale
-            }
     ) {
         AndroidView(
             factory = { ctx ->
                 PlayerView(ctx).apply {
-                    this.player = player   // Atribuição correta
+                    player = viewModel.exoPlayer
                     useController = false
                     resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     keepScreenOn = true
-                    controllerAutoShow = false
-                    controllerHideOnTouch = false
                 }
             },
             modifier = Modifier.fillMaxSize()
         )
 
-        if (showThumbnail) {
+        if (state.playerState == PlayerState.IDLE || state.playerState == PlayerState.BUFFERING) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(Uri.parse(fileUri))
+                    .data(state.currentVideo.path)
                     .videoFrameMillis(1000)
                     .crossfade(true)
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.3f))
             )
         }
 
@@ -240,23 +145,23 @@ fun VideoPlayerScreen(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.4f),
+                            Color.Black.copy(alpha = 0.5f),
                             Color.Transparent,
-                            Color.Black.copy(alpha = 0.4f)
+                            Color.Black.copy(alpha = 0.5f)
                         )
                     )
                 )
         )
 
-        if (isBuffering && !showThumbnail) {
+        if (state.playerState == PlayerState.BUFFERING) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
-                color = Color.White.copy(alpha = 0.8f),
+                color = Color.White.copy(alpha = 0.7f),
                 strokeWidth = 3.dp
             )
         }
 
-        doubleTapFeedback?.let { (offsetX, offsetY) ->
+        doubleTapFeedback?.let { (offsetX, _) ->
             AnimatedVisibility(
                 visible = true,
                 enter = fadeIn(tween(200)) + scaleIn(initialScale = 0.5f, animationSpec = tween(200)),
@@ -278,7 +183,7 @@ fun VideoPlayerScreen(
             }
         }
 
-        adjustmentFeedback?.let { type ->
+        adjustmentType?.let { type ->
             Box(
                 modifier = Modifier
                     .align(if (type == AdjustmentType.BRIGHTNESS) Alignment.CenterStart else Alignment.CenterEnd)
@@ -293,19 +198,19 @@ fun VideoPlayerScreen(
                         imageVector = if (type == AdjustmentType.BRIGHTNESS) Icons.Outlined.BrightnessHigh else Icons.Outlined.VolumeUp,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "${(adjustmentValue * 100).toInt()}%",
+                        "${(adjustmentValue * 100).toInt()}%",
                         color = Color.White,
-                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Box(
                         modifier = Modifier
-                            .height(80.dp)
+                            .height(60.dp)
                             .width(6.dp)
                             .clip(RoundedCornerShape(3.dp))
                             .background(Color.White.copy(alpha = 0.3f)),
@@ -321,58 +226,68 @@ fun VideoPlayerScreen(
                     }
                 }
             }
+            LaunchedEffect(Unit) {
+                delay(800)
+                adjustmentType = null
+            }
         }
 
         AnimatedVisibility(
             visible = showControls,
-            enter = fadeIn(tween(300)) + slideInVertically(initialOffsetY = { it / 8 }, animationSpec = tween(300)),
-            exit = fadeOut(tween(300)) + slideOutVertically(targetOffsetY = { it / 8 }, animationSpec = tween(300))
+            enter = fadeIn(tween(300)) + slideInVertically(initialOffsetY = { it / 8 }),
+            exit = fadeOut(tween(300)) + slideOutVertically(targetOffsetY = { it / 8 })
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                IconButton(
-                    onClick = onBack,
+                Row(
                     modifier = Modifier
                         .align(Alignment.TopStart)
-                        .padding(16.dp)
-                        .statusBarsPadding()
-                        .size(44.dp)
-                        .background(Color.Black.copy(alpha = 0.4f), CircleShape)
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        "Voltar",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    IconButton(
+                        onClick = {
+                            (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                            onBack()
+                        },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color.Black.copy(alpha = 0.4f), CircleShape)
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar", tint = Color.White)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            state.currentVideo.title,
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            state.currentVideo.folderName,
+                            color = Color.White.copy(alpha = 0.7f),
+                            fontSize = 12.sp
+                        )
+                    }
                 }
 
                 Box(
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .size(72.dp)
+                        .size(64.dp)
                         .background(Color.Black.copy(alpha = 0.4f), CircleShape)
-                        .pointerInput(player) {
-                            detectTapGestures {
-                                if (player.isPlaying) player.pause() else player.play()
-                                toggleBounce = true
-                                revealControls()
-                            }
-                        },
+                        .clickable { viewModel.playPause() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Box(modifier = Modifier.size(36.dp).scale(bounceScale)) {
-                        AnimatedContent(
-                            targetState = isPlaying,
-                            transitionSpec = { fadeIn() togetherWith fadeOut() },
-                            label = "playPause"
-                        ) { playing ->
-                            Icon(
-                                if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                                if (playing) "Pausar" else "Reproduzir",
-                                tint = Color.White,
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
+                    AnimatedContent(targetState = state.isPlaying, label = "play") { playing ->
+                        Icon(
+                            if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                            null,
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
+                        )
                     }
                 }
 
@@ -380,115 +295,113 @@ fun VideoPlayerScreen(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp, start = 24.dp, end = 24.dp)
-                        .navigationBarsPadding(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(16.dp)
                 ) {
                     Slider(
-                        value = if (isSeeking) seekPosition else currentPosition.toFloat().coerceAtMost(duration.toFloat()),
-                        onValueChange = { value ->
-                            isSeeking = true
-                            seekPosition = value
-                            revealControls()
-                        },
-                        onValueChangeFinished = {
-                            player.seekTo(seekPosition.toLong())
-                            isSeeking = false
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(24.dp),
+                        value = state.currentPositionMs.toFloat().coerceAtMost(state.durationMs.toFloat()),
+                        onValueChange = { viewModel.seekTo(it.toLong()) },
+                        modifier = Modifier.fillMaxWidth(),
                         colors = SliderDefaults.colors(
                             thumbColor = Color.White,
                             activeTrackColor = Color.White,
                             inactiveTrackColor = Color.White.copy(alpha = 0.3f)
                         ),
-                        thumb = {
-                            SliderDefaults.Thumb(
-                                interactionSource = remember { MutableInteractionSource() },
-                                colors = SliderDefaults.colors(thumbColor = Color.White)
-                            )
-                        },
-                        valueRange = 0f..(duration.toFloat().coerceAtLeast(1f))
+                        valueRange = 0f..(state.durationMs.toFloat().coerceAtLeast(1f))
                     )
-
                     Spacer(modifier = Modifier.height(4.dp))
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = formatTime(currentPosition),
-                            color = Color.White.copy(alpha = 0.9f),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium
+                            VideoUtils.formatDuration(state.currentPositionMs),
+                            color = Color.White,
+                            fontSize = 12.sp
                         )
                         Text(
-                            text = formatTime(duration),
-                            color = Color.White.copy(alpha = 0.9f),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium
+                            VideoUtils.formatDuration(state.durationMs),
+                            color = Color.White,
+                            fontSize = 12.sp
                         )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        IconButton(
+                            onClick = { viewModel.goToPrevious() },
+                            enabled = state.queue.hasPrevious
+                        ) {
+                            Icon(Icons.Filled.FastRewind, "Anterior", tint = Color.White)
+                        }
+                        Text(
+                            state.queue.positionDescription,
+                            color = Color.White,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
+                        IconButton(
+                            onClick = { viewModel.advanceToNext() },
+                            enabled = state.queue.hasNext
+                        ) {
+                            Icon(Icons.Filled.FastForward, "Próximo", tint = Color.White)
+                        }
                     }
                 }
             }
         }
 
-        // Camada unificada de gestos
+        var dragStartX by remember { mutableFloatStateOf(0f) }
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(Unit) {
                     detectTapGestures(
-                        onTap = { revealControls() },
+                        onTap = { showControls = !showControls },
                         onDoubleTap = { offset ->
-                            val seekAmount = if (offset.x < size.width / 2f) -10000L else 10000L
-                            val newPosition = (player.currentPosition + seekAmount).coerceIn(0, player.duration)
-                            player.seekTo(newPosition)
+                            val delta = if (offset.x < size.width / 2f) -10000L else 10000L
+                            viewModel.seekBy(delta)
                             doubleTapFeedback = offset.x / size.width to offset.y / size.height
-                            revealControls()
+                            showControls = true
                         }
                     )
                 }
                 .pointerInput(Unit) {
                     detectVerticalDragGestures(
-                        onDragStart = { offset ->
-                            dragStartX = offset.x
-                            isDragging = true
-                            adjustmentFeedback = if (dragStartX < size.width / 2)
-                                AdjustmentType.BRIGHTNESS else AdjustmentType.VOLUME
-                            revealControls()
-                        },
+                        onDragStart = { offset -> dragStartX = offset.x },
                         onVerticalDrag = { _, dragAmount ->
                             val delta = -dragAmount / size.height.toFloat()
-                            val halfWidth = size.width / 2f
-                            if (dragStartX < halfWidth) {
+                            if (dragStartX < size.width / 2) {
+                                val window = (context as? Activity)?.window
                                 val current = window?.attributes?.screenBrightness ?: 0.5f
                                 val new = (current + delta).coerceIn(0.01f, 1.0f)
                                 window?.attributes = window?.attributes?.apply {
                                     screenBrightness = new
                                 }
+                                adjustmentType = AdjustmentType.BRIGHTNESS
                                 adjustmentValue = new
                             } else {
-                                val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                                val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-                                val currentVol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-                                val newVol = (currentVol + (delta * maxVol).toInt()).coerceIn(0, maxVol)
-                                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVol, 0)
-                                adjustmentValue = newVol.toFloat() / maxVol.toFloat()
+                                val audioManager =
+                                    context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                                val maxVol =
+                                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                                val currentVol =
+                                    audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+                                val newVol =
+                                    (currentVol + (delta * maxVol).toInt()).coerceIn(0, maxVol)
+                                audioManager.setStreamVolume(
+                                    AudioManager.STREAM_MUSIC,
+                                    newVol,
+                                    0
+                                )
+                                adjustmentType = AdjustmentType.VOLUME
+                                adjustmentValue = newVol.toFloat() / maxVol
                             }
-                            adjustmentFeedback = if (dragStartX < halfWidth)
-                                AdjustmentType.BRIGHTNESS else AdjustmentType.VOLUME
+                            showControls = true
                         },
-                        onDragEnd = {
-                            isDragging = false
-                            adjustmentFeedback = null
-                        },
-                        onDragCancel = {
-                            isDragging = false
-                            adjustmentFeedback = null
-                        }
+                        onDragEnd = {},
+                        onDragCancel = {}
                     )
                 }
         )
@@ -496,15 +409,3 @@ fun VideoPlayerScreen(
 }
 
 private enum class AdjustmentType { BRIGHTNESS, VOLUME }
-
-private fun formatTime(millis: Long): String {
-    val totalSeconds = (millis / 1000).coerceAtLeast(0)
-    val hours = totalSeconds / 3600
-    val minutes = (totalSeconds % 3600) / 60
-    val seconds = totalSeconds % 60
-    return if (hours > 0) {
-        String.format("%02d:%02d:%02d", hours, minutes, seconds)
-    } else {
-        String.format("%02d:%02d", minutes, seconds)
-    }
-}

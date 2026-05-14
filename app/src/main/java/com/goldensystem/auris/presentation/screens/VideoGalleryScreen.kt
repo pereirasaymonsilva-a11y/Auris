@@ -1,32 +1,19 @@
 package com.goldensystem.auris.presentation.screens
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
-import android.text.format.Formatter
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.VideoLibrary
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,160 +25,154 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.request.videoFrameMillis
+import com.goldensystem.auris.data.model.QueueContext
 import com.goldensystem.auris.data.model.VideoItem
+import com.goldensystem.auris.data.model.VideoQueue
+import com.goldensystem.auris.presentation.viewmodel.GalleryUiState
+import com.goldensystem.auris.presentation.viewmodel.SortMode
 import com.goldensystem.auris.presentation.viewmodel.VideoGalleryViewModel
-import com.goldensystem.auris.utils.formatDuration
+import com.goldensystem.auris.utils.VideoUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoGalleryScreen(
-    onVideoClick: (String) -> Unit,
+    onVideoClick: (VideoItem) -> Unit = {},
+    onOpenPlayerWithQueue: (VideoQueue) -> Unit,
     onBack: () -> Unit,
     viewModel: VideoGalleryViewModel = hiltViewModel()
 ) {
-    val videos by viewModel.videos.collectAsStateWithLifecycle()
-    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-
-    val permission = remember {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_VIDEO
-        } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-    }
-
-    var hasPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-
-    LaunchedEffect(hasPermission) {
-        if (hasPermission && videos.isEmpty() && !isLoading) {
-            viewModel.loadVideos()
-        }
-    }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        hasPermission = granted
-    }
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
+            GalleryTopBar(
+                state = state,
+                onSearchChange = viewModel::setSearchQuery,
+                onSortChange = viewModel::setSortMode,
+                onContextChange = viewModel::setContext,
+                onBack = {
+                    if (state.currentContext == QueueContext.FOLDER) viewModel.exitFolder()
+                    else onBack()
+                },
+                isInFolder = state.currentContext == QueueContext.FOLDER
+            )
+        }
+    ) { padding ->
+        Box(modifier = Modifier.padding(padding)) {
+            when {
+                state.isLoading -> LoadingState()
+                state.errorMessage != null -> ErrorState(state.errorMessage!!) { viewModel.loadVideos() }
+                state.displayVideos.isEmpty() && state.searchQuery.isNotBlank() -> EmptySearchState()
+                state.displayVideos.isEmpty() && state.searchQuery.isBlank() -> EmptyState()
+                else -> {
+                    Column {
+                        if (state.currentContext != QueueContext.FOLDER && state.searchQuery.isBlank()) {
+                            ContextTabs(
+                                current = state.currentContext,
+                                onChange = viewModel::setContext
+                            )
+                        }
+                        LazyVerticalGrid(
+                            columns = GridCells.Adaptive(minSize = 120.dp),
+                            contentPadding = PaddingValues(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            if (state.currentContext == QueueContext.ALL && state.searchQuery.isBlank()) {
+                                items(state.folders, key = { it.path }) { folder ->
+                                    FolderItem(folder) { viewModel.enterFolder(folder.path) }
+                                }
+                            }
+                            items(state.displayVideos, key = { it.id }) { video ->
+                                VideoGridItem(
+                                    video = video,
+                                    onClick = {
+                                        onOpenPlayerWithQueue(viewModel.buildQueue(video))
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GalleryTopBar(
+    state: GalleryUiState,
+    onSearchChange: (String) -> Unit,
+    onSortChange: (SortMode) -> Unit,
+    onContextChange: (QueueContext) -> Unit,
+    onBack: () -> Unit,
+    isInFolder: Boolean
+) {
+    var showSortMenu by remember { mutableStateOf(false) }
+
+    Column {
+        CenterAlignedTopAppBar(
+            title = {
+                if (isInFolder) {
                     Text(
-                        text = "Galeria de Vídeos",
+                        text = state.currentFolder?.substringAfterLast("/") ?: "Pasta",
                         fontWeight = FontWeight.SemiBold
                     )
-                },
-                navigationIcon = {
+                } else {
+                    Text("Vídeos", fontWeight = FontWeight.Bold)
+                }
+            },
+            navigationIcon = {
+                if (isInFolder || state.currentContext == QueueContext.FOLDER) {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Voltar",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar")
                     }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
-                )
-            )
-        }
-    ) { innerPadding ->
-        Box(
+                }
+            },
+            actions = {
+                IconButton(onClick = { showSortMenu = true }) {
+                    Icon(Icons.Filled.Sort, "Ordenar")
+                }
+            }
+        )
+
+        OutlinedTextField(
+            value = state.searchQuery,
+            onValueChange = onSearchChange,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 4.dp),
+            placeholder = { Text("Pesquisar vídeos...") },
+            leadingIcon = { Icon(Icons.Filled.Search, null) },
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        DropdownMenu(
+            expanded = showSortMenu,
+            onDismissRequest = { showSortMenu = false }
         ) {
-            when {
-                !hasPermission -> PermissionRequestContent(
-                    onRequestPermission = { permissionLauncher.launch(permission) }
-                )
-                isLoading && videos.isEmpty() -> LoadingContent()
-                errorMessage != null -> ErrorContent(
-                    message = errorMessage!!,
-                    onRetry = { viewModel.loadVideos() }
-                )
-                videos.isEmpty() -> EmptyContent()
-                else -> VideoGrid(
-                    videos = videos,
-                    onVideoClick = { onVideoClick(it.contentUri) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun PermissionRequestContent(onRequestPermission: () -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(32.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Lock,
-                contentDescription = null,
-                modifier = Modifier.size(80.dp),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Acesso aos Vídeos",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "O Auris precisa de permissão para acessar e reproduzir seus vídeos.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Button(
-                onClick = onRequestPermission,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.VideoLibrary,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Permitir Acesso",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+            SortMode.entries.forEach { mode ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            mode.label,
+                            fontWeight = if (mode == state.sortMode) FontWeight.Bold else FontWeight.Normal
+                        )
+                    },
+                    onClick = {
+                        onSortChange(mode)
+                        showSortMenu = false
+                    }
                 )
             }
         }
@@ -199,271 +180,175 @@ private fun PermissionRequestContent(onRequestPermission: () -> Unit) {
 }
 
 @Composable
-private fun LoadingContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(48.dp),
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Carregando vídeos...",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+private fun ContextTabs(current: QueueContext, onChange: (QueueContext) -> Unit) {
+    TabRow(selectedTabIndex = current.ordinal) {
+        Tab(
+            selected = current == QueueContext.ALL,
+            onClick = { onChange(QueueContext.ALL) },
+            text = { Text("Todos") }
+        )
+        Tab(
+            selected = current == QueueContext.RECENT,
+            onClick = { onChange(QueueContext.RECENT) },
+            text = { Text("Recentes") }
+        )
+        Tab(
+            selected = current == QueueContext.FOLDER,
+            onClick = { onChange(QueueContext.FOLDER) },
+            text = { Text("Pastas") }
+        )
     }
 }
 
 @Composable
-private fun ErrorContent(message: String, onRetry: () -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = Icons.Outlined.VideoLibrary,
-                contentDescription = null,
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Ops, algo deu errado",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 32.dp)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            OutlinedButton(
-                onClick = onRetry,
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Tentar novamente")
-            }
-        }
-    }
-}
-
-@Composable
-private fun EmptyContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = Icons.Outlined.VideoLibrary,
-                contentDescription = null,
-                modifier = Modifier.size(80.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Nenhum vídeo encontrado",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Seus vídeos aparecerão aqui",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun VideoGrid(
-    videos: List<VideoItem>,
-    onVideoClick: (VideoItem) -> Unit
-) {
-    LazyColumn(
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(
-            items = videos,
-            key = { it.id }
-        ) { video ->
-            var visible by remember { mutableStateOf(false) }
-            LaunchedEffect(Unit) {
-                visible = true
-            }
-            AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(animationSpec = tween(400)) + slideInVertically(
-                    initialOffsetY = { it / 4 },
-                    animationSpec = tween(400)
-                ),
-                exit = fadeOut() + slideOutVertically()
-            ) {
-                VideoCard(
-                    video = video,
-                    onClick = { onVideoClick(video) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun VideoCard(
+private fun VideoGridItem(
     video: VideoItem,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.96f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "videoCardScale"
+        targetValue = if (isPressed) 0.95f else 1f,
+        animationSpec = spring(dampingRatio = 0.6f),
+        label = "scale"
     )
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            ),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            // Thumbnail
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            ) {
+        Box {
+            Box(modifier = Modifier.aspectRatio(16f / 9f)) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(Uri.parse(video.contentUri))
+                        .data(video.path)
                         .videoFrameMillis(1000)
                         .crossfade(true)
-                        .allowHardware(false)
                         .build(),
                     contentDescription = video.title,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-
-                // Gradiente overlay
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.Black.copy(alpha = 0.75f)
-                                ),
-                                startY = 0.5f,
-                                endY = 1.0f
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f))
                             )
                         )
                 )
-
-                // Ícone de play central com fundo circular
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(56.dp)
-                        .background(Color.Black.copy(alpha = 0.35f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.PlayArrow,
-                        contentDescription = "Reproduzir",
-                        modifier = Modifier.size(36.dp),
-                        tint = Color.White.copy(alpha = 0.9f)
-                    )
-                }
-
-                // Duração
-                Surface(
+                Text(
+                    text = video.durationFormatted,
+                    color = Color.White,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(8.dp),
-                    shape = RoundedCornerShape(6.dp),
-                    color = Color.Black.copy(alpha = 0.7f)
-                ) {
-                    Text(
-                        text = formatDuration(video.duration),
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
+                        .padding(4.dp)
+                )
+                Icon(
+                    Icons.Filled.PlayArrow,
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.8f),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(28.dp)
+                )
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Título
             Text(
                 text = video.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 2,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurface
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
             )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Linha secundária (duração, resolução, tamanho)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = formatDuration(video.duration),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (video.resolution.isNotBlank()) {
-                    Text("•", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
-                    Text(video.resolution, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                if (video.size > 0) {
-                    Text("•", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
-                    Text(formatFileSize(LocalContext.current, video.size), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
         }
     }
 }
 
-private fun formatFileSize(context: Context, size: Long): String {
-    return Formatter.formatShortFileSize(context, size)
+@Composable
+private fun FolderItem(
+    folder: VideoUtils.FolderInfo,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        animationSpec = spring(dampingRatio = 0.6f),
+        label = "folderScale"
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f))
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                Icons.Filled.Folder,
+                contentDescription = null,
+                modifier = Modifier.size(36.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = folder.name,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = "${folder.videoCount} vídeos",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingState() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun ErrorState(message: String, onRetry: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(message, color = MaterialTheme.colorScheme.error)
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(onClick = onRetry) { Text("Tentar novamente") }
+        }
+    }
+}
+
+@Composable
+private fun EmptyState() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text("Nenhum vídeo encontrado", style = MaterialTheme.typography.titleMedium)
+    }
+}
+
+@Composable
+private fun EmptySearchState() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text("Nenhum resultado para a busca", style = MaterialTheme.typography.titleMedium)
+    }
 }

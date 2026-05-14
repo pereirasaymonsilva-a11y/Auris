@@ -3,6 +3,7 @@ package com.goldensystem.auris.presentation.navigation
 import com.goldensystem.auris.presentation.screens.WordDelimiterConfigScreen
 import com.goldensystem.auris.presentation.screens.DelimiterConfigScreen
 import android.annotation.SuppressLint
+import android.os.Bundle
 import androidx.annotation.OptIn
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -34,6 +35,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.goldensystem.auris.data.model.VideoQueue
 import com.goldensystem.auris.data.preferences.LaunchTab
 import com.goldensystem.auris.data.preferences.UserPreferencesRepository
 import com.goldensystem.auris.presentation.screens.AlbumDetailScreen
@@ -52,7 +54,6 @@ import com.goldensystem.auris.presentation.screens.NavBarCornerRadiusScreen
 import com.goldensystem.auris.presentation.screens.PaletteStyleSettingsScreen
 import com.goldensystem.auris.presentation.screens.PlaylistDetailScreen
 import com.goldensystem.auris.presentation.screens.RecentlyPlayedScreen
-
 import com.goldensystem.auris.presentation.screens.AboutScreen
 import com.goldensystem.auris.presentation.screens.SearchScreen
 import com.goldensystem.auris.presentation.screens.StatsScreen
@@ -65,6 +66,17 @@ import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
 import com.goldensystem.auris.presentation.viewmodel.PlaylistViewModel
 import kotlinx.coroutines.flow.first
 import com.goldensystem.auris.presentation.components.ScreenWrapper
+
+private val VideoQueueNavType = object : NavType<VideoQueue>(isNullableAllowed = false) {
+    override fun get(bundle: Bundle, key: String): VideoQueue? =
+        bundle.getParcelable(key)
+    override fun put(bundle: Bundle, key: String, value: VideoQueue) {
+        bundle.putParcelable(key, value)
+    }
+    override fun parseValue(value: String): VideoQueue {
+        throw UnsupportedOperationException("Not supported")
+    }
+}
 
 @OptIn(UnstableApi::class)
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -216,9 +228,7 @@ fun AppNavigation(
                     SettingsScreen(
                         navController = navController,
                         playerViewModel = playerViewModel,
-                        onNavigationIconClick = {
-                            navController.popBackStack()
-                        }
+                        onNavigationIconClick = { navController.popBackStack() }
                     )
                 }
             }
@@ -354,7 +364,6 @@ fun AppNavigation(
                     }
                 }
             }
-
             composable(
                 Screen.DJSpace.route,
                 enterTransition = { enterTransition() },
@@ -567,7 +576,9 @@ fun AppNavigation(
                     )
                 }
             }
-            // ===== GALERIA DE VÍDEOS =====
+
+            // ===== NOVAS ROTAS DO SISTEMA DE VÍDEOS =====
+
             composable(
                 "video_gallery",
                 enterTransition = { enterTransition() },
@@ -576,24 +587,23 @@ fun AppNavigation(
                 popExitTransition = { popExitTransition() },
             ) {
                 VideoGalleryScreen(
-                    onVideoClick = { uri ->
-                        navController.navigate("video_player/${android.net.Uri.encode(uri)}")
+                    onOpenPlayerWithQueue = { queue ->
+                        navController.currentBackStackEntry?.savedStateHandle?.set("queue", queue)
+                        navController.navigate("video_player")
                     },
                     onBack = { navController.popBackStack() }
                 )
             }
-            // ===== PLAYER DE VÍDEO =====
+
             composable(
-                route = "video_player/{videoUri}",
-                arguments = listOf(navArgument("videoUri") { type = NavType.StringType }),
+                route = "video_player",
+                arguments = listOf(navArgument("queue") { type = VideoQueueNavType }),
                 enterTransition = { enterTransition() },
                 exitTransition = { exitTransition() },
                 popEnterTransition = { popEnterTransition() },
                 popExitTransition = { popExitTransition() },
-            ) { backStackEntry ->
-                val videoUri = backStackEntry.arguments?.getString("videoUri") ?: return@composable
+            ) {
                 VideoPlayerScreen(
-                    fileUri = videoUri,
                     onBack = { navController.popBackStack() }
                 )
             }
