@@ -341,9 +341,24 @@ fun VideoPlayerScreen(
                         val th = if (isDragging) 6.dp.toPx() else 4.dp.toPx()
                         val tr = if (isDragging) 10.dp.toPx() else 4.dp.toPx()
 
-                        drawRoundRect(Color.White.copy(alpha = 0.15f), Offset.Zero, Size(size.width, th), CornerRadius(th / 2))
-                        drawRoundRect(Color.White.copy(alpha = 0.25f), Offset.Zero, Size(size.width * buf, th), CornerRadius(th / 2))
-                        drawRoundRect(Color.White, Offset.Zero, Size(size.width * eff, th), CornerRadius(th / 2))
+                        drawRoundRect(
+                            color = Color.White.copy(alpha = 0.15f),
+                            topLeft = Offset.Zero,
+                            size = Size(size.width, th),
+                            cornerRadius = CornerRadius(th / 2)
+                        )
+                        drawRoundRect(
+                            color = Color.White.copy(alpha = 0.25f),
+                            topLeft = Offset.Zero,
+                            size = Size(size.width * buf, th),
+                            cornerRadius = CornerRadius(th / 2)
+                        )
+                        drawRoundRect(
+                            color = Color.White,
+                            topLeft = Offset.Zero,
+                            size = Size(size.width * eff, th),
+                            cornerRadius = CornerRadius(th / 2)
+                        )
                         if (tr > 0f) {
                             drawCircle(
                                 color = Color.White,
