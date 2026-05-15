@@ -5,8 +5,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import
-import com.goldensystem.auris.utils.VideoQueueHolder androidx.compose.foundation.interaction.MutableInteractionSource
+import com.goldensystem.auris.utils.VideoQueueHolder
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
