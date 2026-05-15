@@ -29,8 +29,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -283,13 +284,7 @@ fun VideoPlayerScreen(
                 Row(
                     Modifier.align(Alignment.TopStart).fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp).statusBarsPadding()
                         .clip(RoundedCornerShape(16.dp))
-                        .then(
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                Modifier.blur(24.dp).background(Color.White.copy(alpha = 0.08f))
-                            } else {
-                                Modifier.background(Color.Black.copy(alpha = 0.45f))
-                            }
-                        ),
+                        .background(Color.Black.copy(alpha = 0.45f)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = {
@@ -311,10 +306,16 @@ fun VideoPlayerScreen(
                     feedbackAlpha = 0.6f; feedbackScale = 0.9f
                     scope.launch { delay(60); feedbackAlpha = 1f; feedbackScale = 1f }
                 }, contentAlignment = Alignment.Center) {
-                    Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
-                        AnimatedContent(state.isPlaying, transitionSpec = { scaleIn(spring(dampingRatio = 0.6f, stiffness = 400f)) togetherWith fadeOut(spring(dampingRatio = 0.6f, stiffness = 400f)) }, label = "playPause") { playing ->
-                            Icon(if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(48.dp).graphicsLayer { alpha = feedbackAlphaAnim; scaleX = feedbackScaleAnim; scaleY = feedbackScaleAnim })
-                        }
+                    AnimatedContent(state.isPlaying, transitionSpec = { scaleIn(spring(dampingRatio = 0.6f, stiffness = 400f)) togetherWith fadeOut(spring(dampingRatio = 0.6f, stiffness = 400f)) }, label = "playPause") { playing ->
+                        Icon(
+                            if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                            null,
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .alpha(feedbackAlphaAnim)
+                                .scale(feedbackScaleAnim)
+                        )
                     }
                 }
 
