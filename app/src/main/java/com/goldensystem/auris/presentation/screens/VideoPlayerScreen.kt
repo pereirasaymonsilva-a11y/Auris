@@ -112,23 +112,26 @@ fun VideoPlayerScreen(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        // PlayerView conectado ao ExoPlayer
-        AndroidView(
-            factory = { ctx ->
-                PlayerView(ctx).apply {
-                    this.player = viewModel.exoPlayer
-                    useController = false
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                    keepScreenOn = true
-                }
-            },
-            update = { playerView ->
-                if (playerView.player !== viewModel.exoPlayer) {
-                    playerView.player = viewModel.exoPlayer
-                }
-            },
-            modifier = Modifier.fillMaxSize()
-        )
+        // Só cria o PlayerView quando o exoPlayer estiver disponível
+        val exoPlayer = viewModel.exoPlayer
+        if (exoPlayer != null) {
+            AndroidView(
+                factory = { ctx ->
+                    PlayerView(ctx).apply {
+                        player = exoPlayer
+                        useController = false
+                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        keepScreenOn = true
+                    }
+                },
+                update = { playerView ->
+                    if (playerView.player !== exoPlayer) {
+                        playerView.player = exoPlayer
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
 
         // Thumbnail enquanto idle/buffering
         if (state.playerState == PlayerState.IDLE || state.playerState == PlayerState.BUFFERING) {
