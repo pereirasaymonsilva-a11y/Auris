@@ -306,32 +306,13 @@ fun VideoPlayerScreen(
                     }
                 }
 
-                // Play/Pause
-                Box(Modifier.align(Alignment.Center).clickable(remember { MutableInteractionSource() }, null) {
-                    viewModel.playPause()
-                    feedbackAlpha = 0.6f; feedbackScale = 0.9f
-                    scope.launch { delay(60); feedbackAlpha = 1f; feedbackScale = 1f }
-                }, contentAlignment = Alignment.Center) {
-                    AnimatedContent(state.isPlaying, transitionSpec = { scaleIn(spring(dampingRatio = 0.6f, stiffness = 400f)) togetherWith fadeOut(spring(dampingRatio = 0.6f, stiffness = 400f)) }, label = "playPause") { playing ->
-                        Icon(
-                            if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                            null,
-                            tint = Color.White,
-                            modifier = Modifier
-                                .size(48.dp)
-                                .alpha(feedbackAlphaAnim)
-                                .scale(feedbackScaleAnim)
-                        )
-                    }
-                }
-
                 // Inferior
                 Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(horizontal = 12.dp, vertical = 16.dp).navigationBarsPadding()) {
                     var isDragging by remember { mutableStateOf(false) }
                     var dragPosition by remember { mutableFloatStateOf(0f) }
 
                     Canvas(
-                        Modifier.fillMaxWidth().height(24.dp).pointerInput(Unit) {
+                        Modifier.fillMaxWidth().height(24.dp).offset(y = 6.dp).pointerInput(Unit) {
                             detectHorizontalDragGestures(
                                 onDragStart = { isDragging = true; dragPosition = (it.x / size.width).coerceIn(0f, 1f); resetAutoHide() },
                                 onHorizontalDrag = { _, dragAmount ->
