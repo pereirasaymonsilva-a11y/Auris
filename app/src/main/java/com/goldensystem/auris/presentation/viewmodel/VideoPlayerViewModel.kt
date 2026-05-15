@@ -57,9 +57,7 @@ class VideoPlayerViewModel @Inject constructor(
     init {
         if (ContextCompat.checkSelfPermission(getApplication(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             _uiState.update { it.copy(errorMessage = "Permissão de armazenamento não concedida") }
-            return
-        }
-        if (queue.current != null && queue.current!!.path.isNotBlank()) {
+        } else if (queue.current != null && queue.current!!.path.isNotBlank()) {
             initializePlayer()
         } else {
             _uiState.update { it.copy(errorMessage = "Nenhum vídeo disponível") }
