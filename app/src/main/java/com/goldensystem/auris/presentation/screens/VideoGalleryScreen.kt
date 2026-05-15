@@ -101,14 +101,6 @@ fun VideoGalleryScreen(
     video = video,
     viewModel = viewModel,
     onClick = { queue -> onOpenPlayerWithQueue(queue) }
-
-    onClick = {
-    .clickable(interactionSource = interactionSource, indication = null, onClick = {
-    val queue = viewModel.buildQueue(video)
-    VideoQueueHolder.setQueue(queue)
-    onClick(queue)
-})
-}
                                     )
                                 }
                             }
