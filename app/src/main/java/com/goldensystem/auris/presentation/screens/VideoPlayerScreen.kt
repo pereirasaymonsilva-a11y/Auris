@@ -1,10 +1,10 @@
-// VideoPlayerScreen.kt
 package com.goldensystem.auris.presentation.screens
 
 import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.media.AudioManager
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -116,18 +116,12 @@ fun VideoPlayerScreen(
         AndroidView(
             factory = { ctx ->
                 PlayerView(ctx).apply {
-                    // Conecta o player
                     this.player = viewModel.exoPlayer
                     useController = false
                     resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     keepScreenOn = true
-                    // Workaround para Compose Surface sync
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        setEnableComposeSurfaceSyncWorkaround(true)
-                    }
                 }
             },
-            // Atualiza a conexão se o player for recriado
             update = { playerView ->
                 if (playerView.player !== viewModel.exoPlayer) {
                     playerView.player = viewModel.exoPlayer
