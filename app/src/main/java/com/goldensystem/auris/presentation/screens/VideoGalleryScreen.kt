@@ -98,7 +98,11 @@ fun VideoGalleryScreen(
                                 items(state.displayVideos, key = { it.id }) { video ->
                                     VideoGridItem(
                                         video = video,
-                                        onClick = { onOpenPlayerWithQueue(viewModel.buildQueue(video)) }
+    onClick = {
+    val queue = viewModel.buildQueue(video)
+    VideoQueueHolder.setQueue(queue)
+    onOpenPlayerWithQueue(queue)
+}
                                     )
                                 }
                             }

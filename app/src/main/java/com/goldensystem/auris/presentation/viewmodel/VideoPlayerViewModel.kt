@@ -1,3 +1,4 @@
+// 2. VideoPlayerViewModel.kt (modificado)
 package com.goldensystem.auris.presentation.viewmodel
 
 import android.app.Application
@@ -7,19 +8,17 @@ import android.os.Build
 import android.provider.MediaStore
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import com.goldensystem.auris.data.model.QueueContext
 import com.goldensystem.auris.data.model.VideoItem
 import com.goldensystem.auris.data.model.VideoQueue
+import com.goldensystem.auris.utils.VideoQueueHolder
 import com.goldensystem.auris.utils.VideoUtils.safeSeekBy
 import com.goldensystem.auris.utils.VideoUtils.safeSeekTo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +26,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 enum class PlayerState { IDLE, BUFFERING, READY, ENDED, ERROR }
@@ -44,12 +42,10 @@ data class VideoPlayerUiState(
 
 @HiltViewModel
 class VideoPlayerViewModel @Inject constructor(
-    application: Application,
-    savedStateHandle: SavedStateHandle
+    application: Application
 ) : AndroidViewModel(application) {
 
-    private val initialQueue: VideoQueue = savedStateHandle.get<VideoQueue>("queue") ?: VideoQueue.EMPTY
-    private val _uiState = MutableStateFlow(VideoPlayerUiState(queue = initialQueue, currentVideo = initialQueue.current ?: VideoItem.EMPTY))
+    private val _uiState = MutableStateFlow(VideoPlayerUiState())
     val uiState: StateFlow<VideoPlayerUiState> = _uiState.asStateFlow()
 
     var exoPlayer: ExoPlayer? = null
@@ -69,83 +65,13 @@ class VideoPlayerViewModel @Inject constructor(
             return
         }
 
-        // Se a fila estiver vazia, carrega todos os vídeos como fallback
-        if (initialQueue.isEmpty) {
-            loadFallbackQueue()
-        } else if (initialQueue.current != null && initialQueue.current!!.path.isNotBlank()) {
+        val holderQueue = VideoQueueHolder.getQueue()
+        if (holderQueue != null && holderQueue.videos.isNotEmpty()) {
+            _uiState.update { it.copy(queue = holderQueue, currentVideo = holderQueue.current ?: VideoItem.EMPTY) }
             initializePlayer()
         } else {
-            _uiState.update { it.copy(errorMessage = "Nenhum vídeo disponível") }
+            _uiState.update { it.copy(errorMessage = "Nenhuma fila de reprodução disponível") }
         }
-    }
-
-    private fun loadFallbackQueue() {
-        viewModelScope.launch {
-            try {
-                val videos = withContext(Dispatchers.IO) { fetchAllVideos() }
-                if (videos.isNotEmpty()) {
-                    val newQueue = VideoQueue(
-                        videos = videos,
-                        currentIndex = 0,
-                        context = QueueContext.ALL
-                    )
-                    _uiState.update { it.copy(queue = newQueue, currentVideo = newQueue.current ?: VideoItem.EMPTY) }
-                    initializePlayer()
-                } else {
-                    _uiState.update { it.copy(errorMessage = "Nenhum vídeo encontrado no dispositivo") }
-                }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = e.message ?: "Erro ao carregar vídeos") }
-            }
-        }
-    }
-
-    private suspend fun fetchAllVideos(): List<VideoItem> {
-        val videos = mutableListOf<VideoItem>()
-        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
-        } else {
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        }
-        val projection = arrayOf(
-            MediaStore.Video.Media._ID, MediaStore.Video.Media.DISPLAY_NAME,
-            MediaStore.Video.Media.DATA, MediaStore.Video.Media.DURATION,
-            MediaStore.Video.Media.SIZE, MediaStore.Video.Media.WIDTH,
-            MediaStore.Video.Media.HEIGHT, MediaStore.Video.Media.DATE_ADDED
-        )
-        getApplication<Application>().contentResolver.query(
-            collection, projection, null, null, "${MediaStore.Video.Media.DATE_ADDED} DESC"
-        )?.use { cursor ->
-            val idCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
-            val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
-            val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
-            val durCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
-            val sizeCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
-            val widthCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.WIDTH)
-            val heightCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.HEIGHT)
-            val dateCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idCol)
-                val path = cursor.getString(dataCol) ?: continue
-                val width = cursor.getInt(widthCol)
-                val height = cursor.getInt(heightCol)
-                videos.add(
-                    VideoItem(
-                        id = id,
-                        title = cursor.getString(nameCol) ?: "Desconhecido",
-                        path = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id).toString(),
-                        durationMs = cursor.getLong(durCol),
-                        resolution = if (width > 0 && height > 0) "${width}x${height}" else "",
-                        sizeBytes = cursor.getLong(sizeCol),
-                        folderPath = path.substringBeforeLast("/", ""),
-                        dateAddedMs = cursor.getLong(dateCol) * 1000L,
-                        width = width,
-                        height = height
-                    )
-                )
-            }
-        }
-        return videos
     }
 
     private fun initializePlayer() {
@@ -166,23 +92,19 @@ class VideoPlayerViewModel @Inject constructor(
             addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(state: Int) {
                     _uiState.update {
-                        it.copy(
-                            playerState = when (state) {
-                                Player.STATE_IDLE -> PlayerState.IDLE
-                                Player.STATE_BUFFERING -> PlayerState.BUFFERING
-                                Player.STATE_READY -> PlayerState.READY
-                                Player.STATE_ENDED -> PlayerState.ENDED
-                                else -> PlayerState.ERROR
-                            }
-                        )
+                        it.copy(playerState = when (state) {
+                            Player.STATE_IDLE -> PlayerState.IDLE
+                            Player.STATE_BUFFERING -> PlayerState.BUFFERING
+                            Player.STATE_READY -> PlayerState.READY
+                            Player.STATE_ENDED -> PlayerState.ENDED
+                            else -> PlayerState.ERROR
+                        })
                     }
                     if (state == Player.STATE_ENDED) advanceToNext()
                 }
-
                 override fun onIsPlayingChanged(playing: Boolean) {
                     _uiState.update { it.copy(isPlaying = playing) }
                 }
-
                 override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                     _uiState.update { it.copy(playerState = PlayerState.ERROR, errorMessage = error.message) }
                 }
@@ -223,10 +145,7 @@ class VideoPlayerViewModel @Inject constructor(
     }
 
     fun onResume() {
-        if (wasPlayingBeforePause) {
-            exoPlayer?.play()
-            wasPlayingBeforePause = false
-        }
+        if (wasPlayingBeforePause) { exoPlayer?.play(); wasPlayingBeforePause = false }
     }
 
     fun onPause() {
@@ -240,10 +159,7 @@ class VideoPlayerViewModel @Inject constructor(
         exoPlayer = null
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        releasePlayer()
-    }
+    override fun onCleared() { super.onCleared(); releasePlayer() }
 
     private fun startPositionUpdates() {
         positionUpdater?.cancel()
@@ -263,8 +179,5 @@ class VideoPlayerViewModel @Inject constructor(
         }
     }
 
-    private fun stopPositionUpdates() {
-        positionUpdater?.cancel()
-        positionUpdater = null
-    }
+    private fun stopPositionUpdates() { positionUpdater?.cancel(); positionUpdater = null }
 }

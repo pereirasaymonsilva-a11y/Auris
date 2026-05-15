@@ -3,7 +3,6 @@ package com.goldensystem.auris.presentation.navigation
 import com.goldensystem.auris.presentation.screens.WordDelimiterConfigScreen
 import com.goldensystem.auris.presentation.screens.DelimiterConfigScreen
 import android.annotation.SuppressLint
-import android.os.Bundle
 import androidx.annotation.OptIn
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -35,7 +34,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.goldensystem.auris.data.model.VideoQueue
 import com.goldensystem.auris.data.preferences.LaunchTab
 import com.goldensystem.auris.data.preferences.UserPreferencesRepository
 import com.goldensystem.auris.presentation.screens.AlbumDetailScreen
@@ -66,17 +64,6 @@ import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
 import com.goldensystem.auris.presentation.viewmodel.PlaylistViewModel
 import kotlinx.coroutines.flow.first
 import com.goldensystem.auris.presentation.components.ScreenWrapper
-
-private val VideoQueueNavType = object : NavType<VideoQueue>(isNullableAllowed = true) {
-    override fun get(bundle: Bundle, key: String): VideoQueue? =
-        bundle.getParcelable(key)
-    override fun put(bundle: Bundle, key: String, value: VideoQueue) {
-        bundle.putParcelable(key, value)
-    }
-    override fun parseValue(value: String): VideoQueue {
-        throw UnsupportedOperationException("Not supported")
-    }
-}
 
 @OptIn(UnstableApi::class)
 @SuppressLint("UnrememberedGetBackStackEntry")
@@ -588,7 +575,6 @@ fun AppNavigation(
             ) {
                 VideoGalleryScreen(
                     onOpenPlayerWithQueue = { queue ->
-                        navController.currentBackStackEntry?.savedStateHandle?.set("queue", queue)
                         navController.navigate("video_player")
                     },
                     onBack = { navController.popBackStack() }
@@ -597,13 +583,6 @@ fun AppNavigation(
 
             composable(
                 route = "video_player",
-                arguments = listOf(
-                    navArgument("queue") {
-                        type = VideoQueueNavType
-                        nullable = true
-                        defaultValue = null
-                    }
-                ),
                 enterTransition = { enterTransition() },
                 exitTransition = { exitTransition() },
                 popEnterTransition = { popEnterTransition() },
