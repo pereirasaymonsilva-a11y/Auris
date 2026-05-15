@@ -5,7 +5,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import
+import com.goldensystem.auris.utils.VideoQueueHolder androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -97,11 +98,16 @@ fun VideoGalleryScreen(
                             } else {
                                 items(state.displayVideos, key = { it.id }) { video ->
                                     VideoGridItem(
-                                        video = video,
+    video = video,
+    viewModel = viewModel,
+    onClick = { queue -> onOpenPlayerWithQueue(queue) }
+
     onClick = {
+    .clickable(interactionSource = interactionSource, indication = null, onClick = {
     val queue = viewModel.buildQueue(video)
     VideoQueueHolder.setQueue(queue)
-    onOpenPlayerWithQueue(queue)
+    onClick(queue)
+})
 }
                                     )
                                 }
@@ -193,7 +199,11 @@ private fun ContextTabs(
 }
 
 @Composable
-private fun VideoGridItem(video: VideoItem, onClick: () -> Unit) {
+private fun VideoGridItem(
+    video: VideoItem,
+    viewModel: VideoGalleryViewModel,
+    onClick: (VideoQueue) -> Unit
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(

@@ -1,4 +1,3 @@
-// 2. VideoPlayerViewModel.kt (modificado)
 package com.goldensystem.auris.presentation.viewmodel
 
 import android.app.Application
@@ -55,16 +54,14 @@ class VideoPlayerViewModel @Inject constructor(
     private var positionUpdater: kotlinx.coroutines.Job? = null
 
     init {
-        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            android.Manifest.permission.READ_MEDIA_VIDEO
-        } else {
-            android.Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-        if (ContextCompat.checkSelfPermission(getApplication(), permission) != PackageManager.PERMISSION_GRANTED) {
-            _uiState.update { it.copy(errorMessage = "Permissão de armazenamento não concedida") }
-            return
-        }
-
+    val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        android.Manifest.permission.READ_MEDIA_VIDEO
+    } else {
+        android.Manifest.permission.READ_EXTERNAL_STORAGE
+    }
+    if (ContextCompat.checkSelfPermission(getApplication(), permission) != PackageManager.PERMISSION_GRANTED) {
+        _uiState.update { it.copy(errorMessage = "Permissão de armazenamento não concedida") }
+    } else {
         val holderQueue = VideoQueueHolder.getQueue()
         if (holderQueue != null && holderQueue.videos.isNotEmpty()) {
             _uiState.update { it.copy(queue = holderQueue, currentVideo = holderQueue.current ?: VideoItem.EMPTY) }
@@ -73,6 +70,7 @@ class VideoPlayerViewModel @Inject constructor(
             _uiState.update { it.copy(errorMessage = "Nenhuma fila de reprodução disponível") }
         }
     }
+}
 
     private fun initializePlayer() {
         val video = _uiState.value.currentVideo
