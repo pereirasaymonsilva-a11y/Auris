@@ -332,7 +332,10 @@ fun VideoPlayerScreen(
                         Modifier.fillMaxWidth().height(24.dp).pointerInput(Unit) {
                             detectHorizontalDragGestures(
                                 onDragStart = { isDragging = true; dragPosition = (it.x / size.width).coerceIn(0f, 1f); resetAutoHide() },
-                                onDrag = { c, _ -> c.consume(); dragPosition = (c.position.x / size.width).coerceIn(0f, 1f) },
+                                onDrag = { change, _ ->
+                                    change.consume()
+                                    dragPosition = (change.position.x / size.width).coerceIn(0f, 1f)
+                                },
                                 onDragEnd = { viewModel.seekTo((dragPosition * state.durationMs).toLong()); isDragging = false },
                                 onDragCancel = { isDragging = false }
                             )
@@ -343,9 +346,24 @@ fun VideoPlayerScreen(
                         val th = if (isDragging) 6.dp.toPx() else 4.dp.toPx()
                         val tr = if (isDragging) 10.dp.toPx() else 4.dp.toPx()
 
-                        drawRoundRect(Color.White.copy(alpha = 0.15f), Size(size.width, th), CornerRadius(th / 2))
-                        drawRoundRect(Color.White.copy(alpha = 0.25f), Size(size.width * buf, th), CornerRadius(th / 2))
-                        drawRoundRect(Color.White, Size(size.width * eff, th), CornerRadius(th / 2))
+                        drawRoundRect(
+                            color = Color.White.copy(alpha = 0.15f),
+                            topLeft = Offset.Zero,
+                            size = Size(size.width, th),
+                            cornerRadius = CornerRadius(th / 2)
+                        )
+                        drawRoundRect(
+                            color = Color.White.copy(alpha = 0.25f),
+                            topLeft = Offset.Zero,
+                            size = Size(size.width * buf, th),
+                            cornerRadius = CornerRadius(th / 2)
+                        )
+                        drawRoundRect(
+                            color = Color.White,
+                            topLeft = Offset.Zero,
+                            size = Size(size.width * eff, th),
+                            cornerRadius = CornerRadius(th / 2)
+                        )
                         if (tr > 0f) {
                             drawCircle(Color.White, tr, Offset(size.width * eff, th / 2))
                             if (isDragging) drawCircle(Color.White.copy(alpha = 0.5f), tr + 2.dp.toPx(), Offset(size.width * eff, th / 2), style = Stroke(1.dp.toPx()))
