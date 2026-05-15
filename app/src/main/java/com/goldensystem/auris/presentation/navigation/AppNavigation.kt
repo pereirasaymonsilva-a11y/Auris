@@ -67,7 +67,7 @@ import com.goldensystem.auris.presentation.viewmodel.PlaylistViewModel
 import kotlinx.coroutines.flow.first
 import com.goldensystem.auris.presentation.components.ScreenWrapper
 
-private val VideoQueueNavType = object : NavType<VideoQueue>(isNullableAllowed = false) {
+private val VideoQueueNavType = object : NavType<VideoQueue>(isNullableAllowed = true) {
     override fun get(bundle: Bundle, key: String): VideoQueue? =
         bundle.getParcelable(key)
     override fun put(bundle: Bundle, key: String, value: VideoQueue) {
@@ -597,7 +597,13 @@ fun AppNavigation(
 
             composable(
                 route = "video_player",
-                arguments = listOf(navArgument("queue") { type = VideoQueueNavType }),
+                arguments = listOf(
+                    navArgument("queue") {
+                        type = VideoQueueNavType
+                        nullable = true
+                        defaultValue = null
+                    }
+                ),
                 enterTransition = { enterTransition() },
                 exitTransition = { exitTransition() },
                 popEnterTransition = { popEnterTransition() },
