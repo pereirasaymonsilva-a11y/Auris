@@ -13,11 +13,13 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.goldensystem.auris.data.model.QueueContext
 import com.goldensystem.auris.data.model.VideoItem
 import com.goldensystem.auris.data.model.VideoQueue
 import com.goldensystem.auris.utils.VideoUtils.safeSeekBy
 import com.goldensystem.auris.utils.VideoUtils.safeSeekTo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 enum class PlayerState { IDLE, BUFFERING, READY, ENDED, ERROR }
@@ -45,8 +48,8 @@ class VideoPlayerViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    private val queue: VideoQueue = savedStateHandle.get<VideoQueue>("queue") ?: VideoQueue.EMPTY
-    private val _uiState = MutableStateFlow(VideoPlayerUiState(queue = queue, currentVideo = queue.current ?: VideoItem.EMPTY))
+    private val initialQueue: VideoQueue = savedStateHandle.get<VideoQueue>("queue") ?: VideoQueue.EMPTY
+    private val _uiState = MutableStateFlow(VideoPlayerUiState(queue = initialQueue, currentVideo = initialQueue.current ?: VideoItem.EMPTY))
     val uiState: StateFlow<VideoPlayerUiState> = _uiState.asStateFlow()
 
     var exoPlayer: ExoPlayer? = null
@@ -63,15 +66,91 @@ class VideoPlayerViewModel @Inject constructor(
         }
         if (ContextCompat.checkSelfPermission(getApplication(), permission) != PackageManager.PERMISSION_GRANTED) {
             _uiState.update { it.copy(errorMessage = "Permissão de armazenamento não concedida") }
-        } else if (queue.current != null && queue.current!!.path.isNotBlank()) {
+            return
+        }
+
+        // Se a fila estiver vazia, carrega todos os vídeos como fallback
+        if (initialQueue.isEmpty) {
+            loadFallbackQueue()
+        } else if (initialQueue.current != null && initialQueue.current!!.path.isNotBlank()) {
             initializePlayer()
         } else {
             _uiState.update { it.copy(errorMessage = "Nenhum vídeo disponível") }
         }
     }
 
+    private fun loadFallbackQueue() {
+        viewModelScope.launch {
+            try {
+                val videos = withContext(Dispatchers.IO) { fetchAllVideos() }
+                if (videos.isNotEmpty()) {
+                    val newQueue = VideoQueue(
+                        videos = videos,
+                        currentIndex = 0,
+                        context = QueueContext.ALL
+                    )
+                    _uiState.update { it.copy(queue = newQueue, currentVideo = newQueue.current ?: VideoItem.EMPTY) }
+                    initializePlayer()
+                } else {
+                    _uiState.update { it.copy(errorMessage = "Nenhum vídeo encontrado no dispositivo") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = e.message ?: "Erro ao carregar vídeos") }
+            }
+        }
+    }
+
+    private suspend fun fetchAllVideos(): List<VideoItem> {
+        val videos = mutableListOf<VideoItem>()
+        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        } else {
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        }
+        val projection = arrayOf(
+            MediaStore.Video.Media._ID, MediaStore.Video.Media.DISPLAY_NAME,
+            MediaStore.Video.Media.DATA, MediaStore.Video.Media.DURATION,
+            MediaStore.Video.Media.SIZE, MediaStore.Video.Media.WIDTH,
+            MediaStore.Video.Media.HEIGHT, MediaStore.Video.Media.DATE_ADDED
+        )
+        getApplication<Application>().contentResolver.query(
+            collection, projection, null, null, "${MediaStore.Video.Media.DATE_ADDED} DESC"
+        )?.use { cursor ->
+            val idCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
+            val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
+            val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
+            val durCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+            val sizeCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
+            val widthCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.WIDTH)
+            val heightCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.HEIGHT)
+            val dateCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(idCol)
+                val path = cursor.getString(dataCol) ?: continue
+                val width = cursor.getInt(widthCol)
+                val height = cursor.getInt(heightCol)
+                videos.add(
+                    VideoItem(
+                        id = id,
+                        title = cursor.getString(nameCol) ?: "Desconhecido",
+                        path = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id).toString(),
+                        durationMs = cursor.getLong(durCol),
+                        resolution = if (width > 0 && height > 0) "${width}x${height}" else "",
+                        sizeBytes = cursor.getLong(sizeCol),
+                        folderPath = path.substringBeforeLast("/", ""),
+                        dateAddedMs = cursor.getLong(dateCol) * 1000L,
+                        width = width,
+                        height = height
+                    )
+                )
+            }
+        }
+        return videos
+    }
+
     private fun initializePlayer() {
-        val video = queue.current ?: return
+        val video = _uiState.value.currentVideo
+        if (video == VideoItem.EMPTY || video.path.isBlank()) return
         releasePlayer()
 
         val contentUri = ContentUris.withAppendedId(
@@ -87,19 +166,23 @@ class VideoPlayerViewModel @Inject constructor(
             addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(state: Int) {
                     _uiState.update {
-                        it.copy(playerState = when (state) {
-                            Player.STATE_IDLE -> PlayerState.IDLE
-                            Player.STATE_BUFFERING -> PlayerState.BUFFERING
-                            Player.STATE_READY -> PlayerState.READY
-                            Player.STATE_ENDED -> PlayerState.ENDED
-                            else -> PlayerState.ERROR
-                        })
+                        it.copy(
+                            playerState = when (state) {
+                                Player.STATE_IDLE -> PlayerState.IDLE
+                                Player.STATE_BUFFERING -> PlayerState.BUFFERING
+                                Player.STATE_READY -> PlayerState.READY
+                                Player.STATE_ENDED -> PlayerState.ENDED
+                                else -> PlayerState.ERROR
+                            }
+                        )
                     }
                     if (state == Player.STATE_ENDED) advanceToNext()
                 }
+
                 override fun onIsPlayingChanged(playing: Boolean) {
                     _uiState.update { it.copy(isPlaying = playing) }
                 }
+
                 override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                     _uiState.update { it.copy(playerState = PlayerState.ERROR, errorMessage = error.message) }
                 }
@@ -115,14 +198,16 @@ class VideoPlayerViewModel @Inject constructor(
     fun seekTo(positionMs: Long): Boolean = exoPlayer?.safeSeekTo(positionMs) ?: false
 
     fun advanceToNext() {
-        if (!queue.hasNext) return
-        val nextQueue = queue.moveToNext()
+        val currentQueue = _uiState.value.queue
+        if (!currentQueue.hasNext) return
+        val nextQueue = currentQueue.moveToNext()
         playQueueItem(nextQueue)
     }
 
     fun goToPrevious() {
-        if (!queue.hasPrevious) return
-        val prevQueue = queue.moveToPrevious()
+        val currentQueue = _uiState.value.queue
+        if (!currentQueue.hasPrevious) return
+        val prevQueue = currentQueue.moveToPrevious()
         playQueueItem(prevQueue)
     }
 
@@ -138,7 +223,10 @@ class VideoPlayerViewModel @Inject constructor(
     }
 
     fun onResume() {
-        if (wasPlayingBeforePause) { exoPlayer?.play(); wasPlayingBeforePause = false }
+        if (wasPlayingBeforePause) {
+            exoPlayer?.play()
+            wasPlayingBeforePause = false
+        }
     }
 
     fun onPause() {
@@ -152,7 +240,10 @@ class VideoPlayerViewModel @Inject constructor(
         exoPlayer = null
     }
 
-    override fun onCleared() { super.onCleared(); releasePlayer() }
+    override fun onCleared() {
+        super.onCleared()
+        releasePlayer()
+    }
 
     private fun startPositionUpdates() {
         positionUpdater?.cancel()
@@ -172,5 +263,8 @@ class VideoPlayerViewModel @Inject constructor(
         }
     }
 
-    private fun stopPositionUpdates() { positionUpdater?.cancel(); positionUpdater = null }
+    private fun stopPositionUpdates() {
+        positionUpdater?.cancel()
+        positionUpdater = null
+    }
 }
