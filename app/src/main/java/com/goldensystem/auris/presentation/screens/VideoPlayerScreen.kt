@@ -198,7 +198,13 @@ fun VideoPlayerScreen(
                 doubleTapFeedback = null
             }
             Box(Modifier.align(Alignment.Center).offset(x = if (offsetX < 0.5f) (-60).dp else 60.dp).size(96.dp), contentAlignment = Alignment.Center) {
-                Canvas(Modifier.fillMaxSize()) { drawCircle(Color.White.copy(alpha = 0.3f * pulseAlpha), size.minDimension / 2 * pulseScale, center) }
+                Canvas(Modifier.fillMaxSize()) {
+                    drawCircle(
+                        color = Color.White.copy(alpha = 0.3f * pulseAlpha),
+                        radius = size.minDimension / 2 * pulseScale,
+                        center = center
+                    )
+                }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(if (offsetX < 0.5f) Icons.Filled.Replay10 else Icons.Filled.Forward10, null, tint = Color.White, modifier = Modifier.size(32.dp))
                     Spacer(Modifier.height(4.dp))
