@@ -2,8 +2,9 @@ package com.goldensystem.auris.presentation.viewmodel
 
 import android.app.Application
 import android.content.ContentUris
-import android.net.Uri
+import android.content.pm.PackageManager
 import android.provider.MediaStore
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -54,6 +55,10 @@ class VideoPlayerViewModel @Inject constructor(
     private var positionUpdater: kotlinx.coroutines.Job? = null
 
     init {
+        if (ContextCompat.checkSelfPermission(getApplication(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            _uiState.update { it.copy(errorMessage = "Permissão de armazenamento não concedida") }
+            return
+        }
         if (queue.current != null && queue.current!!.path.isNotBlank()) {
             initializePlayer()
         } else {
@@ -71,8 +76,8 @@ class VideoPlayerViewModel @Inject constructor(
                 video.id
             )
             setMediaItem(MediaItem.fromUri(contentUri))
-            prepare()
             playWhenReady = true
+            prepare()
 
             addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(state: Int) {
@@ -120,7 +125,8 @@ class VideoPlayerViewModel @Inject constructor(
         val video = newQueue.current ?: return
         val player = exoPlayer ?: return
         if (video.path.isBlank()) return
-        player.setMediaItem(MediaItem.fromUri(ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, video.id)))
+        val contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, video.id)
+        player.setMediaItem(MediaItem.fromUri(contentUri))
         player.prepare()
         player.playWhenReady = true
         _uiState.update { it.copy(queue = newQueue, currentVideo = video, errorMessage = null) }
@@ -148,10 +154,15 @@ class VideoPlayerViewModel @Inject constructor(
         positionUpdater = viewModelScope.launch {
             while (isActive) {
                 val player = exoPlayer
-                if (player != null) {
-                    _uiState.update { it.copy(currentPositionMs = player.currentPosition, durationMs = player.duration.takeIf { d -> d > 0 && d != C.TIME_UNSET } ?: it.durationMs) }
+                if (player != null && player.isPlaying) {
+                    _uiState.update {
+                        it.copy(
+                            currentPositionMs = player.currentPosition,
+                            durationMs = player.duration.takeIf { d -> d > 0 && d != C.TIME_UNSET } ?: it.durationMs
+                        )
+                    }
                 }
-                delay(250)
+                delay(100)
             }
         }
     }

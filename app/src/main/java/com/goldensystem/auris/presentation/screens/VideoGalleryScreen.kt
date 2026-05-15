@@ -183,7 +183,6 @@ private fun ContextTabs(
             onToggleShowFolders(false)
         }, text = { Text("Recentes") })
         Tab(selected = current == QueueContext.FOLDER && !showFoldersOnly, onClick = {
-            // Já está em uma pasta? Se sim, não faz nada. Senão, mostra a lista de pastas.
             if (current != QueueContext.FOLDER) onToggleShowFolders(true)
         }, text = { Text("Pastas") })
     }

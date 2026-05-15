@@ -1,5 +1,6 @@
 package com.goldensystem.auris.presentation.viewmodel
 
+import android.content.ContentUris
 import android.content.Context
 import android.os.Build
 import android.provider.MediaStore
@@ -13,7 +14,6 @@ import com.goldensystem.auris.utils.VideoUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import android.content.ContentUris
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,7 +32,7 @@ data class GalleryUiState(
     val currentContext: QueueContext = QueueContext.ALL,
     val sortMode: SortMode = SortMode.DATE_DESC,
     val currentFolder: String? = null,
-    val showFoldersOnly: Boolean = false  // NOVO: controla se a tela deve mostrar apenas pastas
+    val showFoldersOnly: Boolean = false
 ) {
     val displayVideos: List<VideoItem>
         get() = if (searchQuery.isBlank()) filteredVideos
@@ -97,7 +97,7 @@ class VideoGalleryViewModel @Inject constructor(
                 currentContext = contextType,
                 filteredVideos = applySort(videos, state.sortMode),
                 currentFolder = if (contextType == QueueContext.FOLDER) state.currentFolder else null,
-                showFoldersOnly = false  // ao trocar de aba, desativa modo "só pastas"
+                showFoldersOnly = false
             )
         }
     }
@@ -173,7 +173,7 @@ class VideoGalleryViewModel @Inject constructor(
                 videos.add(VideoItem(
                     id = id,
                     title = cursor.getString(nameCol) ?: "Desconhecido",
-                    path = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id).toString(), // usa content URI
+                    path = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id).toString(),
                     durationMs = cursor.getLong(durCol),
                     resolution = if (width > 0 && height > 0) "${width}x${height}" else "",
                     sizeBytes = cursor.getLong(sizeCol),

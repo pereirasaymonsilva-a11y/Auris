@@ -63,10 +63,13 @@ fun VideoPlayerScreen(
     var doubleTapFeedback by remember { mutableStateOf<Pair<Float, Float>?>(null) }
     var adjustmentType by remember { mutableStateOf<AdjustmentType?>(null) }
     var adjustmentValue by remember { mutableFloatStateOf(0f) }
+    var playerView by remember { mutableStateOf<PlayerView?>(null) }
 
     // Força landscape ao entrar
     LaunchedEffect(Unit) {
-        (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        try {
+            (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        } catch (_: Exception) {}
     }
 
     DisposableEffect(Unit) {
@@ -96,7 +99,7 @@ fun VideoPlayerScreen(
         onBack()
     }
 
-    // Auto-hide dos controles (apenas se visíveis e sem interação)
+    // Auto-hide dos controles
     LaunchedEffect(showControls) {
         if (showControls) {
             delay(2500)
@@ -109,20 +112,24 @@ fun VideoPlayerScreen(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        // PlayerView com update para sincronizar o player
+        // PlayerView
         AndroidView(
             factory = { ctx ->
-                PlayerView(ctx).apply {
-                    useController = false
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                    keepScreenOn = true
+                PlayerView(ctx).also {
+                    playerView = it
+                    it.useController = false
+                    it.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                    it.keepScreenOn = true
                 }
-            },
-            update = { playerView ->
-                playerView.player = viewModel.exoPlayer
             },
             modifier = Modifier.fillMaxSize()
         )
+
+        // Associa o player assim que disponível
+        DisposableEffect(viewModel.exoPlayer) {
+            playerView?.player = viewModel.exoPlayer
+            onDispose { }
+        }
 
         // Thumbnail enquanto idle/buffering
         if (state.playerState == PlayerState.IDLE || state.playerState == PlayerState.BUFFERING) {
@@ -138,7 +145,7 @@ fun VideoPlayerScreen(
             )
         }
 
-        // Overlay gradiente suave
+        // Overlay gradiente
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -162,7 +169,7 @@ fun VideoPlayerScreen(
             )
         }
 
-        // Feedback de double-tap (centralizado, sem offset)
+        // Feedback de double-tap
         doubleTapFeedback?.let { (offsetX, _) ->
             AnimatedVisibility(
                 visible = true,
@@ -180,6 +187,7 @@ fun VideoPlayerScreen(
                             tint = Color.White,
                             modifier = Modifier.size(48.dp)
                         )
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = if (offsetX < 0.5f) "-10s" else "+10s",
                             color = Color.White,
@@ -195,7 +203,7 @@ fun VideoPlayerScreen(
             }
         }
 
-        // Indicador lateral de brilho/volume (com LaunchedEffect simples)
+        // Indicador lateral de brilho/volume
         adjustmentType?.let { type ->
             Box(
                 modifier = Modifier
@@ -259,7 +267,8 @@ fun VideoPlayerScreen(
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .statusBarsPadding(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
@@ -270,8 +279,8 @@ fun VideoPlayerScreen(
                             onBack()
                         },
                         modifier = Modifier
-                            .size(40.dp)
-                            .background(Color.Black.copy(alpha = 0.4f), CircleShape)
+                            .size(36.dp)
+                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
                     ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar", tint = Color.White)
                     }
@@ -280,7 +289,7 @@ fun VideoPlayerScreen(
                         Text(
                             state.currentVideo.title,
                             color = Color.White,
-                            fontWeight = FontWeight.SemiBold,
+                            fontWeight = FontWeight.Medium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -292,36 +301,20 @@ fun VideoPlayerScreen(
                     }
                 }
 
-                // Centro: play/pause
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(64.dp)
-                        .background(Color.Black.copy(alpha = 0.4f), CircleShape)
-                        .clickable { viewModel.playPause() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    AnimatedContent(targetState = state.isPlaying, label = "play") { playing ->
-                        Icon(
-                            if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                            null,
-                            tint = Color.White,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                }
-
-                // Inferior: seekbar, tempo e botões de controle
+                // Inferior: seekbar, tempo e botões
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 24.dp)
+                        .navigationBarsPadding()
                 ) {
                     Slider(
                         value = state.currentPositionMs.toFloat().coerceAtMost(state.durationMs.toFloat()),
                         onValueChange = { viewModel.seekTo(it.toLong()) },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(24.dp),
                         colors = SliderDefaults.colors(
                             thumbColor = Color.White,
                             activeTrackColor = Color.White,
@@ -334,8 +327,8 @@ fun VideoPlayerScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(VideoUtils.formatDuration(state.currentPositionMs), color = Color.White, fontSize = 12.sp)
-                        Text(VideoUtils.formatDuration(state.durationMs), color = Color.White, fontSize = 12.sp)
+                        Text(VideoUtils.formatDuration(state.currentPositionMs), color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp)
+                        Text(VideoUtils.formatDuration(state.durationMs), color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp)
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(
@@ -349,11 +342,17 @@ fun VideoPlayerScreen(
                         IconButton(onClick = { viewModel.seekBy(-10000) }) {
                             Icon(Icons.Filled.Replay10, "-10s", tint = Color.White)
                         }
-                        IconButton(onClick = { viewModel.playPause() }) {
+                        IconButton(
+                            onClick = { viewModel.playPause() },
+                            modifier = Modifier
+                                .size(56.dp)
+                                .background(Color.White.copy(alpha = 0.2f), CircleShape)
+                        ) {
                             Icon(
                                 if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                                contentDescription = null,
-                                tint = Color.White
+                                null,
+                                tint = Color.White,
+                                modifier = Modifier.size(32.dp)
                             )
                         }
                         IconButton(onClick = { viewModel.seekBy(10000) }) {
@@ -363,6 +362,13 @@ fun VideoPlayerScreen(
                             Icon(Icons.Filled.SkipNext, "Próximo", tint = Color.White)
                         }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = state.queue.positionDescription,
+                        color = Color.White.copy(alpha = 0.6f),
+                        fontSize = 12.sp,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
                 }
             }
         }
@@ -379,7 +385,6 @@ fun VideoPlayerScreen(
                             val delta = if (offset.x < size.width / 2f) -10000L else 10000L
                             viewModel.seekBy(delta)
                             doubleTapFeedback = offset.x / size.width to offset.y / size.height
-                            // Não mostra controles no double-tap (apenas feedback)
                         }
                     )
                 }
@@ -404,7 +409,6 @@ fun VideoPlayerScreen(
                                 adjustmentType = AdjustmentType.VOLUME
                                 adjustmentValue = newVol.toFloat() / maxVol
                             }
-                            // Não ativa showControls aqui
                         },
                         onDragEnd = {},
                         onDragCancel = {}
