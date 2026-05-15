@@ -208,7 +208,15 @@ private fun VideoGridItem(
         modifier = Modifier
             .fillMaxWidth()
             .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+            .clickable(
+    interactionSource = interactionSource,
+    indication = null,
+    onClick = {
+        val queue = viewModel.buildQueue(video)
+        VideoQueueHolder.setQueue(queue)
+        onClick(queue)
+    }
+),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
