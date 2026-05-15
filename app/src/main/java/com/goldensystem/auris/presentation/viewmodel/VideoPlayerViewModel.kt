@@ -1,9 +1,9 @@
 package com.goldensystem.auris.presentation.viewmodel
 
 import android.app.Application
+import android.content.ContentUris
 import android.net.Uri
-import com.goldensystem.auris.utils.VideoUtils.safeSeekBy
-import com.goldensystem.auris.utils.VideoUtils.safeSeekTo
+import android.provider.MediaStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -13,7 +13,8 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.goldensystem.auris.data.model.VideoItem
 import com.goldensystem.auris.data.model.VideoQueue
-import com.goldensystem.auris.utils.VideoUtils
+import com.goldensystem.auris.utils.VideoUtils.safeSeekBy
+import com.goldensystem.auris.utils.VideoUtils.safeSeekTo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,10 +44,7 @@ class VideoPlayerViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
 
     private val queue: VideoQueue = savedStateHandle.get<VideoQueue>("queue") ?: VideoQueue.EMPTY
-
-    private val _uiState = MutableStateFlow(
-        VideoPlayerUiState(queue = queue, currentVideo = queue.current ?: VideoItem.EMPTY)
-    )
+    private val _uiState = MutableStateFlow(VideoPlayerUiState(queue = queue, currentVideo = queue.current ?: VideoItem.EMPTY))
     val uiState: StateFlow<VideoPlayerUiState> = _uiState.asStateFlow()
 
     var exoPlayer: ExoPlayer? = null
@@ -56,7 +54,11 @@ class VideoPlayerViewModel @Inject constructor(
     private var positionUpdater: kotlinx.coroutines.Job? = null
 
     init {
-        initializePlayer()
+        if (queue.current != null && queue.current!!.path.isNotBlank()) {
+            initializePlayer()
+        } else {
+            _uiState.update { it.copy(errorMessage = "Nenhum vídeo disponível") }
+        }
     }
 
     private fun initializePlayer() {
@@ -64,56 +66,43 @@ class VideoPlayerViewModel @Inject constructor(
         releasePlayer()
 
         val player = ExoPlayer.Builder(getApplication()).build().apply {
-            setMediaItem(MediaItem.fromUri(Uri.parse(video.path)))
+            val contentUri = ContentUris.withAppendedId(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                video.id
+            )
+            setMediaItem(MediaItem.fromUri(contentUri))
             prepare()
             playWhenReady = true
 
             addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(state: Int) {
                     _uiState.update {
-                        it.copy(
-                            playerState = when (state) {
-                                Player.STATE_IDLE -> PlayerState.IDLE
-                                Player.STATE_BUFFERING -> PlayerState.BUFFERING
-                                Player.STATE_READY -> PlayerState.READY
-                                Player.STATE_ENDED -> PlayerState.ENDED
-                                else -> PlayerState.ERROR
-                            }
-                        )
+                        it.copy(playerState = when (state) {
+                            Player.STATE_IDLE -> PlayerState.IDLE
+                            Player.STATE_BUFFERING -> PlayerState.BUFFERING
+                            Player.STATE_READY -> PlayerState.READY
+                            Player.STATE_ENDED -> PlayerState.ENDED
+                            else -> PlayerState.ERROR
+                        })
                     }
-                    if (state == Player.STATE_ENDED) {
-                        advanceToNext()
-                    }
+                    if (state == Player.STATE_ENDED) advanceToNext()
                 }
-
                 override fun onIsPlayingChanged(playing: Boolean) {
                     _uiState.update { it.copy(isPlaying = playing) }
                 }
-
                 override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                     _uiState.update { it.copy(playerState = PlayerState.ERROR, errorMessage = error.message) }
                 }
             })
         }
-
         exoPlayer = player
         startPositionUpdates()
     }
 
-    fun playPause() {
-        val player = exoPlayer ?: return
-        if (player.isPlaying) player.pause() else player.play()
-    }
+    fun playPause() = exoPlayer?.let { if (it.isPlaying) it.pause() else it.play() }
 
-    fun seekBy(deltaMs: Long): Boolean {
-        val player = exoPlayer ?: return false
-        return player.safeSeekBy(deltaMs)
-    }
-
-    fun seekTo(positionMs: Long): Boolean {
-        val player = exoPlayer ?: return false
-        return player.safeSeekTo(positionMs)
-    }
+    fun seekBy(deltaMs: Long): Boolean = exoPlayer?.safeSeekBy(deltaMs) ?: false
+    fun seekTo(positionMs: Long): Boolean = exoPlayer?.safeSeekTo(positionMs) ?: false
 
     fun advanceToNext() {
         if (!queue.hasNext) return
@@ -130,19 +119,15 @@ class VideoPlayerViewModel @Inject constructor(
     private fun playQueueItem(newQueue: VideoQueue) {
         val video = newQueue.current ?: return
         val player = exoPlayer ?: return
-
-        player.setMediaItem(MediaItem.fromUri(Uri.parse(video.path)))
+        if (video.path.isBlank()) return
+        player.setMediaItem(MediaItem.fromUri(ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, video.id)))
         player.prepare()
         player.playWhenReady = true
-
         _uiState.update { it.copy(queue = newQueue, currentVideo = video, errorMessage = null) }
     }
 
     fun onResume() {
-        if (wasPlayingBeforePause) {
-            exoPlayer?.play()
-            wasPlayingBeforePause = false
-        }
+        if (wasPlayingBeforePause) { exoPlayer?.play(); wasPlayingBeforePause = false }
     }
 
     fun onPause() {
@@ -156,31 +141,20 @@ class VideoPlayerViewModel @Inject constructor(
         exoPlayer = null
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        releasePlayer()
-    }
+    override fun onCleared() { super.onCleared(); releasePlayer() }
 
     private fun startPositionUpdates() {
         positionUpdater?.cancel()
         positionUpdater = viewModelScope.launch {
             while (isActive) {
-                val player = exoPlayer ?: continue
-                val pos = player.currentPosition
-                val dur = player.duration.takeIf { it != C.TIME_UNSET && it > 0 }
-                _uiState.update {
-                    it.copy(
-                        currentPositionMs = pos,
-                        durationMs = dur ?: it.durationMs
-                    )
+                val player = exoPlayer
+                if (player != null) {
+                    _uiState.update { it.copy(currentPositionMs = player.currentPosition, durationMs = player.duration.takeIf { d -> d > 0 && d != C.TIME_UNSET } ?: it.durationMs) }
                 }
                 delay(250)
             }
         }
     }
 
-    private fun stopPositionUpdates() {
-        positionUpdater?.cancel()
-        positionUpdater = null
-    }
+    private fun stopPositionUpdates() { positionUpdater?.cancel(); positionUpdater = null }
 }

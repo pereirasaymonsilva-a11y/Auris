@@ -30,7 +30,8 @@ data class GalleryUiState(
     val errorMessage: String? = null,
     val currentContext: QueueContext = QueueContext.ALL,
     val sortMode: SortMode = SortMode.DATE_DESC,
-    val currentFolder: String? = null
+    val currentFolder: String? = null,
+    val showFoldersOnly: Boolean = false  // NOVO: controla se a tela deve mostrar apenas pastas
 ) {
     val displayVideos: List<VideoItem>
         get() = if (searchQuery.isBlank()) filteredVideos
@@ -41,14 +42,10 @@ data class GalleryUiState(
 }
 
 enum class SortMode(val label: String) {
-    NAME_ASC("Nome A-Z"),
-    NAME_DESC("Nome Z-A"),
-    DATE_DESC("Mais recentes"),
-    DATE_ASC("Mais antigos"),
-    DURATION_DESC("Maior duração"),
-    DURATION_ASC("Menor duração"),
-    SIZE_DESC("Maior tamanho"),
-    SIZE_ASC("Menor tamanho")
+    NAME_ASC("Nome A-Z"), NAME_DESC("Nome Z-A"),
+    DATE_DESC("Mais recentes"), DATE_ASC("Mais antigos"),
+    DURATION_DESC("Maior duração"), DURATION_ASC("Menor duração"),
+    SIZE_DESC("Maior tamanho"), SIZE_ASC("Menor tamanho")
 }
 
 @HiltViewModel
@@ -81,17 +78,10 @@ class VideoGalleryViewModel @Inject constructor(
         }
     }
 
-    fun setSearchQuery(query: String) {
-        _uiState.update { it.copy(searchQuery = query) }
-    }
+    fun setSearchQuery(query: String) = _uiState.update { it.copy(searchQuery = query) }
 
     fun setSortMode(mode: SortMode) {
-        _uiState.update { state ->
-            state.copy(
-                sortMode = mode,
-                filteredVideos = applySort(state.allVideos, mode)
-            )
-        }
+        _uiState.update { state -> state.copy(sortMode = mode, filteredVideos = applySort(state.allVideos, mode)) }
     }
 
     fun setContext(contextType: QueueContext) {
@@ -105,9 +95,14 @@ class VideoGalleryViewModel @Inject constructor(
             state.copy(
                 currentContext = contextType,
                 filteredVideos = applySort(videos, state.sortMode),
-                currentFolder = if (contextType == QueueContext.FOLDER) state.currentFolder else null
+                currentFolder = if (contextType == QueueContext.FOLDER) state.currentFolder else null,
+                showFoldersOnly = false  // ao trocar de aba, desativa modo "só pastas"
             )
         }
+    }
+
+    fun setShowFoldersOnly(show: Boolean) {
+        _uiState.update { it.copy(showFoldersOnly = show) }
     }
 
     fun enterFolder(folderPath: String) {
@@ -116,14 +111,13 @@ class VideoGalleryViewModel @Inject constructor(
             state.copy(
                 currentContext = QueueContext.FOLDER,
                 currentFolder = folderPath,
-                filteredVideos = applySort(folderVideos, state.sortMode)
+                filteredVideos = applySort(folderVideos, state.sortMode),
+                showFoldersOnly = false
             )
         }
     }
 
-    fun exitFolder() {
-        setContext(QueueContext.ALL)
-    }
+    fun exitFolder() = setContext(QueueContext.ALL)
 
     fun buildQueue(clickedVideo: VideoItem? = null): VideoQueue {
         val state = _uiState.value
@@ -133,24 +127,19 @@ class VideoGalleryViewModel @Inject constructor(
             QueueContext.FOLDER -> state.allVideos.filter { it.folderPath == state.currentFolder }
             QueueContext.SEARCH -> state.displayVideos
         }
-        return if (clickedVideo != null) {
-            VideoQueueManager.startFromItem(state.currentContext, sourceVideos, clickedVideo)
-        } else {
-            VideoQueueManager.build(state.currentContext, sourceVideos)
-        }
+        return if (clickedVideo != null) VideoQueueManager.startFromItem(state.currentContext, sourceVideos, clickedVideo)
+        else VideoQueueManager.build(state.currentContext, sourceVideos)
     }
 
-    private fun applySort(videos: List<VideoItem>, mode: SortMode): List<VideoItem> {
-        return when (mode) {
-            SortMode.NAME_ASC -> videos.sortedBy { it.title.lowercase() }
-            SortMode.NAME_DESC -> videos.sortedByDescending { it.title.lowercase() }
-            SortMode.DATE_DESC -> videos.sortedByDescending { it.dateAddedMs }
-            SortMode.DATE_ASC -> videos.sortedBy { it.dateAddedMs }
-            SortMode.DURATION_DESC -> videos.sortedByDescending { it.durationMs }
-            SortMode.DURATION_ASC -> videos.sortedBy { it.durationMs }
-            SortMode.SIZE_DESC -> videos.sortedByDescending { it.sizeBytes }
-            SortMode.SIZE_ASC -> videos.sortedBy { it.sizeBytes }
-        }
+    private fun applySort(videos: List<VideoItem>, mode: SortMode): List<VideoItem> = when (mode) {
+        SortMode.NAME_ASC -> videos.sortedBy { it.title.lowercase() }
+        SortMode.NAME_DESC -> videos.sortedByDescending { it.title.lowercase() }
+        SortMode.DATE_DESC -> videos.sortedByDescending { it.dateAddedMs }
+        SortMode.DATE_ASC -> videos.sortedBy { it.dateAddedMs }
+        SortMode.DURATION_DESC -> videos.sortedByDescending { it.durationMs }
+        SortMode.DURATION_ASC -> videos.sortedBy { it.durationMs }
+        SortMode.SIZE_DESC -> videos.sortedByDescending { it.sizeBytes }
+        SortMode.SIZE_ASC -> videos.sortedBy { it.sizeBytes }
     }
 
     private fun fetchAllVideos(): List<VideoItem> {
@@ -160,22 +149,13 @@ class VideoGalleryViewModel @Inject constructor(
         } else {
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI
         }
-
         val projection = arrayOf(
-            MediaStore.Video.Media._ID,
-            MediaStore.Video.Media.DISPLAY_NAME,
-            MediaStore.Video.Media.DATA,
-            MediaStore.Video.Media.DURATION,
-            MediaStore.Video.Media.SIZE,
-            MediaStore.Video.Media.WIDTH,
-            MediaStore.Video.Media.HEIGHT,
-            MediaStore.Video.Media.DATE_ADDED
+            MediaStore.Video.Media._ID, MediaStore.Video.Media.DISPLAY_NAME,
+            MediaStore.Video.Media.DATA, MediaStore.Video.Media.DURATION,
+            MediaStore.Video.Media.SIZE, MediaStore.Video.Media.WIDTH,
+            MediaStore.Video.Media.HEIGHT, MediaStore.Video.Media.DATE_ADDED
         )
-
-        context.contentResolver.query(
-            collection, projection, null, null,
-            "${MediaStore.Video.Media.DATE_ADDED} DESC"
-        )?.use { cursor ->
+        context.contentResolver.query(collection, projection, null, null, "${MediaStore.Video.Media.DATE_ADDED} DESC")?.use { cursor ->
             val idCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
             val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
             val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
@@ -184,25 +164,22 @@ class VideoGalleryViewModel @Inject constructor(
             val widthCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.WIDTH)
             val heightCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.HEIGHT)
             val dateCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)
-
             while (cursor.moveToNext()) {
+                val id = cursor.getLong(idCol)
                 val path = cursor.getString(dataCol) ?: continue
                 val width = cursor.getInt(widthCol)
                 val height = cursor.getInt(heightCol)
-                videos.add(
-                    VideoItem(
-                        id = cursor.getLong(idCol),
-                        title = cursor.getString(nameCol) ?: "Desconhecido",
-                        path = path,
-                        durationMs = cursor.getLong(durCol),
-                        resolution = if (width > 0 && height > 0) "${width}x${height}" else "",
-                        sizeBytes = cursor.getLong(sizeCol),
-                        folderPath = path.substringBeforeLast("/", ""),
-                        dateAddedMs = cursor.getLong(dateCol) * 1000L,
-                        width = width,
-                        height = height
-                    )
-                )
+                videos.add(VideoItem(
+                    id = id,
+                    title = cursor.getString(nameCol) ?: "Desconhecido",
+                    path = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id).toString(), // usa content URI
+                    durationMs = cursor.getLong(durCol),
+                    resolution = if (width > 0 && height > 0) "${width}x${height}" else "",
+                    sizeBytes = cursor.getLong(sizeCol),
+                    folderPath = path.substringBeforeLast("/", ""),
+                    dateAddedMs = cursor.getLong(dateCol) * 1000L,
+                    width = width, height = height
+                ))
             }
         }
         return videos

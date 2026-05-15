@@ -71,14 +71,17 @@ fun VideoGalleryScreen(
             when {
                 state.isLoading -> LoadingState()
                 state.errorMessage != null -> ErrorState(state.errorMessage!!) { viewModel.loadVideos() }
-                state.displayVideos.isEmpty() && state.searchQuery.isNotBlank() -> EmptySearchState()
-                state.displayVideos.isEmpty() && state.searchQuery.isBlank() -> EmptyState()
+                state.showFoldersOnly && state.folders.isEmpty() -> EmptyState()
+                state.displayVideos.isEmpty() && !state.showFoldersOnly && state.searchQuery.isNotBlank() -> EmptySearchState()
+                state.displayVideos.isEmpty() && !state.showFoldersOnly && state.searchQuery.isBlank() -> EmptyState()
                 else -> {
                     Column {
                         if (state.currentContext != QueueContext.FOLDER && state.searchQuery.isBlank()) {
                             ContextTabs(
                                 current = state.currentContext,
-                                onChange = viewModel::setContext
+                                showFoldersOnly = state.showFoldersOnly,
+                                onChange = viewModel::setContext,
+                                onToggleShowFolders = viewModel::setShowFoldersOnly
                             )
                         }
                         LazyVerticalGrid(
@@ -87,16 +90,17 @@ fun VideoGalleryScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            if (state.currentContext == QueueContext.ALL && state.searchQuery.isBlank()) {
+                            if (state.showFoldersOnly) {
                                 items(state.folders, key = { it.path }) { folder ->
                                     FolderItem(folder) { viewModel.enterFolder(folder.path) }
                                 }
-                            }
-                            items(state.displayVideos, key = { it.id }) { video ->
-                                VideoGridItem(
-                                    video = video,
-                                    onClick = { onOpenPlayerWithQueue(viewModel.buildQueue(video)) }
-                                )
+                            } else {
+                                items(state.displayVideos, key = { it.id }) { video ->
+                                    VideoGridItem(
+                                        video = video,
+                                        onClick = { onOpenPlayerWithQueue(viewModel.buildQueue(video)) }
+                                    )
+                                }
                             }
                         }
                     }
@@ -122,10 +126,7 @@ private fun GalleryTopBar(
         CenterAlignedTopAppBar(
             title = {
                 if (isInFolder) {
-                    Text(
-                        text = state.currentFolder?.substringAfterLast("/") ?: "Pasta",
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Text(text = state.currentFolder?.substringAfterLast("/") ?: "Pasta", fontWeight = FontWeight.SemiBold)
                 } else {
                     Text("Vídeos", fontWeight = FontWeight.Bold)
                 }
@@ -147,31 +148,18 @@ private fun GalleryTopBar(
         OutlinedTextField(
             value = state.searchQuery,
             onValueChange = onSearchChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 4.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
             placeholder = { Text("Pesquisar vídeos...") },
             leadingIcon = { Icon(Icons.Filled.Search, null) },
             singleLine = true,
             shape = RoundedCornerShape(12.dp)
         )
 
-        DropdownMenu(
-            expanded = showSortMenu,
-            onDismissRequest = { showSortMenu = false }
-        ) {
+        DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
             SortMode.entries.forEach { mode ->
                 DropdownMenuItem(
-                    text = {
-                        Text(
-                            mode.label,
-                            fontWeight = if (mode == state.sortMode) FontWeight.Bold else FontWeight.Normal
-                        )
-                    },
-                    onClick = {
-                        onSortChange(mode)
-                        showSortMenu = false
-                    }
+                    text = { Text(mode.label, fontWeight = if (mode == state.sortMode) FontWeight.Bold else FontWeight.Normal) },
+                    onClick = { onSortChange(mode); showSortMenu = false }
                 )
             }
         }
@@ -179,19 +167,30 @@ private fun GalleryTopBar(
 }
 
 @Composable
-private fun ContextTabs(current: QueueContext, onChange: (QueueContext) -> Unit) {
-    TabRow(selectedTabIndex = current.ordinal) {
-        Tab(selected = current == QueueContext.ALL, onClick = { onChange(QueueContext.ALL) }, text = { Text("Todos") })
-        Tab(selected = current == QueueContext.RECENT, onClick = { onChange(QueueContext.RECENT) }, text = { Text("Recentes") })
-        Tab(selected = current == QueueContext.FOLDER, onClick = { onChange(QueueContext.FOLDER) }, text = { Text("Pastas") })
+private fun ContextTabs(
+    current: QueueContext,
+    showFoldersOnly: Boolean,
+    onChange: (QueueContext) -> Unit,
+    onToggleShowFolders: (Boolean) -> Unit
+) {
+    TabRow(selectedTabIndex = if (showFoldersOnly) 3 else current.ordinal) {
+        Tab(selected = current == QueueContext.ALL && !showFoldersOnly, onClick = {
+            onChange(QueueContext.ALL)
+            onToggleShowFolders(false)
+        }, text = { Text("Todos") })
+        Tab(selected = current == QueueContext.RECENT && !showFoldersOnly, onClick = {
+            onChange(QueueContext.RECENT)
+            onToggleShowFolders(false)
+        }, text = { Text("Recentes") })
+        Tab(selected = current == QueueContext.FOLDER && !showFoldersOnly, onClick = {
+            // Já está em uma pasta? Se sim, não faz nada. Senão, mostra a lista de pastas.
+            if (current != QueueContext.FOLDER) onToggleShowFolders(true)
+        }, text = { Text("Pastas") })
     }
 }
 
 @Composable
-private fun VideoGridItem(
-    video: VideoItem,
-    onClick: () -> Unit
-) {
+private fun VideoGridItem(video: VideoItem, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -222,30 +221,22 @@ private fun VideoGridItem(
                     contentScale = ContentScale.Crop
                 )
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f))
-                            )
-                        )
+                    modifier = Modifier.fillMaxSize().background(
+                        Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f)))
+                    )
                 )
                 Text(
                     text = video.durationFormatted,
                     color = Color.White,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(4.dp)
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp)
                 )
                 Icon(
                     Icons.Filled.PlayArrow,
                     contentDescription = null,
                     tint = Color.White.copy(alpha = 0.8f),
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(28.dp)
+                    modifier = Modifier.align(Alignment.Center).size(28.dp)
                 )
             }
             Text(
@@ -261,10 +252,7 @@ private fun VideoGridItem(
 }
 
 @Composable
-private fun FolderItem(
-    folder: VideoUtils.FolderInfo,
-    onClick: () -> Unit
-) {
+private fun FolderItem(folder: VideoUtils.FolderInfo, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -285,57 +273,15 @@ private fun FolderItem(
             modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                Icons.Filled.Folder,
-                contentDescription = null,
-                modifier = Modifier.size(36.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
+            Icon(Icons.Filled.Folder, null, modifier = Modifier.size(36.dp), tint = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = folder.name,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = "${folder.videoCount} vídeos",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(folder.name, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text("${folder.videoCount} vídeos", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
-@Composable
-private fun LoadingState() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-private fun ErrorState(message: String, onRetry: () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(message, color = MaterialTheme.colorScheme.error)
-            Spacer(modifier = Modifier.height(8.dp))
-            TextButton(onClick = onRetry) { Text("Tentar novamente") }
-        }
-    }
-}
-
-@Composable
-private fun EmptyState() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Nenhum vídeo encontrado", style = MaterialTheme.typography.titleMedium)
-    }
-}
-
-@Composable
-private fun EmptySearchState() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Nenhum resultado para a busca", style = MaterialTheme.typography.titleMedium)
-    }
-}
+@Composable private fun LoadingState() = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+@Composable private fun ErrorState(message: String, onRetry: () -> Unit) = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Column(horizontalAlignment = Alignment.CenterHorizontally) { Text(message, color = MaterialTheme.colorScheme.error); Spacer(Modifier.height(8.dp)); TextButton(onClick = onRetry) { Text("Tentar novamente") } } }
+@Composable private fun EmptyState() = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Nenhum vídeo encontrado", style = MaterialTheme.typography.titleMedium) }
+@Composable private fun EmptySearchState() = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Nenhum resultado para a busca", style = MaterialTheme.typography.titleMedium) }
