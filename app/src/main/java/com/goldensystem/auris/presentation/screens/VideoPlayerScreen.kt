@@ -7,11 +7,16 @@ import android.media.AudioManager
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,8 +30,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +46,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -48,7 +61,10 @@ import coil.request.videoFrameMillis
 import com.goldensystem.auris.presentation.viewmodel.PlayerState
 import com.goldensystem.auris.presentation.viewmodel.VideoPlayerViewModel
 import com.goldensystem.auris.utils.VideoUtils
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,76 +81,102 @@ fun VideoPlayerScreen(
     var adjustmentType by remember { mutableStateOf<AdjustmentType?>(null) }
     var adjustmentValue by remember { mutableFloatStateOf(0f) }
 
-    // Força landscape ao entrar
-    LaunchedEffect(Unit) {
-        try {
-            (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        } catch (_: Exception) {}
+    // Micro feedback do play/pause
+    var feedbackAlpha by remember { mutableFloatStateOf(1f) }
+    var feedbackScale by remember { mutableFloatStateOf(1f) }
+    val feedbackAlphaAnim by animateFloatAsState(feedbackAlpha, spring(dampingRatio = 0.5f, stiffness = 600f), label = "fbAlpha")
+    val feedbackScaleAnim by animateFloatAsState(feedbackScale, spring(dampingRatio = 0.5f, stiffness = 600f), label = "fbScale")
+
+    // Auto‑hide
+    val scope = rememberCoroutineScope()
+    var autoHideJob by remember { mutableStateOf<Job?>(null) }
+
+    fun resetAutoHide() {
+        autoHideJob?.cancel()
+        autoHideJob = scope.launch {
+            delay(if (state.isPlaying) 2500L else 4000L)
+            showControls = false
+        }
     }
 
+    LaunchedEffect(showControls, state.isPlaying) {
+        if (showControls) resetAutoHide()
+    }
+
+    DisposableEffect(Unit) { onDispose { autoHideJob?.cancel() } }
+
+    // Fullscreen
+    LaunchedEffect(Unit) {
+        try { (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE } catch (_: Exception) {}
+        val w = (context as? Activity)?.window
+        w?.let {
+            WindowCompat.setDecorFitsSystemWindows(it, false)
+            val c = WindowInsetsControllerCompat(it, it.decorView)
+            c.hide(WindowInsetsCompat.Type.systemBars())
+            c.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+    }
     DisposableEffect(Unit) {
         onDispose {
-            try {
-                (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            } catch (_: Exception) {}
+            try { (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED } catch (_: Exception) {}
+            val w = (context as? Activity)?.window
+            w?.let {
+                val c = WindowInsetsControllerCompat(it, it.decorView)
+                c.show(WindowInsetsCompat.Type.systemBars())
+                WindowCompat.setDecorFitsSystemWindows(it, true)
+            }
         }
     }
 
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
+        val obs = LifecycleEventObserver { _, e ->
+            when (e) {
                 Lifecycle.Event.ON_PAUSE -> viewModel.onPause()
                 Lifecycle.Event.ON_RESUME -> viewModel.onResume()
                 else -> {}
             }
         }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        lifecycleOwner.lifecycle.addObserver(obs)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
     }
 
     BackHandler {
-        try {
-            (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        } catch (_: Exception) {}
+        try { (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED } catch (_: Exception) {}
         onBack()
     }
 
-    // Auto-hide dos controles
-    LaunchedEffect(showControls) {
-        if (showControls) {
-            delay(2500)
-            showControls = false
-        }
+    // Recursos cacheados
+    val overlayBrush = remember { Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.42f), Color.Transparent, Color.Black.copy(alpha = 0.42f))) }
+    val blurEffect = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            android.graphics.RenderEffect.createBlurEffect(24f, 24f, android.graphics.Shader.TileMode.CLAMP)
+        else null
+    }
+    val blurEffectLight = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            android.graphics.RenderEffect.createBlurEffect(16f, 16f, android.graphics.Shader.TileMode.CLAMP)
+        else null
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
-        // Só cria o PlayerView quando o exoPlayer estiver disponível
-        val exoPlayer = viewModel.exoPlayer
-        if (exoPlayer != null) {
-            AndroidView(
-                factory = { ctx ->
-                    PlayerView(ctx).apply {
-                        player = exoPlayer
-                        useController = false
-                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                        keepScreenOn = true
-                    }
-                },
-                update = { playerView ->
-                    if (playerView.player !== exoPlayer) {
-                        playerView.player = exoPlayer
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
-        }
+    Box(Modifier.fillMaxSize().background(Color.Black)) {
+        // Player
+        AndroidView(
+            factory = { ctx ->
+                PlayerView(ctx).apply {
+                    this.player = viewModel.exoPlayer
+                    useController = false
+                    controllerAutoShow = false
+                    controllerHideOnTouch = false
+                    setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                    keepScreenOn = true
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
 
-        // Thumbnail enquanto idle/buffering
-        if (state.playerState == PlayerState.IDLE || state.playerState == PlayerState.BUFFERING) {
+        // Thumbnail enquanto não estiver pronto
+        if (state.playerState != PlayerState.READY) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(state.currentVideo.path)
@@ -147,269 +189,91 @@ fun VideoPlayerScreen(
             )
         }
 
-        // Overlay gradiente
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 0.6f),
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.6f)
-                        )
-                    )
-                )
-        )
+        // Gradiente
+        Box(Modifier.fillMaxSize().background(overlayBrush))
 
-        // Indicador de buffering
+        // Buffering
         if (state.playerState == PlayerState.BUFFERING) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = Color.White.copy(alpha = 0.7f),
-                strokeWidth = 3.dp
-            )
+            LinearProgressIndicator(Modifier.align(Alignment.TopCenter).fillMaxWidth().height(2.dp), color = Color.White.copy(alpha = 0.6f), trackColor = Color.Transparent)
         }
 
-        // Feedback de double-tap
-        doubleTapFeedback?.let { (offsetX, _) ->
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(tween(200)) + scaleIn(initialScale = 0.5f, animationSpec = tween(200)),
-                exit = fadeOut(tween(300)) + scaleOut(targetScale = 1.5f, animationSpec = tween(300))
-            ) {
-                Box(
-                    modifier = Modifier.align(Alignment.Center),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = if (offsetX < 0.5f) Icons.Filled.Replay10 else Icons.Filled.Forward10,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = if (offsetX < 0.5f) "-10s" else "+10s",
-                            color = Color.White,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-            LaunchedEffect(Unit) {
+        // Double‑tap
+        if (doubleTapFeedback != null) {
+            val (offsetX, _) = doubleTapFeedback!!
+            var pulseAlpha by remember { mutableFloatStateOf(1f) }
+            val pulseScale by animateFloatAsState(if (pulseAlpha > 0f) 1.6f else 0.8f, tween(400), label = "pulseS")
+            LaunchedEffect(doubleTapFeedback) {
+                pulseAlpha = 0f
                 delay(600)
                 doubleTapFeedback = null
             }
-        }
-
-        // Indicador lateral de brilho/volume
-        adjustmentType?.let { type ->
-            Box(
-                modifier = Modifier
-                    .align(if (type == AdjustmentType.BRIGHTNESS) Alignment.CenterStart else Alignment.CenterEnd)
-                    .padding(horizontal = 32.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .padding(12.dp),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(Modifier.align(Alignment.Center).offset(x = if (offsetX < 0.5f) (-60).dp else 60.dp).size(96.dp), contentAlignment = Alignment.Center) {
+                Canvas(Modifier.fillMaxSize()) { drawCircle(Color.White.copy(alpha = 0.3f * pulseAlpha), size.minDimension / 2 * pulseScale, center) }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = if (type == AdjustmentType.BRIGHTNESS) Icons.Outlined.BrightnessHigh else Icons.Outlined.VolumeUp,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        "${(adjustmentValue * 100).toInt()}%",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Box(
-                        modifier = Modifier
-                            .height(60.dp)
-                            .width(6.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(Color.White.copy(alpha = 0.3f)),
-                        contentAlignment = Alignment.BottomCenter
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxHeight(adjustmentValue)
-                                .width(6.dp)
-                                .clip(RoundedCornerShape(3.dp))
-                                .background(Color.White)
-                        )
-                    }
-                }
-            }
-            LaunchedEffect(adjustmentType, adjustmentValue) {
-                if (adjustmentType != null) {
-                    delay(800)
-                    adjustmentType = null
+                    Icon(if (offsetX < 0.5f) Icons.Filled.Replay10 else Icons.Filled.Forward10, null, tint = Color.White, modifier = Modifier.size(32.dp))
+                    Spacer(Modifier.height(4.dp))
+                    Text(if (offsetX < 0.5f) "-10s" else "+10s", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
 
-        // Controles principais (AnimatedVisibility)
-        AnimatedVisibility(
-            visible = showControls,
-            enter = fadeIn(tween(300)) + slideInVertically(initialOffsetY = { it / 8 }),
-            exit = fadeOut(tween(300)) + slideOutVertically(targetOffsetY = { it / 8 })
-        ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                // Topo: voltar + nome
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .statusBarsPadding(),
-                    verticalAlignment = Alignment.CenterVertically
+        // Indicador lateral
+        adjustmentType?.let { type ->
+            AnimatedVisibility(visible = true, enter = fadeIn(tween(200)), exit = fadeOut(tween(250)), label = "adjust") {
+                Box(
+                    Modifier.align(if (type == AdjustmentType.BRIGHTNESS) Alignment.CenterStart else Alignment.CenterEnd)
+                        .padding(horizontal = 32.dp).clip(RoundedCornerShape(12.dp))
+                        .then(if (blurEffectLight != null) Modifier.graphicsLayer { renderEffect = blurEffectLight }.background(Color.Black.copy(alpha = 0.35f)) else Modifier.background(Color.Black.copy(alpha = 0.5f)))
+                        .padding(12.dp), contentAlignment = Alignment.Center
                 ) {
-                    IconButton(
-                        onClick = {
-                            try {
-                                (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                            } catch (_: Exception) {}
-                            onBack()
-                        },
-                        modifier = Modifier
-                            .size(36.dp)
-                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar", tint = Color.White)
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            state.currentVideo.title,
-                            color = Color.White,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            state.currentVideo.folderName,
-                            color = Color.White.copy(alpha = 0.7f),
-                            fontSize = 12.sp
-                        )
-                    }
-                }
-
-                // Inferior: seekbar, tempo e botões
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 24.dp)
-                        .navigationBarsPadding()
-                ) {
-                    Slider(
-                        value = state.currentPositionMs.toFloat().coerceAtMost(state.durationMs.toFloat()),
-                        onValueChange = { viewModel.seekTo(it.toLong()) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(24.dp),
-                        colors = SliderDefaults.colors(
-                            thumbColor = Color.White,
-                            activeTrackColor = Color.White,
-                            inactiveTrackColor = Color.White.copy(alpha = 0.3f)
-                        ),
-                        valueRange = 0f..(state.durationMs.toFloat().coerceAtLeast(1f))
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(VideoUtils.formatDuration(state.currentPositionMs), color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp)
-                        Text(VideoUtils.formatDuration(state.durationMs), color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp)
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = { viewModel.goToPrevious() }, enabled = state.queue.hasPrevious) {
-                            Icon(Icons.Filled.SkipPrevious, "Anterior", tint = Color.White)
-                        }
-                        IconButton(onClick = { viewModel.seekBy(-10000) }) {
-                            Icon(Icons.Filled.Replay10, "-10s", tint = Color.White)
-                        }
-                        IconButton(
-                            onClick = { viewModel.playPause() },
-                            modifier = Modifier
-                                .size(56.dp)
-                                .background(Color.White.copy(alpha = 0.2f), CircleShape)
-                        ) {
-                            Icon(
-                                if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                                null,
-                                tint = Color.White,
-                                modifier = Modifier.size(32.dp)
-                            )
-                        }
-                        IconButton(onClick = { viewModel.seekBy(10000) }) {
-                            Icon(Icons.Filled.Forward10, "+10s", tint = Color.White)
-                        }
-                        IconButton(onClick = { viewModel.advanceToNext() }, enabled = state.queue.hasNext) {
-                            Icon(Icons.Filled.SkipNext, "Próximo", tint = Color.White)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(if (type == AdjustmentType.BRIGHTNESS) Icons.Outlined.BrightnessHigh else Icons.Outlined.VolumeUp, null, tint = Color.White, modifier = Modifier.size(28.dp))
+                        Spacer(Modifier.height(4.dp))
+                        Text("${(adjustmentValue * 100).toInt()}%", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(4.dp))
+                        Box(Modifier.height(60.dp).width(6.dp).clip(RoundedCornerShape(3.dp)).background(Color.White.copy(alpha = 0.3f)), contentAlignment = Alignment.BottomCenter) {
+                            Box(Modifier.fillMaxHeight(adjustmentValue).width(6.dp).clip(RoundedCornerShape(3.dp)).background(Color.White))
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = state.queue.positionDescription,
-                        color = Color.White.copy(alpha = 0.6f),
-                        fontSize = 12.sp,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
                 }
             }
+            LaunchedEffect(adjustmentType, adjustmentValue) { if (adjustmentType != null) { delay(800); adjustmentType = null } }
         }
 
-        // Camada de gestos unificada
+        // Camada de gestos (PRIMEIRO, para ficar ATRÁS dos controles)
         var dragStartX by remember { mutableFloatStateOf(0f) }
         Box(
-            modifier = Modifier
-                .fillMaxSize()
+            Modifier.fillMaxSize()
                 .pointerInput(Unit) {
                     detectTapGestures(
-                        onTap = { showControls = !showControls },
-                        onDoubleTap = { offset ->
-                            val delta = if (offset.x < size.width / 2f) -10000L else 10000L
-                            viewModel.seekBy(delta)
-                            doubleTapFeedback = offset.x / size.width to offset.y / size.height
+                        onTap = { showControls = !showControls; if (showControls) resetAutoHide() },
+                        onDoubleTap = { off ->
+                            val d = if (off.x < size.width / 2f) -10000L else 10000L
+                            viewModel.seekBy(d)
+                            doubleTapFeedback = off.x / size.width to off.y / size.height
                         }
                     )
                 }
                 .pointerInput(Unit) {
                     detectVerticalDragGestures(
-                        onDragStart = { offset -> dragStartX = offset.x },
-                        onVerticalDrag = { _, dragAmount ->
-                            val delta = -dragAmount / size.height.toFloat()
+                        onDragStart = { dragStartX = it.x; resetAutoHide() },
+                        onVerticalDrag = { _, da ->
+                            val d = -da / size.height.toFloat()
                             if (dragStartX < size.width / 2) {
-                                val window = (context as? Activity)?.window
-                                val current = window?.attributes?.screenBrightness ?: 0.5f
-                                val new = (current + delta).coerceIn(0.01f, 1.0f)
-                                window?.attributes = window?.attributes?.apply { screenBrightness = new }
+                                val win = (context as? Activity)?.window
+                                val cur = win?.attributes?.screenBrightness?.takeIf { it >= 0f } ?: 0.5f
+                                val n = (cur + d).coerceIn(0.01f, 1.0f)
+                                if (abs(n - cur) > 0.02f) win?.attributes = win?.attributes?.apply { screenBrightness = n }
                                 adjustmentType = AdjustmentType.BRIGHTNESS
-                                adjustmentValue = new
+                                adjustmentValue = n
                             } else {
-                                val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                                val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-                                val currentVol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-                                val newVol = (currentVol + (delta * maxVol).toInt()).coerceIn(0, maxVol)
-                                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVol, AudioManager.FLAG_SHOW_UI)
+                                val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                                val max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                                val cur = am.getStreamVolume(AudioManager.STREAM_MUSIC)
+                                val n = (cur + (d * max).toInt()).coerceIn(0, max)
+                                if (n != cur) am.setStreamVolume(AudioManager.STREAM_MUSIC, n, 0)
                                 adjustmentType = AdjustmentType.VOLUME
-                                adjustmentValue = newVol.toFloat() / maxVol
+                                adjustmentValue = n.toFloat() / max
                             }
                         },
                         onDragEnd = {},
@@ -417,6 +281,108 @@ fun VideoPlayerScreen(
                     )
                 }
         )
+
+        // Controles (DEPOIS dos gestos = ACIMA)
+        AnimatedVisibility(
+            visible = showControls,
+            enter = fadeIn(tween(220)) + slideInVertically(tween(220)) { it / 8 },
+            exit = fadeOut(tween(180)) + slideOutVertically(tween(180)) { it / 8 },
+            label = "controls"
+        ) {
+            Box(Modifier.fillMaxSize()) {
+                // Topo
+                Row(
+                    Modifier.align(Alignment.TopStart).fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp).statusBarsPadding()
+                        .clip(RoundedCornerShape(16.dp))
+                        .then(if (blurEffect != null) Modifier.graphicsLayer { renderEffect = blurEffect }.background(Color.White.copy(alpha = 0.08f)) else Modifier.background(Color.Black.copy(alpha = 0.45f))),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {
+                        try { (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED } catch (_: Exception) {}
+                        onBack()
+                    }, Modifier.size(36.dp).background(Color.Black.copy(alpha = 0.3f), CircleShape)) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar", tint = Color.White, modifier = Modifier.size(20.dp))
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(state.currentVideo.title, color = Color.White, fontWeight = FontWeight.Medium, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(state.currentVideo.folderName, color = Color.White.copy(alpha = 0.7f), fontSize = 11.sp)
+                    }
+                }
+
+                // Play/Pause
+                Box(Modifier.align(Alignment.Center).clickable(remember { MutableInteractionSource() }, null) {
+                    viewModel.playPause()
+                    feedbackAlpha = 0.6f; feedbackScale = 0.9f
+                    scope.launch { delay(60); feedbackAlpha = 1f; feedbackScale = 1f }
+                }, contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(64.dp).graphicsLayer { alpha = feedbackAlphaAnim; scaleX = feedbackScaleAnim; scaleY = feedbackScaleAnim }, contentAlignment = Alignment.Center) {
+                        AnimatedContent(state.isPlaying, transitionSpec = { scaleIn(spring(dampingRatio = 0.6f, stiffness = 400f)) togetherWith fadeOut(spring(dampingRatio = 0.6f, stiffness = 400f)) }, label = "playPause") { playing ->
+                            Icon(if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(48.dp))
+                        }
+                    }
+                }
+
+                // Inferior
+                Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(horizontal = 12.dp, vertical = 16.dp).navigationBarsPadding()) {
+                    var isDragging by remember { mutableStateOf(false) }
+                    var dragPosition by remember { mutableFloatStateOf(0f) }
+
+                    Canvas(
+                        Modifier.fillMaxWidth().height(24.dp).pointerInput(Unit) {
+                            detectHorizontalDragGestures(
+                                onDragStart = { isDragging = true; dragPosition = (it.x / size.width).coerceIn(0f, 1f); resetAutoHide() },
+                                onDrag = { c, _ -> c.consume(); dragPosition = (c.position.x / size.width).coerceIn(0f, 1f) },
+                                onDragEnd = { viewModel.seekTo((dragPosition * state.durationMs).toLong()); isDragging = false },
+                                onDragCancel = { isDragging = false }
+                            )
+                        }
+                    ) {
+                        val eff = if (isDragging) dragPosition else if (state.durationMs > 0) state.currentPositionMs.toFloat() / state.durationMs else 0f
+                        val buf = (viewModel.exoPlayer?.bufferedPercentage?.toFloat() ?: 0f) / 100f
+                        val th = if (isDragging) 6.dp.toPx() else 4.dp.toPx()
+                        val tr = if (isDragging) 10.dp.toPx() else 4.dp.toPx()
+
+                        drawRoundRect(Color.White.copy(alpha = 0.15f), Size(size.width, th), CornerRadius(th / 2))
+                        drawRoundRect(Color.White.copy(alpha = 0.25f), Size(size.width * buf, th), CornerRadius(th / 2))
+                        drawRoundRect(Color.White, Size(size.width * eff, th), CornerRadius(th / 2))
+                        if (tr > 0f) {
+                            drawCircle(Color.White, tr, Offset(size.width * eff, th / 2))
+                            if (isDragging) drawCircle(Color.White.copy(alpha = 0.5f), tr + 2.dp.toPx(), Offset(size.width * eff, th / 2), style = Stroke(1.dp.toPx()))
+                        }
+                    }
+
+                    Spacer(Modifier.height(4.dp))
+
+                    val displayedPos = if (isDragging) (dragPosition * state.durationMs).toLong() else state.currentPositionMs
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(VideoUtils.formatDuration(displayedPos), color = Color.White.copy(alpha = 0.8f), fontSize = 11.sp)
+                        Text(VideoUtils.formatDuration(state.durationMs), color = Color.White.copy(alpha = 0.8f), fontSize = 11.sp)
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                        IconButton({ viewModel.goToPrevious() }, enabled = state.queue.hasPrevious, Modifier.size(40.dp)) { Icon(Icons.Filled.SkipPrevious, "Anterior", tint = Color.White, modifier = Modifier.size(24.dp)) }
+                        Spacer(Modifier.width(12.dp))
+                        IconButton({ viewModel.seekBy(-10000) }, Modifier.size(40.dp)) { Icon(Icons.Filled.Replay10, "-10s", tint = Color.White, modifier = Modifier.size(24.dp)) }
+                        Spacer(Modifier.width(20.dp))
+                        IconButton({ viewModel.playPause() }, Modifier.size(48.dp)) {
+                            AnimatedContent(state.isPlaying, transitionSpec = { scaleIn(spring(dampingRatio = 0.55f, stiffness = 350f)) togetherWith fadeOut(spring(dampingRatio = 0.55f, stiffness = 350f)) }, label = "playPauseSm") { playing ->
+                                Icon(if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(32.dp))
+                            }
+                        }
+                        Spacer(Modifier.width(20.dp))
+                        IconButton({ viewModel.seekBy(10000) }, Modifier.size(40.dp)) { Icon(Icons.Filled.Forward10, "+10s", tint = Color.White, modifier = Modifier.size(24.dp)) }
+                        Spacer(Modifier.width(12.dp))
+                        IconButton({ viewModel.advanceToNext() }, enabled = state.queue.hasNext, Modifier.size(40.dp)) { Icon(Icons.Filled.SkipNext, "Próximo", tint = Color.White, modifier = Modifier.size(24.dp)) }
+                    }
+
+                    Spacer(Modifier.height(6.dp))
+                    Text(state.queue.positionDescription, color = Color.White.copy(alpha = 0.5f), fontSize = 11.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
+                }
+            }
+        }
     }
 }
 
