@@ -1,8 +1,11 @@
+// VideoPlayerViewModel.kt
 package com.goldensystem.auris.presentation.viewmodel
 
 import android.app.Application
 import android.content.ContentUris
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.provider.MediaStore
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
@@ -55,7 +58,12 @@ class VideoPlayerViewModel @Inject constructor(
     private var positionUpdater: kotlinx.coroutines.Job? = null
 
     init {
-        if (ContextCompat.checkSelfPermission(getApplication(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            android.Manifest.permission.READ_MEDIA_VIDEO
+        } else {
+            android.Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+        if (ContextCompat.checkSelfPermission(getApplication(), permission) != PackageManager.PERMISSION_GRANTED) {
             _uiState.update { it.copy(errorMessage = "Permissão de armazenamento não concedida") }
         } else if (queue.current != null && queue.current!!.path.isNotBlank()) {
             initializePlayer()
@@ -68,11 +76,19 @@ class VideoPlayerViewModel @Inject constructor(
         val video = queue.current ?: return
         releasePlayer()
 
-        val player = ExoPlayer.Builder(getApplication()).build().apply {
-            val contentUri = ContentUris.withAppendedId(
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                video.id
+        val contentUri = ContentUris.withAppendedId(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            video.id
+        )
+        // Garantir permissão de leitura para a URI
+        try {
+            getApplication<Application>().contentResolver.takePersistableUriPermission(
+                contentUri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
+        } catch (_: Exception) {}
+
+        val player = ExoPlayer.Builder(getApplication()).build().apply {
             setMediaItem(MediaItem.fromUri(contentUri))
             playWhenReady = true
             prepare()
@@ -124,6 +140,12 @@ class VideoPlayerViewModel @Inject constructor(
         val player = exoPlayer ?: return
         if (video.path.isBlank()) return
         val contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, video.id)
+        try {
+            getApplication<Application>().contentResolver.takePersistableUriPermission(
+                contentUri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        } catch (_: Exception) {}
         player.setMediaItem(MediaItem.fromUri(contentUri))
         player.prepare()
         player.playWhenReady = true

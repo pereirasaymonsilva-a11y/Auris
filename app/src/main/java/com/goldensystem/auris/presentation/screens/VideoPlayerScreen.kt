@@ -1,3 +1,4 @@
+// VideoPlayerScreen.kt
 package com.goldensystem.auris.presentation.screens
 
 import android.app.Activity
@@ -63,7 +64,6 @@ fun VideoPlayerScreen(
     var doubleTapFeedback by remember { mutableStateOf<Pair<Float, Float>?>(null) }
     var adjustmentType by remember { mutableStateOf<AdjustmentType?>(null) }
     var adjustmentValue by remember { mutableFloatStateOf(0f) }
-    var playerView by remember { mutableStateOf<PlayerView?>(null) }
 
     // Força landscape ao entrar
     LaunchedEffect(Unit) {
@@ -112,24 +112,29 @@ fun VideoPlayerScreen(
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        // PlayerView
+        // PlayerView conectado ao ExoPlayer
         AndroidView(
             factory = { ctx ->
-                PlayerView(ctx).also {
-                    playerView = it
-                    it.useController = false
-                    it.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                    it.keepScreenOn = true
+                PlayerView(ctx).apply {
+                    // Conecta o player
+                    this.player = viewModel.exoPlayer
+                    useController = false
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                    keepScreenOn = true
+                    // Workaround para Compose Surface sync
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        setEnableComposeSurfaceSyncWorkaround(true)
+                    }
+                }
+            },
+            // Atualiza a conexão se o player for recriado
+            update = { playerView ->
+                if (playerView.player !== viewModel.exoPlayer) {
+                    playerView.player = viewModel.exoPlayer
                 }
             },
             modifier = Modifier.fillMaxSize()
         )
-
-        // Associa o player assim que disponível
-        DisposableEffect(viewModel.exoPlayer) {
-            playerView?.player = viewModel.exoPlayer
-            onDispose { }
-        }
 
         // Thumbnail enquanto idle/buffering
         if (state.playerState == PlayerState.IDLE || state.playerState == PlayerState.BUFFERING) {
