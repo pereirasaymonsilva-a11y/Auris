@@ -345,8 +345,19 @@ fun VideoPlayerScreen(
                         drawRoundRect(Color.White.copy(alpha = 0.25f), Offset.Zero, Size(size.width * buf, th), CornerRadius(th / 2))
                         drawRoundRect(Color.White, Offset.Zero, Size(size.width * eff, th), CornerRadius(th / 2))
                         if (tr > 0f) {
-                            drawCircle(Color.White, tr, Offset(size.width * eff, th / 2))
-                            if (isDragging) drawCircle(Color.White.copy(alpha = 0.5f), tr + 2.dp.toPx(), Offset(size.width * eff, th / 2), style = Stroke(1.dp.toPx()))
+                            drawCircle(
+                                color = Color.White,
+                                radius = tr,
+                                center = Offset(size.width * eff, th / 2)
+                            )
+                            if (isDragging) {
+                                drawCircle(
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    radius = tr + 2.dp.toPx(),
+                                    center = Offset(size.width * eff, th / 2),
+                                    style = Stroke(1.dp.toPx())
+                                )
+                            }
                         }
                     }
 
