@@ -29,13 +29,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -145,18 +145,7 @@ fun VideoPlayerScreen(
         onBack()
     }
 
-    // Recursos cacheados
     val overlayBrush = remember { Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.42f), Color.Transparent, Color.Black.copy(alpha = 0.42f))) }
-    val blurEffect = remember {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            android.graphics.RenderEffect.createBlurEffect(24f, 24f, android.graphics.Shader.TileMode.CLAMP)
-        else null
-    }
-    val blurEffectLight = remember {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            android.graphics.RenderEffect.createBlurEffect(16f, 16f, android.graphics.Shader.TileMode.CLAMP)
-        else null
-    }
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         // Player
@@ -223,7 +212,7 @@ fun VideoPlayerScreen(
                 Box(
                     Modifier.align(if (type == AdjustmentType.BRIGHTNESS) Alignment.CenterStart else Alignment.CenterEnd)
                         .padding(horizontal = 32.dp).clip(RoundedCornerShape(12.dp))
-                        .then(if (blurEffectLight != null) Modifier.graphicsLayer { renderEffect = blurEffectLight }.background(Color.Black.copy(alpha = 0.35f)) else Modifier.background(Color.Black.copy(alpha = 0.5f)))
+                        .background(Color.Black.copy(alpha = 0.5f))
                         .padding(12.dp), contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -240,7 +229,7 @@ fun VideoPlayerScreen(
             LaunchedEffect(adjustmentType, adjustmentValue) { if (adjustmentType != null) { delay(800); adjustmentType = null } }
         }
 
-        // Camada de gestos (PRIMEIRO, para ficar ATRÁS dos controles)
+        // Camada de gestos (ATRÁS dos controles)
         var dragStartX by remember { mutableFloatStateOf(0f) }
         Box(
             Modifier.fillMaxSize()
@@ -282,7 +271,7 @@ fun VideoPlayerScreen(
                 }
         )
 
-        // Controles (DEPOIS dos gestos = ACIMA)
+        // Controles (ACIMA dos gestos)
         AnimatedVisibility(
             visible = showControls,
             enter = fadeIn(tween(220)) + slideInVertically(tween(220)) { it / 8 },
@@ -294,7 +283,13 @@ fun VideoPlayerScreen(
                 Row(
                     Modifier.align(Alignment.TopStart).fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp).statusBarsPadding()
                         .clip(RoundedCornerShape(16.dp))
-                        .then(if (blurEffect != null) Modifier.graphicsLayer { renderEffect = blurEffect }.background(Color.White.copy(alpha = 0.08f)) else Modifier.background(Color.Black.copy(alpha = 0.45f))),
+                        .then(
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                Modifier.blur(24.dp).background(Color.White.copy(alpha = 0.08f))
+                            } else {
+                                Modifier.background(Color.Black.copy(alpha = 0.45f))
+                            }
+                        ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = {
@@ -316,9 +311,9 @@ fun VideoPlayerScreen(
                     feedbackAlpha = 0.6f; feedbackScale = 0.9f
                     scope.launch { delay(60); feedbackAlpha = 1f; feedbackScale = 1f }
                 }, contentAlignment = Alignment.Center) {
-                    Box(Modifier.size(64.dp).graphicsLayer { alpha = feedbackAlphaAnim; scaleX = feedbackScaleAnim; scaleY = feedbackScaleAnim }, contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
                         AnimatedContent(state.isPlaying, transitionSpec = { scaleIn(spring(dampingRatio = 0.6f, stiffness = 400f)) togetherWith fadeOut(spring(dampingRatio = 0.6f, stiffness = 400f)) }, label = "playPause") { playing ->
-                            Icon(if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(48.dp))
+                            Icon(if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(48.dp).graphicsLayer { alpha = feedbackAlphaAnim; scaleX = feedbackScaleAnim; scaleY = feedbackScaleAnim })
                         }
                     }
                 }
@@ -332,9 +327,8 @@ fun VideoPlayerScreen(
                         Modifier.fillMaxWidth().height(24.dp).pointerInput(Unit) {
                             detectHorizontalDragGestures(
                                 onDragStart = { isDragging = true; dragPosition = (it.x / size.width).coerceIn(0f, 1f); resetAutoHide() },
-                                onDrag = { change, _ ->
-                                    change.consume()
-                                    dragPosition = (change.position.x / size.width).coerceIn(0f, 1f)
+                                onHorizontalDrag = { _, dragAmount ->
+                                    dragPosition = (dragPosition + dragAmount / size.width).coerceIn(0f, 1f)
                                 },
                                 onDragEnd = { viewModel.seekTo((dragPosition * state.durationMs).toLong()); isDragging = false },
                                 onDragCancel = { isDragging = false }
@@ -346,24 +340,9 @@ fun VideoPlayerScreen(
                         val th = if (isDragging) 6.dp.toPx() else 4.dp.toPx()
                         val tr = if (isDragging) 10.dp.toPx() else 4.dp.toPx()
 
-                        drawRoundRect(
-                            color = Color.White.copy(alpha = 0.15f),
-                            topLeft = Offset.Zero,
-                            size = Size(size.width, th),
-                            cornerRadius = CornerRadius(th / 2)
-                        )
-                        drawRoundRect(
-                            color = Color.White.copy(alpha = 0.25f),
-                            topLeft = Offset.Zero,
-                            size = Size(size.width * buf, th),
-                            cornerRadius = CornerRadius(th / 2)
-                        )
-                        drawRoundRect(
-                            color = Color.White,
-                            topLeft = Offset.Zero,
-                            size = Size(size.width * eff, th),
-                            cornerRadius = CornerRadius(th / 2)
-                        )
+                        drawRoundRect(Color.White.copy(alpha = 0.15f), Offset.Zero, Size(size.width, th), CornerRadius(th / 2))
+                        drawRoundRect(Color.White.copy(alpha = 0.25f), Offset.Zero, Size(size.width * buf, th), CornerRadius(th / 2))
+                        drawRoundRect(Color.White, Offset.Zero, Size(size.width * eff, th), CornerRadius(th / 2))
                         if (tr > 0f) {
                             drawCircle(Color.White, tr, Offset(size.width * eff, th / 2))
                             if (isDragging) drawCircle(Color.White.copy(alpha = 0.5f), tr + 2.dp.toPx(), Offset(size.width * eff, th / 2), style = Stroke(1.dp.toPx()))
