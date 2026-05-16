@@ -1,4 +1,4 @@
-# <Auris> 🎶
+# Auris 🎶
 
 <p align="center">
   <img src="assets/icon.png" alt="Ícone do Auris" width="128"/>

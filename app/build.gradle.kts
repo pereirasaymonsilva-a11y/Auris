@@ -1,13 +1,13 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.ksp) 
+    alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.baselineprofile)
     id("kotlin-parcelize")
-    id("kotlin-kapt")  // 🔥 ADICIONADO: necessário para kapt
+    id("kotlin-kapt")
 }
 
 val enableAbiSplits = providers.gradleProperty("pixelplay.enableAbiSplits")
@@ -106,9 +106,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "2.1.0"
-    }
+    // REMOVIDO composeOptions – não é mais necessário com o plugin moderno
 
     buildFeatures {
         compose = true
@@ -166,9 +164,8 @@ android {
 
 composeCompiler {
     enableStrongSkippingMode = true
-    featureFlags = setOf(
-        org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag.OptimizeNonSkippingGroups
-    )
+    // Remove a flag redundante, pois já é padrão
+    // featureFlags = setOf(...)
 }
 
 ksp {
@@ -177,10 +174,14 @@ ksp {
     arg("room.generateKotlin", "true")
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 dependencies {
     implementation(libs.androidx.profileinstaller)
     implementation(libs.androidx.paging.common)
-    baselineProfile(project(":baselineprofile"))  // 🔥 CORRIGIDO
+    baselineProfile(project(":baselineprofile"))
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.androidx.core.ktx)
@@ -229,14 +230,16 @@ dependencies {
     androidTestImplementation(libs.androidx.benchmark.macro.junit4)
     androidTestImplementation(libs.androidx.uiautomator)
 
-    // Hilt - usar libs + kapt (sem repetir strings)
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
+    // ==================== HILT (versão fixa 2.51.1) ====================
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt("com.google.dagger:hilt-compiler:2.51.1")
+    // Remove qualquer outra dependência do Hilt (ex: libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.hilt.work)
     kapt(libs.androidx.hilt.compiler)
+    // ================================================================
 
-    // Room - usar libs + ksp (removido duplicatas)
+    // Room
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
