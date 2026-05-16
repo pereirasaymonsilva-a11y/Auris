@@ -317,11 +317,6 @@ private fun ContextTabs(
     }
 }
 
-// Função auxiliar não-Composable para criar URI (segura)
-private fun getVideoContentUri(videoId: Long): Uri {
-    return ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videoId)
-}
-
 @Composable
 private fun FeaturedVideoItem(
     video: VideoItem,
@@ -333,7 +328,7 @@ private fun FeaturedVideoItem(
     val scale by animateFloatAsState(targetValue = if (isPressed) 0.98f else 1f, animationSpec = spring(dampingRatio = 0.5f))
     val glowAlpha by animateFloatAsState(targetValue = if (isPressed) 0.8f else 0.2f, animationSpec = tween(200))
 
-    val contentUri = getVideoContentUri(video.id)
+    val contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, video.id)
 
     Card(
         modifier = Modifier
@@ -411,9 +406,8 @@ private fun VideoGridItem(
     val elevation by animateDpAsState(targetValue = if (isPressed) 8.dp else 2.dp, animationSpec = tween(100))
     val glowAlpha by animateFloatAsState(targetValue = if (isPressed) 0.5f else 0f, animationSpec = tween(150))
 
-    val contentUri = getVideoContentUri(video.id)
+    val contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, video.id)
 
-    // Cálculo inline de "recente" sem função externa
     val isRecent = remember(video.dateAddedMs) {
         val now = System.currentTimeMillis()
         val sevenDaysAgo = now - (7L * 24 * 60 * 60 * 1000)
@@ -477,6 +471,8 @@ private fun VideoGridItem(
 
 @Composable
 fun CustomPlayIcon(modifier: Modifier = Modifier, alpha: Float = 0.8f) {
+    // Acessamos a cor primária fora do Canvas para garantir contexto composable
+    val primaryColor = MaterialTheme.colorScheme.primary
     Canvas(modifier = modifier) {
         val width = size.width
         val height = size.height
@@ -492,7 +488,7 @@ fun CustomPlayIcon(modifier: Modifier = Modifier, alpha: Float = 0.8f) {
         }
         drawPath(path, color = Color.White.copy(alpha = alpha))
         drawCircle(
-            color = MaterialTheme.colorScheme.primary.copy(alpha = alpha * 0.5f),
+            color = primaryColor.copy(alpha = alpha * 0.5f),
             radius = width * 0.7f,
             center = Offset(width / 2, height / 2)
         )
