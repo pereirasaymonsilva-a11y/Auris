@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gallery_title">Auris 视频</string>
+    <string name="gallery_permission_title">需要权限</string>
+    <string name="gallery_permission_message">为了显示您的视频，Auris 需要访问设备存储空间。</string>
+    <string name="gallery_permission_button">允许访问</string>
+    <string name="gallery_search_hint">搜索视频…</string>
+    <string name="gallery_tab_all">全部</string>
+    <string name="gallery_tab_recent">最近</string>
+    <string name="gallery_tab_folders">文件夹</string>
+    <string name="gallery_sort">排序</string>
+    <string name="gallery_retry">重试</string>
+    <string name="gallery_empty">未找到视频</string>
+    <string name="gallery_empty_search">没有找到相关结果</string>
+    <string name="gallery_new">新</string>
+    <string name="gallery_featured">★ 精选</string>
+    <string name="gallery_back">返回</string>
+    <string name="gallery_folder_fallback">文件夹</string>
+    <string name="gallery_video_count_suffix">个视频</string>
+</resources>

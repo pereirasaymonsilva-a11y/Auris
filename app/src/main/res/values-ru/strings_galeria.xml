@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gallery_title">Auris Видео</string>
+    <string name="gallery_permission_title">Требуется разрешение</string>
+    <string name="gallery_permission_message">Для отображения ваших видео Auris необходим доступ к хранилищу устройства.</string>
+    <string name="gallery_permission_button">Разрешить доступ</string>
+    <string name="gallery_search_hint">Поиск видео…</string>
+    <string name="gallery_tab_all">Все</string>
+    <string name="gallery_tab_recent">Недавние</string>
+    <string name="gallery_tab_folders">Папки</string>
+    <string name="gallery_sort">Сортировка</string>
+    <string name="gallery_retry">Повторить</string>
+    <string name="gallery_empty">Видео не найдены</string>
+    <string name="gallery_empty_search">Ничего не найдено</string>
+    <string name="gallery_new">Новое</string>
+    <string name="gallery_featured">★ ИЗБРАННОЕ</string>
+    <string name="gallery_back">Назад</string>
+    <string name="gallery_folder_fallback">Папка</string>
+    <string name="gallery_video_count_suffix">видео</string>
+</resources>

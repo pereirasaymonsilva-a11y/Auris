@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gallery_title">Auris Video</string>
+    <string name="gallery_permission_title">Izin diperlukan</string>
+    <string name="gallery_permission_message">Untuk menampilkan video Anda, Auris perlu mengakses penyimpanan perangkat.</string>
+    <string name="gallery_permission_button">Izinkan akses</string>
+    <string name="gallery_search_hint">Cari video…</string>
+    <string name="gallery_tab_all">Semua</string>
+    <string name="gallery_tab_recent">Terbaru</string>
+    <string name="gallery_tab_folders">Folder</string>
+    <string name="gallery_sort">Urutkan</string>
+    <string name="gallery_retry">Coba lagi</string>
+    <string name="gallery_empty">Tidak ada video ditemukan</string>
+    <string name="gallery_empty_search">Tidak ada hasil untuk pencarian Anda</string>
+    <string name="gallery_new">Baru</string>
+    <string name="gallery_featured">★ UNGGULAN</string>
+    <string name="gallery_back">Kembali</string>
+    <string name="gallery_folder_fallback">Folder</string>
+    <string name="gallery_video_count_suffix">video</string>
+</resources>

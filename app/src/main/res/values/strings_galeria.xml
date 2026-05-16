@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gallery_title">Auris Videos</string>
+    <string name="gallery_permission_title">Permission required</string>
+    <string name="gallery_permission_message">To display your videos, Auris needs to access device storage.</string>
+    <string name="gallery_permission_button">Allow access</string>
+    <string name="gallery_search_hint">Search videos…</string>
+    <string name="gallery_tab_all">All</string>
+    <string name="gallery_tab_recent">Recent</string>
+    <string name="gallery_tab_folders">Folders</string>
+    <string name="gallery_sort">Sort</string>
+    <string name="gallery_retry">Try again</string>
+    <string name="gallery_empty">No videos found</string>
+    <string name="gallery_empty_search">No results for your search</string>
+    <string name="gallery_new">New</string>
+    <string name="gallery_featured">★ FEATURED</string>
+    <string name="gallery_back">Back</string>
+    <string name="gallery_folder_fallback">Folder</string>
+    <string name="gallery_video_count_suffix">videos</string>
+</resources>
