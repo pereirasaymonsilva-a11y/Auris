@@ -49,10 +49,7 @@ import com.goldensystem.auris.presentation.viewmodel.SortMode
 import com.goldensystem.auris.presentation.viewmodel.VideoGalleryViewModel
 import com.goldensystem.auris.utils.VideoQueueHolder
 import com.goldensystem.auris.utils.VideoUtils
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.temporal.ChronoUnit
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -162,7 +159,6 @@ fun VideoGalleryScreen(
     }
 }
 
-// Tela de permissão
 @Composable
 private fun PermissionScreen(onRequest: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -190,7 +186,6 @@ private fun PermissionScreen(onRequest: () -> Unit) {
     }
 }
 
-// TopBar com blur e search
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GalleryTopBar(
@@ -272,7 +267,6 @@ private fun GalleryTopBar(
     }
 }
 
-// Tabs
 @Composable
 private fun ContextTabs(
     current: QueueContext,
@@ -324,19 +318,16 @@ private fun ContextTabs(
     }
 }
 
-// Gera a URI do MediaStore a partir do ID do vídeo (estável para thumbnail)
 private fun getVideoContentUri(videoId: Long): Uri {
     return ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videoId)
 }
 
-// Verifica se o vídeo foi adicionado nos últimos 7 dias
 private fun isVideoRecent(dateAddedMs: Long): Boolean {
     val now = System.currentTimeMillis()
     val sevenDaysAgo = now - (7L * 24 * 60 * 60 * 1000)
     return dateAddedMs > sevenDaysAgo
 }
 
-// Featured Video item
 @Composable
 private fun FeaturedVideoItem(
     video: VideoItem,
@@ -414,7 +405,6 @@ private fun FeaturedVideoItem(
     }
 }
 
-// Item de vídeo normal
 @Composable
 private fun VideoGridItem(
     video: VideoItem,
@@ -485,7 +475,6 @@ private fun VideoGridItem(
     }
 }
 
-// Ícone de play customizado
 @Composable
 fun CustomPlayIcon(modifier: Modifier = Modifier, alpha: Float = 0.8f) {
     Canvas(modifier = modifier) {
@@ -510,7 +499,6 @@ fun CustomPlayIcon(modifier: Modifier = Modifier, alpha: Float = 0.8f) {
     }
 }
 
-// Folder item
 @Composable
 private fun FolderItem(folder: VideoUtils.FolderInfo, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -541,7 +529,6 @@ private fun FolderItem(folder: VideoUtils.FolderInfo, onClick: () -> Unit) {
     }
 }
 
-// Estados
 @Composable
 private fun LoadingState() = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
