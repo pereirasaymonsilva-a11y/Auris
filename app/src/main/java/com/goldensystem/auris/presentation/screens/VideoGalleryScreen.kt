@@ -125,20 +125,30 @@ fun VideoGalleryScreen(
                             } else {
                                 val videos = state.displayVideos
                                 if (showFeatured && videos.isNotEmpty()) {
-                                    item(span = { GridItemSpan(maxLineSpan) }) {
-                                        FeaturedVideoItem(
-                                            video = videos.first(),
-                                            viewModel = viewModel,
-                                            onClick = { queue ->
+                                    val featured = viewModel.getFeaturedVideo()
+                                    if (featured != null) {
+                                        item(span = { GridItemSpan(maxLineSpan) }) {
+                                            FeaturedVideoItem(
+                                                video = featured,
+                                                viewModel = viewModel,
+                                                onClick = { queue ->
+                                                    VideoQueueHolder.setQueue(queue)
+                                                    onOpenPlayerWithQueue(queue)
+                                                }
+                                            )
+                                        }
+                                        items(videos.filter { it.id != featured.id }, key = { it.id }) { video ->
+                                            VideoGridItem(video, viewModel) { queue ->
                                                 VideoQueueHolder.setQueue(queue)
                                                 onOpenPlayerWithQueue(queue)
                                             }
-                                        )
-                                    }
-                                    items(videos.drop(1), key = { it.id }) { video ->
-                                        VideoGridItem(video, viewModel) { queue ->
-                                            VideoQueueHolder.setQueue(queue)
-                                            onOpenPlayerWithQueue(queue)
+                                        }
+                                    } else {
+                                        items(videos, key = { it.id }) { video ->
+                                            VideoGridItem(video, viewModel) { queue ->
+                                                VideoQueueHolder.setQueue(queue)
+                                                onOpenPlayerWithQueue(queue)
+                                            }
                                         }
                                     }
                                 } else {
@@ -222,8 +232,11 @@ private fun GalleryTopBar(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showSortMenu = true }) {
-                        Icon(Icons.Filled.Sort, contentDescription = stringResource(R.string.gallery_sort))
+                    // Oculta botão de ordenação na aba "Recentes" (ordenação fixa por data)
+                    if (state.currentContext != QueueContext.RECENT) {
+                        IconButton(onClick = { showSortMenu = true }) {
+                            Icon(Icons.Filled.Sort, contentDescription = stringResource(R.string.gallery_sort))
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
@@ -471,7 +484,6 @@ private fun VideoGridItem(
 
 @Composable
 fun CustomPlayIcon(modifier: Modifier = Modifier, alpha: Float = 0.8f) {
-    // Acessamos a cor primária fora do Canvas para garantir contexto composable
     val primaryColor = MaterialTheme.colorScheme.primary
     Canvas(modifier = modifier) {
         val width = size.width

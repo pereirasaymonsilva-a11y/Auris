@@ -13,6 +13,7 @@ data class VideoItem(
     val sizeBytes: Long = 0L,
     val folderPath: String = "",
     val dateAddedMs: Long = 0L,
+    val viewCount: Int = 0,
     val width: Int = 0,
     val height: Int = 0
 ) : Parcelable {
