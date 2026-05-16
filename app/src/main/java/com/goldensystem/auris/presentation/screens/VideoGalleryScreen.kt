@@ -49,7 +49,6 @@ import com.goldensystem.auris.presentation.viewmodel.SortMode
 import com.goldensystem.auris.presentation.viewmodel.VideoGalleryViewModel
 import com.goldensystem.auris.utils.VideoQueueHolder
 import com.goldensystem.auris.utils.VideoUtils
-import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -318,14 +317,9 @@ private fun ContextTabs(
     }
 }
 
+// Função auxiliar não-Composable para criar URI (segura)
 private fun getVideoContentUri(videoId: Long): Uri {
     return ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videoId)
-}
-
-private fun isVideoRecent(dateAddedMs: Long): Boolean {
-    val now = System.currentTimeMillis()
-    val sevenDaysAgo = now - (7L * 24 * 60 * 60 * 1000)
-    return dateAddedMs > sevenDaysAgo
 }
 
 @Composable
@@ -418,7 +412,13 @@ private fun VideoGridItem(
     val glowAlpha by animateFloatAsState(targetValue = if (isPressed) 0.5f else 0f, animationSpec = tween(150))
 
     val contentUri = getVideoContentUri(video.id)
-    val isRecent = isVideoRecent(video.dateAddedMs)
+
+    // Cálculo inline de "recente" sem função externa
+    val isRecent = remember(video.dateAddedMs) {
+        val now = System.currentTimeMillis()
+        val sevenDaysAgo = now - (7L * 24 * 60 * 60 * 1000)
+        video.dateAddedMs > sevenDaysAgo
+    }
 
     Card(
         modifier = Modifier
