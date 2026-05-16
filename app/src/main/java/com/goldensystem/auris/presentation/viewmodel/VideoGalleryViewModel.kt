@@ -60,9 +60,6 @@ class VideoGalleryViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(GalleryUiState())
     val uiState: StateFlow<GalleryUiState> = _uiState.asStateFlow()
 
-    // Lista mutável eficiente para atualizações de viewCount
-    private val _allVideos = mutableStateListOf<VideoItem>()
-    
     private var previousContext: QueueContext = QueueContext.ALL
     private var wasInFoldersMode: Boolean = false
 
@@ -85,14 +82,11 @@ class VideoGalleryViewModel @Inject constructor(
                     video.copy(viewCount = viewCountMap[video.id] ?: 0)
                 }
                 
-                _allVideos.clear()
-                _allVideos.addAll(videosWithCounts)
-                
                 val folders = VideoUtils.extractFolders(videosWithCounts)
-                _uiState.update {
-                    it.copy(
+                _uiState.update { state ->
+                    state.copy(
                         allVideos = videosWithCounts,
-                        filteredVideos = applySortAndContext(videosWithCounts, it.currentContext, it.sortMode),
+                        filteredVideos = applySortAndContext(videosWithCounts, state.currentContext, state.sortMode),
                         folders = folders,
                         isLoading = false
                     )
@@ -109,7 +103,7 @@ class VideoGalleryViewModel @Inject constructor(
         _uiState.update { state ->
             state.copy(
                 sortMode = mode,
-                filteredVideos = applySortAndContext(_allVideos, state.currentContext, mode)
+                filteredVideos = applySortAndContext(state.allVideos, state.currentContext, mode)
             )
         }
     }
@@ -118,7 +112,7 @@ class VideoGalleryViewModel @Inject constructor(
         _uiState.update { state ->
             state.copy(
                 currentContext = contextType,
-                filteredVideos = applySortAndContext(_allVideos, contextType, state.sortMode),
+                filteredVideos = applySortAndContext(state.allVideos, contextType, state.sortMode),
                 currentFolder = if (contextType == QueueContext.FOLDER) state.currentFolder else null,
                 showFoldersOnly = false
             )
@@ -132,7 +126,7 @@ class VideoGalleryViewModel @Inject constructor(
 
     fun loadFolders() {
         viewModelScope.launch {
-            val folders = VideoUtils.extractFolders(_allVideos)
+            val folders = VideoUtils.extractFolders(_uiState.value.allVideos)
             _uiState.update { it.copy(folders = folders, showFoldersOnly = true, filteredVideos = emptyList()) }
         }
     }
@@ -144,19 +138,15 @@ class VideoGalleryViewModel @Inject constructor(
             viewCountRepository.incrementViewCount(videoId)
             
             // 2. Atualiza em memória de forma eficiente (apenas o item clicado)
-            val index = _allVideos.indexOfFirst { it.id == videoId }
-            if (index != -1) {
-                val old = _allVideos[index]
-                val updated = old.copy(viewCount = old.viewCount + 1)
-                _allVideos[index] = updated
-                
-                // 3. Recalcula filteredVideos com a lista atualizada
-                _uiState.update { state ->
-                    state.copy(
-                        allVideos = _allVideos.toList(),
-                        filteredVideos = applySortAndContext(_allVideos, state.currentContext, state.sortMode)
-                    )
+            _uiState.update { state ->
+                val updatedList = state.allVideos.map { video ->
+                    if (video.id == videoId) video.copy(viewCount = video.viewCount + 1)
+                    else video
                 }
+                state.copy(
+                    allVideos = updatedList,
+                    filteredVideos = applySortAndContext(updatedList, state.currentContext, state.sortMode)
+                )
             }
         }
     }
@@ -167,7 +157,7 @@ class VideoGalleryViewModel @Inject constructor(
         previousContext = _uiState.value.currentContext
         wasInFoldersMode = _uiState.value.showFoldersOnly
         _uiState.update { state ->
-            val folderVideos = _allVideos.filter { it.folderPath == folderPath }
+            val folderVideos = state.allVideos.filter { it.folderPath == folderPath }
             state.copy(
                 currentContext = QueueContext.FOLDER,
                 currentFolder = folderPath,
@@ -196,7 +186,7 @@ class VideoGalleryViewModel @Inject constructor(
                 state.copy(
                     currentContext = restoredContext,
                     currentFolder = null,
-                    filteredVideos = applySortAndContext(_allVideos, restoredContext, state.sortMode),
+                    filteredVideos = applySortAndContext(state.allVideos, restoredContext, state.sortMode),
                     showFoldersOnly = false
                 )
             }
@@ -207,9 +197,9 @@ class VideoGalleryViewModel @Inject constructor(
     fun buildQueue(clickedVideo: VideoItem? = null): VideoQueue {
         val state = _uiState.value
         val sourceVideos = when (state.currentContext) {
-            QueueContext.ALL -> _allVideos
-            QueueContext.RECENT -> _allVideos.filter { isRecent(it.dateAddedMs) }
-            QueueContext.FOLDER -> _allVideos.filter { it.folderPath == state.currentFolder }
+            QueueContext.ALL -> state.allVideos
+            QueueContext.RECENT -> state.allVideos.filter { isRecent(it.dateAddedMs) }
+            QueueContext.FOLDER -> state.allVideos.filter { it.folderPath == state.currentFolder }
             QueueContext.SEARCH -> state.displayVideos
         }
         return if (clickedVideo != null) VideoQueueManager.startFromItem(state.currentContext, sourceVideos, clickedVideo)
@@ -251,9 +241,9 @@ class VideoGalleryViewModel @Inject constructor(
     fun getFeaturedVideo(): VideoItem? {
         val state = _uiState.value
         val sourceVideos = when (state.currentContext) {
-            QueueContext.ALL -> _allVideos
-            QueueContext.RECENT -> _allVideos.filter { isRecent(it.dateAddedMs) }
-            else -> _allVideos
+            QueueContext.ALL -> state.allVideos
+            QueueContext.RECENT -> state.allVideos.filter { isRecent(it.dateAddedMs) }
+            else -> state.allVideos
         }
         if (sourceVideos.isEmpty()) return null
         val maxView = sourceVideos.maxByOrNull { it.viewCount }
