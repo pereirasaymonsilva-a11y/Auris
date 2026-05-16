@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.baselineprofile)
     id("kotlin-parcelize")
+    id("kotlin-kapt")  // 🔥 ADICIONADO: necessário para kapt
 }
 
 val enableAbiSplits = providers.gradleProperty("pixelplay.enableAbiSplits")
@@ -61,16 +62,13 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // ===== Configuração de assinatura =====
     signingConfigs {
-        // Assinatura fixa para debug (opcional, usando keystore antiga se existir)
         create("fixedDebug") {
             storeFile = file("debug.keystore")
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
-        // NOVA assinatura de produção com my-release-key.keystore
         create("release") {
             storeFile = file("my-release-key.keystore")
             storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "Saymonsil098"
@@ -81,10 +79,9 @@ android {
 
     buildTypes {
         debug {
-    applicationIdSuffix = ".debug"
-    // signingConfig = signingConfigs.getByName("fixedDebug")
-       }
-
+            applicationIdSuffix = ".debug"
+            // signingConfig = signingConfigs.getByName("fixedDebug")
+        }
         release {
             isDebuggable = false
             isMinifyEnabled = true
@@ -93,10 +90,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Usa a nova keystore de produção
             signingConfig = signingConfigs.getByName("release")
         }
-
         create("benchmark") {
             initWith(getByName("release"))
             signingConfig = signingConfigs.getByName("debug")
@@ -145,19 +140,17 @@ android {
         }
     }
 
-    // CI builds installable phone APKs per supported Android device ABI.
     splits {
         abi {
             isEnable = enableAbiSplits
             reset()
             if (enableAbiSplits) {
                 include("arm64-v8a", "armeabi-v7a")
-                isUniversalApk = true  // GERA APK UNIVERSAL
+                isUniversalApk = true
             }
         }
     }
 
-    // AAB bundle 配置：通过 Google Play 分发时自动按架构拆分（推荐）
     bundle {
         abi {
             enableSplit = true
@@ -187,7 +180,7 @@ ksp {
 dependencies {
     implementation(libs.androidx.profileinstaller)
     implementation(libs.androidx.paging.common)
-    "baselineProfile"(project(":baselineprofile"))
+    baselineProfile(project(":baselineprofile"))  // 🔥 CORRIGIDO
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.androidx.core.ktx)
@@ -236,14 +229,14 @@ dependencies {
     androidTestImplementation(libs.androidx.benchmark.macro.junit4)
     androidTestImplementation(libs.androidx.uiautomator)
 
-    // Hilt
+    // Hilt - usar libs + kapt (sem repetir strings)
     implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
+    kapt(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.hilt.work)
-    ksp(libs.androidx.hilt.compiler)
+    kapt(libs.androidx.hilt.compiler)
 
-    // Room
+    // Room - usar libs + ksp (removido duplicatas)
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
@@ -398,18 +391,8 @@ dependencies {
     // Encrypted credentials storage
     implementation(libs.androidx.security.crypto)
 
-    //roku
+    // roku
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-
-    // Room
-    implementation "androidx.room:room-runtime:2.6.1"
-    kapt "androidx.room:room-compiler:2.6.1"
-    implementation "androidx.room:room-ktx:2.6.1"
-
-    // Hilt (já deve ter)
-    implementation "com.google.dagger:hilt-android:2.48"
-    kapt "com.google.dagger:hilt-compiler:2.48"
-    
 }
 
 tasks.withType<Test> {
