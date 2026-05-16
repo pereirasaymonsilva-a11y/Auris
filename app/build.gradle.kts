@@ -1,13 +1,13 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.ksp) 
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.baselineprofile)
     id("kotlin-parcelize")
-    id("kotlin-kapt")
+    id("kotlin-kapt")   // <-- ÚNICA ADIÇÃO AQUI
 }
 
 val enableAbiSplits = providers.gradleProperty("pixelplay.enableAbiSplits")
@@ -106,7 +106,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    // REMOVIDO composeOptions – não é mais necessário com o plugin moderno
+    composeOptions {
+        kotlinCompilerExtensionVersion = "2.1.0"
+    }
 
     buildFeatures {
         compose = true
@@ -164,8 +166,9 @@ android {
 
 composeCompiler {
     enableStrongSkippingMode = true
-    // Remove a flag redundante, pois já é padrão
-    // featureFlags = setOf(...)
+    featureFlags = setOf(
+        org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag.OptimizeNonSkippingGroups
+    )
 }
 
 ksp {
@@ -175,7 +178,7 @@ ksp {
 }
 
 kapt {
-    correctErrorTypes = true
+    correctErrorTypes = true   // <-- ÚNICA ADIÇÃO AQUI
 }
 
 dependencies {
@@ -230,14 +233,12 @@ dependencies {
     androidTestImplementation(libs.androidx.benchmark.macro.junit4)
     androidTestImplementation(libs.androidx.uiautomator)
 
-    // ==================== HILT (versão fixa 2.51.1) ====================
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt("com.google.dagger:hilt-compiler:2.51.1")
-    // Remove qualquer outra dependência do Hilt (ex: libs.hilt.android)
+    // Hilt - usando apenas o que vem do libs.versions.toml
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.hilt.work)
     kapt(libs.androidx.hilt.compiler)
-    // ================================================================
 
     // Room
     implementation(libs.androidx.room.runtime)
