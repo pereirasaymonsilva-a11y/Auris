@@ -232,7 +232,6 @@ private fun GalleryTopBar(
                     }
                 },
                 actions = {
-                    // Oculta botão de ordenação na aba "Recentes" (ordenação fixa por data)
                     if (state.currentContext != QueueContext.RECENT) {
                         IconButton(onClick = { showSortMenu = true }) {
                             Icon(Icons.Filled.Sort, contentDescription = stringResource(R.string.gallery_sort))
