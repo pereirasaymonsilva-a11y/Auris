@@ -1,13 +1,13 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.ksp) 
+    alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.baselineprofile)
     id("kotlin-parcelize")
-    id("kotlin-kapt")   // <-- ÚNICA ADIÇÃO AQUI
+    id("kotlin-kapt")          // necessário para outras libs (Room não, pq usa ksp, mas deixe)
 }
 
 val enableAbiSplits = providers.gradleProperty("pixelplay.enableAbiSplits")
@@ -178,7 +178,7 @@ ksp {
 }
 
 kapt {
-    correctErrorTypes = true   // <-- ÚNICA ADIÇÃO AQUI
+    correctErrorTypes = true
 }
 
 dependencies {
@@ -233,14 +233,15 @@ dependencies {
     androidTestImplementation(libs.androidx.benchmark.macro.junit4)
     androidTestImplementation(libs.androidx.uiautomator)
 
-    // Hilt - usando apenas o que vem do libs.versions.toml
+    // ==================== HILT (USANDO KSP, NÃO KAPT) ====================
     implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
+    ksp(libs.hilt.android.compiler)          // <-- trocado de kapt para ksp
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.hilt.work)
-    kapt(libs.androidx.hilt.compiler)
+    ksp(libs.androidx.hilt.compiler)          // <-- trocado de kapt para ksp
+    // ====================================================================
 
-    // Room
+    // Room (já usa ksp, ok)
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
