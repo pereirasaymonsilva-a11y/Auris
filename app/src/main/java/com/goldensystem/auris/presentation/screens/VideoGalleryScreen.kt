@@ -1,9 +1,11 @@
 package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
+import android.content.ContentUris
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.*
@@ -25,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -48,17 +49,10 @@ import com.goldensystem.auris.presentation.viewmodel.SortMode
 import com.goldensystem.auris.presentation.viewmodel.VideoGalleryViewModel
 import com.goldensystem.auris.utils.VideoQueueHolder
 import com.goldensystem.auris.utils.VideoUtils
-import java.io.File
+import java.time.Instant
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
-// Cores da marca
-object AurisBrand {
-    val primary = Color(0xFF00E5B2)
-    val primaryDark = Color(0xFF00997A)
-    val glow = primary.copy(alpha = 0.4f)
-    val glowStrong = primary.copy(alpha = 0.7f)
-}
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -178,14 +172,18 @@ private fun PermissionScreen(onRequest: () -> Unit) {
             modifier = Modifier.padding(24.dp).fillMaxWidth()
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
-                Icon(Icons.Filled.Folder, contentDescription = null, modifier = Modifier.size(56.dp), tint = AurisBrand.primary)
+                Icon(Icons.Filled.Folder, contentDescription = null, modifier = Modifier.size(56.dp), tint = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(stringResource(R.string.gallery_permission_title), fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(stringResource(R.string.gallery_permission_message), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 Spacer(modifier = Modifier.height(24.dp))
-                Button(onClick = onRequest, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = AurisBrand.primary)) {
-                    Text(stringResource(R.string.gallery_permission_button), color = Color.Black)
+                Button(
+                    onClick = onRequest,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.gallery_permission_button), color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }
@@ -219,7 +217,7 @@ private fun GalleryTopBar(
                     if (isInFolder) {
                         Text(text = state.currentFolder?.substringAfterLast("/") ?: stringResource(R.string.gallery_folder_fallback), fontWeight = FontWeight.SemiBold)
                     } else {
-                        Text(stringResource(R.string.gallery_title), fontWeight = FontWeight.Bold, letterSpacing = (-0.5).sp, color = AurisBrand.primary)
+                        Text(stringResource(R.string.gallery_title), fontWeight = FontWeight.Bold, letterSpacing = (-0.5).sp, color = MaterialTheme.colorScheme.primary)
                     }
                 },
                 navigationIcon = {
@@ -246,7 +244,7 @@ private fun GalleryTopBar(
                 singleLine = true,
                 shape = RoundedCornerShape(24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = AurisBrand.primary,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
@@ -274,7 +272,7 @@ private fun GalleryTopBar(
     }
 }
 
-// Tabs sem indicator experimental
+// Tabs
 @Composable
 private fun ContextTabs(
     current: QueueContext,
@@ -301,7 +299,7 @@ private fun ContextTabs(
                 onToggleShowFolders(false)
             },
             text = { Text(stringResource(R.string.gallery_tab_all)) },
-            selectedContentColor = AurisBrand.primary,
+            selectedContentColor = MaterialTheme.colorScheme.primary,
             unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Tab(
@@ -311,7 +309,7 @@ private fun ContextTabs(
                 onToggleShowFolders(false)
             },
             text = { Text(stringResource(R.string.gallery_tab_recent)) },
-            selectedContentColor = AurisBrand.primary,
+            selectedContentColor = MaterialTheme.colorScheme.primary,
             unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Tab(
@@ -320,10 +318,22 @@ private fun ContextTabs(
                 if (!showFoldersOnly) onToggleShowFolders(true)
             },
             text = { Text(stringResource(R.string.gallery_tab_folders)) },
-            selectedContentColor = AurisBrand.primary,
+            selectedContentColor = MaterialTheme.colorScheme.primary,
             unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+}
+
+// Gera a URI do MediaStore a partir do ID do vídeo (estável para thumbnail)
+private fun getVideoContentUri(videoId: Long): Uri {
+    return ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videoId)
+}
+
+// Verifica se o vídeo foi adicionado nos últimos 7 dias
+private fun isVideoRecent(dateAddedMs: Long): Boolean {
+    val now = System.currentTimeMillis()
+    val sevenDaysAgo = now - (7L * 24 * 60 * 60 * 1000)
+    return dateAddedMs > sevenDaysAgo
 }
 
 // Featured Video item
@@ -338,6 +348,8 @@ private fun FeaturedVideoItem(
     val scale by animateFloatAsState(targetValue = if (isPressed) 0.98f else 1f, animationSpec = spring(dampingRatio = 0.5f))
     val glowAlpha by animateFloatAsState(targetValue = if (isPressed) 0.8f else 0.2f, animationSpec = tween(200))
 
+    val contentUri = getVideoContentUri(video.id)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -351,14 +363,25 @@ private fun FeaturedVideoItem(
         elevation = CardDefaults.cardElevation(defaultElevation = if (isPressed) 12.dp else 4.dp)
     ) {
         Box {
-            Box(Modifier.matchParentSize().background(Brush.radialGradient(listOf(AurisBrand.glow.copy(alpha = glowAlpha), Color.Transparent), radius = 0.9f)))
-            Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.3f)), startY = 0.7f)))
+            Box(
+                Modifier.matchParentSize().background(
+                    Brush.radialGradient(
+                        listOf(MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha), Color.Transparent),
+                        radius = 0.9f
+                    )
+                )
+            )
+            Box(
+                Modifier.matchParentSize().background(
+                    Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.3f)), startY = 0.7f)
+                )
+            )
 
             Row(modifier = Modifier.fillMaxWidth().height(180.dp)) {
                 Box(modifier = Modifier.weight(0.6f).fillMaxHeight()) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(Uri.fromFile(File(video.path)))
+                            .data(contentUri)
                             .videoFrameMillis(1000)
                             .crossfade(true)
                             .build(),
@@ -370,12 +393,18 @@ private fun FeaturedVideoItem(
                     CustomPlayIcon(modifier = Modifier.align(Alignment.Center).size(36.dp), alpha = if (isPressed) 0.9f else 0.7f)
                 }
                 Column(modifier = Modifier.weight(0.4f).fillMaxHeight().padding(12.dp), verticalArrangement = Arrangement.Center) {
-                    Text(stringResource(R.string.gallery_featured), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = AurisBrand.primary, letterSpacing = 0.5.sp)
+                    Text(
+                        stringResource(R.string.gallery_featured),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        letterSpacing = 0.5.sp
+                    )
                     Spacer(Modifier.height(4.dp))
                     Text(video.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     Spacer(Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.PlayArrow, null, modifier = Modifier.size(12.dp), tint = AurisBrand.primary)
+                        Icon(Icons.Filled.PlayArrow, null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.width(4.dp))
                         Text(video.durationFormatted, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
@@ -398,20 +427,8 @@ private fun VideoGridItem(
     val elevation by animateDpAsState(targetValue = if (isPressed) 8.dp else 2.dp, animationSpec = tween(100))
     val glowAlpha by animateFloatAsState(targetValue = if (isPressed) 0.5f else 0f, animationSpec = tween(150))
 
-    // Fallback: se não tiver data, não mostra "Novo"
-    val isRecent = run {
-        try {
-            val dateStr = video::class.java.getDeclaredField("dateAdded").let { it.isAccessible = true; it.get(video) as? String }
-                ?: video::class.java.getDeclaredField("modificationDate").let { it.isAccessible = true; it.get(video) as? String }
-            if (dateStr != null) {
-                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                val date = LocalDate.parse(dateStr.take(10), formatter)
-                date.isAfter(LocalDate.now().minusDays(7))
-            } else false
-        } catch (e: Exception) {
-            false
-        }
-    }
+    val contentUri = getVideoContentUri(video.id)
+    val isRecent = isVideoRecent(video.dateAddedMs)
 
     Card(
         modifier = Modifier
@@ -426,13 +443,24 @@ private fun VideoGridItem(
         elevation = CardDefaults.cardElevation(defaultElevation = elevation)
     ) {
         Box {
-            Box(Modifier.matchParentSize().background(Brush.radialGradient(listOf(AurisBrand.glow.copy(alpha = glowAlpha), Color.Transparent), radius = 0.8f)))
-            Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)), startY = 0.6f)))
+            Box(
+                Modifier.matchParentSize().background(
+                    Brush.radialGradient(
+                        listOf(MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha), Color.Transparent),
+                        radius = 0.8f
+                    )
+                )
+            )
+            Box(
+                Modifier.matchParentSize().background(
+                    Brush.verticalGradient(listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)), startY = 0.6f)
+                )
+            )
 
             Box(modifier = Modifier.aspectRatio(16f / 9f)) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(Uri.fromFile(File(video.path)))
+                        .data(contentUri)
                         .videoFrameMillis(1000)
                         .crossfade(true)
                         .build(),
@@ -448,7 +476,7 @@ private fun VideoGridItem(
             Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text(video.title, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                 if (isRecent) {
-                    Surface(shape = RoundedCornerShape(12.dp), color = AurisBrand.primary.copy(alpha = 0.85f), contentColor = Color.Black) {
+                    Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f), contentColor = MaterialTheme.colorScheme.onPrimary) {
                         Text(stringResource(R.string.gallery_new), fontSize = 8.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                     }
                 }
@@ -474,7 +502,11 @@ fun CustomPlayIcon(modifier: Modifier = Modifier, alpha: Float = 0.8f) {
             close()
         }
         drawPath(path, color = Color.White.copy(alpha = alpha))
-        drawCircle(color = AurisBrand.glowStrong.copy(alpha = alpha * 0.5f), radius = width * 0.7f, center = Offset(width / 2, height / 2))
+        drawCircle(
+            color = MaterialTheme.colorScheme.primary.copy(alpha = alpha * 0.5f),
+            radius = width * 0.7f,
+            center = Offset(width / 2, height / 2)
+        )
     }
 }
 
@@ -492,8 +524,16 @@ private fun FolderItem(folder: VideoUtils.FolderInfo, onClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = elevation)
     ) {
-        Column(modifier = Modifier.padding(12.dp).background(Brush.radialGradient(listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.03f)), radius = 0.8f)), horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Filled.Folder, null, modifier = Modifier.size(42.dp), tint = AurisBrand.primary)
+        Column(
+            modifier = Modifier.padding(12.dp).background(
+                Brush.radialGradient(
+                    listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.03f)),
+                    radius = 0.8f
+                )
+            ),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(Icons.Filled.Folder, null, modifier = Modifier.size(42.dp), tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.height(4.dp))
             Text(folder.name, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text("${folder.videoCount} ${stringResource(R.string.gallery_video_count_suffix)}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -503,7 +543,9 @@ private fun FolderItem(folder: VideoUtils.FolderInfo, onClick: () -> Unit) {
 
 // Estados
 @Composable
-private fun LoadingState() = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = AurisBrand.primary) }
+private fun LoadingState() = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+}
 
 @Composable
 private fun ErrorState(message: String, onRetry: () -> Unit) = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
