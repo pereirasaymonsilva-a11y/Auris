@@ -132,6 +132,7 @@ fun VideoGalleryScreen(
                                                 video = featured,
                                                 viewModel = viewModel,
                                                 onClick = { queue ->
+                                                    viewModel.incrementViewCount(featured.id)
                                                     VideoQueueHolder.setQueue(queue)
                                                     onOpenPlayerWithQueue(queue)
                                                 }
@@ -139,6 +140,7 @@ fun VideoGalleryScreen(
                                         }
                                         items(videos.filter { it.id != featured.id }, key = { it.id }) { video ->
                                             VideoGridItem(video, viewModel) { queue ->
+                                                viewModel.incrementViewCount(video.id)
                                                 VideoQueueHolder.setQueue(queue)
                                                 onOpenPlayerWithQueue(queue)
                                             }
@@ -146,6 +148,7 @@ fun VideoGalleryScreen(
                                     } else {
                                         items(videos, key = { it.id }) { video ->
                                             VideoGridItem(video, viewModel) { queue ->
+                                                viewModel.incrementViewCount(video.id)
                                                 VideoQueueHolder.setQueue(queue)
                                                 onOpenPlayerWithQueue(queue)
                                             }
@@ -154,6 +157,7 @@ fun VideoGalleryScreen(
                                 } else {
                                     items(videos, key = { it.id }) { video ->
                                         VideoGridItem(video, viewModel) { queue ->
+                                            viewModel.incrementViewCount(video.id)
                                             VideoQueueHolder.setQueue(queue)
                                             onOpenPlayerWithQueue(queue)
                                         }
@@ -347,8 +351,7 @@ private fun FeaturedVideoItem(
             .fillMaxWidth()
             .graphicsLayer { scaleX = scale; scaleY = scale }
             .clickable(interactionSource = interactionSource, indication = null) {
-                val queue = viewModel.buildQueue(video)
-                onClick(queue)
+                onClick(viewModel.buildQueue(video))
             },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
@@ -431,8 +434,7 @@ private fun VideoGridItem(
             .fillMaxWidth()
             .graphicsLayer { scaleX = scale; scaleY = scale }
             .clickable(interactionSource = interactionSource, indication = null) {
-                val queue = viewModel.buildQueue(video)
-                onClick(queue)
+                onClick(viewModel.buildQueue(video))
             },
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),

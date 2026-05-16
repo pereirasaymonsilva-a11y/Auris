@@ -60,6 +60,9 @@ class VideoGalleryViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(GalleryUiState())
     val uiState: StateFlow<GalleryUiState> = _uiState.asStateFlow()
 
+    // Lista mutável interna para atualizações eficientes
+    private var _allVideos = mutableListOf<VideoItem>()
+
     private var previousContext: QueueContext = QueueContext.ALL
     private var wasInFoldersMode: Boolean = false
 
@@ -69,24 +72,20 @@ class VideoGalleryViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                // Busca vídeos do MediaStore
                 val rawVideos = withContext(Dispatchers.IO) { fetchAllVideos() }
-                
-                // Busca viewCounts salvos no banco
-                val viewCountMap = withContext(Dispatchers.IO) { 
-                    viewCountRepository.getAllViewCountsFlow().first() 
+                val viewCountMap = withContext(Dispatchers.IO) {
+                    viewCountRepository.getAllViewCountsFlow().first()
                 }
-                
-                // Combina os dados
                 val videosWithCounts = rawVideos.map { video ->
                     video.copy(viewCount = viewCountMap[video.id] ?: 0)
                 }
-                
+                _allVideos = videosWithCounts.toMutableList()
+
                 val folders = VideoUtils.extractFolders(videosWithCounts)
-                _uiState.update { state ->
-                    state.copy(
+                _uiState.update {
+                    it.copy(
                         allVideos = videosWithCounts,
-                        filteredVideos = applySortAndContext(videosWithCounts, state.currentContext, state.sortMode),
+                        filteredVideos = applySortAndContext(videosWithCounts, it.currentContext, it.sortMode),
                         folders = folders,
                         isLoading = false
                     )
@@ -131,28 +130,6 @@ class VideoGalleryViewModel @Inject constructor(
         }
     }
 
-    // ==================== INCREMENTAR VIEWCOUNT (OTIMIZADO E PERSISTENTE) ====================
-    fun incrementViewCount(videoId: Long) {
-        viewModelScope.launch {
-            // 1. Atualiza no banco de dados (em segundo plano)
-            viewCountRepository.incrementViewCount(videoId)
-            
-            // 2. Atualiza em memória de forma eficiente (apenas o item clicado)
-            _uiState.update { state ->
-                val updatedList = state.allVideos.map { video ->
-                    if (video.id == videoId) video.copy(viewCount = video.viewCount + 1)
-                    else video
-                }
-                state.copy(
-                    allVideos = updatedList,
-                    filteredVideos = applySortAndContext(updatedList, state.currentContext, state.sortMode)
-                )
-            }
-        }
-    }
-    // =======================================================================================
-
-    // ==================== NAVEGAÇÃO EM PASTAS (CORRIGIDA) ====================
     fun enterFolder(folderPath: String) {
         previousContext = _uiState.value.currentContext
         wasInFoldersMode = _uiState.value.showFoldersOnly
@@ -169,7 +146,6 @@ class VideoGalleryViewModel @Inject constructor(
 
     fun exitFolder() {
         if (wasInFoldersMode) {
-            // Retorna para a lista de pastas
             _uiState.update { state ->
                 state.copy(
                     currentContext = QueueContext.ALL,
@@ -180,7 +156,6 @@ class VideoGalleryViewModel @Inject constructor(
             }
             loadFolders()
         } else {
-            // Restaura o contexto anterior (ALL ou RECENT)
             val restoredContext = previousContext
             _uiState.update { state ->
                 state.copy(
@@ -192,7 +167,6 @@ class VideoGalleryViewModel @Inject constructor(
             }
         }
     }
-    // =========================================================================
 
     fun buildQueue(clickedVideo: VideoItem? = null): VideoQueue {
         val state = _uiState.value
@@ -206,7 +180,35 @@ class VideoGalleryViewModel @Inject constructor(
         else VideoQueueManager.build(state.currentContext, sourceVideos)
     }
 
-    // ==================== MÉTODOS AUXILIARES ====================
+    fun incrementViewCount(videoId: Long) {
+        viewModelScope.launch {
+            viewCountRepository.incrementViewCount(videoId)
+            val index = _allVideos.indexOfFirst { it.id == videoId }
+            if (index != -1) {
+                val old = _allVideos[index]
+                _allVideos[index] = old.copy(viewCount = old.viewCount + 1)
+                _uiState.update { state ->
+                    state.copy(
+                        allVideos = _allVideos,
+                        filteredVideos = applySortAndContext(_allVideos, state.currentContext, state.sortMode)
+                    )
+                }
+            }
+        }
+    }
+
+    fun getFeaturedVideo(): VideoItem? {
+        val state = _uiState.value
+        val sourceVideos = when (state.currentContext) {
+            QueueContext.ALL -> state.allVideos
+            QueueContext.RECENT -> state.allVideos.filter { isRecent(it.dateAddedMs) }
+            else -> state.allVideos
+        }
+        if (sourceVideos.isEmpty()) return null
+        val maxView = sourceVideos.maxByOrNull { it.viewCount }
+        return if (maxView?.viewCount == 0) sourceVideos.maxByOrNull { it.dateAddedMs } else maxView
+    }
+
     private fun applySortAndContext(videos: List<VideoItem>, context: QueueContext, mode: SortMode): List<VideoItem> {
         val base = when (context) {
             QueueContext.ALL -> videos
@@ -215,7 +217,7 @@ class VideoGalleryViewModel @Inject constructor(
             QueueContext.SEARCH -> videos
         }
         return if (context == QueueContext.RECENT) {
-            base.sortedByDescending { it.dateAddedMs } // Recente sempre por data
+            base.sortedByDescending { it.dateAddedMs }
         } else {
             applySort(base, mode)
         }
@@ -236,22 +238,6 @@ class VideoGalleryViewModel @Inject constructor(
         val now = System.currentTimeMillis()
         val sevenDaysAgo = now - (7L * 24 * 60 * 60 * 1000)
         return dateAddedMs > sevenDaysAgo
-    }
-
-    fun getFeaturedVideo(): VideoItem? {
-        val state = _uiState.value
-        val sourceVideos = when (state.currentContext) {
-            QueueContext.ALL -> state.allVideos
-            QueueContext.RECENT -> state.allVideos.filter { isRecent(it.dateAddedMs) }
-            else -> state.allVideos
-        }
-        if (sourceVideos.isEmpty()) return null
-        val maxView = sourceVideos.maxByOrNull { it.viewCount }
-        return if (maxView?.viewCount == 0) {
-            sourceVideos.maxByOrNull { it.dateAddedMs }
-        } else {
-            maxView
-        }
     }
 
     private suspend fun fetchAllVideos(): List<VideoItem> {
@@ -284,14 +270,14 @@ class VideoGalleryViewModel @Inject constructor(
                 videos.add(VideoItem(
                     id = id,
                     title = cursor.getString(nameCol) ?: "Desconhecido",
-                    path = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id).toString(),
+                    path = path,
                     durationMs = cursor.getLong(durCol),
                     resolution = if (width > 0 && height > 0) "${width}x${height}" else "",
                     sizeBytes = cursor.getLong(sizeCol),
                     folderPath = path.substringBeforeLast("/", ""),
                     dateAddedMs = cursor.getLong(dateCol) * 1000L,
                     width = width, height = height,
-                    viewCount = 0 // será substituído pelo banco
+                    viewCount = 0
                 ))
             }
         }
