@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -50,19 +52,15 @@ import java.io.File
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-// ==================== CORES DA MARCA AURIS ====================
+// Cores da marca
 object AurisBrand {
     val primary = Color(0xFF00E5B2)
     val primaryDark = Color(0xFF00997A)
     val glow = primary.copy(alpha = 0.4f)
     val glowStrong = primary.copy(alpha = 0.7f)
-    val surfaceGlow = Brush.radialGradient(
-        colors = listOf(glow, Color.Transparent),
-        radius = 0.8f
-    )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoGalleryScreen(
     onOpenPlayerWithQueue: (VideoQueue) -> Unit,
@@ -98,9 +96,7 @@ fun VideoGalleryScreen(
     }
 
     if (!hasPermission) {
-        PermissionScreen(
-            onRequest = { permissionLauncher.launch(permission) }
-        )
+        PermissionScreen(onRequest = { permissionLauncher.launch(permission) })
     } else {
         Scaffold(
             topBar = {
@@ -172,53 +168,23 @@ fun VideoGalleryScreen(
     }
 }
 
-// ==================== TELA DE PERMISSÃO ====================
+// Tela de permissão
 @Composable
 private fun PermissionScreen(onRequest: () -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Card(
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            ),
-            modifier = Modifier
-                .padding(24.dp)
-                .fillMaxWidth()
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+            modifier = Modifier.padding(24.dp).fillMaxWidth()
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(24.dp)
-            ) {
-                Icon(
-                    Icons.FolderSpecial,
-                    contentDescription = null,
-                    modifier = Modifier.size(56.dp),
-                    tint = AurisBrand.primary
-                )
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+                Icon(Icons.Filled.Folder, contentDescription = null, modifier = Modifier.size(56.dp), tint = AurisBrand.primary)
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.gallery_permission_title),
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Text(stringResource(R.string.gallery_permission_title), fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.gallery_permission_message),
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
+                Text(stringResource(R.string.gallery_permission_message), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 Spacer(modifier = Modifier.height(24.dp))
-                Button(
-                    onClick = onRequest,
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = AurisBrand.primary)
-                ) {
+                Button(onClick = onRequest, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = AurisBrand.primary)) {
                     Text(stringResource(R.string.gallery_permission_button), color = Color.Black)
                 }
             }
@@ -226,8 +192,8 @@ private fun PermissionScreen(onRequest: () -> Unit) {
     }
 }
 
-// ==================== TOP BAR (FLOATING + BLUR) ====================
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+// TopBar com blur e search
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GalleryTopBar(
     state: GalleryUiState,
@@ -247,11 +213,7 @@ private fun GalleryTopBar(
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
         tonalElevation = 0.dp
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .blur(radius = 0.5.dp)
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             CenterAlignedTopAppBar(
                 title = {
                     if (isInFolder) {
@@ -272,17 +234,13 @@ private fun GalleryTopBar(
                         Icon(Icons.Filled.Sort, contentDescription = stringResource(R.string.gallery_sort))
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.Transparent
-                )
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
 
             OutlinedTextField(
                 value = state.searchQuery,
                 onValueChange = onSearchChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
                 placeholder = { Text(stringResource(R.string.gallery_search_hint)) },
                 leadingIcon = { Icon(Icons.Filled.Search, null) },
                 singleLine = true,
@@ -316,6 +274,7 @@ private fun GalleryTopBar(
     }
 }
 
+// Tabs sem indicator experimental
 @Composable
 private fun ContextTabs(
     current: QueueContext,
@@ -333,14 +292,7 @@ private fun ContextTabs(
     TabRow(
         selectedTabIndex = selectedIndex,
         containerColor = Color.Transparent,
-        divider = { Spacer(Modifier.height(0.dp)) },
-        indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
-                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedIndex]),
-                color = AurisBrand.primary,
-                height = 3.dp
-            )
-        }
+        divider = { Spacer(Modifier.height(0.dp)) }
     ) {
         Tab(
             selected = !showFoldersOnly && current == QueueContext.ALL,
@@ -374,7 +326,7 @@ private fun ContextTabs(
     }
 }
 
-// ==================== FEATURED VIDEO ITEM ====================
+// Featured Video item
 @Composable
 private fun FeaturedVideoItem(
     video: VideoItem,
@@ -383,62 +335,26 @@ private fun FeaturedVideoItem(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.98f else 1f,
-        animationSpec = spring(dampingRatio = 0.5f),
-        label = "featuredScale"
-    )
-    val glowAlpha by animateFloatAsState(
-        targetValue = if (isPressed) 0.8f else 0.2f,
-        animationSpec = tween(200),
-        label = "glowAlpha"
-    )
+    val scale by animateFloatAsState(targetValue = if (isPressed) 0.98f else 1f, animationSpec = spring(dampingRatio = 0.5f))
+    val glowAlpha by animateFloatAsState(targetValue = if (isPressed) 0.8f else 0.2f, animationSpec = tween(200))
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = {
-                    val queue = viewModel.buildQueue(video)
-                    onClick(queue)
-                }
-            ),
+            .clickable(interactionSource = interactionSource, indication = null) {
+                val queue = viewModel.buildQueue(video)
+                onClick(queue)
+            },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isPressed) 12.dp else 4.dp)
     ) {
         Box {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        brush = Brush.radialGradient(
-                            colors = listOf(AurisBrand.glow.copy(alpha = glowAlpha), Color.Transparent),
-                            radius = 0.9f
-                        )
-                    )
-            )
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.3f)),
-                            startY = 0.7f
-                        )
-                    )
-            )
+            Box(Modifier.matchParentSize().background(Brush.radialGradient(listOf(AurisBrand.glow.copy(alpha = glowAlpha), Color.Transparent), radius = 0.9f)))
+            Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.3f)), startY = 0.7f)))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-            ) {
+            Row(modifier = Modifier.fillMaxWidth().height(180.dp)) {
                 Box(modifier = Modifier.weight(0.6f).fillMaxHeight()) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
@@ -450,43 +366,17 @@ private fun FeaturedVideoItem(
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
-                    Box(
-                        modifier = Modifier.fillMaxSize().background(
-                            Brush.horizontalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)))
-                        )
-                    )
-                    CustomPlayIcon(
-                        modifier = Modifier.align(Alignment.Center).size(36.dp),
-                        alpha = if (isPressed) 0.9f else 0.7f
-                    )
+                    Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)))))
+                    CustomPlayIcon(modifier = Modifier.align(Alignment.Center).size(36.dp), alpha = if (isPressed) 0.9f else 0.7f)
                 }
-                Column(
-                    modifier = Modifier
-                        .weight(0.4f)
-                        .fillMaxHeight()
-                        .padding(12.dp),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.gallery_featured),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AurisBrand.primary,
-                        letterSpacing = 0.5.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = video.title,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
+                Column(modifier = Modifier.weight(0.4f).fillMaxHeight().padding(12.dp), verticalArrangement = Arrangement.Center) {
+                    Text(stringResource(R.string.gallery_featured), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = AurisBrand.primary, letterSpacing = 0.5.sp)
+                    Spacer(Modifier.height(4.dp))
+                    Text(video.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Spacer(Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.PlayArrow, null, modifier = Modifier.size(12.dp), tint = AurisBrand.primary)
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(Modifier.width(4.dp))
                         Text(video.durationFormatted, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
@@ -495,7 +385,7 @@ private fun FeaturedVideoItem(
     }
 }
 
-// ==================== CARD DE VÍDEO NORMAL ====================
+// Item de vídeo normal
 @Composable
 private fun VideoGridItem(
     video: VideoItem,
@@ -504,69 +394,40 @@ private fun VideoGridItem(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
-        animationSpec = spring(dampingRatio = 0.5f),
-        label = "scale"
-    )
-    val elevation by animateDpAsState(
-        targetValue = if (isPressed) 8.dp else 2.dp,
-        animationSpec = tween(100),
-        label = "elevation"
-    )
-    val glowAlpha by animateFloatAsState(
-        targetValue = if (isPressed) 0.5f else 0f,
-        animationSpec = tween(150),
-        label = "glowAlpha"
-    )
+    val scale by animateFloatAsState(targetValue = if (isPressed) 0.97f else 1f, animationSpec = spring(dampingRatio = 0.5f))
+    val elevation by animateDpAsState(targetValue = if (isPressed) 8.dp else 2.dp, animationSpec = tween(100))
+    val glowAlpha by animateFloatAsState(targetValue = if (isPressed) 0.5f else 0f, animationSpec = tween(150))
 
-    val isRecent = remember(video) {
+    // Fallback: se não tiver data, não mostra "Novo"
+    val isRecent = run {
         try {
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            val date = LocalDate.parse(video.dateAdded.take(10), formatter)
-            date.isAfter(LocalDate.now().minusDays(7))
-        } catch (_: Exception) { false }
+            val dateStr = video::class.java.getDeclaredField("dateAdded").let { it.isAccessible = true; it.get(video) as? String }
+                ?: video::class.java.getDeclaredField("modificationDate").let { it.isAccessible = true; it.get(video) as? String }
+            if (dateStr != null) {
+                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                val date = LocalDate.parse(dateStr.take(10), formatter)
+                date.isAfter(LocalDate.now().minusDays(7))
+            } else false
+        } catch (e: Exception) {
+            false
+        }
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = {
-                    val queue = viewModel.buildQueue(video)
-                    onClick(queue)
-                }
-            ),
+            .clickable(interactionSource = interactionSource, indication = null) {
+                val queue = viewModel.buildQueue(video)
+                onClick(queue)
+            },
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         elevation = CardDefaults.cardElevation(defaultElevation = elevation)
     ) {
         Box {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        brush = Brush.radialGradient(
-                            colors = listOf(AurisBrand.glow.copy(alpha = glowAlpha), Color.Transparent),
-                            radius = 0.8f
-                        )
-                    )
-            )
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
-                            startY = 0.6f
-                        )
-                    )
-            )
+            Box(Modifier.matchParentSize().background(Brush.radialGradient(listOf(AurisBrand.glow.copy(alpha = glowAlpha), Color.Transparent), radius = 0.8f)))
+            Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)), startY = 0.6f)))
 
             Box(modifier = Modifier.aspectRatio(16f / 9f)) {
                 AsyncImage(
@@ -579,50 +440,16 @@ private fun VideoGridItem(
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-                Box(
-                    modifier = Modifier.fillMaxSize().background(
-                        Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f)))
-                    )
-                )
-                Text(
-                    text = video.durationFormatted,
-                    color = Color.White,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(6.dp)
-                )
-                CustomPlayIcon(
-                    modifier = Modifier.align(Alignment.Center).size(32.dp),
-                    alpha = if (isPressed) 0.9f else 0.7f
-                )
+                Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f)))))
+                Text(video.durationFormatted, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Medium, modifier = Modifier.align(Alignment.BottomEnd).padding(6.dp))
+                CustomPlayIcon(modifier = Modifier.align(Alignment.Center).size(32.dp), alpha = if (isPressed) 0.9f else 0.7f)
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = video.title,
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
+            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(video.title, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                 if (isRecent) {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = AurisBrand.primary.copy(alpha = 0.85f),
-                        contentColor = Color.Black
-                    ) {
-                        Text(
-                            text = stringResource(R.string.gallery_new),
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
+                    Surface(shape = RoundedCornerShape(12.dp), color = AurisBrand.primary.copy(alpha = 0.85f), contentColor = Color.Black) {
+                        Text(stringResource(R.string.gallery_new), fontSize = 8.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                     }
                 }
             }
@@ -630,7 +457,7 @@ private fun VideoGridItem(
     }
 }
 
-// ==================== ÍCONE DE PLAY PERSONALIZADO ====================
+// Ícone de play customizado
 @Composable
 fun CustomPlayIcon(modifier: Modifier = Modifier, alpha: Float = 0.8f) {
     Canvas(modifier = modifier) {
@@ -647,74 +474,36 @@ fun CustomPlayIcon(modifier: Modifier = Modifier, alpha: Float = 0.8f) {
             close()
         }
         drawPath(path, color = Color.White.copy(alpha = alpha))
-        drawCircle(
-            color = AurisBrand.glowStrong.copy(alpha = alpha * 0.5f),
-            radius = width * 0.7f,
-            center = center
-        )
+        drawCircle(color = AurisBrand.glowStrong.copy(alpha = alpha * 0.5f), radius = width * 0.7f, center = Offset(width / 2, height / 2))
     }
 }
 
-// ==================== CARD DE PASTA ====================
+// Folder item
 @Composable
 private fun FolderItem(folder: VideoUtils.FolderInfo, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
-        animationSpec = spring(dampingRatio = 0.5f),
-        label = "folderScale"
-    )
-    val elevation by animateDpAsState(
-        targetValue = if (isPressed) 6.dp else 1.dp,
-        animationSpec = tween(100)
-    )
+    val scale by animateFloatAsState(targetValue = if (isPressed) 0.97f else 1f, animationSpec = spring(dampingRatio = 0.5f))
+    val elevation by animateDpAsState(targetValue = if (isPressed) 6.dp else 1.dp, animationSpec = tween(100))
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+        modifier = Modifier.fillMaxWidth().graphicsLayer { scaleX = scale; scaleY = scale }.clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = elevation)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(12.dp)
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.03f)),
-                        radius = 0.8f
-                    )
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                Icons.Filled.Folder,
-                null,
-                modifier = Modifier.size(42.dp),
-                tint = AurisBrand.primary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                folder.name,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        Column(modifier = Modifier.padding(12.dp).background(Brush.radialGradient(listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.03f)), radius = 0.8f)), horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(Icons.Filled.Folder, null, modifier = Modifier.size(42.dp), tint = AurisBrand.primary)
+            Spacer(Modifier.height(4.dp))
+            Text(folder.name, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text("${folder.videoCount} ${stringResource(R.string.gallery_video_count_suffix)}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
-// ==================== ESTADOS COMUNS ====================
+// Estados
 @Composable
-private fun LoadingState() = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-    CircularProgressIndicator(color = AurisBrand.primary)
-}
+private fun LoadingState() = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = AurisBrand.primary) }
 
 @Composable
 private fun ErrorState(message: String, onRetry: () -> Unit) = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
