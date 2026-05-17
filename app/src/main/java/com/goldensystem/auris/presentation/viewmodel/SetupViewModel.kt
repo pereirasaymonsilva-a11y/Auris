@@ -48,7 +48,10 @@ data class SetupUiState(
     val isInspectingBackup: Boolean = false,
     val isRestoringBackup: Boolean = false,
     val restorePlan: RestorePlan? = null,
-    val backupTransferProgress: BackupTransferProgressUpdate? = null
+    val backupTransferProgress: BackupTransferProgressUpdate? = null,
+    // 🔥 NOVOS CAMPOS PARA LETRAS
+    val lyricsSource: String = "embedded_first",
+    val useAnimatedLyrics: Boolean = true
 ) {
     val allPermissionsGranted: Boolean
         get() {
@@ -78,12 +81,6 @@ class SetupViewModel @Inject constructor(
     private val _events = MutableSharedFlow<SetupEvent>()
     val events = _events.asSharedFlow()
     
-    /**
-     * Expose sync progress for UI to show during initial setup
-     */
-    /**
-     * Expose sync progress for UI to show during initial setup
-     */
     val isSyncing = syncManager.isSyncing
 
     private val fileExplorerStateHolder = FileExplorerStateHolder(userPreferencesRepository, viewModelScope, context)
@@ -107,7 +104,6 @@ class SetupViewModel @Inject constructor(
             }
         }
 
-        // Consolidated collectors using combine() to reduce coroutine overhead
         viewModelScope.launch {
             combine(
                 userPreferencesRepository.blockedDirectoriesFlow,
@@ -144,29 +140,25 @@ class SetupViewModel @Inject constructor(
         val radius: Int,
         val appThemeMode: String
     )
-    
-    fun setLyricsSource(source: String) {
-    val preference = when (source) {
-        "embedded_first" -> LyricsSourcePreference.EMBEDDED_FIRST
-        "online_first" -> LyricsSourcePreference.API_FIRST
-        else -> LyricsSourcePreference.EMBEDDED_FIRST
-    }
-    viewModelScope.launch {
-        userPreferencesRepository.setLyricsSourcePreference(preference)
-    }
-}
 
+    // ==================== FUNÇÕES DAS LETRAS (APENAS UMA VEZ CADA) ====================
     fun setLyricsSource(source: String) {
-    viewModelScope.launch {
-        userPreferencesRepository.setLyricsSourcePreference(source)
+        viewModelScope.launch {
+            val preference = when (source) {
+                "embedded_first" -> LyricsSourcePreference.EMBEDDED_FIRST
+                "online_first"   -> LyricsSourcePreference.API_FIRST
+                else              -> LyricsSourcePreference.EMBEDDED_FIRST
+            }
+            userPreferencesRepository.setLyricsSourcePreference(preference)
+        }
     }
-}
 
     fun setUseAnimatedLyrics(enabled: Boolean) {
-    viewModelScope.launch {
-        userPreferencesRepository.setUseAnimatedLyrics(enabled)
+        viewModelScope.launch {
+            userPreferencesRepository.setUseAnimatedLyrics(enabled)
+        }
     }
-}
+    // ==============================================================================
 
     fun checkPermissions(context: Context) {
         val mediaPermissionGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -178,7 +170,7 @@ class SetupViewModel @Inject constructor(
         val notificationsPermissionGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         } else {
-            true // Not required before Android 13 (Tiramisu)
+            true
         }
 
         val alarmsPermissionGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -199,10 +191,6 @@ class SetupViewModel @Inject constructor(
 
     fun loadMusicDirectories() {
         viewModelScope.launch {
-            if (!userPreferencesRepository.initialSetupDoneFlow.first()) {
-                // Blacklist model: default is allow all, so no setup needed.
-            }
-
             userPreferencesRepository.blockedDirectoriesFlow.first().let { blocked ->
                 _uiState.update { it.copy(blockedDirectories = blocked) }
             }
@@ -288,10 +276,6 @@ class SetupViewModel @Inject constructor(
         }
     }
     
-    /**
-     * Retry the initial sync if it failed.
-     * Can be called from UI when user wants to retry after a failure.
-     */
     fun retrySync() {
         viewModelScope.launch {
             syncManager.fullSync()
@@ -418,21 +402,4 @@ class SetupViewModel @Inject constructor(
             syncManager.fullSync()
         }
     }
-    
-    fun setLyricsSource(source: String) {
-    viewModelScope.launch {
-        val preference = when (source) {
-            "embedded_first" -> LyricsSourcePreference.EMBEDDED_FIRST
-            "online_first"   -> LyricsSourcePreference.API_FIRST
-            else              -> LyricsSourcePreference.EMBEDDED_FIRST
-        }
-        userPreferencesRepository.setLyricsSourcePreference(preference)
-        }
-      }
-
-    fun setUseAnimatedLyrics(enabled: Boolean) {
-    viewModelScope.launch {
-        userPreferencesRepository.setUseAnimatedLyrics(enabled)
-         }
-       }
 }
