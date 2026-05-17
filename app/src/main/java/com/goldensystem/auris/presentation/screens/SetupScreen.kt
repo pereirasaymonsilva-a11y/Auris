@@ -931,7 +931,7 @@ fun BackupRestorePage(
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            LoadingIndicator(modifier = Modifier.size(20.dp))
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp))
                             Text(
                                 text = stringResource(R.string.setup_checking_backup),
                                 style = MaterialTheme.typography.bodyMedium,
@@ -1689,7 +1689,7 @@ private fun SetupRestoreDialog(
                                     .height(52.dp)
                             ) {
                                 if (inProgress) {
-                                    LoadingIndicator(modifier = Modifier.size(18.dp))
+                                    CircularProgressIndicator(modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(stringResource(R.string.restoring))
                                 } else {
@@ -2490,7 +2490,7 @@ fun NavBarLayoutPage(
                                      contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                  )
                              ) {
-                                 Icon(Icons.Rounded.RoundedCorner, contentDescription = null, modifier = Modifier.size(18.dp))
+                                 Icon(Icons.Rounded.Crop, contentDescription = null, modifier = Modifier.size(18.dp))
                                  Spacer(modifier = Modifier.width(8.dp))
                                  Text(stringResource(R.string.customize_corner_radius))
                              }
