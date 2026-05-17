@@ -115,21 +115,32 @@ class SetupViewModel @Inject constructor(
             }
         }
 
-        // COMBINE AGORA INCLUI AS FLOWS DE LETRAS
+        // COMBINE CORRETO PARA 7 FLOWS USANDO LISTA
         viewModelScope.launch {
             combine(
-                userPreferencesRepository.blockedDirectoriesFlow,
-                userPreferencesRepository.libraryNavigationModeFlow,
-                userPreferencesRepository.navBarStyleFlow,
-                userPreferencesRepository.navBarCornerRadiusFlow,
-                themePreferencesRepository.appThemeModeFlow,
-                userPreferencesRepository.lyricsSourcePreferenceFlow,
-                userPreferencesRepository.useAnimatedLyricsFlow
-            ) { blocked, mode, style, radius, appThemeMode, lyricsSourcePref, useAnimated ->
+                listOf(
+                    userPreferencesRepository.blockedDirectoriesFlow,
+                    userPreferencesRepository.libraryNavigationModeFlow,
+                    userPreferencesRepository.navBarStyleFlow,
+                    userPreferencesRepository.navBarCornerRadiusFlow,
+                    themePreferencesRepository.appThemeModeFlow,
+                    userPreferencesRepository.lyricsSourcePreferenceFlow,
+                    userPreferencesRepository.useAnimatedLyricsFlow
+                )
+            ) { values ->
+                val blocked = values[0] as Set<String>
+                val mode = values[1] as String
+                val style = values[2] as String
+                val radius = values[3] as Int
+                val appThemeMode = values[4] as String
+                val lyricsSourcePref = values[5] as LyricsSourcePreference
+                val useAnimated = values[6] as Boolean
+
                 val lyricsSourceStr = when (lyricsSourcePref) {
                     LyricsSourcePreference.EMBEDDED_FIRST -> "embedded_first"
                     LyricsSourcePreference.API_FIRST -> "online_first"
                 }
+
                 SetupPrefsUpdate(
                     blocked = blocked,
                     mode = mode,
