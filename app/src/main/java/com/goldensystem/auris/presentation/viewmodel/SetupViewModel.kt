@@ -139,8 +139,8 @@ class SetupViewModel @Inject constructor(
                 val lyricsSourceStr = when (lyricsSourcePref) {
                     LyricsSourcePreference.EMBEDDED_FIRST -> "embedded_first"
                     LyricsSourcePreference.API_FIRST -> "online_first"
-                }
-
+                    LyricsSourcePreference.LOCAL_FIRST -> "local_first"
+                                      }
                 SetupPrefsUpdate(
                     blocked = blocked,
                     mode = mode,
