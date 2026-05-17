@@ -1,5 +1,26 @@
 package com.goldensystem.auris.presentation.screens
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.goldensystem.auris.data.model.SyncedLine
+import com.goldensystem.auris.presentation.components.SyncedLyricsList
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -2202,21 +2223,14 @@ fun SetupBottomBar(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun LyricsSetupPage(
     uiState: SetupUiState,
-    onLyricsSourceChanged: (String) -> Unit,
+    onLyricsSourceChanged: (String) -> Unit, // mantido para compatibilidade
     onAnimatedLyricsChanged: (Boolean) -> Unit,
     onSkip: () -> Unit
 ) {
-    val lyricsIcons = persistentListOf(
-        R.drawable.rounded_lyrics_24,
-        R.drawable.rounded_music_note_24,
-        R.drawable.rounded_playlist_play_24,
-        R.drawable.rounded_album_24,
-        R.drawable.rounded_mic_24
-    )
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
@@ -2224,6 +2238,7 @@ fun LyricsSetupPage(
             .fillMaxSize()
             .padding(24.dp)
     ) {
+        // Título e subtítulo
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -2243,61 +2258,21 @@ fun LyricsSetupPage(
             )
         }
 
+        // PRÉ-VISUALIZAÇÃO IDÊNTICA À TELA DE LETRAS DO PLAYER
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            PermissionIconCollage(
-                modifier = Modifier.height(200.dp),
-                icons = lyricsIcons
-            )
+            LyricsSetupPreview(animated = uiState.useAnimatedLyrics)
         }
 
+        // Controles
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Opção 1: Fonte das letras (Embedded/Online)
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                ),
-                shape = RoundedCornerShape(24.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.setup_lyrics_source_label),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stringResource(R.string.setup_lyrics_source_description),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    // Aqui você pode adicionar um seletor (dropdown ou switch)
-                    // Por enquanto, apenas um placeholder
-                    Text(
-                        text = "Online > Local",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Opção 2: Letras animadas
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -2337,6 +2312,92 @@ fun LyricsSetupPage(
             }
         }
     }
+}
+
+@Composable
+private fun LyricsSetupPreview(animated: Boolean) {
+    // Dados de exemplo – 5 linhas (pode ser substituído por strings.xml depois)
+    val exampleSyncedLines = listOf(
+             SyncedLine(time = 0, line = stringResource(R.string.lyrics_preview_line_1)),
+             SyncedLine(time = 1000, line = stringResource(R.string.lyrics_preview_line_2)),
+             SyncedLine(time = 2000, line = stringResource(R.string.lyrics_preview_line_3)),
+             SyncedLine(time = 3000, line = stringResource(R.string.lyrics_preview_line_4)),
+             SyncedLine(time = 4000, line = stringResource(R.string.lyrics_preview_line_5))
+                                  )
+    // Simula a posição de reprodução dentro da linha atual (terceira linha, índice 2)
+    var playbackPosition by remember { mutableStateOf(2500L) }
+    val currentLineIndex = resolveCurrentLineIndex(exampleSyncedLines, playbackPosition)
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = currentLineIndex.coerceAtLeast(0))
+    val highlightColor = MaterialTheme.colorScheme.primary
+    val baseColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+
+    // Animação da posição para demonstrar rolagem automática
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(2000)
+            playbackPosition = (playbackPosition + 1000) % 5000
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp)
+            .clip(RoundedCornerShape(28.dp))
+            .background(containerColor)
+    ) {
+        SyncedLyricsList(
+            lines = exampleSyncedLines,
+            listState = listState,
+            playbackPositionFlow = MutableStateFlow(playbackPosition).asStateFlow(),
+            lyricsSyncOffset = 0,
+            positionOverrideMs = null,
+            accentColor = highlightColor,
+            textStyle = MaterialTheme.typography.bodyLarge,
+            onLineClick = {},
+            highlightZoneFraction = 0.08f,
+            highlightOffsetDp = 32.dp,
+            autoscrollAnimationSpec = tween(300),
+            useAnimatedLyrics = animated,
+            animatedLyricsBlurEnabled = true,
+            animatedLyricsBlurStrength = 2.5f,
+            immersiveMode = false,
+            lyricsAlignment = "center",
+            showTranslation = false,
+            showRomanization = false,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(top = 70.dp, bottom = 70.dp, start = 24.dp, end = 24.dp)
+        )
+
+        // Barra de progresso (idêntica à do player)
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(bottom = 16.dp, start = 24.dp, end = 24.dp)
+        ) {
+            LinearProgressIndicator(
+                progress = 0.65f,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp)),
+                color = highlightColor,
+                trackColor = baseColor.copy(alpha = 0.3f)
+            )
+        }
+    }
+}
+
+// Função auxiliar – resolve a linha atual baseada na posição
+private fun resolveCurrentLineIndex(lines: List<SyncedLine>, position: Long): Int {
+    if (lines.isEmpty()) return -1
+    return lines.withIndex().lastOrNull { (index, line) ->
+        val nextTime = lines.getOrNull(index + 1)?.time ?: Int.MAX_VALUE
+        val lineEndTime = if (nextTime == Int.MAX_VALUE) Long.MAX_VALUE else nextTime.toLong()
+        position in line.time.toLong()..<lineEndTime
+    }?.index ?: -1
 }
 
 @OptIn(ExperimentalAnimationApi::class)

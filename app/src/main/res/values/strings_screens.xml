@@ -4,6 +4,13 @@
     <string name="nav_error_genre_id_missing">Error: Genre ID missing</string>
     <string name="easter_egg_thank_you">Thank you for using Auris!</string>
 
+<!-- Lyrics - example lines for the preview in the setup screen -->
+    <string name="lyrics_preview_line_1">Lyrics look like this</string>
+    <string name="lyrics_preview_line_2">Thank you for using Auris</string>
+    <string name="lyrics_preview_line_3">Auris is completely free</string>
+    <string name="lyrics_preview_line_4">HUNNN Lyrics... BUMM</string>
+    <string name="lyrics_preview_line_5">Do not download Auris from unknown sources</string>
+
     <!-- Word delimiter config -->
     <string name="word_delimiter_section_title">Current Word Delimiters</string>
     <string name="word_delimiter_section_subtitle">These keywords split artist names when surrounded by spaces. Matches case‑insensitively. Tap to remove.</string>
