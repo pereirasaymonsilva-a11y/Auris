@@ -1,6 +1,7 @@
 package com.goldensystem.auris.presentation.viewmodel
 
 import android.Manifest
+import com.goldensystem.auris.data.model.LyricsSourcePreference
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -417,4 +418,21 @@ class SetupViewModel @Inject constructor(
             syncManager.fullSync()
         }
     }
+    
+    fun setLyricsSource(source: String) {
+    viewModelScope.launch {
+        val preference = when (source) {
+            "embedded_first" -> LyricsSourcePreference.EMBEDDED_FIRST
+            "online_first"   -> LyricsSourcePreference.API_FIRST
+            else              -> LyricsSourcePreference.EMBEDDED_FIRST
+        }
+        userPreferencesRepository.setLyricsSourcePreference(preference)
+        }
+      }
+
+    fun setUseAnimatedLyrics(enabled: Boolean) {
+    viewModelScope.launch {
+        userPreferencesRepository.setUseAnimatedLyrics(enabled)
+         }
+       }
 }

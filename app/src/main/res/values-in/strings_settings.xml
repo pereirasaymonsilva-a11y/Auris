@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<string name="setup_lyrics_title">Lirik lagu</string>
+<string name="setup_lyrics_subtitle">Sesuaikan tampilan lirik saat pemutaran</string>
+<string name="setup_lyrics_source_label">Sumber lirik</string>
+<string name="setup_lyrics_source_description">Lebih suka lirik tersemat atau cari daring?</string>
+<string name="setup_lyrics_source_embedded">Tersemat dalam file</string>
+<string name="setup_lyrics_source_online">Cari daring terlebih dahulu</string>
+<string name="setup_animated_lyrics_label">Lirik animasi</string>
+<string name="setup_animated_lyrics_description">Animasi halus saat menampilkan lirik</string>
     <!-- Main settings screen -->
     <string name="settings_top_bar_title">Pengaturan</string>
     <string name="settings_accounts_row_title">Akun</string>

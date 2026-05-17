@@ -2,11 +2,13 @@
 <resources>
      <!-- Tela de letras no welcome -->
     <string name="setup_lyrics_title">Letras das músicas</string>
-    <string name="setup_lyrics_subtitle">Personalize como as letras aparecem durante a reprodução</string>
-    <string name="setup_lyrics_source_label">Fonte das letras</string>
-    <string name="setup_lyrics_source_description">Prefere letras embutidas no arquivo ou buscar online?</string>
-    <string name="setup_animated_lyrics_label">Letras animadas</string>
-    <string name="setup_animated_lyrics_description">Animações suaves durante a exibição das letras</string>
+<string name="setup_lyrics_subtitle">Personalize como as letras aparecem durante a reprodução</string>
+<string name="setup_lyrics_source_label">Fonte das letras</string>
+<string name="setup_lyrics_source_description">Prefere letras embutidas no arquivo ou buscar online?</string>
+<string name="setup_lyrics_source_embedded">Embutidas no arquivo</string>
+<string name="setup_lyrics_source_online">Buscar online primeiro</string>
+<string name="setup_animated_lyrics_label">Letras animadas</string>
+<string name="setup_animated_lyrics_description">Animações suaves durante a exibição das letras</string>
 
     <!-- Navigation / misc -->
     <string name="nav_error_genre_id_missing">Erro: ID do gênero ausente</string>

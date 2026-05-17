@@ -444,20 +444,6 @@ fun SetupScreen(
     }
 }
 
-fun setLyricsSource(source: String) {
-    _uiState.update { it.copy(lyricsSource = source) }
-    viewModelScope.launch {
-        userPreferencesRepository.setLyricsSourcePreference(source)
-    }
-}
-
-fun setUseAnimatedLyrics(enabled: Boolean) {
-    _uiState.update { it.copy(useAnimatedLyrics = enabled) }
-    viewModelScope.launch {
-        userPreferencesRepository.setUseAnimatedLyrics(enabled)
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DirectorySelectionPage(

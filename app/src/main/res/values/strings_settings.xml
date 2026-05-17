@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<string name="setup_lyrics_title">Song lyrics</string>
+<string name="setup_lyrics_subtitle">Customize how lyrics are displayed during playback</string>
+<string name="setup_lyrics_source_label">Lyrics source</string>
+<string name="setup_lyrics_source_description">Prefer embedded lyrics or fetch online?</string>
+<string name="setup_lyrics_source_embedded">Embedded in file</string>
+<string name="setup_lyrics_source_online">Search online first</string>
+<string name="setup_animated_lyrics_label">Animated lyrics</string>
+<string name="setup_animated_lyrics_description">Smooth animations while displaying lyrics</string>
     <!-- Main settings screen -->
     <string name="settings_top_bar_title">Settings</string>
     <string name="settings_accounts_row_title">Accounts</string>
