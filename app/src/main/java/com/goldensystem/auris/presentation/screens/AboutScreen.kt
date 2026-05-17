@@ -110,14 +110,14 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import timber.log.Timber
 import kotlin.math.roundToInt
 
-// ---------- Dados de Contribuidores ----------
+// ---------- Dados de Contribuidores (agora com String) ----------
 
 private data class Contributor(
     val id: String,
-    val displayNameRes: Int,  // R.string.xxx
-    val roleRes: Int,
-    val detailRes: Int? = null,
-    val badgeRes: Int? = null,
+    val displayName: String,
+    val role: String,
+    val detail: String? = null,
+    val badge: String? = null,
     val avatarUrl: String? = null,
     val iconRes: Int? = null,
     val githubUrl: String? = null,
@@ -125,59 +125,7 @@ private data class Contributor(
     val contributions: Int? = null,
 )
 
-private val CoreMaintainer = Contributor(
-    id = "theovilardo",
-    displayNameRes = R.string.contributor_theo_display_name,
-    roleRes = R.string.contributor_theo_role,
-    detailRes = R.string.contributor_theo_detail,
-    avatarUrl = "https://avatars.githubusercontent.com/u/26845343?v=4",
-    iconRes = R.drawable.round_developer_board_24,
-    githubUrl = "https://github.com/theovilardo",
-    telegramUrl = "https://t.me/thevelopersupport",
-)
-
-private val AurisMaintainer = Contributor(
-    id = "pereirasaymonsilva-a11y",
-    displayNameRes = R.string.contributor_auris_display_name,
-    roleRes = R.string.contributor_auris_role,
-    detailRes = R.string.contributor_auris_detail,
-    avatarUrl = "https://avatars.githubusercontent.com/u/255678043?v=4&size=64",
-    iconRes = R.drawable.ic_music_placeholder,
-    githubUrl = "https://github.com/pereirasaymonsilva-a11y",
-    telegramUrl = "about.scream",
-)
-
-private val PinnedCommunityMembers = listOf(
-    Contributor(
-        id = "lostf1sh",
-        displayNameRes = R.string.contributor_lostf1sh_display_name,
-        roleRes = R.string.contributor_lostf1sh_role,
-        detailRes = R.string.contributor_lostf1sh_detail,
-        badgeRes = R.string.contributor_lostf1sh_badge,
-        iconRes = R.drawable.rounded_celebration_24,
-        githubUrl = "https://github.com/lostf1sh",
-    ),
-    Contributor(
-        id = "cromaguy",
-        displayNameRes = R.string.contributor_cromaguy_display_name,
-        roleRes = R.string.contributor_cromaguy_role,
-        detailRes = R.string.contributor_cromaguy_detail,
-        badgeRes = R.string.contributor_cromaguy_badge,
-        iconRes = R.drawable.round_developer_board_24,
-        githubUrl = "https://github.com/cromaguy",
-    ),
-    Contributor(
-        id = "colbycabrera",
-        displayNameRes = R.string.contributor_colby_display_name,
-        roleRes = R.string.contributor_colby_role,
-        detailRes = R.string.contributor_colby_detail,
-        badgeRes = R.string.contributor_colby_badge,
-        iconRes = R.drawable.round_newspaper_24,
-        githubUrl = "https://github.com/ColbyCabrera",
-    ),
-)
-
-private val PinnedAliases = mapOf(
+private val pinnedAliases = mapOf(
     "cromaguy" to setOf("chroma"),
 )
 
@@ -203,6 +151,60 @@ fun AboutScreen(
         "N/A"
     }
 
+    // ---------- Dados dos mantenedores e membros fixos (resolvidos com stringResource) ----------
+    val coreMaintainer = Contributor(
+        id = "theovilardo",
+        displayName = stringResource(R.string.contributor_theo_display_name),
+        role = stringResource(R.string.contributor_theo_role),
+        detail = stringResource(R.string.contributor_theo_detail),
+        avatarUrl = "https://avatars.githubusercontent.com/u/26845343?v=4",
+        iconRes = R.drawable.round_developer_board_24,
+        githubUrl = "https://github.com/theovilardo",
+        telegramUrl = "https://t.me/thevelopersupport",
+    )
+
+    val aurisMaintainer = Contributor(
+        id = "pereirasaymonsilva-a11y",
+        displayName = stringResource(R.string.contributor_auris_display_name),
+        role = stringResource(R.string.contributor_auris_role),
+        detail = stringResource(R.string.contributor_auris_detail),
+        avatarUrl = "https://avatars.githubusercontent.com/u/255678043?v=4&size=64",
+        iconRes = R.drawable.ic_music_placeholder,
+        githubUrl = "https://github.com/pereirasaymonsilva-a11y",
+        telegramUrl = "about.scream",
+    )
+
+    val pinnedCommunityMembers = listOf(
+        Contributor(
+            id = "lostf1sh",
+            displayName = stringResource(R.string.contributor_lostf1sh_display_name),
+            role = stringResource(R.string.contributor_lostf1sh_role),
+            detail = stringResource(R.string.contributor_lostf1sh_detail),
+            badge = stringResource(R.string.contributor_lostf1sh_badge),
+            iconRes = R.drawable.rounded_celebration_24,
+            githubUrl = "https://github.com/lostf1sh",
+        ),
+        Contributor(
+            id = "cromaguy",
+            displayName = stringResource(R.string.contributor_cromaguy_display_name),
+            role = stringResource(R.string.contributor_cromaguy_role),
+            detail = stringResource(R.string.contributor_cromaguy_detail),
+            badge = stringResource(R.string.contributor_cromaguy_badge),
+            iconRes = R.drawable.round_developer_board_24,
+            githubUrl = "https://github.com/cromaguy",
+        ),
+        Contributor(
+            id = "colbycabrera",
+            displayName = stringResource(R.string.contributor_colby_display_name),
+            role = stringResource(R.string.contributor_colby_role),
+            detail = stringResource(R.string.contributor_colby_detail),
+            badge = stringResource(R.string.contributor_colby_badge),
+            iconRes = R.drawable.round_newspaper_24,
+            githubUrl = "https://github.com/ColbyCabrera",
+        ),
+    )
+
+    // ---------- Busca de contribuidores do GitHub ----------
     var contributors by remember { mutableStateOf<List<Contributor>>(emptyList()) }
     var isLoadingContributors by remember { mutableStateOf(true) }
     val githubService = remember { GitHubContributorService() }
@@ -212,7 +214,7 @@ fun AboutScreen(
             val result = githubService.fetchContributors()
             result.onSuccess { githubContributors ->
                 contributors = githubContributors
-                    .filter { normalizeHandle(it.login) != CoreMaintainer.id }
+                    .filter { normalizeHandle(it.login) != coreMaintainer.id }
                     .map { github ->
                         Contributor(
                             id = normalizeHandle(github.login),
@@ -239,9 +241,9 @@ fun AboutScreen(
     }
 
     val spotlightContributors = remember(contributorsById) {
-        PinnedCommunityMembers.map { pinned ->
+        pinnedCommunityMembers.map { pinned ->
             val primaryMatch = contributorsById[pinned.id]
-            val aliasMatch = PinnedAliases[pinned.id]
+            val aliasMatch = pinnedAliases[pinned.id]
                 ?.firstNotNullOfOrNull { alias -> contributorsById[alias] }
             val match = primaryMatch ?: aliasMatch
 
@@ -259,10 +261,10 @@ fun AboutScreen(
 
     val excludedIds = remember(spotlightContributors) {
         buildSet {
-            add(CoreMaintainer.id)
+            add(coreMaintainer.id)
             spotlightContributors.forEach { spotlight ->
                 add(spotlight.id)
-                addAll(PinnedAliases[spotlight.id].orEmpty())
+                addAll(pinnedAliases[spotlight.id].orEmpty())
             }
         }
     }
@@ -271,6 +273,7 @@ fun AboutScreen(
         contributors.filterNot { it.id in excludedIds }
     }
 
+    // ---------- Animações de entrada ----------
     val transitionState = remember { MutableTransitionState(false) }
     LaunchedEffect(Unit) {
         transitionState.targetState = true
@@ -473,25 +476,25 @@ fun AboutScreen(
 
             item(key = "maintainer_card") {
                 ContributorCard(
-                    contributor = CoreMaintainer,
+                    contributor = coreMaintainer,
                     shape = expressiveListShape(index = 0, count = 1),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     showContributionCount = false,
-                    onCardClick = CoreMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
+                    onCardClick = coreMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
                 )
             }
 
             item(key = "auris_maintainer_card") {
                 ContributorCard(
-                    contributor = AurisMaintainer,
+                    contributor = aurisMaintainer,
                     shape = expressiveListShape(index = 0, count = 1),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     showContributionCount = false,
-                    onCardClick = AurisMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
+                    onCardClick = aurisMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
                 )
             }
 
