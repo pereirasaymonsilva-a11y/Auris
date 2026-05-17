@@ -384,13 +384,12 @@ fun SetupScreen(
                         onModeSelected = setupViewModel::setAppThemeMode
                     )
                     SetupPage.Finish -> FinishPage()
-                    SetupPage.LibraryLayout -> LibraryLayoutPage(
-                        uiState = uiState,
-                        onModeSelected = setupViewModel::setLibraryNavigationMode,
-                        onSkip = {
-                            navigateToPage(pagerState.currentPage + 1)
-                        }
-                    )
+                    SetupPage.LyricsSetup -> LyricsSetupPage(
+    uiState = uiState,
+    onLyricsSourceChanged = { setupViewModel.setLyricsSource(it) },
+    onAnimatedLyricsChanged = { setupViewModel.setUseAnimatedLyrics(it) },
+    onSkip = { navigateToPage(pagerState.currentPage + 1) }
+)
                     SetupPage.NavBarLayout -> NavBarLayoutPage(
                         uiState = uiState,
                         onModeSelected = setupViewModel::setNavBarStyle,
@@ -442,6 +441,20 @@ fun SetupScreen(
             onBack = { showCornerRadiusOverlay = false },
             isFullWidth = uiState.navBarStyle == "full_width"
         )
+    }
+}
+
+fun setLyricsSource(source: String) {
+    _uiState.update { it.copy(lyricsSource = source) }
+    viewModelScope.launch {
+        userPreferencesRepository.setLyricsSourcePreference(source)
+    }
+}
+
+fun setUseAnimatedLyrics(enabled: Boolean) {
+    _uiState.update { it.copy(useAnimatedLyrics = enabled) }
+    viewModelScope.launch {
+        userPreferencesRepository.setUseAnimatedLyrics(enabled)
     }
 }
 
@@ -543,7 +556,7 @@ sealed class SetupPage {
     object ThemeSelection : SetupPage()
     object NotificationsPermission : SetupPage()
     object AlarmsPermission : SetupPage()
-    object LibraryLayout : SetupPage()
+    object LyricsSetup : SetupPage()
     object NavBarLayout : SetupPage()
     object BatteryOptimization : SetupPage()
     object Finish : SetupPage()
@@ -562,7 +575,7 @@ private fun buildSetupPages(sdkInt: Int): List<SetupPage> {
     pages += SetupPage.BackupRestore
     pages += SetupPage.DirectorySelection
     pages += SetupPage.ThemeSelection
-    pages += SetupPage.LibraryLayout
+    pages += SetupPage.LyricsSetup
     pages += SetupPage.NavBarLayout
 
     if (sdkInt >= Build.VERSION_CODES.S) {
@@ -657,22 +670,23 @@ fun WelcomePage() {
             Text(
                 text = stringResource(R.string.setup_welcome_prefix),
                 style = ExpTitleTypography.displayLarge.copy(
-                    fontSize = 42.sp,
-                    lineHeight = 1.1.em
+                    fontSize = 32.sp,
+                    lineHeight = 1.2.em
                 ),
             )
             Text(
                 text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.displayLarge.copy(
                     fontFamily = GoogleSansRounded,
-                    fontSize = 46.sp,
+                    fontSize = 32.sp,
                     color = MaterialTheme.colorScheme.primary,
-                    lineHeight = 1.1.em
+                    lineHeight = 1.2.em
                 ),
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
-        Surface(
+    //botao "beta" removido
+        /*Surface(
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -695,7 +709,7 @@ fun WelcomePage() {
                     fontWeight = FontWeight.SemiBold
                 )
             }
-        }
+        }*/
         Spacer(modifier = Modifier.height(16.dp))
         // Placeholder for vector art
         Box(
@@ -984,7 +998,6 @@ fun ThemeSelectionPage(
             title = stringResource(R.string.setup_theme_dark_title),
             description = stringResource(R.string.setup_theme_dark_description),
             icon = Icons.Rounded.DarkMode,
-            recommended = true
         ),
         ThemeOptionItem(
             mode = AppThemeMode.LIGHT,
@@ -997,6 +1010,7 @@ fun ThemeSelectionPage(
             title = stringResource(R.string.setup_theme_follow_title),
             description = stringResource(R.string.setup_theme_follow_description),
             icon = Icons.Rounded.PhoneAndroid
+            recommended = true
         )
     )
 
@@ -2203,6 +2217,143 @@ fun SetupBottomBar(
     }
 }
 
+@Composable
+fun LyricsSetupPage(
+    uiState: SetupUiState,
+    onLyricsSourceChanged: (String) -> Unit,
+    onAnimatedLyricsChanged: (Boolean) -> Unit,
+    onSkip: () -> Unit
+) {
+    val lyricsIcons = persistentListOf(
+        R.drawable.rounded_lyrics_24,
+        R.drawable.rounded_music_note_24,
+        R.drawable.rounded_playlist_play_24,
+        R.drawable.rounded_album_24,
+        R.drawable.rounded_mic_24
+    )
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.setup_lyrics_title),
+                style = MaterialTheme.typography.displayMedium.copy(
+                    fontFamily = GoogleSansRounded,
+                    fontSize = 32.sp
+                ),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.setup_lyrics_subtitle),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            PermissionIconCollage(
+                modifier = Modifier.height(200.dp),
+                icons = lyricsIcons
+            )
+        }
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Opção 1: Fonte das letras (Embedded/Online)
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.setup_lyrics_source_label),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = stringResource(R.string.setup_lyrics_source_description),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    // Aqui você pode adicionar um seletor (dropdown ou switch)
+                    // Por enquanto, apenas um placeholder
+                    Text(
+                        text = "Online > Local",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Opção 2: Letras animadas
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.setup_animated_lyrics_label),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = stringResource(R.string.setup_animated_lyrics_description),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = uiState.useAnimatedLyrics,
+                        onCheckedChange = onAnimatedLyricsChanged
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            TextButton(onClick = onSkip) {
+                Text(stringResource(R.string.skip_for_now))
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NavBarLayoutPage(
@@ -2451,3 +2602,24 @@ fun NavBarPreview(isDefault: Boolean) {
         }
     }
 }
+
+data class SetupUiState(
+    val mediaPermissionGranted: Boolean = false,
+    val notificationsPermissionGranted: Boolean = false,
+    val alarmsPermissionGranted: Boolean = false,
+    val allPermissionsGranted: Boolean = false,
+    val isLoadingDirectories: Boolean = false,
+    val isRestoringBackup: Boolean = false,
+    val isInspectingBackup: Boolean = false,
+    val restorePlan: RestorePlan? = null,
+    val backupTransferProgress: BackupTransferProgressUpdate? = null,
+    val appThemeMode: String = AppThemeMode.DARK,
+    val libraryNavigationMode: String = "tab_row",
+    val navBarStyle: String = "default",
+    val navBarCornerRadius: Int = 28,
+    val excludedFolders: List<String> = emptyList(),
+    
+    // 🔥 NOVOS CAMPOS para letras
+    val lyricsSource: String = "embedded_first",   // embedded_first ou online_first
+    val useAnimatedLyrics: Boolean = true
+)

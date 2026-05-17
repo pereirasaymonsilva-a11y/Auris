@@ -143,6 +143,29 @@ class SetupViewModel @Inject constructor(
         val radius: Int,
         val appThemeMode: String
     )
+    
+    fun setLyricsSource(source: String) {
+    val preference = when (source) {
+        "embedded_first" -> LyricsSourcePreference.EMBEDDED_FIRST
+        "online_first" -> LyricsSourcePreference.API_FIRST
+        else -> LyricsSourcePreference.EMBEDDED_FIRST
+    }
+    viewModelScope.launch {
+        userPreferencesRepository.setLyricsSourcePreference(preference)
+    }
+}
+
+    fun setLyricsSource(source: String) {
+    viewModelScope.launch {
+        userPreferencesRepository.setLyricsSourcePreference(source)
+    }
+}
+
+    fun setUseAnimatedLyrics(enabled: Boolean) {
+    viewModelScope.launch {
+        userPreferencesRepository.setUseAnimatedLyrics(enabled)
+    }
+}
 
     fun checkPermissions(context: Context) {
         val mediaPermissionGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

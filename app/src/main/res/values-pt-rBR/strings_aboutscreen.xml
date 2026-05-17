@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_core_display_name">Theo Vilardo</string>
+    <string name="about_core_role">Criador original</string>
+    <string name="about_core_detail">Esse é o criador original do PixelPlayer.</string>
+
+    <string name="about_auris_display_name">Saymon Silva Pereira</string>
+    <string name="about_auris_role">Mantenedor do Auris</string>
+    <string name="about_auris_detail">Criador do Auris, Versão modificada do PixelPlayer.</string>
+
+    <string name="about_lostf1sh_display_name">@lostf1sh</string>
+    <string name="about_lostf1sh_role">Contribuidor mais ativo</string>
+    <string name="about_lostf1sh_detail">Contribuiu enormemente em recursos, arquitetura e confiabilidade.</string>
+    <string name="about_lostf1sh_badge">Maior Impacto</string>
+
+    <string name="about_cromaguy_display_name">@cromaguy</string>
+    <string name="about_cromaguy_role">Desenvolvedor do Rhythm</string>
+    <string name="about_cromaguy_detail">Desenvolvedor do Rhythm (outro app de música) e grande apoiador da comunidade.</string>
+    <string name="about_cromaguy_badge">Aliado da Comunidade</string>
+
+    <string name="about_colby_display_name">@ColbyCabrera</string>
+    <string name="about_colby_role">Primeiro contribuidor</string>
+    <string name="about_colby_detail">Ajudou a moldar o PixelPlayer nos estágios iniciais.</string>
+    <string name="about_colby_badge">Apoio Inicial</string>
+</resources>
