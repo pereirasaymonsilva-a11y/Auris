@@ -1,7 +1,6 @@
 package com.goldensystem.auris.presentation.viewmodel
 
 import android.Manifest
-import com.goldensystem.auris.data.model.LyricsSourcePreference
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -16,6 +15,7 @@ import com.goldensystem.auris.data.backup.model.BackupOperationType
 import com.goldensystem.auris.data.backup.model.BackupSection
 import com.goldensystem.auris.data.backup.model.RestorePlan
 import com.goldensystem.auris.data.backup.model.RestoreResult
+import com.goldensystem.auris.data.model.LyricsSourcePreference
 import com.goldensystem.auris.data.preferences.AppThemeMode
 import com.goldensystem.auris.data.preferences.ThemePreferencesRepository
 import com.goldensystem.auris.data.preferences.UserPreferencesRepository
@@ -49,7 +49,7 @@ data class SetupUiState(
     val isRestoringBackup: Boolean = false,
     val restorePlan: RestorePlan? = null,
     val backupTransferProgress: BackupTransferProgressUpdate? = null,
-    // 🔥 NOVOS CAMPOS PARA LETRAS
+    // Campos para letras
     val lyricsSource: String = "embedded_first",
     val useAnimatedLyrics: Boolean = true
 ) {
@@ -97,6 +97,17 @@ class SetupViewModel @Inject constructor(
     private var hasPendingDirectoryRuleChanges = false
     private var latestDirectoryRuleUpdateJob: Job? = null
 
+    // Classe auxiliar para receber as atualizações combinadas
+    private data class SetupPrefsUpdate(
+        val blocked: Set<String>,
+        val mode: String,
+        val style: String,
+        val radius: Int,
+        val appThemeMode: String,
+        val lyricsSource: String,
+        val useAnimatedLyrics: Boolean
+    )
+
     init {
         viewModelScope.launch {
             if (!userPreferencesRepository.initialSetupDoneFlow.first()) {
@@ -104,15 +115,30 @@ class SetupViewModel @Inject constructor(
             }
         }
 
+        // COMBINE AGORA INCLUI AS FLOWS DE LETRAS
         viewModelScope.launch {
             combine(
                 userPreferencesRepository.blockedDirectoriesFlow,
                 userPreferencesRepository.libraryNavigationModeFlow,
                 userPreferencesRepository.navBarStyleFlow,
                 userPreferencesRepository.navBarCornerRadiusFlow,
-                themePreferencesRepository.appThemeModeFlow
-            ) { blocked, mode, style, radius, appThemeMode ->
-                SetupPrefsUpdate(blocked, mode, style, radius, appThemeMode)
+                themePreferencesRepository.appThemeModeFlow,
+                userPreferencesRepository.lyricsSourcePreferenceFlow,
+                userPreferencesRepository.useAnimatedLyricsFlow
+            ) { blocked, mode, style, radius, appThemeMode, lyricsSourcePref, useAnimated ->
+                val lyricsSourceStr = when (lyricsSourcePref) {
+                    LyricsSourcePreference.EMBEDDED_FIRST -> "embedded_first"
+                    LyricsSourcePreference.API_FIRST -> "online_first"
+                }
+                SetupPrefsUpdate(
+                    blocked = blocked,
+                    mode = mode,
+                    style = style,
+                    radius = radius,
+                    appThemeMode = appThemeMode,
+                    lyricsSource = lyricsSourceStr,
+                    useAnimatedLyrics = useAnimated
+                )
             }.collect { update ->
                 _uiState.update { state ->
                     state.copy(
@@ -120,7 +146,9 @@ class SetupViewModel @Inject constructor(
                         libraryNavigationMode = update.mode,
                         navBarStyle = update.style,
                         navBarCornerRadius = update.radius,
-                        appThemeMode = update.appThemeMode
+                        appThemeMode = update.appThemeMode,
+                        lyricsSource = update.lyricsSource,
+                        useAnimatedLyrics = update.useAnimatedLyrics
                     )
                 }
             }
@@ -132,16 +160,8 @@ class SetupViewModel @Inject constructor(
             }
         }
     }
-    
-    private data class SetupPrefsUpdate(
-        val blocked: Set<String>,
-        val mode: String,
-        val style: String,
-        val radius: Int,
-        val appThemeMode: String
-    )
 
-    // ==================== FUNÇÕES DAS LETRAS (APENAS UMA VEZ CADA) ====================
+    // ==================== FUNÇÕES DAS LETRAS ====================
     fun setLyricsSource(source: String) {
         viewModelScope.launch {
             val preference = when (source) {
