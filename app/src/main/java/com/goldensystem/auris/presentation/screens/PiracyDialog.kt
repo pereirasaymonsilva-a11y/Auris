@@ -192,9 +192,25 @@ private fun startDownload(context: Context, downloadUrl: String, onIdReceived: (
     onIdReceived(id)
 }
 
+// Função auxiliar (NÃO é @Composable)
+private fun startDownload(context: Context, downloadUrl: String, onIdReceived: (Long) -> Unit) {
+    val fileName = "auris_official_${System.currentTimeMillis()}.apk"
+    val request = DownloadManager.Request(Uri.parse(downloadUrl))
+        .setTitle(context.getString(R.string.piracy_download_title))
+        .setDescription(context.getString(R.string.piracy_download_description))
+        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+        .setAllowedOverMetered(true)
+        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+
+    val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+    val id = manager.enqueue(request)
+    onIdReceived(id)
+}
+
+// Função auxiliar (NÃO é @Composable)
 private fun installApk(context: Context, filePath: String) {
     try {
-        Toast.makeText(context, stringResource(R.string.piracy_download_completed), Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.piracy_download_completed), Toast.LENGTH_SHORT).show()
 
         val uri = Uri.parse(filePath)
         val apkUri = if (uri.scheme == "content") {
@@ -224,9 +240,9 @@ private fun installApk(context: Context, filePath: String) {
         if (intent.resolveActivity(context.packageManager) != null) {
             context.startActivity(intent)
         } else {
-            Toast.makeText(context, stringResource(R.string.piracy_install_error), Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.piracy_install_error), Toast.LENGTH_SHORT).show()
         }
     } catch (e: Exception) {
-        Toast.makeText(context, stringResource(R.string.piracy_apk_install_error, e.message), Toast.LENGTH_LONG).show()
+        Toast.makeText(context, context.getString(R.string.piracy_apk_install_error, e.message), Toast.LENGTH_LONG).show()
     }
 }

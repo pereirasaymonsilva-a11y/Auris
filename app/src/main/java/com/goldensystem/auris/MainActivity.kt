@@ -1099,7 +1099,6 @@ Trace.endSection()
 
 }
 //servidor golden system verificação contra mofificaçao APK
-class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -1137,4 +1136,3 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
