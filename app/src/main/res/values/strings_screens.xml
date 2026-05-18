@@ -7,7 +7,7 @@
 <!-- Lyrics - example lines for the preview in the setup screen -->
     <string name="lyrics_preview_line_1">Lyrics look like this</string>
     <string name="lyrics_preview_line_2">Thank you for using Auris</string>
-    <string name="lyrics_preview_line_3">Auris is completely free</string>
+    <string name="lyrics_preview_line_3"></string>
     <string name="lyrics_preview_line_4">HUNNN Lyrics... BUMM</string>
     <string name="lyrics_preview_line_5">Do not download Auris from unknown sources</string>
 

@@ -13,7 +13,7 @@
 <!-- Letras - linhas de exemplo para a pré-visualização na tela de configuração -->
     <string name="lyrics_preview_line_1">As letras ficam assim</string>
     <string name="lyrics_preview_line_2">Obrigado por utilizar o Auris</string>
-    <string name="lyrics_preview_line_3">O Auris é totalmente gratuito</string>
+    <string name="lyrics_preview_line_3"></string>
     <string name="lyrics_preview_line_4">HUNNN Letras... BUMM</string>
     <string name="lyrics_preview_line_5">Não baixe o Auris por fontes desconhecidas</string>
 
