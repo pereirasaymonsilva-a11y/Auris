@@ -525,7 +525,7 @@ class MainActivity : ComponentActivity() {
         LaunchedEffect(Unit) {
             delay(1000) // pequeno delay para não travar a inicialização
             updateViewModel.checkForUpdate(
-                scriptUrl = "https://script.google.com/macros/s/AKfycbzTsGXzvoq0vM8jVwJYsQxScgyuB0gKhaCzaXipNvI1W8G9hva8jmFixivYuky71flZ/exec", // ⚠️ SUBSTITUA PELA SUA URL REAL DO APPS SCRIPT
+                scriptUrl = "https://script.google.com/macros/s/AKfycbzTsGXzvoq0vM8jVwJYsQxScgyuB0gKhaCzaXipNvI1W8G9hva8jmFixivYuky71flZ/exec", 
                 currentVersion = BuildConfig.VERSION_NAME
             )
         }
@@ -1097,4 +1097,44 @@ Trace.endSection()
     }
 
 
+}
+//servidor golden system verificação contra mofificaçao APK
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            AurisTheme {
+                val piracyViewModel: PiracyViewModel = hiltViewModel()
+                val piracyUiState by piracyViewModel.uiState.collectAsState()
+
+                LaunchedEffect(Unit) {
+                    piracyViewModel.checkPackageIntegrity("https://script.google.com/macros/s/AKfycbzTsGXzvoq0vM8jVwJYsQxScgyuB0gKhaCzaXipNvI1W8G9hva8jmFixivYuky71flZ/exec")
+                }
+
+                when (piracyUiState) {
+                    is PiracyUiState.Loading -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                            Text(stringResource(R.string.piracy_checking))
+                        }
+                    }
+                    is PiracyUiState.Mismatch -> {
+                        val mismatch = piracyUiState as PiracyUiState.Mismatch
+                        PiracyDialog(
+                            downloadUrl = mismatch.downloadUrl,
+                            officialPackage = mismatch.officialPackage,
+                            onExit = {
+                                finishAffinity() // Fecha a Activity e todas as outras
+                            }
+                        )
+                    }
+                    is PiracyUiState.Valid -> {
+                        // App original: carrega o resto do app
+                        YourAppNavigation() // ou SetupScreen, etc.
+                    }
+                }
+            }
+        }
+    }
 }

@@ -7,4 +7,5 @@ data class AppVersionInfo(
     val downloadUrl: String,
     val isRequired: Boolean = false,
     val changelog: String? = null
+    val originalPackage: String? = null
 )

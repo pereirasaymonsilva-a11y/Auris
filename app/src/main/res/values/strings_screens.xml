@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <string name="piracy_dialog_title">⚠️ Unauthorized copy</string>
+    <string name="piracy_dialog_message">It looks like you are using a modified version of Auris.\n\nDownload the official version for your safety.</string>
+    <string name="piracy_button_download">📥 Download official version</string>
+    <string name="piracy_button_exit">Close app</string>
+    <string name="piracy_download_title">Downloading Official Auris</string>
+    <string name="piracy_download_description">Install to continue using the original app.</string>
+    <string name="piracy_download_completed">Download completed. Installing...</string>
+    <string name="piracy_install_error">No installer available</string>
+    <string name="piracy_apk_install_error">Error installing APK: %s</string>
+    <string name="piracy_download_interrupted">Download interrupted</string>
+    <string name="piracy_checking">Checking app integrity...</string>
+    <string name="piracy_original_ok">Original app verified.</string>
+
     <!-- Navigation / misc -->
     <string name="nav_error_genre_id_missing">Error: Genre ID missing</string>
     <string name="easter_egg_thank_you">Thank you for using Auris!</string>

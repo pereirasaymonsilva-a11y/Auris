@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+        <!-- Título do diálogo de cópia não autorizada -->
+    <string name="piracy_dialog_title">⚠️ Cópia não autorizada</string>
+    <string name="piracy_dialog_message">Parece que você está usando uma versão modificada do Auris.\n\nBaixe a versão original para garantir sua segurança.</string>
+    <string name="piracy_button_download">📥 Baixar versão oficial</string>
+    <string name="piracy_button_exit">Fechar aplicativo</string>
+    <string name="piracy_download_title">Baixando Auris Oficial</string>
+    <string name="piracy_download_description">Instale para continuar usando o app original.</string>
+    <string name="piracy_download_completed">Download concluído. Instalando...</string>
+    <string name="piracy_install_error">Nenhum instalador disponível</string>
+    <string name="piracy_apk_install_error">Erro ao instalar APK: %s</string>
+    <string name="piracy_download_interrupted">Download interrompido</string>
+    <string name="piracy_checking">Verificando integridade do app...</string>
+    <string name="piracy_original_ok">App original verificado.</string>
      <!-- Tela de letras no welcome -->
     <string name="setup_lyrics_title">Letras das músicas</string>
     <string name="setup_lyrics_subtitle">Personalize como as letras aparecem durante a reprodução</string>

@@ -65,13 +65,17 @@ class UpdateRepository @Inject constructor(
                             return@withContext Result.failure(Exception("URL de download inválida"))
                         }
 
+                        // 🔥 NOVO: extrai o campo originalPackage
+                        val originalPackage = obj.optString("originalPackage", null)
+
                         aurisInfo = AppVersionInfo(
                             appName = appName,
                             version = obj.optString("version", "0.0.0"),
                             id = obj.optString("id", ""),
                             downloadUrl = downloadUrl,
                             isRequired = obj.optBoolean("isRequired", false),
-                            changelog = obj.optString("changelog", null)
+                            changelog = obj.optString("changelog", null),
+                            originalPackage = originalPackage  // ← adicionado
                         )
                         break
                     }
