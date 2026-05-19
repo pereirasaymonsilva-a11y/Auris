@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -40,12 +39,18 @@ fun PiracyDialog(
     var progress by remember { mutableIntStateOf(0) }
     var isDownloading by remember { mutableStateOf(false) }
 
+    // Obter os textos (String) dentro do contexto @Composable
+    val downloadTitle = stringResource(R.string.piracy_download_title)
+    val downloadDescription = stringResource(R.string.piracy_download_description)
+
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) {
-        startDownload(context, downloadUrl) { id ->
-            downloadId = id
-            isDownloading = true
+    ) { granted ->
+        if (granted) {
+            startDownload(context, downloadUrl, downloadTitle, downloadDescription) { id ->
+                downloadId = id
+                isDownloading = true
+            }
         }
     }
 
@@ -98,8 +103,6 @@ fun PiracyDialog(
                     }
                     if (filePath != null) {
                         installApk(context, filePath)
-                        // Após instalação, não fechamos imediatamente; deixamos o usuário abrir o app original
-                        // Mas podemos fechar este app após um tempo
                         onExit()
                     }
                     break
@@ -152,7 +155,7 @@ fun PiracyDialog(
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             } else {
-                                startDownload(context, downloadUrl) { id ->
+                                startDownload(context, downloadUrl, downloadTitle, downloadDescription) { id ->
                                     downloadId = id
                                     isDownloading = true
                                 }
@@ -178,11 +181,25 @@ fun PiracyDialog(
     }
 }
 
-private fun startDownload(context: Context, downloadUrl: String, onIdReceived: (Long) -> Unit) {
+/**
+ * Inicia o download do APK oficial.
+ * @param context Contexto da aplicação
+ * @param downloadUrl URL do APK
+ * @param title Título da notificação de download (String já resolvida)
+ * @param description Descrição da notificação de download (String já resolvida)
+ * @param onIdReceived Callback que recebe o ID do download
+ */
+private fun startDownload(
+    context: Context,
+    downloadUrl: String,
+    title: String,
+    description: String,
+    onIdReceived: (Long) -> Unit
+) {
     val fileName = "auris_official_${System.currentTimeMillis()}.apk"
     val request = DownloadManager.Request(Uri.parse(downloadUrl))
-        .setTitle(stringResource(R.string.piracy_download_title))
-        .setDescription(stringResource(R.string.piracy_download_description))
+        .setTitle(title)
+        .setDescription(description)
         .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
         .setAllowedOverMetered(true)
         .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
@@ -192,7 +209,11 @@ private fun startDownload(context: Context, downloadUrl: String, onIdReceived: (
     onIdReceived(id)
 }
 
-// Função auxiliar (NÃO é @Composable)
+/**
+ * Instala o APK baixado.
+ * @param context Contexto da aplicação
+ * @param filePath Caminho do arquivo APK
+ */
 private fun installApk(context: Context, filePath: String) {
     try {
         Toast.makeText(context, context.getString(R.string.piracy_download_completed), Toast.LENGTH_SHORT).show()
