@@ -19,12 +19,11 @@ class PiracyViewModel @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<PiracyUiState>(PiracyUiState.Loading)
+    private val _uiState = MutableStateFlow<PiracyUiState>(PiracyUiState.Valid)
     val uiState: StateFlow<PiracyUiState> = _uiState.asStateFlow()
 
     fun checkPackageIntegrity(scriptUrl: String) {
         viewModelScope.launch {
-            _uiState.value = PiracyUiState.Loading
             updateRepository.fetchAppVersion(scriptUrl).fold(
                 onSuccess = { info ->
                     val expectedPackage = info.originalPackage
@@ -50,7 +49,6 @@ class PiracyViewModel @Inject constructor(
     }
 
     fun reset() {
-        _uiState.value = PiracyUiState.Loading
     }
 }
 
