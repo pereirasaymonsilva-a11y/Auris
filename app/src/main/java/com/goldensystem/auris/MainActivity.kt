@@ -4,6 +4,11 @@ import com.goldensystem.auris.presentation.navigation.navigateSafely
 
 // import androidx.compose.ui.platform.LocalView // No longer needed for this
 // import androidx.core.view.WindowInsetsCompat // No longer needed for this
+import com.goldensystem.auris.presentation.screens.PiracyDialog
+import com.goldensystem.auris.presentation.viewmodel.PiracyUiState
+import com.goldensystem.auris.presentation.viewmodel.PiracyViewModel
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.res.stringResource
 import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -261,52 +266,75 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            PixelPlayTheme(
-                darkTheme = useDarkTheme
-            ) {
-                var contentVisible by remember { mutableStateOf(false) }
-                val contentAlpha by animateFloatAsState(
-                    targetValue = if (contentVisible) 1f else 0f,
-                    animationSpec = tween(600, easing = LinearOutSlowInEasing),
-                    label = "AppContentAlpha"
-                )
+            PixelPlayTheme(darkTheme = useDarkTheme) {
+    // --- Verificação de integridade (anti-pirataria) ---
+    val piracyViewModel: PiracyViewModel = hiltViewModel()
+    val piracyUiState by piracyViewModel.uiState.collectAsState()
 
-                LaunchedEffect(Unit) {
-                    // Delay slightly to ensure first frame layout is done behind Splash
-                    delay(100)
-                    contentVisible = true
+    LaunchedEffect(Unit) {
+        piracyViewModel.checkPackageIntegrity("https://script.google.com/macros/s/AKfycbzTsGXzvoq0vM8jVwJYsQxScgyuB0gKhaCzaXipNvI1W8G9hva8jmFixivYuky71flZ/exec")
+    }
+
+    when (piracyUiState) {
+        is PiracyUiState.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+                Text(stringResource(R.string.piracy_checking))
+            }
+        }
+        is PiracyUiState.Mismatch -> {
+            val mismatch = piracyUiState as PiracyUiState.Mismatch
+            PiracyDialog(
+                downloadUrl = mismatch.downloadUrl,
+                officialPackage = mismatch.officialPackage,
+                onExit = {
+                    finishAffinity()
+                    android.os.Process.killProcess(android.os.Process.myPid())
                 }
-
-                Surface(
-                    modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha }, 
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    if (showSetupScreen == null) {
-                        SetupGateLoadingScreen()
-                    } else {
-                        AnimatedContent(
-                            targetState = showSetupScreen,
-                            transitionSpec = {
-                                if (targetState) {
-                                    // Transition to Setup
-                                    fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
-                                } else {
-                                    // Transition from Setup to Main App
-                                    scaleIn(initialScale = 0.95f, animationSpec = tween(450)) + fadeIn(animationSpec = tween(450)) togetherWith
-                                            slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(450)) + fadeOut(animationSpec = tween(450))
-                                }
-                            },
-                            label = "SetupTransition"
-                        ) { shouldShowSetup ->
-                            if (shouldShowSetup) {
-                                SetupScreen(onSetupComplete = {
-                                    // Repository-backed setup completion updates the gate automatically.
-                                })
+            )
+        }
+        is PiracyUiState.Valid -> {
+            // --- TODO O SEU CONTEÚDO ORIGINAL DO PIXELPLAYTHEME VAI AQUI DENTRO (SEM ALTERAR NADA) ---
+            var contentVisible by remember { mutableStateOf(false) }
+            val contentAlpha by animateFloatAsState(
+                targetValue = if (contentVisible) 1f else 0f,
+                animationSpec = tween(600, easing = LinearOutSlowInEasing),
+                label = "AppContentAlpha"
+            )
+            LaunchedEffect(Unit) {
+                delay(100)
+                contentVisible = true
+            }
+            Surface(
+                modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha },
+                color = MaterialTheme.colorScheme.background
+            ) {
+                if (showSetupScreen == null) {
+                    SetupGateLoadingScreen()
+                } else {
+                    AnimatedContent(
+                        targetState = showSetupScreen,
+                        transitionSpec = {
+                            if (targetState) {
+                                fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
                             } else {
-                                MainAppContent(playerViewModel, mainViewModel)
+                                scaleIn(initialScale = 0.95f, animationSpec = tween(450)) + fadeIn(animationSpec = tween(450)) togetherWith
+                                        slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(450)) + fadeOut(animationSpec = tween(450))
                             }
+                        },
+                        label = "SetupTransition"
+                    ) { shouldShowSetup ->
+                        if (shouldShowSetup) {
+                            SetupScreen(onSetupComplete = {})
+                        } else {
+                            MainAppContent(playerViewModel, mainViewModel)
                         }
                     }
+                }
+            }
+        }
+    }
+}
 
                     // Show crash report dialog if needed
                     if (showCrashReportDialog && crashLogData != null) {
@@ -1098,41 +1126,3 @@ Trace.endSection()
 
 
 }
-//servidor golden system verificação contra mofificaçao APK
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContent {
-            AurisTheme {
-                val piracyViewModel: PiracyViewModel = hiltViewModel()
-                val piracyUiState by piracyViewModel.uiState.collectAsState()
-
-                LaunchedEffect(Unit) {
-                    piracyViewModel.checkPackageIntegrity("https://script.google.com/macros/s/AKfycbzTsGXzvoq0vM8jVwJYsQxScgyuB0gKhaCzaXipNvI1W8G9hva8jmFixivYuky71flZ/exec")
-                }
-
-                when (piracyUiState) {
-                    is PiracyUiState.Loading -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
-                            Text(stringResource(R.string.piracy_checking))
-                        }
-                    }
-                    is PiracyUiState.Mismatch -> {
-                        val mismatch = piracyUiState as PiracyUiState.Mismatch
-                        PiracyDialog(
-                            downloadUrl = mismatch.downloadUrl,
-                            officialPackage = mismatch.officialPackage,
-                            onExit = {
-                                finishAffinity() // Fecha a Activity e todas as outras
-                            }
-                        )
-                    }
-                    is PiracyUiState.Valid -> {
-                        // App original: carrega o resto do app
-                        YourAppNavigation() // ou SetupScreen, etc.
-                    }
-                }
-            }
-        }
-    }
