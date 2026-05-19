@@ -7,7 +7,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,9 +38,14 @@ fun PiracyDialog(
     var progress by remember { mutableIntStateOf(0) }
     var isDownloading by remember { mutableStateOf(false) }
 
-    // Obter os textos (String) dentro do contexto @Composable
+    // Todas as strings são obtidas AQUI, no escopo @Composable
+    val dialogTitle = stringResource(R.string.piracy_dialog_title)
+    val dialogMessage = stringResource(R.string.piracy_dialog_message)
+    val downloadButtonText = stringResource(R.string.piracy_button_download)
+    val exitButtonText = stringResource(R.string.piracy_button_exit)
     val downloadTitle = stringResource(R.string.piracy_download_title)
     val downloadDescription = stringResource(R.string.piracy_download_description)
+    val downloadInterrupted = stringResource(R.string.piracy_download_interrupted)
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -54,6 +58,7 @@ fun PiracyDialog(
         }
     }
 
+    // Monitoramento do progresso do download
     LaunchedEffect(downloadId) {
         val id = downloadId ?: return@LaunchedEffect
         val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
@@ -110,7 +115,8 @@ fun PiracyDialog(
                 DownloadManager.STATUS_FAILED,
                 DownloadManager.STATUS_PAUSED -> {
                     isDownloading = false
-                    Toast.makeText(context, stringResource(R.string.piracy_download_interrupted), Toast.LENGTH_SHORT).show()
+                    // Usamos o contexto para mostrar o Toast, não stringResource
+                    Toast.makeText(context, downloadInterrupted, Toast.LENGTH_SHORT).show()
                     break
                 }
             }
@@ -130,13 +136,13 @@ fun PiracyDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = stringResource(R.string.piracy_dialog_title),
+                    text = dialogTitle,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    text = stringResource(R.string.piracy_dialog_message),
+                    text = dialogMessage,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -164,7 +170,7 @@ fun PiracyDialog(
                         enabled = !isDownloading,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(stringResource(R.string.piracy_button_download))
+                        Text(downloadButtonText)
                     }
 
                     Spacer(Modifier.height(12.dp))
@@ -173,7 +179,7 @@ fun PiracyDialog(
                         onClick = onExit,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(stringResource(R.string.piracy_button_exit))
+                        Text(exitButtonText)
                     }
                 }
             }
@@ -181,14 +187,6 @@ fun PiracyDialog(
     }
 }
 
-/**
- * Inicia o download do APK oficial.
- * @param context Contexto da aplicação
- * @param downloadUrl URL do APK
- * @param title Título da notificação de download (String já resolvida)
- * @param description Descrição da notificação de download (String já resolvida)
- * @param onIdReceived Callback que recebe o ID do download
- */
 private fun startDownload(
     context: Context,
     downloadUrl: String,
@@ -209,11 +207,6 @@ private fun startDownload(
     onIdReceived(id)
 }
 
-/**
- * Instala o APK baixado.
- * @param context Contexto da aplicação
- * @param filePath Caminho do arquivo APK
- */
 private fun installApk(context: Context, filePath: String) {
     try {
         Toast.makeText(context, context.getString(R.string.piracy_download_completed), Toast.LENGTH_SHORT).show()
