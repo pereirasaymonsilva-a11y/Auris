@@ -294,7 +294,6 @@ class MainActivity : ComponentActivity() {
             )
         }
         is PiracyUiState.Valid -> {
-            // --- TODO O SEU CONTEÚDO ORIGINAL DO PIXELPLAYTHEME VAI AQUI DENTRO (SEM ALTERAR NADA) ---
             var contentVisible by remember { mutableStateOf(false) }
             val contentAlpha by animateFloatAsState(
                 targetValue = if (contentVisible) 1f else 0f,
@@ -333,8 +332,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
 
                     // Show crash report dialog if needed
                     if (showCrashReportDialog && crashLogData != null) {
@@ -1122,7 +1119,5 @@ Trace.endSection()
 
     override fun onResume() {
         super.onResume()
-    }
-
-
-}
+      }
+  }
