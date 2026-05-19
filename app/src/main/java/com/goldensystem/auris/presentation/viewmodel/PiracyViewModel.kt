@@ -55,7 +55,6 @@ class PiracyViewModel @Inject constructor(
 }
 
 sealed class PiracyUiState {
-    object Loading : PiracyUiState()
     object Valid : PiracyUiState()
     data class Mismatch(val downloadUrl: String, val officialPackage: String) : PiracyUiState()
 }
