@@ -332,6 +332,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+      }
 
                     // Show crash report dialog if needed
                     if (showCrashReportDialog && crashLogData != null) {
@@ -346,7 +347,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-        }
         handleIntent(intent)
     }
 
