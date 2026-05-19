@@ -277,12 +277,6 @@ class MainActivity : ComponentActivity() {
     }
 
     when (piracyUiState) {
-        is PiracyUiState.Loading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-                Text(stringResource(R.string.piracy_checking))
-            }
-        }
         is PiracyUiState.Mismatch -> {
             val mismatch = piracyUiState as PiracyUiState.Mismatch
             PiracyDialog(
