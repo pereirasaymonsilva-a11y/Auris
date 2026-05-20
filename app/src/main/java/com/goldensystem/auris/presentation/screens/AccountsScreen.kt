@@ -699,7 +699,7 @@ private fun openService(
     context: Context,
     service: ExternalServiceAccount,
     onOpenNavidromeDashboard: () -> Unit,
-    onOpenJellyfinDashboard: () -> Unit
+    onOpenJellyfinDashboard: () -> Unit,
     onOpenGDriveDashboard: () -> Unit
 ) {
     when (service) {
