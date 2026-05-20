@@ -538,7 +538,7 @@ private fun EmptyAccountsCard(
             )
 
             disconnectedServices.forEach { service ->
-                val isComingSoon = service == ExternalServiceAccount.GOOGLE_DRIVE
+                val isComingSoon = false
                 val painter = when (service) {
                     ExternalServiceAccount.TELEGRAM -> painterResource(R.drawable.telegram)
                     else -> null
