@@ -92,6 +92,7 @@ fun AccountsScreen(
     onBackClick: () -> Unit,
     onOpenNavidromeDashboard: () -> Unit = {},
     onOpenJellyfinDashboard: () -> Unit = {},
+    onOpenGDriveDashboard: () -> Unit = {},
     viewModel: AccountsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -335,7 +336,7 @@ private fun ConnectedAccountCard(
     val loggingOut = stringResource(R.string.presentation_batch_b_accounts_logging_out)
     val logOut = stringResource(R.string.cd_logout)
     val palette = servicePalette(account.service)
-    val isComingSoon = account.service == ExternalServiceAccount.GOOGLE_DRIVE
+    val isComingSoon = false
     val cardShape = AbsoluteSmoothCornerShape(28.dp, 60)
 
     Card(
@@ -707,8 +708,9 @@ private fun openService(
             )
         }
         ExternalServiceAccount.GOOGLE_DRIVE -> {
-            Toast.makeText(context, context.getString(R.string.accounts_google_drive_soon), Toast.LENGTH_SHORT).show()
-        }
+    // Navega para a tela do Google Drive
+    onOpenGDriveDashboard()
+}
         ExternalServiceAccount.NAVIDROME -> {
             onOpenNavidromeDashboard()
         }

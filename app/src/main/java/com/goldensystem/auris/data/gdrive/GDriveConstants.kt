@@ -2,7 +2,7 @@ package com.goldensystem.auris.data.gdrive
 
 object GDriveConstants {
     // TODO: Replace with your Google Cloud Console OAuth2 Web Client ID
-    const val WEB_CLIENT_ID = "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com"
+    const val WEB_CLIENT_ID = "334751105599-3knt9qnoe1avksrntftlspn5jhr1ud1m.apps.googleusercontent.com"
 
     const val SCOPE_DRIVE_READONLY = "https://www.googleapis.com/auth/drive.readonly"
     const val TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
