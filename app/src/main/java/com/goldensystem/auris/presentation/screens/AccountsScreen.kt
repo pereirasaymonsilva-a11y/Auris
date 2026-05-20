@@ -224,7 +224,8 @@ fun AccountsScreen(
                                 context = context,
                                 service = service,
                                 onOpenNavidromeDashboard = onOpenNavidromeDashboard,
-                                onOpenJellyfinDashboard = onOpenJellyfinDashboard
+                                onOpenJellyfinDashboard = onOpenJellyfinDashboard,
+                     onOpenGDriveDashboard = onOpenGDriveDashboard
                             )
                         }
                     )
