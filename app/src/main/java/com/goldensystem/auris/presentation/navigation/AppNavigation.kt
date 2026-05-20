@@ -234,7 +234,7 @@ fun AppNavigation(
                         },
                         onOpenJellyfinDashboard = {
                             navController.navigateSafely(Screen.JellyfinDashboard.route)
-                        }
+                        },
                      onOpenGDriveDashboard = {  // ← NOVO
                     navController.navigateSafely(Screen.GDriveDashboard.route        )
                         }
