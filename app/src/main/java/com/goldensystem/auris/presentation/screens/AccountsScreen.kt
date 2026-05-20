@@ -205,7 +205,8 @@ fun AccountsScreen(
                                 context = context,
                                 service = account.service,
                                 onOpenNavidromeDashboard = onOpenNavidromeDashboard,
-                                onOpenJellyfinDashboard = onOpenJellyfinDashboard
+                                onOpenJellyfinDashboard = onOpenJellyfinDashboard,
+                     onOpenGDriveDashboard = onOpenGDriveDashboard
                             )
                         },
                         onLogout = { viewModel.logout(account.service) },
@@ -699,6 +700,7 @@ private fun openService(
     service: ExternalServiceAccount,
     onOpenNavidromeDashboard: () -> Unit,
     onOpenJellyfinDashboard: () -> Unit
+    onOpenGDriveDashboard: () -> Unit
 ) {
     when (service) {
         ExternalServiceAccount.TELEGRAM -> {

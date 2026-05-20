@@ -236,11 +236,11 @@ fun AppNavigation(
                             navController.navigateSafely(Screen.JellyfinDashboard.route)
                         },
                      onOpenGDriveDashboard = {  // ← NOVO
-                    navController.navigateSafely(Screen.GDriveDashboard.route        )
-                        }
-                    )
+                    navController.navigateSafely(Screen.GDriveDashboard.route)
                 }
-            }
+            )
+        }
+    }
             composable(
                 route = Screen.SettingsCategory.route,
                 arguments = listOf(navArgument("categoryId") { type = NavType.StringType }),
