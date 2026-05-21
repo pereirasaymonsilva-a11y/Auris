@@ -113,9 +113,9 @@ fun StreamingProviderSheet(
                         iconPainter = painterResource(R.drawable.rounded_drive_export_24),
                         iconTint = Color(0xFF4285F4),
                         title = "Google Drive",
-                        subtitle = "Coming soon",
+                        subtitle = "Google Drive Account Manager",
                         shape = providerSegmentItemShape,
-                        enabled = false,
+                        enabled = true,
                         onClick = { }
                     )
 
