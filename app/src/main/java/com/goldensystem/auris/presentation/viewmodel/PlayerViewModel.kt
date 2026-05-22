@@ -3059,7 +3059,7 @@ class PlayerViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val mediaItem = buildResolvedPlaybackMediaItem(song, gdriveStreamProxy)
+            val mediaItem = buildResolvedPlaybackMediaItem(song)
             if (controller.currentMediaItem?.mediaId == song.id) {
                 if (!controller.isPlaying) controller.play()
             } else {
