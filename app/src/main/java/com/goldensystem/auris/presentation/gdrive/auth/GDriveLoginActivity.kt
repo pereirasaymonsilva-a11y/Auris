@@ -240,25 +240,31 @@ private fun FolderCard(folder: FolderItem, cardShape: AbsoluteSmoothCornerShape,
 private suspend fun signInWithGoogle(context: android.content.Context, viewModel: GDriveLoginViewModel) {
     try {
         val credentialManager = CredentialManager.create(context)
+        
         val googleIdOption = GetGoogleIdOption.Builder()
             .setServerClientId(GDriveConstants.WEB_CLIENT_ID)
             .setFilterByAuthorizedAccounts(false)
             .setAutoSelectEnabled(false)
             .setNonce(null)
             .build()
-        val request = GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build()
-        // Use o context como Activity (já que GDriveLoginActivity é uma Activity)
-        val result = credentialManager.getCredential(context as android.app.Activity, request)
-        val credential = result.getCredential()
+        
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+        
+        // FORMATO MODERNO - com parâmetros nomeados
+        val result = credentialManager.getCredential(
+            context = context,
+            request = request
+        )
+        
+        val credential = result.credential
         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
         val idToken = googleIdTokenCredential.idToken
         val serverAuthCode = credential.data.getString("com.google.android.libraries.identity.googleid.BUNDLE_KEY_SERVER_AUTH_CODE")
         
-        // Extrair email do token (opcional, mas útil)
-        val email = try {
-            val payload = String(android.util.Base64.decode(idToken.split(".")[1], android.util.Base64.URL_SAFE))
-            org.json.JSONObject(payload).optString("email")
-        } catch (e: Exception) { null }
+        // ✅ NOVO: pegar o email direto do googleIdTokenCredential.id
+        val email = googleIdTokenCredential.id  // isso já é o email!
         
         viewModel.processCredential(idToken, serverAuthCode, email)
     } catch (e: GetCredentialException) {

@@ -119,22 +119,16 @@ class GDriveRepository @Inject constructor(
                 .putString("gdrive_avatar", profilePictureUri)
                 .apply()
 
-            // Usa o email recebido ou pede ao usuário
-            var accountEmail = email
+            // ✅ AGORA USA O EMAIL QUE VEIO DO LOGIN (não usa getAccountName mais)
+            val accountEmail = email
             if (accountEmail.isNullOrBlank()) {
-                // Fallback: tenta pegar a conta primária (pode falhar)
-                accountEmail = try {
-                    com.google.android.gms.auth.GoogleAuthUtil.getAccountName(context)
-                } catch (e: Exception) { null }
-                if (accountEmail.isNullOrBlank()) {
-                    return@withContext Result.failure(Exception("Não foi possível identificar a conta Google. Tente novamente."))
-                }
+                return@withContext Result.failure(Exception("Email não recebido do Google. Tente novamente."))
             }
 
             // Pede token de acesso usando o email
             val scope = "oauth2:${GDriveConstants.SCOPE_DRIVE_READONLY}"
             val accessToken = try {
-                com.google.android.gms.auth.GoogleAuthUtil.getToken(context, accountEmail, scope)
+                GoogleAuthUtil.getToken(context, accountEmail, scope)
             } catch (e: com.google.android.gms.auth.UserRecoverableAuthException) {
                 return@withContext Result.failure(Exception("É necessário autorizar o acesso ao Google Drive. O app tentará novamente."))
             } catch (e: Exception) {
