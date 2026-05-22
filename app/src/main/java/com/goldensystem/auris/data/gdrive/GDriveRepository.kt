@@ -29,13 +29,14 @@ import timber.log.Timber
 import kotlin.math.absoluteValue
 import javax.inject.Inject
 import javax.inject.Singleton
+import dagger.Lazy
 
 @Singleton
 class GDriveRepository @Inject constructor(
     private val api: GDriveApiService,
     private val dao: GDriveDao,
     private val musicDao: MusicDao,
-    private val gdriveStreamProxy: GDriveStreamProxy,   // <-- NOVO
+    private val gdriveStreamProxy: dagger.Lazy<GDriveStreamProxy>,   // <-- NOVO
     @ApplicationContext private val context: Context
 ) {
     data class BulkSyncResult(
@@ -148,7 +149,7 @@ class GDriveRepository @Inject constructor(
             api.setAccessToken(accessToken)
             _isLoggedInFlow.value = true
             
-            gdriveStreamProxy.start()
+            gdriveStreamProxy.get().start()
 
             Result.success(displayName ?: email ?: "Usuário")
         } catch (e: Exception) {
