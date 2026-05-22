@@ -77,7 +77,6 @@ fun GDriveLoginScreen(
         smoothnessAsPercentBR = 60, smoothnessAsPercentBL = 60
     )
 
-    // Handle state transitions
     LaunchedEffect(loginState) {
         when (loginState) {
             is GDriveLoginState.Success -> {
@@ -85,11 +84,7 @@ fun GDriveLoginScreen(
                 onClose()
             }
             is GDriveLoginState.Error -> {
-                Toast.makeText(
-                    context,
-                    (loginState as GDriveLoginState.Error).message,
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(context, (loginState as GDriveLoginState.Error).message, Toast.LENGTH_SHORT).show()
             }
             else -> {}
         }
@@ -100,27 +95,16 @@ fun GDriveLoginScreen(
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Rounded.CloudQueue,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        Icon(Icons.Rounded.CloudQueue, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(24.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text(
-                            stringResource(R.string.auth_gdrive_title),
-                            fontFamily = GoogleSansRounded,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                        Text(stringResource(R.string.auth_gdrive_title), fontFamily = GoogleSansRounded, fontWeight = FontWeight.SemiBold)
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = {
                         if (loginState is GDriveLoginState.FolderSetup) {
                             if (!viewModel.navigateBack()) onClose()
-                        } else {
-                            onClose()
-                        }
+                        } else onClose()
                     }) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.auth_cd_back))
                     }
@@ -128,320 +112,107 @@ fun GDriveLoginScreen(
             )
         }
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             when (val state = loginState) {
                 is GDriveLoginState.Idle, is GDriveLoginState.Error -> {
-                    // Sign-in screen
                     SignInContent(
                         cardShape = cardShape,
                         isError = state is GDriveLoginState.Error,
                         errorMessage = (state as? GDriveLoginState.Error)?.message,
-                        onSignIn = {
-                            scope.launch {
-                                signInWithGoogle(context, viewModel)
-                            }
-                        }
+                        onSignIn = { scope.launch { signInWithGoogle(context, viewModel) } }
                     )
                 }
-
                 is GDriveLoginState.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator(
-                                color = MaterialTheme.colorScheme.secondary
-                            )
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
                             Spacer(Modifier.height(16.dp))
-                            Text(
-                                stringResource(R.string.auth_gdrive_setting_up),
-                                fontFamily = GoogleSansRounded,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
+                            Text(stringResource(R.string.auth_gdrive_setting_up), fontFamily = GoogleSansRounded, style = MaterialTheme.typography.bodyLarge)
                         }
                     }
                 }
-
                 is GDriveLoginState.LoggedIn -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.secondary
-                        )
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
                     }
                 }
-
                 is GDriveLoginState.FolderSetup -> {
                     FolderSetupContent(
                         state = state,
                         cardShape = cardShape,
-                        onFolderClick = { folder -> viewModel.navigateIntoFolder(folder) },
-                        onSelectFolder = { folder ->
-                            viewModel.selectFolder(folder.id, folder.name)
-                        },
+                        onFolderClick = { viewModel.navigateIntoFolder(it) },
+                        onSelectFolder = { viewModel.selectFolder(it.id, it.name) },
                         onCreateFolder = { viewModel.createMusicFolder() },
-                        onBreadcrumbClick = { index -> viewModel.navigateToBreadcrumb(index) }
+                        onBreadcrumbClick = { viewModel.navigateToBreadcrumb(it) }
                     )
                 }
-
-                is GDriveLoginState.Success -> {
-                    // Handled by LaunchedEffect
-                }
+                is GDriveLoginState.Success -> {}
             }
         }
     }
 }
 
 @Composable
-private fun SignInContent(
-    cardShape: AbsoluteSmoothCornerShape,
-    isError: Boolean,
-    errorMessage: String?,
-    onSignIn: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Google Drive icon
-        Box(
-            modifier = Modifier
-                .size(80.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.secondaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                Icons.Rounded.CloudQueue,
-                contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.secondary
-            )
+private fun SignInContent(cardShape: AbsoluteSmoothCornerShape, isError: Boolean, errorMessage: String?, onSignIn: () -> Unit) {
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Box(modifier = Modifier.size(80.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {
+            Icon(Icons.Rounded.CloudQueue, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.secondary)
         }
-
         Spacer(Modifier.height(24.dp))
-
-        Text(
-            stringResource(R.string.auth_gdrive_connect_title),
-            style = MaterialTheme.typography.headlineSmall,
-            fontFamily = GoogleSansRounded,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-
+        Text(stringResource(R.string.auth_gdrive_connect_title), style = MaterialTheme.typography.headlineSmall, fontFamily = GoogleSansRounded, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         Spacer(Modifier.height(8.dp))
-
-        Text(
-            stringResource(R.string.auth_gdrive_connect_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            fontFamily = GoogleSansRounded,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-
+        Text(stringResource(R.string.auth_gdrive_connect_subtitle), style = MaterialTheme.typography.bodyMedium, fontFamily = GoogleSansRounded, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
         Spacer(Modifier.height(32.dp))
-
-        Button(
-            onClick = onSignIn,
-            shape = cardShape,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.onSecondary
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-        ) {
-            Text(
-                stringResource(R.string.auth_gdrive_sign_in_with_google),
-                fontFamily = GoogleSansRounded,
-                fontWeight = FontWeight.SemiBold,
-                style = MaterialTheme.typography.titleMedium
-            )
+        Button(onClick = onSignIn, shape = cardShape, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary, contentColor = MaterialTheme.colorScheme.onSecondary), modifier = Modifier.fillMaxWidth().height(56.dp)) {
+            Text(stringResource(R.string.auth_gdrive_sign_in_with_google), fontFamily = GoogleSansRounded, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleMedium)
         }
-
         if (isError && errorMessage != null) {
             Spacer(Modifier.height(16.dp))
-            Card(
-                shape = cardShape,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
-                )
-            ) {
-                Text(
-                    text = errorMessage,
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontFamily = GoogleSansRounded,
-                    color = MaterialTheme.colorScheme.onErrorContainer
-                )
+            Card(shape = cardShape, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+                Text(text = errorMessage, modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium, fontFamily = GoogleSansRounded, color = MaterialTheme.colorScheme.onErrorContainer)
             }
         }
     }
 }
 
 @Composable
-private fun FolderSetupContent(
-    state: GDriveLoginState.FolderSetup,
-    cardShape: AbsoluteSmoothCornerShape,
-    onFolderClick: (FolderItem) -> Unit,
-    onSelectFolder: (FolderItem) -> Unit,
-    onCreateFolder: () -> Unit,
-    onBreadcrumbClick: (Int) -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Header
-        Text(
-            text = stringResource(R.string.auth_gdrive_select_music_folder_title),
-            style = MaterialTheme.typography.titleMedium,
-            fontFamily = GoogleSansRounded,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-        )
-
-        Text(
-            text = stringResource(R.string.auth_gdrive_select_music_folder_subtitle),
-            style = MaterialTheme.typography.bodySmall,
-            fontFamily = GoogleSansRounded,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 24.dp)
-        )
-
+private fun FolderSetupContent(state: GDriveLoginState.FolderSetup, cardShape: AbsoluteSmoothCornerShape, onFolderClick: (FolderItem) -> Unit, onSelectFolder: (FolderItem) -> Unit, onCreateFolder: () -> Unit, onBreadcrumbClick: (Int) -> Unit) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        Text(stringResource(R.string.auth_gdrive_select_music_folder_title), style = MaterialTheme.typography.titleMedium, fontFamily = GoogleSansRounded, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+        Text(stringResource(R.string.auth_gdrive_select_music_folder_subtitle), style = MaterialTheme.typography.bodySmall, fontFamily = GoogleSansRounded, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 24.dp))
         Spacer(Modifier.height(12.dp))
-
-        // Breadcrumb navigation
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        LazyRow(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             itemsIndexed(state.currentPath) { index, crumb ->
-                if (index > 0) {
-                    Icon(
-                        Icons.Rounded.ChevronRight,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                TextButton(
-                    onClick = { onBreadcrumbClick(index) },
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = crumb.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontFamily = GoogleSansRounded,
-                        fontWeight = if (index == state.currentPath.lastIndex) FontWeight.Bold else FontWeight.Normal,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                if (index > 0) Icon(Icons.Rounded.ChevronRight, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                TextButton(onClick = { onBreadcrumbClick(index) }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)) {
+                    Text(text = crumb.name, style = MaterialTheme.typography.bodyMedium, fontFamily = GoogleSansRounded, fontWeight = if (index == state.currentPath.lastIndex) FontWeight.Bold else FontWeight.Normal, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
-
         Spacer(Modifier.height(8.dp))
-
-        // Create folder button
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .clickable(enabled = !state.isLoading, onClick = onCreateFolder),
-            shape = cardShape,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            )
-        ) {
-            Row(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Rounded.CreateNewFolder,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(24.dp)
-                )
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).clickable(enabled = !state.isLoading, onClick = onCreateFolder), shape = cardShape, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+            Row(modifier = Modifier.padding(16.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Rounded.CreateNewFolder, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(24.dp))
                 Spacer(Modifier.width(12.dp))
                 Column {
-                    Text(
-                        text = stringResource(R.string.auth_gdrive_create_pixelplay_music_title),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontFamily = GoogleSansRounded,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Text(
-                        text = stringResource(R.string.auth_gdrive_create_folder_here_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        fontFamily = GoogleSansRounded,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
-                    )
+                    Text(stringResource(R.string.auth_gdrive_create_pixelplay_music_title), style = MaterialTheme.typography.titleSmall, fontFamily = GoogleSansRounded, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                    Text(stringResource(R.string.auth_gdrive_create_folder_here_hint), style = MaterialTheme.typography.bodySmall, fontFamily = GoogleSansRounded, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f))
                 }
             }
         }
-
         Spacer(Modifier.height(8.dp))
-
-        // Folder list
         if (state.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(32.dp),
-                    strokeWidth = 3.dp,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+            Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(modifier = Modifier.size(32.dp), strokeWidth = 3.dp, color = MaterialTheme.colorScheme.secondary)
             }
         } else if (state.folders.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.auth_gdrive_no_folders_here),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontFamily = GoogleSansRounded,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
+            Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                Text(stringResource(R.string.auth_gdrive_no_folders_here), style = MaterialTheme.typography.bodyLarge, fontFamily = GoogleSansRounded, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
             }
         } else {
-            LazyColumn(
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                items(
-                    items = state.folders,
-                    key = { it.id }
-                ) { folder ->
-                    FolderCard(
-                        folder = folder,
-                        cardShape = cardShape,
-                        onNavigate = { onFolderClick(folder) },
-                        onSelect = { onSelectFolder(folder) }
-                    )
+            LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                items(state.folders, key = { it.id }) { folder ->
+                    FolderCard(folder, cardShape, { onFolderClick(folder) }, { onSelectFolder(folder) })
                 }
             }
         }
@@ -449,117 +220,42 @@ private fun FolderSetupContent(
 }
 
 @Composable
-private fun FolderCard(
-    folder: FolderItem,
-    cardShape: AbsoluteSmoothCornerShape,
-    onNavigate: () -> Unit,
-    onSelect: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onNavigate),
-        shape = cardShape,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.secondaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Rounded.Folder,
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp),
-                    tint = MaterialTheme.colorScheme.secondary
-                )
+private fun FolderCard(folder: FolderItem, cardShape: AbsoluteSmoothCornerShape, onNavigate: () -> Unit, onSelect: () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth().clickable(onClick = onNavigate), shape = cardShape, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
+        Row(modifier = Modifier.padding(12.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {
+                Icon(Icons.Rounded.Folder, contentDescription = null, modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.secondary)
             }
-
             Spacer(Modifier.width(12.dp))
-
-            Text(
-                text = folder.name,
-                style = MaterialTheme.typography.titleSmall,
-                fontFamily = GoogleSansRounded,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-
-            // Use this folder button
-            FilledTonalButton(
-                onClick = onSelect,
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                colors = ButtonDefaults.filledTonalButtonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f),
-                    contentColor = MaterialTheme.colorScheme.secondary
-                )
-            ) {
-                Text(
-                    stringResource(R.string.auth_gdrive_use_this_folder),
-                    fontFamily = GoogleSansRounded,
-                    fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.labelMedium
-                )
+            Text(text = folder.name, style = MaterialTheme.typography.titleSmall, fontFamily = GoogleSansRounded, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            FilledTonalButton(onClick = onSelect, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f), contentColor = MaterialTheme.colorScheme.secondary)) {
+                Text(stringResource(R.string.auth_gdrive_use_this_folder), fontFamily = GoogleSansRounded, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
             }
-
             Spacer(Modifier.width(4.dp))
-
-            Icon(
-                Icons.Rounded.ChevronRight,
-                contentDescription = stringResource(R.string.auth_gdrive_cd_open_folder),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.size(20.dp)
-            )
+            Icon(Icons.Rounded.ChevronRight, contentDescription = stringResource(R.string.auth_gdrive_cd_open_folder), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
         }
     }
 }
 
-private suspend fun signInWithGoogle(
-    context: android.content.Context,
-    viewModel: GDriveLoginViewModel
-) {
+private suspend fun signInWithGoogle(context: android.content.Context, viewModel: GDriveLoginViewModel) {
     try {
         val credentialManager = CredentialManager.create(context)
-
         val googleIdOption = GetGoogleIdOption.Builder()
             .setServerClientId(GDriveConstants.WEB_CLIENT_ID)
             .setFilterByAuthorizedAccounts(false)
             .setAutoSelectEnabled(false)
             .setNonce(null)
-            .addAdditionalScope(GDriveConstants.SCOPE_DRIVE_READONLY)
-            .build()
-
-        val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
-
+            .build()  // ← sem addAdditionalScope
+        val request = GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build()
         val result = credentialManager.getCredential(request, context as android.app.Activity)
         val credential = result.credential
         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
         val idToken = googleIdTokenCredential.idToken
         val serverAuthCode = credential.data.getString("com.google.android.libraries.identity.googleid.BUNDLE_KEY_SERVER_AUTH_CODE")
-
-        // 👇 NOVO: pega email, nome e foto
-        val email = googleIdTokenCredential.account?.email
-        val displayName = googleIdTokenCredential.account?.displayName
-        val profilePic = googleIdTokenCredential.account?.profilePictureUri?.toString()
-
-        viewModel.processCredential(idToken, serverAuthCode, email, displayName, profilePic)
+        viewModel.processCredential(idToken, serverAuthCode)
     } catch (e: GetCredentialException) {
-        viewModel.processCredential("", null, null, null, null)
+        viewModel.processCredential("", null)
     } catch (e: Exception) {
-        viewModel.processCredential("", null, null, null, null)
+        viewModel.processCredential("", null)
     }
 }

@@ -1,6 +1,7 @@
 package com.goldensystem.auris.data.gdrive
 
 import android.content.Context
+import com.google.android.gms.auth.GoogleAuthUtil
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
@@ -111,25 +112,24 @@ class GDriveRepository @Inject constructor(
 ): Result<String> {
     return withContext(Dispatchers.IO) {
         try {
-            // Salva nome e email (só para mostrar na tela)
+            // Salva informações do usuário (opcional)
             prefs.edit()
                 .putString("gdrive_email", email)
                 .putString("gdrive_display_name", displayName)
                 .putString("gdrive_avatar", profilePictureUri)
                 .apply()
 
-            // Pega a conta do Google que está logada no celular
-            val account = com.google.android.gms.auth.GoogleAuthUtil.getAccountName(context)
-            if (account.isNullOrBlank()) {
+            // Pega o nome da conta (email) do Google AccountManager
+            val accountName = com.google.android.gms.auth.GoogleAuthUtil.getAccountName(context)
+            if (accountName.isNullOrBlank()) {
                 return@withContext Result.failure(Exception("Nenhuma conta Google encontrada. Adicione uma conta nas configurações."))
             }
 
-            // Pede um token de acesso para o Google Drive
+            // Pede token de acesso usando o nome da conta
             val scope = "oauth2:${GDriveConstants.SCOPE_DRIVE_READONLY}"
             val accessToken = try {
-                com.google.android.gms.auth.GoogleAuthUtil.getToken(context, account, scope)
+                com.google.android.gms.auth.GoogleAuthUtil.getToken(context, accountName, scope)
             } catch (e: com.google.android.gms.auth.UserRecoverableAuthException) {
-                // Esse erro acontece se o usuário nunca deu permissão. O app não consegue resolver sozinho.
                 return@withContext Result.failure(Exception("Precisa autorizar o Google Drive. Tente novamente."))
             } catch (e: Exception) {
                 return@withContext Result.failure(e)
@@ -139,7 +139,7 @@ class GDriveRepository @Inject constructor(
                 return@withContext Result.failure(Exception("Token de acesso vazio"))
             }
 
-            // Salva o token para usar depois
+            // Salva o token
             prefs.edit()
                 .putString("gdrive_access_token", accessToken)
                 .putLong("gdrive_token_expires_at", System.currentTimeMillis() + 3600_000L)
