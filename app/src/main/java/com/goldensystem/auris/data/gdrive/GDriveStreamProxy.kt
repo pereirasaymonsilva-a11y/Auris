@@ -28,13 +28,6 @@ import java.net.ServerSocket
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Local HTTP proxy server for streaming Google Drive audio.
- *
- * Resolves `gdrive://{fileId}` URIs by proxying requests to the Drive REST API
- * with the required Authorization header. Follows the same architectural pattern
- * as [NeteaseStreamProxy] and [TelegramStreamProxy] using Ktor CIO.
- */
 @Singleton
 class GDriveStreamProxy @Inject constructor(
     private val repository: GDriveRepository,
@@ -53,15 +46,12 @@ class GDriveStreamProxy @Inject constructor(
     private var startJob: Job? = null
 
     fun isReady(): Boolean = actualPort > 0 && server != null
-    funfun getProxyUrl(fileId: String): String {
-    if (!isReady()) return ""
-    return "http://127.0.0.1:$actualPort/gdrive/$fileId"
+
+    fun getProxyUrl(fileId: String): String {
+        if (!isReady()) return ""
+        return "http://127.0.0.1:$actualPort/gdrive/$fileId"
     }
 
-    /**
-     * Parse a `gdrive://` URI and return the proxy URL.
-     * Returns null if the URI is not a valid GDrive URI.
-     */
     fun resolveGDriveUri(uriString: String): String? {
         val uri = Uri.parse(uriString)
         if (uri.scheme != "gdrive") return null
@@ -104,7 +94,6 @@ class GDriveStreamProxy @Inject constructor(
             host = "127.0.0.1",
             port = port,
             configure = {
-                // Keep behavior consistent with the other local proxies during quick restarts.
                 reuseAddress = true
             }
         ) {
@@ -140,7 +129,6 @@ class GDriveStreamProxy @Inject constructor(
                             return@get
                         }
 
-                        // Build the request to Google Drive
                         val requestBuilder = Request.Builder()
                             .url(streamUrl)
                             .header("Authorization", authHeader)
@@ -153,7 +141,6 @@ class GDriveStreamProxy @Inject constructor(
                             okHttpClient.newCall(requestBuilder.build()).execute()
                         }
 
-                        // If 401, try refreshing the token and retry once
                         if (response.code == 401) {
                             response.close()
                             Timber.d("GDriveStreamProxy: 401 received, refreshing token...")
