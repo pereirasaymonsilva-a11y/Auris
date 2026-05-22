@@ -219,6 +219,8 @@ private data class ResolvedAlbumSelection(
 class PlayerViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val musicRepository: MusicRepository,
+    //conversor gdrive
+    private val gdriveStreamProxy: GDriveStreamProxy,
     private val aurisOnlineRepository: AurisOnlineRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val aiPreferencesRepository: AiPreferencesRepository,
@@ -3010,7 +3012,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     private suspend fun buildResolvedPlaybackMediaItem(song: Song): MediaItem {
-        val mediaItem = MediaItemBuilder.build(song)
+        val mediaItem = MediaItemBuilder.build(song, gdriveStreamProxy)
         val originalUri = mediaItem.localConfiguration?.uri ?: return mediaItem
         val scheme = originalUri.scheme
         if (
@@ -3056,7 +3058,7 @@ class PlayerViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val mediaItem = buildResolvedPlaybackMediaItem(song)
+            val mediaItem = buildResolvedPlaybackMediaItem(song, gdriveStreamProxy)
             if (controller.currentMediaItem?.mediaId == song.id) {
                 if (!controller.isPlaying) controller.play()
             } else {
@@ -3143,23 +3145,21 @@ class PlayerViewModel @Inject constructor(
     }
 
     private fun buildPlaybackMediaItem(song: Song, playlistId: String? = null): MediaItem {
-        val baseItem = MediaItemBuilder.build(song)
-        if (playlistId == null) {
-            return baseItem
-        }
+    val baseItem = MediaItemBuilder.build(song, gdriveStreamProxy)  // <-- passando proxy
+    if (playlistId == null) return baseItem
 
-        val mergedExtras = Bundle(baseItem.mediaMetadata.extras ?: Bundle()).apply {
-            putString("playlistId", playlistId)
-        }
-
-        return baseItem.buildUpon()
-            .setMediaMetadata(
-                baseItem.mediaMetadata.buildUpon()
-                    .setExtras(mergedExtras)
-                    .build()
-            )
-            .build()
+    val mergedExtras = Bundle(baseItem.mediaMetadata.extras ?: Bundle()).apply {
+        putString("playlistId", playlistId)
     }
+
+    return baseItem.buildUpon()
+        .setMediaMetadata(
+            baseItem.mediaMetadata.buildUpon()
+                .setExtras(mergedExtras)
+                .build()
+        )
+        .build()
+}
 
     fun playSelectedSongs(songs: List<Song>) {
         if (songs.isEmpty()) return

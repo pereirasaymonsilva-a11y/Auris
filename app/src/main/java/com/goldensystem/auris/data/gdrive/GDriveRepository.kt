@@ -35,6 +35,7 @@ class GDriveRepository @Inject constructor(
     private val api: GDriveApiService,
     private val dao: GDriveDao,
     private val musicDao: MusicDao,
+    private val gdriveStreamProxy: GDriveStreamProxy,   // <-- NOVO
     @ApplicationContext private val context: Context
 ) {
     data class BulkSyncResult(
@@ -146,6 +147,8 @@ class GDriveRepository @Inject constructor(
 
             api.setAccessToken(accessToken)
             _isLoggedInFlow.value = true
+            
+            gdriveStreamProxy.start()
 
             Result.success(displayName ?: email ?: "Usuário")
         } catch (e: Exception) {

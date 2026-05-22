@@ -1,6 +1,7 @@
 package com.goldensystem.auris.utils
 
 import android.content.Context
+import com.goldensystem.auris.data.gdrive.GDriveStreamProxy
 import android.net.Uri
 import android.os.Bundle
 import androidx.core.content.FileProvider
@@ -73,14 +74,14 @@ object MediaItemBuilder {
     const val EXTERNAL_EXTRA_SAMPLE_RATE = EXTERNAL_EXTRA_PREFIX + "SAMPLE_RATE"
     const val EXTERNAL_EXTRA_FILE_PATH = EXTERNAL_EXTRA_PREFIX + "FILE_PATH"
 
-    fun build(song: Song): MediaItem {
-        return MediaItem.Builder()
-            .setMediaId(song.id)
-            .setUri(playbackUri(song))
-            .setMimeType(playbackMimeType(song))
-            .setMediaMetadata(buildMediaMetadataForSong(song))
-            .build()
-    }
+    fun build(song: Song, gdriveProxy: GDriveStreamProxy? = null): MediaItem {
+    return MediaItem.Builder()
+        .setMediaId(song.id)
+        .setUri(playbackUri(song, gdriveProxy))
+        .setMimeType(playbackMimeType(song))
+        .setMediaMetadata(buildMediaMetadataForSong(song))
+        .build()
+}
 
     fun buildForExternalController(context: Context, song: Song): MediaItem {
         return MediaItem.Builder()
@@ -96,11 +97,14 @@ object MediaItemBuilder {
             .build()
     }
 
-    fun playbackUri(song: Song): Uri = playbackUri(
+    fun playbackUri(song: Song, gdriveProxy: GDriveStreamProxy? = null): Uri {
+    return playbackUri(
         contentUriString = song.contentUriString,
         filePath = song.path,
-        mimeType = song.mimeType
+        mimeType = song.mimeType,
+        gdriveProxy = gdriveProxy
     )
+}
 
     internal fun playbackMimeType(song: Song): String? = playbackMimeType(
         contentUriString = song.contentUriString,
@@ -108,22 +112,31 @@ object MediaItemBuilder {
         mimeType = song.mimeType
     )
 
-    fun playbackUri(
-        contentUriString: String,
-        filePath: String? = null,
-        mimeType: String? = null
-    ): Uri {
-        directLocalFileUri(contentUriString, filePath, mimeType)?.let { return it }
-        val uri = runCatching { Uri.parse(contentUriString) }.getOrNull()
-            ?: return Uri.fromFile(File(contentUriString))
-        // Telegram downloaded files can be stored as absolute paths (without file://).
-        // Normalize them so ExoPlayer always gets a canonical local-file URI.
-        return if (uri.scheme.isNullOrBlank() && contentUriString.startsWith("/")) {
-            Uri.fromFile(File(contentUriString))
-        } else {
-            uri
+    internal fun playbackUri(
+    contentUriString: String,
+    filePath: String? = null,
+    mimeType: String? = null,
+    gdriveProxy: GDriveStreamProxy? = null
+): Uri {
+    // 🚀 NOVO: Resolver URI do Google Drive via proxy local
+    if (contentUriString.startsWith("gdrive://") && gdriveProxy != null && gdriveProxy.isReady()) {
+        val fileId = contentUriString.substringAfter("gdrive://")
+        val proxyUrl = gdriveProxy.getProxyUrl(fileId)
+        if (proxyUrl.isNotBlank()) {
+            return Uri.parse(proxyUrl)  // Ex: http://127.0.0.1:54321/gdrive/abc123
         }
     }
+
+    // Código original (não altere o resto)
+    directLocalFileUri(contentUriString, filePath, mimeType)?.let { return it }
+    val uri = runCatching { Uri.parse(contentUriString) }.getOrNull()
+        ?: return Uri.fromFile(File(contentUriString))
+    return if (uri.scheme.isNullOrBlank() && contentUriString.startsWith("/")) {
+        Uri.fromFile(File(contentUriString))
+    } else {
+        uri
+    }
+}
 
     internal fun playbackMimeType(
         contentUriString: String,

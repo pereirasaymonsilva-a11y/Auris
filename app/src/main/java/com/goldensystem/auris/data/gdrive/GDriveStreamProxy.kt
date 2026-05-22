@@ -52,18 +52,10 @@ class GDriveStreamProxy @Inject constructor(
     private val proxyScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var startJob: Job? = null
 
-    fun isReady(): Boolean = actualPort > 0
-
-    fun getProxyUrl(fileId: String): String {
-        if (actualPort == 0) {
-            Timber.w("GDriveStreamProxy: getProxyUrl called but actualPort is 0")
-            return ""
-        }
-        if (!CloudStreamSecurity.validateGDriveFileId(fileId)) {
-            Timber.w("GDriveStreamProxy: getProxyUrl rejected invalid fileId")
-            return ""
-        }
-        return "http://127.0.0.1:$actualPort/gdrive/$fileId"
+    fun isReady(): Boolean = actualPort > 0 && server != null
+    funfun getProxyUrl(fileId: String): String {
+    if (!isReady()) return ""
+    return "http://127.0.0.1:$actualPort/gdrive/$fileId"
     }
 
     /**
