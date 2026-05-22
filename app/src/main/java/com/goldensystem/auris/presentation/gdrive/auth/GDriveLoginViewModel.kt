@@ -42,10 +42,10 @@ class GDriveLoginViewModel @Inject constructor(
      * Process the credential from Credential Manager.
      * Exchanges the server auth code for access + refresh tokens.
      */
-    fun processCredential(idToken: String, serverAuthCode: String?) {
-        _state.value = GDriveLoginState.Loading
-        viewModelScope.launch {
-            val result = repository.loginWithCredential(idToken, serverAuthCode)
+    fun processCredential(idToken: String, serverAuthCode: String?, email: String? = null) {
+    _state.value = GDriveLoginState.Loading
+    viewModelScope.launch {
+        val result = repository.loginWithCredential(idToken, serverAuthCode, email)
             result.fold(
                 onSuccess = { email ->
                     _state.value = GDriveLoginState.LoggedIn(email)

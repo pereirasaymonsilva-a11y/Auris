@@ -245,17 +245,25 @@ private suspend fun signInWithGoogle(context: android.content.Context, viewModel
             .setFilterByAuthorizedAccounts(false)
             .setAutoSelectEnabled(false)
             .setNonce(null)
-            .build()  // ← sem addAdditionalScope
+            .build()
         val request = GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build()
-        val result = credentialManager.getCredential(request, context as android.app.Activity)
-        val credential = result.credential
+        // Use o context como Activity (já que GDriveLoginActivity é uma Activity)
+        val result = credentialManager.getCredential(context as android.app.Activity, request)
+        val credential = result.getCredential()
         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
         val idToken = googleIdTokenCredential.idToken
         val serverAuthCode = credential.data.getString("com.google.android.libraries.identity.googleid.BUNDLE_KEY_SERVER_AUTH_CODE")
-        viewModel.processCredential(idToken, serverAuthCode)
+        
+        // Extrair email do token (opcional, mas útil)
+        val email = try {
+            val payload = String(android.util.Base64.decode(idToken.split(".")[1], android.util.Base64.URL_SAFE))
+            org.json.JSONObject(payload).optString("email")
+        } catch (e: Exception) { null }
+        
+        viewModel.processCredential(idToken, serverAuthCode, email)
     } catch (e: GetCredentialException) {
-        viewModel.processCredential("", null)
+        viewModel.processCredential("", null, null)
     } catch (e: Exception) {
-        viewModel.processCredential("", null)
+        viewModel.processCredential("", null, null)
     }
 }
