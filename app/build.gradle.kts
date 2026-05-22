@@ -386,6 +386,7 @@ dependencies {
     implementation(libs.credentials)
     implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     // Kuromoji
     implementation(libs.kuromoji.ipadic)

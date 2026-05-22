@@ -538,6 +538,7 @@ private suspend fun signInWithGoogle(
             .setFilterByAuthorizedAccounts(false)
             .setAutoSelectEnabled(false)
             .setNonce(null)
+            .addAdditionalScope(GDriveConstants.SCOPE_DRIVE_READONLY)
             .build()
 
         val request = GetCredentialRequest.Builder()

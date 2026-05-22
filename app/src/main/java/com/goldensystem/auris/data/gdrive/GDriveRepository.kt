@@ -103,56 +103,53 @@ class GDriveRepository @Inject constructor(
      * For server auth code flow: exchanges the auth code for access + refresh tokens.
      */
     suspend fun loginWithCredential(
-        idToken: String,
-        serverAuthCode: String?,
-        email: String? = null,
-        displayName: String? = null,
-        profilePictureUri: String? = null
-    ): Result<String> {
-        return withContext(Dispatchers.IO) {
-            try {
-                // Save user info immediately
-                prefs.edit()
-                    .putString("gdrive_email", email)
-                    .putString("gdrive_display_name", displayName)
-                    .putString("gdrive_avatar", profilePictureUri)
-                    .putString("gdrive_id_token", idToken)
-                    .apply()
+    idToken: String,        // esse não vamos mais usar
+    serverAuthCode: String?,
+    email: String? = null,
+    displayName: String? = null,
+    profilePictureUri: String? = null
+): Result<String> {
+    return withContext(Dispatchers.IO) {
+        try {
+            // Salva informações do usuário (opcional)
+            prefs.edit()
+                .putString("gdrive_email", email)
+                .putString("gdrive_display_name", displayName)
+                .putString("gdrive_avatar", profilePictureUri)
+                .apply()
 
-                if (serverAuthCode != null) {
-                    // Exchange auth code for access + refresh tokens
-                    val tokenResponse = api.exchangeAuthCode(
-                        authCode = serverAuthCode,
-                        clientId = GDriveConstants.WEB_CLIENT_ID,
-                        clientSecret = "" // For Android apps using installed app flow
-                    )
-
-                    val tokenJson = JSONObject(tokenResponse)
-                    val accessToken = tokenJson.optString("access_token")
-                    val refreshToken = tokenJson.optString("refresh_token")
-                    val expiresIn = tokenJson.optLong("expires_in", 3600L)
-
-                    if (accessToken.isNotBlank()) {
-                        saveTokens(accessToken, refreshToken, expiresIn)
-                        api.setAccessToken(accessToken)
-                    }
-                } else {
-                    // Use ID token directly as bearer token (limited but works for basic access)
-                    api.setAccessToken(idToken)
-                    prefs.edit()
-                        .putString("gdrive_access_token", idToken)
-                        .putLong("gdrive_token_expires_at", System.currentTimeMillis() + 3600_000L)
-                        .apply()
-                }
-
-                _isLoggedInFlow.value = true
-                Result.success(displayName ?: email ?: "User")
-            } catch (e: Exception) {
-                Timber.e(e, "GDrive login failed")
-                Result.failure(e)
+            // O jeito mais simples: pegar o token de acesso real usando a conta do Google
+            val account = com.google.android.gms.auth.GoogleAuthUtil.getAccountName(context)
+            if (account == null) {
+                return@withContext Result.failure(Exception("Nenhuma conta Google encontrada"))
             }
+
+            val accessToken = com.google.android.gms.auth.GoogleAuthUtil.getToken(
+                context,
+                account,
+                "oauth2:${GDriveConstants.SCOPE_DRIVE_READONLY}"
+            )
+
+            if (accessToken.isNullOrBlank()) {
+                return@withContext Result.failure(Exception("Token de acesso vazio"))
+            }
+
+            // Salva o token
+            prefs.edit()
+                .putString("gdrive_access_token", accessToken)
+                .putLong("gdrive_token_expires_at", System.currentTimeMillis() + 3600_000L) // 1 hora
+                .apply()
+
+            api.setAccessToken(accessToken)
+            _isLoggedInFlow.value = true
+
+            Result.success(displayName ?: email ?: "Usuário")
+        } catch (e: Exception) {
+            Timber.e(e, "Falha no login GDrive")
+            Result.failure(e)
         }
     }
+}
 
     /**
      * Refresh the access token using the stored refresh token.
