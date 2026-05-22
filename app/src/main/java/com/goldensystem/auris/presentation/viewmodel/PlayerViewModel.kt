@@ -5,6 +5,7 @@ import com.goldensystem.auris.data.repository.AurisOnlineRepository
 import android.app.Activity
 import android.content.ComponentName
 import android.net.Uri
+import com.goldensystem.auris.data.gdrive.GDriveStreamProxy
 import android.os.Trace
 import android.media.MediaMetadataRetriever
 import android.util.Log
