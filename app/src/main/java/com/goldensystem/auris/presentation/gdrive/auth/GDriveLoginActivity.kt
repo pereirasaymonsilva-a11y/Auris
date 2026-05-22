@@ -545,21 +545,21 @@ private suspend fun signInWithGoogle(
             .addCredentialOption(googleIdOption)
             .build()
 
-        val result = credentialManager.getCredential(
-            request = request,
-            context = context as android.app.Activity
-        )
-
+        val result = credentialManager.getCredential(request, context as android.app.Activity)
         val credential = result.credential
         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
         val idToken = googleIdTokenCredential.idToken
-        // serverAuthCode is available in the bundle data
         val serverAuthCode = credential.data.getString("com.google.android.libraries.identity.googleid.BUNDLE_KEY_SERVER_AUTH_CODE")
 
-        viewModel.processCredential(idToken, serverAuthCode)
+        // 👇 NOVO: pega email, nome e foto
+        val email = googleIdTokenCredential.account?.email
+        val displayName = googleIdTokenCredential.account?.displayName
+        val profilePic = googleIdTokenCredential.account?.profilePictureUri?.toString()
+
+        viewModel.processCredential(idToken, serverAuthCode, email, displayName, profilePic)
     } catch (e: GetCredentialException) {
-        viewModel.processCredential("", null) // Will trigger error state
+        viewModel.processCredential("", null, null, null, null)
     } catch (e: Exception) {
-        viewModel.processCredential("", null)
+        viewModel.processCredential("", null, null, null, null)
     }
 }
