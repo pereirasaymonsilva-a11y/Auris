@@ -515,15 +515,15 @@ class GDriveRepository @Inject constructor(
         .ifBlank { file.optString("iconLink") }
         .takeIf { it.isNotBlank() }
 
-        val nameWithoutExt = fileName.substringBeforeLast(".")
-        val nameWithoutExt = fileName.substringBeforeLast(".")
-        val parts = nameWithoutExt.split(" - ")
+       val nameWithoutExt = fileName.substringBeforeLast(".")
 
-        val artist = if (parts.size >= 2) parts[0].trim() else "Unknown Artist"
-        val title = if (parts.size >= 2) parts[1].trim() else nameWithoutExt.trim()
-        } else {
-            "Unknown Artist" to nameWithoutExt.trim()
-        }
+       val parts = nameWithoutExt.split(" - ", limit = 2)
+
+        val (artist, title) = if (parts.size == 2) {
+              parts[0].trim() to parts[1].trim()
+         } else {
+          "Unknown Artist" to nameWithoutExt.trim()
+             }
 
         val dateModified = try {
             java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US)
