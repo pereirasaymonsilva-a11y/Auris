@@ -1,6 +1,8 @@
 package com.goldensystem.auris.data.gdrive
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import com.google.android.gms.auth.GoogleAuthUtil
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -116,14 +118,11 @@ class GDriveRepository @Inject constructor(
             "GDriveRepository: token expired, refreshing..."
         )
 
-        CoroutineScope(
-            Dispatchers.IO
-        ).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             refreshAccessToken()
         }
     }
 }
-
     /**
      * Login using a Google ID token from Credential Manager.
      * For server auth code flow: exchanges the auth code for access + refresh tokens.
