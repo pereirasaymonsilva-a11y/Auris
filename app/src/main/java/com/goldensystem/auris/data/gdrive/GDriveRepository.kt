@@ -214,12 +214,24 @@ class GDriveRepository @Inject constructor(
     /**
      * Ensure the access token is valid, refreshing if needed.
      */
-    private suspend fun ensureValidToken() {
+    private suspend fun ensureValidToken(): Boolean {
+    return try {
         val expiresAt = prefs.getLong("gdrive_token_expires_at", 0L)
-        if (System.currentTimeMillis() > expiresAt - 300_000L) {
-            refreshAccessToken()
+
+        // ainda válido
+        if (System.currentTimeMillis() < expiresAt - 300_000L) {
+            return api.hasToken()
         }
+
+        // precisa refresh
+        val result = refreshAccessToken()
+        result.isSuccess
+
+    } catch (e: Exception) {
+        Timber.e(e, "ensureValidToken failed")
+        false
     }
+}
 
     suspend fun logout() {
         api.clearAccessToken()
