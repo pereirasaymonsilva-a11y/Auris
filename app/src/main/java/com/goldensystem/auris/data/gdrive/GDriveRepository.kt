@@ -78,7 +78,8 @@ class GDriveRepository @Inject constructor(
 
     init {
         initFromSavedTokens()
-        _isLoggedInFlow.value = api.hasToken()
+        _isLoggedInFlow.value =
+    !prefs.getString("gdrive_access_token", null).isNullOrBlank()
         Timber.d("GDriveRepository init: isLoggedIn=${api.hasToken()}, email=${userEmail}")
     }
 
@@ -92,35 +93,15 @@ class GDriveRepository @Inject constructor(
     // --- Token Management ---
 
     private fun initFromSavedTokens() {
-    val accessToken =
-        prefs.getString(
-            "gdrive_access_token",
-            null
-        )
+     val accessToken = prefs.getString("gdrive_access_token", null)
+       val expiresAt = prefs.getLong("gdrive_token_expires_at", 0L)
 
-    val expiresAt =
-        prefs.getLong(
-            "gdrive_token_expires_at",
-            0L
-        )
-
-    if (
-        !accessToken.isNullOrBlank() &&
-        System.currentTimeMillis() < expiresAt
-    ) {
+    if (!accessToken.isNullOrBlank()) {
         api.setAccessToken(accessToken)
-
-        Timber.d(
-            "GDriveRepository: restored access token"
-        )
+        _isLoggedInFlow.value = true
+        Timber.d("GDriveRepository: token restored")
     } else {
-        Timber.d(
-            "GDriveRepository: token expired, refreshing..."
-        )
-
-        CoroutineScope(Dispatchers.IO).launch {
-            refreshAccessToken()
-        }
+        _isLoggedInFlow.value = false
     }
 }
     /**
