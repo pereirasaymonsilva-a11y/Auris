@@ -3,6 +3,7 @@ package com.goldensystem.auris.data.gdrive
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.android.gms.auth.GoogleAuthUtil
+import com.google.android.gms.auth.UserRecoverableAuthException
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.goldensystem.auris.data.database.AlbumEntity
@@ -34,6 +35,8 @@ import kotlin.math.absoluteValue
 import javax.inject.Inject
 import javax.inject.Singleton
 
+class AuthorizationRequiredException(val intent: Intent) : Exception("Authorization required")
+
 @Singleton
 class GDriveRepository @Inject constructor(
     private val api: GDriveApiService,
@@ -58,6 +61,7 @@ class GDriveRepository @Inject constructor(
         const val GDRIVE_GENRE = "Google Drive"
     }
 
+    // SharedPreferences criptografada apenas para dados do usuário (email, displayName, avatar)
     private val prefs: SharedPreferences = try {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -74,92 +78,117 @@ class GDriveRepository @Inject constructor(
         Timber.e(e, "GDriveRepository: Failed to create EncryptedSharedPreferences, falling back to plain")
         context.getSharedPreferences("gdrive_prefs_plain", Context.MODE_PRIVATE)
     }
-    
+
     private val _isLoggedInFlow = MutableStateFlow(false)
     val isLoggedInFlow: StateFlow<Boolean> = _isLoggedInFlow.asStateFlow()
-    
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    // Armazena o email da conta logada (usado para obter tokens frescos)
+    private var accountEmail: String? = null
+
     init {
-    restoreSessionFromStorage()
-
-    scope.launch {
-    try {
-        val valid = ensureValidToken()
-
-        _isLoggedInFlow.value =
-            valid && api.hasToken()
-
-    } catch (e: Exception) {
-        Timber.e(e, "Startup token validation failed")
-        _isLoggedInFlow.value = false
+        restoreSessionFromStorage()
+        scope.launch {
+            try {
+                val valid = ensureValidToken()
+                _isLoggedInFlow.value = valid && api.hasToken()
+            } catch (e: Exception) {
+                Timber.e(e, "Startup token validation failed")
+                _isLoggedInFlow.value = false
+            }
         }
     }
-}
+
     val isLoggedIn: Boolean get() = api.hasToken()
     val userEmail: String? get() = prefs.getString("gdrive_email", null)
     val userDisplayName: String? get() = prefs.getString("gdrive_display_name", null)
     val userAvatar: String? get() = prefs.getString("gdrive_avatar", null)
 
-    private fun initFromSavedTokens() {
-        val accessToken = prefs.getString("gdrive_access_token", null) ?: return
-        val expiresAt = prefs.getLong("gdrive_token_expires_at", 0L)
-
-        if (System.currentTimeMillis() < expiresAt) {
-            api.setAccessToken(accessToken)
+    // Restaura apenas dados do usuário (email) - NUNCA salvamos token em disco
+    fun restoreSessionFromStorage() {
+        accountEmail = prefs.getString("gdrive_email", null)
+        if (!accountEmail.isNullOrBlank()) {
+            _isLoggedInFlow.value = true
+            // Não setamos token na API agora; será obtido sob demanda via ensureValidToken()
         } else {
-            Timber.d("GDrive access token expired, will refresh on next use")
+            api.clearAccessToken()
+            _isLoggedInFlow.value = false
         }
     }
 
     /**
-     * Login using a Google ID token from Credential Manager.
-     * For server auth code flow: exchanges the auth code for access + refresh tokens.
+     * Obtém um token de acesso fresco do GoogleAuthUtil usando o email da conta.
+     * Esse método é chamado automaticamente antes de qualquer operação que precise do token.
+     */
+    suspend fun ensureValidToken(): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val email = accountEmail
+                if (email.isNullOrBlank()) {
+                    Timber.d("ensureValidToken: no account email")
+                    return@withContext false
+                }
+
+                val scope = "oauth2:${GDriveConstants.SCOPE_DRIVE_READONLY}"
+                val freshToken = GoogleAuthUtil.getToken(context, email, scope)
+                if (freshToken.isNotBlank()) {
+                    api.setAccessToken(freshToken)
+                    Timber.d("ensureValidToken: obtained fresh token")
+                    true
+                } else {
+                    Timber.d("ensureValidToken: token is blank")
+                    false
+                }
+            } catch (e: UserRecoverableAuthException) {
+                // O usuário precisa interagir (ex: conceder permissão novamente)
+                Timber.e(e, "UserRecoverableAuthException - need to launch intent")
+                // A UI deve capturar isso e mostrar a intent de autorização
+                false
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to get fresh token")
+                false
+            }
+        }
+    }
+
+    /**
+     * Login usando o GoogleAuthUtil. Ignoramos serverAuthCode e idToken, usamos apenas o email.
      */
     suspend fun loginWithCredential(
         idToken: String,
         serverAuthCode: String?,
-        email: String? = null,
-        displayName: String? = null,
-        profilePictureUri: String? = null
+        email: String?,
+        displayName: String?,
+        profilePictureUri: String?
     ): Result<String> {
         return withContext(Dispatchers.IO) {
             try {
+                if (email.isNullOrBlank()) {
+                    return@withContext Result.failure(Exception("Email não recebido do Google"))
+                }
+
+                val scope = "oauth2:${GDriveConstants.SCOPE_DRIVE_READONLY}"
+                val accessToken = GoogleAuthUtil.getToken(context, email, scope)
+
+                // Salva apenas dados do usuário, NUNCA o token
                 prefs.edit()
                     .putString("gdrive_email", email)
                     .putString("gdrive_display_name", displayName)
                     .putString("gdrive_avatar", profilePictureUri)
                     .apply()
 
-                val accountEmail = email
-                if (accountEmail.isNullOrBlank()) {
-                    return@withContext Result.failure(Exception("Email não recebido do Google. Tente novamente."))
-                }
-
-                val scope = "oauth2:${GDriveConstants.SCOPE_DRIVE_READONLY}"
-                val accessToken = try {
-                    GoogleAuthUtil.getToken(context, accountEmail, scope)
-                } catch (e: com.google.android.gms.auth.UserRecoverableAuthException) {
-                    return@withContext Result.failure(Exception("É necessário autorizar o acesso ao Google Drive. O app tentará novamente."))
-                } catch (e: Exception) {
-                    return@withContext Result.failure(e)
-                }
-
-                if (accessToken.isNullOrBlank()) {
-                    return@withContext Result.failure(Exception("Token de acesso vazio"))
-                }
-
-                prefs.edit()
-                    .putString("gdrive_access_token", accessToken)
-                    .putLong("gdrive_token_expires_at", System.currentTimeMillis() + 3600_000L)
-                    .apply()
-
+                accountEmail = email
                 api.setAccessToken(accessToken)
                 _isLoggedInFlow.value = true
 
+                // Inicia o proxy de streaming
                 gdriveStreamProxy.get().start()
 
-                Result.success(displayName ?: email ?: "Usuário")
+                Result.success(displayName ?: email)
+            } catch (e: UserRecoverableAuthException) {
+                // Lança uma exceção especial contendo o Intent para que a Activity possa tratar
+                throw AuthorizationRequiredException(e.intent)
             } catch (e: Exception) {
                 Timber.e(e, "Falha no login GDrive")
                 Result.failure(e)
@@ -168,70 +197,25 @@ class GDriveRepository @Inject constructor(
     }
 
     /**
-     * Refresh the access token using the stored refresh token.
+     * Força a renovação do token via GoogleAuthUtil.
      */
     suspend fun refreshAccessToken(): Result<String> {
         return withContext(Dispatchers.IO) {
             try {
-                val refreshToken = prefs.getString("gdrive_refresh_token", null)
-                    ?: return@withContext Result.failure(Exception("No refresh token"))
-
-                val tokenResponse = api.refreshToken(
-                    refreshToken = refreshToken,
-                    clientId = GDriveConstants.WEB_CLIENT_ID,
-                    clientSecret = ""
-                )
-
-                val tokenJson = JSONObject(tokenResponse)
-                val accessToken = tokenJson.optString("access_token")
-                val expiresIn = tokenJson.optLong("expires_in", 3600L)
-
-                if (accessToken.isNotBlank()) {
-                    saveTokens(accessToken, null, expiresIn)
-                    api.setAccessToken(accessToken)
-                    Result.success(accessToken)
+                val email = accountEmail ?: return@withContext Result.failure(Exception("No account email"))
+                val scope = "oauth2:${GDriveConstants.SCOPE_DRIVE_READONLY}"
+                val newToken = GoogleAuthUtil.getToken(context, email, scope)
+                if (newToken.isNotBlank()) {
+                    api.setAccessToken(newToken)
+                    Result.success(newToken)
                 } else {
-                    Result.failure(Exception("Empty access token in refresh response"))
+                    Result.failure(Exception("Empty token from GoogleAuthUtil"))
                 }
             } catch (e: Exception) {
-                Timber.e(e, "GDrive token refresh failed")
                 Result.failure(e)
             }
         }
     }
-
-    private fun saveTokens(accessToken: String, refreshToken: String?, expiresIn: Long) {
-        val editor = prefs.edit()
-            .putString("gdrive_access_token", accessToken)
-            .putLong("gdrive_token_expires_at", System.currentTimeMillis() + (expiresIn * 1000))
-
-        if (!refreshToken.isNullOrBlank()) {
-            editor.putString("gdrive_refresh_token", refreshToken)
-        }
-        editor.apply()
-    }
-
-    /**
-     * Ensure the access token is valid, refreshing if needed.
-     */
-    private suspend fun ensureValidToken(): Boolean {
-    return try {
-        val expiresAt = prefs.getLong("gdrive_token_expires_at", 0L)
-
-        // ainda válido
-        if (System.currentTimeMillis() < expiresAt - 300_000L) {
-            return api.hasToken()
-        }
-
-        // precisa refresh
-        val result = refreshAccessToken()
-        result.isSuccess
-
-    } catch (e: Exception) {
-        Timber.e(e, "ensureValidToken failed")
-        false
-    }
-}
 
     suspend fun logout() {
         api.clearAccessToken()
@@ -239,7 +223,9 @@ class GDriveRepository @Inject constructor(
         musicDao.clearAllGDriveSongs()
         dao.clearAllSongs()
         dao.clearAllFolders()
+        accountEmail = null
         _isLoggedInFlow.value = false
+        gdriveStreamProxy.get().stop()
     }
 
     // --- Folder Management ---
@@ -249,7 +235,7 @@ class GDriveRepository @Inject constructor(
     suspend fun listDriveFolders(parentId: String = "root"): Result<List<DriveFolder>> {
         return withContext(Dispatchers.IO) {
             try {
-                ensureValidToken()
+                if (!ensureValidToken()) return@withContext Result.failure(Exception("Failed to obtain valid token"))
                 val allFolders = mutableListOf<DriveFolder>()
                 var pageToken: String? = null
 
@@ -283,7 +269,7 @@ class GDriveRepository @Inject constructor(
     suspend fun createMusicFolder(parentId: String = "root"): Result<DriveFolder> {
         return withContext(Dispatchers.IO) {
             try {
-                ensureValidToken()
+                if (!ensureValidToken()) return@withContext Result.failure(Exception("Failed to obtain valid token"))
                 val raw = api.createFolder("PixelPlay Music", parentId)
                 val json = JSONObject(raw)
                 val folder = DriveFolder(
@@ -320,7 +306,7 @@ class GDriveRepository @Inject constructor(
     suspend fun syncFolderSongs(folderId: String): Result<Int> {
         return withContext(Dispatchers.IO) {
             try {
-                ensureValidToken()
+                if (!ensureValidToken()) return@withContext Result.failure(Exception("Failed to obtain valid token"))
                 val allEntities = mutableListOf<GDriveSongEntity>()
                 var pageToken: String? = null
 
@@ -393,7 +379,15 @@ class GDriveRepository @Inject constructor(
     // --- Streaming ---
 
     fun getStreamUrl(fileId: String): String = api.getStreamUrl(fileId)
-    fun getAuthHeader(): String = api.getAuthHeader()
+    
+    /**
+     * Retorna o header de autorização, mas antes garante que o token está válido.
+     * Chamado pelo proxy de streaming.
+     */
+    suspend fun getAuthHeader(): String {
+        ensureValidToken()
+        return api.getAuthHeader()
+    }
 
     // --- Unified Library Sync ---
 
@@ -511,19 +505,18 @@ class GDriveRepository @Inject constructor(
         val fileSize = file.optLong("size", 0L)
         val modifiedTime = file.optString("modifiedTime", "")
         val thumbnailLink =
-    file.optString("thumbnailLink")
-        .ifBlank { file.optString("iconLink") }
-        .takeIf { it.isNotBlank() }
+            file.optString("thumbnailLink")
+                .ifBlank { file.optString("iconLink") }
+                .takeIf { it.isNotBlank() }
 
-       val nameWithoutExt = fileName.substringBeforeLast(".")
-
-       val parts = nameWithoutExt.split(" - ", limit = 2)
+        val nameWithoutExt = fileName.substringBeforeLast(".")
+        val parts = nameWithoutExt.split(" - ", limit = 2)
 
         val (artist, title) = if (parts.size == 2) {
-              parts[0].trim() to parts[1].trim()
-         } else {
-          "Unknown Artist" to nameWithoutExt.trim()
-             }
+            parts[0].trim() to parts[1].trim()
+        } else {
+            "Unknown Artist" to nameWithoutExt.trim()
+        }
 
         val dateModified = try {
             java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US)
@@ -572,16 +565,4 @@ class GDriveRepository @Inject constructor(
     private fun toUnifiedArtistId(artistName: String): Long {
         return -(GDRIVE_ARTIST_ID_OFFSET + artistName.lowercase().hashCode().toLong().absoluteValue)
     }
-    
-    fun restoreSessionFromStorage() {
-    val token = prefs.getString("gdrive_access_token", null)
-
-    if (!token.isNullOrBlank()) {
-        api.setAccessToken(token)
-        _isLoggedInFlow.value = true
-    } else {
-        api.clearAccessToken()
-        _isLoggedInFlow.value = false
-    }
-}
 }

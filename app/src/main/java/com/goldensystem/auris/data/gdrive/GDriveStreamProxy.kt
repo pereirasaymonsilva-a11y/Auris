@@ -106,239 +106,162 @@ class GDriveStreamProxy @Inject constructor(
                     }
 
                     try {
-                    Timber.d(
-    "GDriveProxy: request fileId=$fileId"
-)
+                        Timber.d("GDriveProxy: request fileId=$fileId")
+                        Timber.d("GDriveProxy: isReady=${isReady()}")
 
-Timber.d(
-    "GDriveProxy: isReady=${isReady()}"
-)
+                        // ===== MODIFICAÇÃO CRÍTICA: garantir token válido antes de qualquer requisição =====
+                        val tokenValid = repository.ensureValidToken()
+                        if (!tokenValid) {
+                            call.respond(HttpStatusCode.Unauthorized, "Unable to obtain valid access token")
+                            return@get
+                        }
 
-Timber.d(
-    "GDriveProxy: auth=${repository.getAuthHeader().take(30)}"
-)
-    val rangeValidation =
-        CloudStreamSecurity.validateRangeHeader(
-            call.request.headers["Range"]
-        )
+                        val authHeader = repository.getAuthHeader()
+                        Timber.d("GDriveProxy: auth=${authHeader.take(30)}")
 
-    if (!rangeValidation.isValid) {
-        call.respond(
-            HttpStatusCode(416, "Range Not Satisfiable"),
-            "Invalid range header"
-        )
-        return@get
-    }
-
-    // Garante token antes de qualquer chamada ao Drive
-    var authHeader = repository.getAuthHeader()
-
-    if (authHeader.isBlank() || authHeader == "Bearer ") {
-        Timber.d("GDriveStreamProxy: missing token, refreshing")
-
-        val refreshResult = repository.refreshAccessToken()
-
-        if (refreshResult.isSuccess) {
-            authHeader = repository.getAuthHeader()
-        }
-    }
-
-    if (authHeader.isBlank() || authHeader == "Bearer ") {
-        call.respond(
-            HttpStatusCode.Unauthorized,
-            "No auth token"
-        )
-        return@get
-    }
-
-    // Só pega stream URL depois de ter token
-    val streamUrl = repository.getStreamUrl(fileId)
-    Timber.d("GDriveProxy: streamUrl=$streamUrl")
-
-    if (!CloudStreamSecurity.isSafeRemoteStreamUrl(
-            url = streamUrl,
-            allowedHostSuffixes = ALLOWED_REMOTE_HOST_SUFFIXES
-        )
-    ) {
-        call.respond(
-            HttpStatusCode.BadGateway,
-            "Rejected upstream stream URL"
-        )
-        return@get
-    }
-
-    val requestBuilder = Request.Builder()
-        .url(streamUrl)
-        .header("Authorization", authHeader)
-
-    rangeValidation.normalizedHeader?.let {
-        requestBuilder.header("Range", it)
-    }
-
-    var response = withContext(Dispatchers.IO) {
-    okHttpClient.newCall(
-        requestBuilder.build()
-    ).execute()
-}
-
-Timber.d(
-    "GDriveProxy: upstream code=${response.code}"
-)
-
-    // Se token expirou, tenta refresh e repete request
-    if (response.code == 401) {
-        response.close()
-        Timber.d("GDriveStreamProxy: 401 received, refreshing token...")
-
-        val refreshResult = repository.refreshAccessToken()
-
-        if (refreshResult.isSuccess) {
-            val newAuthHeader = repository.getAuthHeader()
-
-            if (newAuthHeader.isBlank() || newAuthHeader == "Bearer ") {
-                call.respond(
-                    HttpStatusCode.Unauthorized,
-                    "Token refresh failed"
-                )
-                return@get
-            }
-
-            val retryRequest = Request.Builder()
-                .url(streamUrl)
-                .header("Authorization", newAuthHeader)
-
-            rangeValidation.normalizedHeader?.let {
-                retryRequest.header("Range", it)
-            }
-
-            response = withContext(Dispatchers.IO) {
-                okHttpClient.newCall(
-                    retryRequest.build()
-                ).execute()
-            }
-        }
-    }
-
-    response.use { upstream ->
-        if (upstream.code != 200 && upstream.code != 206) {
-            call.respond(
-                CloudStreamSecurity
-                    .mapUpstreamStatusToProxyStatus(
-                        upstream.code
-                    ),
-                "Upstream stream request failed"
-            )
-            return@get
-        }
-
-        val body = upstream.body
-
-        val contentTypeHeader =
-            upstream.header("Content-Type")
-
-        if (!CloudStreamSecurity
-                .isSupportedAudioContentType(
-                    contentTypeHeader
-                )
-        ) {
-            call.respond(
-                HttpStatusCode.BadGateway,
-                "Unsupported stream content type"
-            )
-            return@get
-        }
-
-        val contentLength =
-            upstream.header("Content-Length")
-
-        if (!CloudStreamSecurity
-                .isAcceptableContentLength(
-                    contentLength
-                )
-        ) {
-            call.respond(
-                HttpStatusCode(
-                    413,
-                    "Payload Too Large"
-                ),
-                "Stream content too large"
-            )
-            return@get
-        }
-
-        val contentRange =
-            upstream.header("Content-Range")
-
-        val acceptRanges =
-            upstream.header("Accept-Ranges")
-
-        val responseContentType =
-            contentTypeHeader
-                ?.substringBefore(';')
-                ?.trim()
-                ?.let { raw ->
-                    runCatching {
-                        ContentType.parse(raw)
-                    }.getOrNull()
-                }
-                ?: ContentType.Audio.Any
-
-        if (upstream.code == 206) {
-            call.response.status(
-                HttpStatusCode.PartialContent
-            )
-        } else {
-            call.response.status(
-                HttpStatusCode.OK
-            )
-        }
-
-        call.response.header(
-            "Accept-Ranges",
-            acceptRanges ?: "bytes"
-        )
-
-        contentLength?.let {
-            call.response.header(
-                "Content-Length",
-                it
-            )
-        }
-
-        contentRange?.let {
-            call.response.header(
-                "Content-Range",
-                it
-            )
-        }
-
-        call.respondBytesWriter(
-            contentType = responseContentType
-        ) {
-            withContext(Dispatchers.IO) {
-                body.byteStream().use { input ->
-                    val buffer =
-                        ByteArray(64 * 1024)
-
-                    var bytesRead: Int
-
-                    while (
-                        input.read(buffer)
-                            .also {
-                                bytesRead = it
-                            } != -1
-                    ) {
-                        writeFully(
-                            buffer,
-                            0,
-                            bytesRead
+                        val rangeValidation = CloudStreamSecurity.validateRangeHeader(
+                            call.request.headers["Range"]
                         )
-                    }
-                }
-            }
-        }
-    }
-} catch (e: Exception) {
+
+                        if (!rangeValidation.isValid) {
+                            call.respond(
+                                HttpStatusCode(416, "Range Not Satisfiable"),
+                                "Invalid range header"
+                            )
+                            return@get
+                        }
+
+                        val streamUrl = repository.getStreamUrl(fileId)
+                        Timber.d("GDriveProxy: streamUrl=$streamUrl")
+
+                        if (!CloudStreamSecurity.isSafeRemoteStreamUrl(
+                                url = streamUrl,
+                                allowedHostSuffixes = ALLOWED_REMOTE_HOST_SUFFIXES
+                            )
+                        ) {
+                            call.respond(
+                                HttpStatusCode.BadGateway,
+                                "Rejected upstream stream URL"
+                            )
+                            return@get
+                        }
+
+                        val requestBuilder = Request.Builder()
+                            .url(streamUrl)
+                            .header("Authorization", authHeader)
+
+                        rangeValidation.normalizedHeader?.let {
+                            requestBuilder.header("Range", it)
+                        }
+
+                        var response = withContext(Dispatchers.IO) {
+                            okHttpClient.newCall(
+                                requestBuilder.build()
+                            ).execute()
+                        }
+
+                        Timber.d("GDriveProxy: upstream code=${response.code}")
+
+                        // Se token expirou, tenta renovar e repete request
+                        if (response.code == 401) {
+                            response.close()
+                            Timber.d("GDriveStreamProxy: 401 received, refreshing token...")
+
+                            val refreshResult = repository.refreshAccessToken()
+                            if (refreshResult.isSuccess) {
+                                val newAuthHeader = repository.getAuthHeader()
+                                if (newAuthHeader.isBlank() || newAuthHeader == "Bearer ") {
+                                    call.respond(
+                                        HttpStatusCode.Unauthorized,
+                                        "Token refresh failed"
+                                    )
+                                    return@get
+                                }
+
+                                val retryRequest = Request.Builder()
+                                    .url(streamUrl)
+                                    .header("Authorization", newAuthHeader)
+
+                                rangeValidation.normalizedHeader?.let {
+                                    retryRequest.header("Range", it)
+                                }
+
+                                response = withContext(Dispatchers.IO) {
+                                    okHttpClient.newCall(
+                                        retryRequest.build()
+                                    ).execute()
+                                }
+                            } else {
+                                call.respond(HttpStatusCode.Unauthorized, "Token refresh failed")
+                                return@get
+                            }
+                        }
+
+                        response.use { upstream ->
+                            if (upstream.code != 200 && upstream.code != 206) {
+                                call.respond(
+                                    CloudStreamSecurity.mapUpstreamStatusToProxyStatus(upstream.code),
+                                    "Upstream stream request failed"
+                                )
+                                return@get
+                            }
+
+                            val body = upstream.body
+
+                            val contentTypeHeader = upstream.header("Content-Type")
+
+                            if (!CloudStreamSecurity.isSupportedAudioContentType(contentTypeHeader)) {
+                                call.respond(
+                                    HttpStatusCode.BadGateway,
+                                    "Unsupported stream content type"
+                                )
+                                return@get
+                            }
+
+                            val contentLength = upstream.header("Content-Length")
+
+                            if (!CloudStreamSecurity.isAcceptableContentLength(contentLength)) {
+                                call.respond(
+                                    HttpStatusCode(413, "Payload Too Large"),
+                                    "Stream content too large"
+                                )
+                                return@get
+                            }
+
+                            val contentRange = upstream.header("Content-Range")
+                            val acceptRanges = upstream.header("Accept-Ranges")
+
+                            val responseContentType = contentTypeHeader
+                                ?.substringBefore(';')
+                                ?.trim()
+                                ?.let { raw ->
+                                    runCatching { ContentType.parse(raw) }.getOrNull()
+                                }
+                                ?: ContentType.Audio.Any
+
+                            if (upstream.code == 206) {
+                                call.response.status(HttpStatusCode.PartialContent)
+                            } else {
+                                call.response.status(HttpStatusCode.OK)
+                            }
+
+                            call.response.header("Accept-Ranges", acceptRanges ?: "bytes")
+                            contentLength?.let { call.response.header("Content-Length", it) }
+                            contentRange?.let { call.response.header("Content-Range", it) }
+
+                            call.respondBytesWriter(contentType = responseContentType) {
+                                withContext(Dispatchers.IO) {
+                                    body.byteStream().use { input ->
+                                        val buffer = ByteArray(64 * 1024)
+                                        var bytesRead: Int
+                                        while (input.read(buffer).also { bytesRead = it } != -1) {
+                                            writeFully(buffer, 0, bytesRead)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
                         val msg = e.toString()
                         if (msg.contains("ChannelWriteException") ||
                             msg.contains("ClosedChannelException") ||
@@ -354,4 +277,7 @@ Timber.d(
             }
         }
     }
+
+    // Método auxiliar para acesso externo (caso necessário)
+    suspend fun ensureValidToken(): Boolean = repository.ensureValidToken()
 }
