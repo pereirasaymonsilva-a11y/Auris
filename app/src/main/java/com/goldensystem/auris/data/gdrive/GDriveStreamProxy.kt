@@ -106,6 +106,17 @@ class GDriveStreamProxy @Inject constructor(
                     }
 
                     try {
+                    Timber.d(
+    "GDriveProxy: request fileId=$fileId"
+)
+
+Timber.d(
+    "GDriveProxy: isReady=${isReady()}"
+)
+
+Timber.d(
+    "GDriveProxy: auth=${repository.getAuthHeader().take(30)}"
+)
     val rangeValidation =
         CloudStreamSecurity.validateRangeHeader(
             call.request.headers["Range"]
@@ -142,6 +153,7 @@ class GDriveStreamProxy @Inject constructor(
 
     // Só pega stream URL depois de ter token
     val streamUrl = repository.getStreamUrl(fileId)
+    Timber.d("GDriveProxy: streamUrl=$streamUrl")
 
     if (!CloudStreamSecurity.isSafeRemoteStreamUrl(
             url = streamUrl,
@@ -164,8 +176,14 @@ class GDriveStreamProxy @Inject constructor(
     }
 
     var response = withContext(Dispatchers.IO) {
-        okHttpClient.newCall(requestBuilder.build()).execute()
-    }
+    okHttpClient.newCall(
+        requestBuilder.build()
+    ).execute()
+}
+
+Timber.d(
+    "GDriveProxy: upstream code=${response.code}"
+)
 
     // Se token expirou, tenta refresh e repete request
     if (response.code == 401) {
