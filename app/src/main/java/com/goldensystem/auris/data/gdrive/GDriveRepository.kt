@@ -18,6 +18,9 @@ import com.goldensystem.auris.data.database.toSong
 import com.goldensystem.auris.data.model.Song
 import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -72,21 +75,24 @@ class GDriveRepository @Inject constructor(
         context.getSharedPreferences("gdrive_prefs_plain", Context.MODE_PRIVATE)
     }
     
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     private val _isLoggedInFlow = MutableStateFlow(false)
     val isLoggedInFlow: StateFlow<Boolean> = _isLoggedInFlow.asStateFlow()
+    
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     init {
     restoreSessionFromStorage()
 
     scope.launch {
-        try {
-            ensureValidToken()
-            _isLoggedInFlow.value = api.hasToken()
-        } catch (e: Exception) {
-            Timber.e(e, "Startup token validation failed")
-            _isLoggedInFlow.value = false
+    try {
+        val valid = ensureValidToken()
+
+        _isLoggedInFlow.value =
+            valid && api.hasToken()
+
+    } catch (e: Exception) {
+        Timber.e(e, "Startup token validation failed")
+        _isLoggedInFlow.value = false
         }
     }
 }
