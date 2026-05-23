@@ -29,6 +29,10 @@ class GDriveApiService @Inject constructor(
         accessToken = null
     }
 
+    fun setAccessToken(token: String?) {
+    accessToken = token
+    }
+
     fun hasToken(): Boolean = !accessToken.isNullOrBlank()
 
     fun getAuthHeader(): String = "Bearer ${accessToken ?: ""}"

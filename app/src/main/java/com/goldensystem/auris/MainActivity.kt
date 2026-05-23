@@ -177,6 +177,8 @@ class MainActivity : ComponentActivity() {
     private var isUIVisiblyReady = false
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
     @Inject
+    lateinit var gDriveRepository: GDriveRepository
+    @Inject
     lateinit var userPreferencesRepository: UserPreferencesRepository // Inject here
     @Inject
     lateinit var themePreferencesRepository: ThemePreferencesRepository
@@ -211,6 +213,7 @@ class MainActivity : ComponentActivity() {
             window.isNavigationBarContrastEnforced = false
         }
         super.onCreate(savedInstanceState)
+        gDriveRepository.restoreSessionFromStorage()
 
         // MD3 Optimization: Release Splash Screen immediately to render UI skeleton.
         // Data loading is handled via optimistic UI and smooth transitions.
