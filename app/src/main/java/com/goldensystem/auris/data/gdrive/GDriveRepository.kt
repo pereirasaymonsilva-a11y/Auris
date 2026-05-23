@@ -510,12 +510,17 @@ class GDriveRepository @Inject constructor(
         val mimeType = file.optString("mimeType", "audio/mpeg")
         val fileSize = file.optLong("size", 0L)
         val modifiedTime = file.optString("modifiedTime", "")
-        val thumbnailLink = file.optString("thumbnailLink").takeIf { it.isNotBlank() }
+        val thumbnailLink =
+    file.optString("thumbnailLink")
+        .ifBlank { file.optString("iconLink") }
+        .takeIf { it.isNotBlank() }
 
         val nameWithoutExt = fileName.substringBeforeLast(".")
-        val parts = nameWithoutExt.split(" - ", limit = 2)
-        val (artist, title) = if (parts.size == 2) {
-            parts[0].trim() to parts[1].trim()
+        val nameWithoutExt = fileName.substringBeforeLast(".")
+        val parts = nameWithoutExt.split(" - ")
+
+        val artist = if (parts.size >= 2) parts[0].trim() else "Unknown Artist"
+        val title = if (parts.size >= 2) parts[1].trim() else nameWithoutExt.trim()
         } else {
             "Unknown Artist" to nameWithoutExt.trim()
         }
