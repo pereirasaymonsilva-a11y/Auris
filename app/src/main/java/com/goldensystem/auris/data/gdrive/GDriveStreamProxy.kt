@@ -122,12 +122,23 @@ class GDriveStreamProxy @Inject constructor(
                             return@get
                         }
 
-                        val authHeader = repository.getAuthHeader()
+                        var authHeader = repository.getAuthHeader()
 
-                        if (authHeader.isBlank() || authHeader == "Bearer ") {
-                            call.respond(HttpStatusCode.Unauthorized, "No auth token")
-                            return@get
-                        }
+                      // Se não tiver token em memória, tenta restaurar/refresh
+                     if (authHeader.isBlank() || authHeader == "Bearer ") {
+                     Timber.d("GDriveStreamProxy: no auth token, refreshing...")
+
+                     val refreshResult = repository.refreshAccessToken()
+
+                    if (refreshResult.isSuccess) {
+                       authHeader = repository.getAuthHeader()
+                }
+            }
+
+if (authHeader.isBlank() || authHeader == "Bearer ") {
+    call.respond(HttpStatusCode.Unauthorized, "No auth token")
+    return@get
+}
 
                         val requestBuilder = Request.Builder()
                             .url(streamUrl)
