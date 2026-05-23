@@ -21,17 +21,18 @@ class GDriveApiService @Inject constructor(
     @Volatile
     private var accessToken: String? = null
 
-    fun setAccessToken(token: String) {
-        accessToken = token
-    }
-
     fun clearAccessToken() {
         accessToken = null
     }
 
     fun setAccessToken(token: String?) {
-    accessToken = token
+    if (token.isNullOrBlank()) {
+        clearAccessToken()
+        return
     }
+
+    this.accessToken = token
+}
 
     fun hasToken(): Boolean = !accessToken.isNullOrBlank()
 
