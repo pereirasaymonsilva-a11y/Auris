@@ -90,16 +90,39 @@ class GDriveRepository @Inject constructor(
     // --- Token Management ---
 
     private fun initFromSavedTokens() {
-        val accessToken = prefs.getString("gdrive_access_token", null) ?: return
-        val expiresAt = prefs.getLong("gdrive_token_expires_at", 0L)
+    val accessToken =
+        prefs.getString(
+            "gdrive_access_token",
+            null
+        )
 
-        if (System.currentTimeMillis() < expiresAt) {
-            api.setAccessToken(accessToken)
-        } else {
-            // Token expired, will refresh on next API call
-            Timber.d("GDrive access token expired, will refresh on next use")
+    val expiresAt =
+        prefs.getLong(
+            "gdrive_token_expires_at",
+            0L
+        )
+
+    if (
+        !accessToken.isNullOrBlank() &&
+        System.currentTimeMillis() < expiresAt
+    ) {
+        api.setAccessToken(accessToken)
+
+        Timber.d(
+            "GDriveRepository: restored access token"
+        )
+    } else {
+        Timber.d(
+            "GDriveRepository: token expired, refreshing..."
+        )
+
+        CoroutineScope(
+            Dispatchers.IO
+        ).launch {
+            refreshAccessToken()
         }
     }
+}
 
     /**
      * Login using a Google ID token from Credential Manager.
