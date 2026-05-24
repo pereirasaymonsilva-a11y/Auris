@@ -177,11 +177,11 @@ fun AccountsScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
-                AccountsHeroSection(
-                    connectedCount = uiState.connectedAccounts.size,
-                    disconnectedCount = uiState.disconnectedServices.size
-                )
-            }
+                   AccountsHeroSection(
+                   connectedCount = uiState.connectedAccounts.size,
+                    disconnectedServices = uiState.disconnectedServices   // passa a lista inteira
+                   )
+                }
 
             if (uiState.connectedAccounts.isNotEmpty()) {
                 item {
@@ -247,10 +247,13 @@ fun AccountsScreen(
 @Composable
 private fun AccountsHeroSection(
     connectedCount: Int,
-    disconnectedCount: Int
+    disconnectedServices: List<ExternalServiceAccount>
 ) {
     val connectedHeroTitle = stringResource(R.string.presentation_batch_b_accounts_connected_hero_title)
     val connectedHeroBody = stringResource(R.string.presentation_batch_b_accounts_connected_hero_body)
+    val visibleDisconnectedCount = disconnectedServices.count { service ->
+        serviceDisplayName(service).isNotBlank()
+    }
     val statActive = stringResource(R.string.presentation_batch_b_accounts_stat_active)
     val statAvailable = stringResource(R.string.presentation_batch_b_accounts_stat_available)
     val sectionShape = AbsoluteSmoothCornerShape(30.dp, 60)
@@ -286,8 +289,8 @@ private fun AccountsHeroSection(
                 )
                 HeroStatTile(
                     title = statAvailable,
-                    value = (connectedCount + disconnectedCount).toString(),
-                    modifier = Modifier.weight(1f)
+                    value = (connectedCount + visibleDisconnectedCount).toString(),
+                     modifier = Modifier.weight(1f)
                 )
             }
         }
