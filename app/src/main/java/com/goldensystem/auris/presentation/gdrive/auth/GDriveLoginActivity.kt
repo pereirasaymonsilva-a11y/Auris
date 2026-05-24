@@ -78,17 +78,31 @@ fun GDriveLoginScreen(
     )
 
     LaunchedEffect(loginState) {
-        when (loginState) {
-            is GDriveLoginState.Success -> {
-                Toast.makeText(context, context.getString(R.string.auth_gdrive_toast_connected), Toast.LENGTH_SHORT).show()
-                onClose()
-            }
-            is GDriveLoginState.Error -> {
-                Toast.makeText(context, (loginState as GDriveLoginState.Error).message, Toast.LENGTH_SHORT).show()
-            }
-            else -> {}
+    when (loginState) {
+        is GDriveLoginState.Success -> {
+            Toast.makeText(context, context.getString(R.string.auth_gdrive_toast_connected), Toast.LENGTH_SHORT).show()
+            onClose()
         }
+        is GDriveLoginState.Error -> {
+            Toast.makeText(context, loginState.message, Toast.LENGTH_SHORT).show()
+        }
+        is GDriveLoginState.NeedAuthorization -> {
+            try {
+                context.startIntentSender(
+                    loginState.intent.intentSender,
+                    null,
+                    0,
+                    0,
+                    0,
+                    null
+                )
+            } catch (e: Exception) {
+                Toast.makeText(context, "Precisa autorizar novamente. Faça login.", Toast.LENGTH_SHORT).show()
+            }
+        }
+        else -> { /* outros estados não precisam de ação */ }
     }
+}
 
     Scaffold(
         topBar = {

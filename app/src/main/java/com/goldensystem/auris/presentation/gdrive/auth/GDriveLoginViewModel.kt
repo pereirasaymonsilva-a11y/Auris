@@ -26,9 +26,6 @@ sealed class GDriveLoginState {
     object Success : GDriveLoginState()
     data class Error(val message: String) : GDriveLoginState()
     data class NeedAuthorization(val intent: Intent) : GDriveLoginState()
-    
-    // NOVO: estado que indica que precisamos de autorização interativa
-    data class NeedAuthorization(val intent: Intent) : GDriveLoginState()
 }
 
 data class FolderItem(
@@ -54,7 +51,13 @@ class GDriveLoginViewModel @Inject constructor(
     fun processCredential(idToken: String, serverAuthCode: String?, email: String? = null) {
         _state.value = GDriveLoginState.Loading
         viewModelScope.launch {
-            val result = repository.loginWithCredential(idToken, serverAuthCode, email)
+            val result = repository.loginWithCredential(
+                  idToken = idToken,
+                 serverAuthCode = serverAuthCode,
+                  email = email,
+                  displayName = null,
+                 profilePictureUri = null
+               )
             
             // ===== AQUI ENTRA O CÓDIGO QUE VOCÊ PEDIU =====
             result.fold(
