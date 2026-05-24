@@ -78,29 +78,25 @@ fun GDriveLoginScreen(
     )
 
     LaunchedEffect(loginState) {
-    when (loginState) {
+    // Pega o valor atual do StateFlow
+    val state = loginState
+    when (state) {
         is GDriveLoginState.Success -> {
             Toast.makeText(context, context.getString(R.string.auth_gdrive_toast_connected), Toast.LENGTH_SHORT).show()
             onClose()
         }
         is GDriveLoginState.Error -> {
-            Toast.makeText(context, loginState.message, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
         }
         is GDriveLoginState.NeedAuthorization -> {
             try {
-                context.startIntentSender(
-                    loginState.intent.intentSender,
-                    null,
-                    0,
-                    0,
-                    0,
-                    null
-                )
+                // Inicia a Intent de autorização do Google
+                context.startActivity(state.intent)
             } catch (e: Exception) {
                 Toast.makeText(context, "Precisa autorizar novamente. Faça login.", Toast.LENGTH_SHORT).show()
             }
         }
-        else -> { /* outros estados não precisam de ação */ }
+        else -> { /* Outros estados não precisam de ação */ }
     }
 }
 
@@ -161,6 +157,12 @@ fun GDriveLoginScreen(
                     )
                 }
                 is GDriveLoginState.Success -> {}
+                is GDriveLoginState.NeedAuthorization -> {
+        // Pode mostrar uma mensagem enquanto tenta autorizar, ou apenas um loading
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+            Text("Aguardando autorização...")}
+                }
             }
         }
     }

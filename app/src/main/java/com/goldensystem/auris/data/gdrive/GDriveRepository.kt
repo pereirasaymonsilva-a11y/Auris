@@ -189,7 +189,7 @@ class GDriveRepository @Inject constructor(
                 Result.success(displayName ?: email)
             } catch (e: UserRecoverableAuthException) {
                 // Lança uma exceção especial contendo o Intent para que a Activity possa tratar
-                throw AuthorizationRequiredException(e.intent)
+                throw AuthorizationRequiredException(e.intent ?: Intent())
             } catch (e: Exception) {
                 Timber.e(e, "Falha no login GDrive")
                 Result.failure(e)
