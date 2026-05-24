@@ -537,12 +537,15 @@ private fun EmptyAccountsCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            disconnectedServices.forEach { service ->
-                val isComingSoon = false
-                val painter = when (service) {
-                    ExternalServiceAccount.TELEGRAM -> painterResource(R.drawable.telegram)
-                    else -> null
+            disconnectedServices.filter { service ->
+           serviceDisplayName(service).isNotBlank()
+                 }.forEach { service ->
+            val isComingSoon = false
+            val painter = when (service) {
+                 ExternalServiceAccount.TELEGRAM -> painterResource(R.drawable.telegram)
+                 else -> null
                 }
+
                 FilledTonalButton(
                     onClick = { if (!isComingSoon) onConnect(service) },
                     enabled = !isComingSoon,
@@ -553,18 +556,22 @@ private fun EmptyAccountsCard(
                     ),
                     modifier = Modifier.fillMaxWidth().height(48.dp)
                 ) {
-                    if (painter != null) {
-                        Icon(
-                            painter = painter,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Rounded.Link,
-                            contentDescription = null
-                        )
+                    when {
+                          service == ExternalServiceAccount.GOOGLE_DRIVE -> {
+        // Use um drawable ou ImageVector específico do Drive
+                     Icon(
+                     painter = painterResource(R.drawable.ic_google_drive),
+                      contentDescription = null,
+                     modifier = Modifier.size(18.dp)
+                    )
+                 }
+                   painter != null -> {
+                    Icon(painter = painter, contentDescription = null, modifier = Modifier.size(18.dp))
                     }
+             else -> {
+               Icon(imageVector = Icons.Rounded.Link, contentDescription = null)
+                   }
+                  }
                     Spacer(modifier = Modifier.size(8.dp))
                     Text(
                         text = if (isComingSoon) {
@@ -689,7 +696,11 @@ private fun ServiceIcon(service: ExternalServiceAccount, tint: Color, modifier: 
 private fun serviceDisplayName(service: ExternalServiceAccount): String {
     return when (service) {
         ExternalServiceAccount.TELEGRAM -> stringResource(R.string.presentation_batch_b_service_telegram)
-        ExternalServiceAccount.GOOGLE_DRIVE -> stringResource(R.string.auth_gdrive_title)
+        ExternalServiceAccount.GOOGLE_DRIVE -> {
+              val beta = stringResource(R.string.presentation_batch_h_beta_glyph) // ← substitua pelo ID real
+              val name = stringResource(R.string.auth_gdrive_title)
+                  "$beta $name"
+            }
         ExternalServiceAccount.NAVIDROME -> stringResource(R.string.cd_subsonic_logo)
         ExternalServiceAccount.JELLYFIN -> stringResource(R.string.auth_jellyfin_title)
         else -> ""
