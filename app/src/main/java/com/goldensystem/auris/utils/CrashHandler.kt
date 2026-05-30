@@ -22,7 +22,7 @@ data class CrashLogData(
      */
     fun getFullLog(): String {
         return buildString {
-            appendLine("=== PixelPlayer Crash Report ===")
+            appendLine("=== Auris Crash Report ===")
             appendLine("Date: $formattedDate")
             appendLine("Exception: $exceptionMessage")
             appendLine()

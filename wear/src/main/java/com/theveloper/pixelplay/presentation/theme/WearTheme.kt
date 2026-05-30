@@ -89,7 +89,7 @@ fun WearPalette.surfaceContainerHighColor(): Color = surfaceContainerHigh
 fun WearPalette.surfaceContainerHighestColor(): Color = surfaceContainerHighest
 
 @Composable
-fun WearPixelPlayTheme(
+fun WearAurisTheme(
     albumArt: Bitmap? = null,
     seedColorArgb: Int? = null,
     themePalette: WearThemePalette? = null,

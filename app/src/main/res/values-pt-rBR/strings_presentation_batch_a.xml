@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Web login security notes (QQ / NetEase) -->
-    <string name="auth_web_login_security_note_qq">Nota de segurança: sua senha é inserida apenas nas páginas web do QQ Music. O PixelPlay armazena cookies de sessão para sincronizar sua biblioteca.</string>
-    <string name="auth_web_login_security_note_netease">Nota de segurança: sua senha é inserida apenas nas páginas web do NetEase. O PixelPlay armazena cookies de sessão (MUSIC_U) para sincronizar sua biblioteca.</string>
+    <string name="auth_web_login_security_note_qq">Nota de segurança: sua senha é inserida apenas nas páginas web do QQ Music. O Auris armazena cookies de sessão para sincronizar sua biblioteca.</string>
+    <string name="auth_web_login_security_note_netease">Nota de segurança: sua senha é inserida apenas nas páginas web do NetEase. O Auris armazena cookies de sessão (MUSIC_U) para sincronizar sua biblioteca.</string>
     <string name="auth_error_read_qq_cookies_failed">Falha ao ler cookies do QQ Music: %1$s</string>
     <string name="auth_error_read_netease_cookies_failed">Falha ao ler cookies do NetEase: %1$s</string>
 
@@ -13,7 +13,7 @@
     <string name="auth_gdrive_sign_in_with_google">Entrar com Google</string>
     <string name="auth_gdrive_select_music_folder_title">Selecionar uma pasta de música</string>
     <string name="auth_gdrive_select_music_folder_subtitle">Escolha ou crie uma pasta para usar como sua fonte de música</string>
-    <string name="auth_gdrive_create_pixelplay_music_title">Criar \"PixelPlay Music\"</string>
+    <string name="auth_gdrive_create_auris_music_title">Criar \"Auris Music\"</string>
     <string name="auth_gdrive_create_folder_here_hint">Criar uma nova pasta aqui para sua música</string>
     <string name="auth_gdrive_no_folders_here">Nenhuma pasta aqui</string>
     <string name="auth_gdrive_use_this_folder">Usar</string>

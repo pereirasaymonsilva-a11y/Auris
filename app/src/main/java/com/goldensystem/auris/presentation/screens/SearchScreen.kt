@@ -81,7 +81,7 @@ import com.goldensystem.auris.presentation.components.SmartImageListTargetSize
 import com.goldensystem.auris.presentation.components.SongInfoBottomSheet
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
 import android.util.Log
-import com.goldensystem.auris.ui.theme.LocalPixelPlayDarkTheme
+import com.goldensystem.auris.ui.theme.LocalAurisDarkTheme
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.PlaylistPlay
 import androidx.compose.material.icons.rounded.History
@@ -188,7 +188,7 @@ fun SearchScreen(
 
     val searchbarCornerRadius = 28.dp
 
-    val dm = LocalPixelPlayDarkTheme.current
+    val dm = LocalAurisDarkTheme.current
 
     val gradientColorsDark = listOf(
         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),

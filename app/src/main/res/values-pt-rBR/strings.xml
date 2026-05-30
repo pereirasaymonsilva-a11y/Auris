@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Auris</string>
     <string name="app_name_change_title">Alteração do Nome do App</string>
-    <string name="app_name_change_message">Alteramos o nome app de PixelPlayr para Auris devido a uma questão de marca registrada e modificações. Continue Ouvindo!</string>
+    <string name="app_name_change_message">Alteramos o nome app de Aurisr para Auris devido a uma questão de marca registrada e modificações. Continue Ouvindo!</string>
     <string name="do_not_show_again">Não mostrar novamente</string>
     <string name="dismiss">Dispensar</string>
     <string name="all_files_access_title">Permissão Especial Necessária</string>

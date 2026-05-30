@@ -182,7 +182,7 @@
     <string name="presentation_batch_g_artist_group_by_album_artist">Agrupar por Artista do Álbum</string>
     <string name="presentation_batch_g_artist_group_by_album_artist_sub">Mostrar álbuns de colaboração sob o artista principal</string>
     <string name="presentation_batch_g_artist_info_title">Sobre a Análise de Múltiplos Artistas</string>
-    <string name="presentation_batch_g_artist_info_body">O PixelPlay divide tags de artista usando delimitadores de caractere (/, ;, &amp;) e delimitadores de palavra (feat., ft., vs., x). Delimitadores de palavra são correspondidos sem diferenciar maiúsculas/minúsculas.
+    <string name="presentation_batch_g_artist_info_body">O Auris divide tags de artista usando delimitadores de caractere (/, ;, &amp;) e delimitadores de palavra (feat., ft., vs., x). Delimitadores de palavra são correspondidos sem diferenciar maiúsculas/minúsculas.
 
 "Extrair Artistas do Título" detecta padrões como (feat. Artista) nos títulos das músicas.
 
@@ -267,9 +267,9 @@ Barra invertida (\) pode ser usada para escapar delimitadores de caractere.</str
     <string name="presentation_batch_g_playstore_open">Abrir Play Store</string>
     <string name="presentation_batch_g_playstore_continue_beta">Continuar beta</string>
     <string name="presentation_batch_g_playstore_link_pending">O link da Play Store será ativado a partir da configuração do GitHub.</string>
-    <string name="presentation_batch_g_playstore_title">PixelPlay já está disponível no Google Play</string>
+    <string name="presentation_batch_g_playstore_title">Auris já está disponível no Google Play</string>
     <string name="presentation_batch_g_playstore_body">Use o canal estável no Google Play para atualizações de lançamento enquanto mantemos as builds beta ativas.</string>
-    <string name="presentation_batch_g_playstore_app_name">PixelPlay</string>
+    <string name="presentation_batch_g_playstore_app_name">Auris</string>
     <string name="presentation_batch_g_playstore_release_announcement">Anúncio de lançamento</string>
     <string name="presentation_batch_g_playstore_coming_soon">Em breve</string>
     <string name="presentation_batch_g_genre_sort_title">Ordenar e Reproduzir</string>

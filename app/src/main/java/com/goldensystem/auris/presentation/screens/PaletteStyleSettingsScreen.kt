@@ -68,7 +68,7 @@ import com.goldensystem.auris.presentation.components.MiniPlayerHeight
 import com.goldensystem.auris.presentation.viewmodel.ColorSchemePair
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
 import com.goldensystem.auris.presentation.viewmodel.SettingsViewModel
-import com.goldensystem.auris.ui.theme.LocalPixelPlayDarkTheme
+import com.goldensystem.auris.ui.theme.LocalAurisDarkTheme
 import com.goldensystem.auris.ui.theme.generateColorSchemeFromSeed
 import kotlin.math.roundToInt
 
@@ -82,7 +82,7 @@ fun PaletteStyleSettingsScreen(
 ) {
     val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
     val stablePlayerState by playerViewModel.stablePlayerState.collectAsStateWithLifecycle()
-    val isDarkTheme = LocalPixelPlayDarkTheme.current
+    val isDarkTheme = LocalAurisDarkTheme.current
     val albumSchemePair by playerViewModel.currentAlbumArtColorSchemePair.collectAsStateWithLifecycle()
 
     val baseScheme = MaterialTheme.colorScheme

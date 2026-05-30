@@ -36,7 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.goldensystem.auris.R
 import com.goldensystem.auris.ui.theme.GoogleSansRounded
-import com.goldensystem.auris.ui.theme.PixelPlayStatusBarStyle
+import com.goldensystem.auris.ui.theme.AurisStatusBarStyle
 import kotlinx.collections.immutable.toImmutableList
 import androidx.compose.ui.res.stringResource
 
@@ -54,7 +54,7 @@ fun GenreGradientTopBar(
         Brush.verticalGradient(colors = listOf(startColor, endColor))
     }
 
-    PixelPlayStatusBarStyle(color = startColor)
+    AurisStatusBarStyle(color = startColor)
 
     LargeTopAppBar(
         scrollBehavior = scrollBehavior,
@@ -104,7 +104,7 @@ fun HomeGradientTopBar(
 ) {
     val surfaceColor = MaterialTheme.colorScheme.surface
 
-    PixelPlayStatusBarStyle(color = surfaceColor)
+    AurisStatusBarStyle(color = surfaceColor)
 
     val gradientColors = listOf(
         surfaceColor,

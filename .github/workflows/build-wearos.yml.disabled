@@ -31,5 +31,5 @@ jobs:
       - name: Upload Wear OS APK artifact
         uses: actions/upload-artifact@v4.6.1
         with:
-          name: PixelPlay-wear-only-debug
+          name: Auris-wear-only-debug
           path: wear/build/outputs/apk/debug/*.apk

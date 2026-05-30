@@ -2,14 +2,14 @@ package com.goldensystem.auris.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val PixelPlayPurpleDark = Color(0xFF1E1234)
-val PixelPlayPurplePrimary = Color(0xFF6750A4)
-val PixelPlayPink = Color(0xFFF06292)
-val PixelPlayOrange = Color(0xFFFF8A65)
-val PixelPlayLightPurple = Color(0xFFE1BEE7)
-val PixelPlayWhite = Color(0xFFFFFFFF)
-val PixelPlayBlack = Color(0xFF000000)
-val PixelPlaySurface = Color(0xFF2A1F40)
+val AurisPurpleDark = Color(0xFF1E1234)
+val AurisPurplePrimary = Color(0xFF6750A4)
+val AurisPink = Color(0xFFF06292)
+val AurisOrange = Color(0xFFFF8A65)
+val AurisLightPurple = Color(0xFFE1BEE7)
+val AurisWhite = Color(0xFFFFFFFF)
+val AurisBlack = Color(0xFF000000)
+val AurisSurface = Color(0xFF2A1F40)
 
 // No arquivo Color.kt, substitua o bloco "Colores para tema claro (si se implementa)" por:
 

@@ -72,9 +72,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import com.goldensystem.auris.ui.theme.LocalPixelPlayDarkTheme
+import com.goldensystem.auris.ui.theme.LocalAurisDarkTheme
 import com.goldensystem.auris.ui.theme.GoogleSansRounded
-import com.goldensystem.auris.ui.theme.PixelPlayStatusBarStyle
+import com.goldensystem.auris.ui.theme.AurisStatusBarStyle
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
@@ -125,7 +125,7 @@ fun AlbumDetailScreen(
     val systemNavBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomBarHeightDp = resolveNavBarOccupiedHeight(systemNavBarInset, navBarCompactMode)
     var showPlaylistBottomSheet by remember { mutableStateOf(false) }
-    val isDarkTheme = LocalPixelPlayDarkTheme.current
+    val isDarkTheme = LocalAurisDarkTheme.current
     val baseColorScheme = MaterialTheme.colorScheme
     val albumArtUri = uiState.album?.albumArtUriString?.takeIf { it.isNotBlank() }
     val albumColorSchemeFlow = remember(albumArtUri) {
@@ -478,7 +478,7 @@ private fun SharedAlbumTopBarProbe(
 ) {
     val surfaceColor = MaterialTheme.colorScheme.surface
     val statusBarColor =
-        if (LocalPixelPlayDarkTheme.current) Color.Black.copy(alpha = 0.6f)
+        if (LocalAurisDarkTheme.current) Color.Black.copy(alpha = 0.6f)
         else Color.White.copy(alpha = 0.4f)
     val solidAlpha = (collapseFraction * 2f).coerceIn(0f, 1f)
     val expandedContentAlpha = 1f - solidAlpha
@@ -504,7 +504,7 @@ private fun SharedAlbumTopBarProbe(
     val titleVerticalBias = lerp(1f, -1f, collapseFraction)
     val shuffleAlignment = BiasAlignment(horizontalBias = 1f, verticalBias = titleVerticalBias)
 
-    PixelPlayStatusBarStyle(color = fallbackStatusBarColor)
+    AurisStatusBarStyle(color = fallbackStatusBarColor)
 
     Box(
         modifier = Modifier
@@ -599,7 +599,7 @@ private fun CollapsingAlbumTopBar(
 ) {
     val surfaceColor = MaterialTheme.colorScheme.surface
     val statusBarColor =
-        if (LocalPixelPlayDarkTheme.current) Color.Black.copy(alpha = 0.6f) else Color.White.copy(
+        if (LocalAurisDarkTheme.current) Color.Black.copy(alpha = 0.6f) else Color.White.copy(
             alpha = 0.4f
         )
 
@@ -650,7 +650,7 @@ private fun CollapsingAlbumTopBar(
             .height(headerHeight)
             .clipToBounds()
     ) {
-        PixelPlayStatusBarStyle(color = fallbackStatusBarColor)
+        AurisStatusBarStyle(color = fallbackStatusBarColor)
 
         Box(
             modifier = Modifier

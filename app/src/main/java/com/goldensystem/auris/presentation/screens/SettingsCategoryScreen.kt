@@ -1321,8 +1321,8 @@ fun SettingsCategoryScreen(
                                 addBottomSpace = false
                             ) {
                                 SettingsItem(
-                                    title = stringResource(R.string.setcat_about_pixelplayer_title),
-                                    subtitle = stringResource(R.string.setcat_about_pixelplayer_subtitle),
+                                    title = stringResource(R.string.setcat_about_auris_title),
+                                    subtitle = stringResource(R.string.setcat_about_auris_subtitle),
                                     leadingIcon = { Icon(Icons.Outlined.Info, null, tint = MaterialTheme.colorScheme.secondary) },
                                     trailingIcon = { Icon(Icons.Rounded.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                                     onClick = { navController.navigateSafely("about") }

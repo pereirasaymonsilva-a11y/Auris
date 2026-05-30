@@ -3,11 +3,11 @@
     <!-- Strings da tela About (contribuidores) -->
     <string name="contributor_theo_display_name">Theo Vilardo</string>
     <string name="contributor_theo_role">Criador original</string>
-    <string name="contributor_theo_detail">Esse é o criador original do PixelPlayer.</string>
+    <string name="contributor_theo_detail">Esse é o criador original do Auris.</string>
 
     <string name="contributor_auris_display_name">Saymon Silva Pereira</string>
     <string name="contributor_auris_role">Mantenedor do Auris</string>
-    <string name="contributor_auris_detail">Criador do Auris, versão modificada do PixelPlayer.</string>
+    <string name="contributor_auris_detail">Criador do Auris, versão modificada do Auris.</string>
 
     <string name="contributor_lostf1sh_display_name">@lostf1sh</string>
     <string name="contributor_lostf1sh_role">Contribuidor mais ativo</string>
@@ -21,6 +21,6 @@
 
     <string name="contributor_colby_display_name">@ColbyCabrera</string>
     <string name="contributor_colby_role">Primeiro contribuidor</string>
-    <string name="contributor_colby_detail">Ajudou a moldar o PixelPlayer nos estágios iniciais.</string>
+    <string name="contributor_colby_detail">Ajudou a moldar o Auris nos estágios iniciais.</string>
     <string name="contributor_colby_badge">Apoio Inicial</string>
 </resources>

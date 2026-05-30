@@ -49,7 +49,7 @@ import com.goldensystem.auris.presentation.components.getNavigationBarHeight
 import com.goldensystem.auris.presentation.components.resolveNavBarOccupiedHeight
 import com.goldensystem.auris.presentation.utils.GenreIconProvider
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
-import com.goldensystem.auris.ui.theme.LocalPixelPlayDarkTheme
+import com.goldensystem.auris.ui.theme.LocalAurisDarkTheme
 import androidx.compose.ui.res.stringResource
 import com.goldensystem.auris.R
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
@@ -158,7 +158,7 @@ private fun GenreCard(
     onClick: () -> Unit,
     isGridView: Boolean
 ) {
-    val isDark = LocalPixelPlayDarkTheme.current
+    val isDark = LocalAurisDarkTheme.current
     val themeColor = remember(genre, isDark) {
         com.goldensystem.auris.ui.theme.GenreThemeUtils.getGenreThemeColor(
             genre = genre,

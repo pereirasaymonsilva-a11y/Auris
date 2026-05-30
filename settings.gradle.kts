@@ -29,7 +29,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PixelPlay"
+rootProject.name = "Auris"
 include(":app")
 include(":shared")
 include(":wear")

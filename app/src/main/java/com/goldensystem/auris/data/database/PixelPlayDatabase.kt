@@ -39,7 +39,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     version = 41,   // <-- AUMENTADO
     exportSchema = true
 )
-abstract class PixelPlayDatabase : RoomDatabase() {
+abstract class AurisDatabase : RoomDatabase() {
     abstract fun albumArtThemeDao(): AlbumArtThemeDao
     abstract fun searchHistoryDao(): SearchHistoryDao
     abstract fun musicDao(): MusicDao

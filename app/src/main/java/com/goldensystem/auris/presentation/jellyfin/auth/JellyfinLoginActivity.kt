@@ -74,7 +74,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldensystem.auris.R
 import com.goldensystem.auris.ui.theme.GoogleSansRounded
-import com.goldensystem.auris.ui.theme.PixelPlayTheme
+import com.goldensystem.auris.ui.theme.AurisTheme
 import dagger.hilt.android.AndroidEntryPoint
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 
@@ -85,7 +85,7 @@ class JellyfinLoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PixelPlayTheme {
+            AurisTheme {
                 JellyfinLoginScreen(onClose = { finish() })
             }
         }

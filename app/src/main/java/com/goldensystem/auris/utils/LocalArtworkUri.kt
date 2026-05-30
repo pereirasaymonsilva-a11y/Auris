@@ -3,7 +3,7 @@ package com.goldensystem.auris.utils
 import android.net.Uri
 
 object LocalArtworkUri {
-    const val SCHEME = "pixelplay_local_art"
+    const val SCHEME = "auris_local_art"
     private const val HOST_SONG = "song"
     private const val CACHE_BUST_QUERY = "t"
 

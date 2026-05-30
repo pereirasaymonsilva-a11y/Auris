@@ -76,7 +76,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goldensystem.auris.R
 import com.goldensystem.auris.ui.theme.GoogleSansRounded
-import com.goldensystem.auris.ui.theme.PixelPlayTheme
+import com.goldensystem.auris.ui.theme.AurisTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import org.json.JSONObject
@@ -98,7 +98,7 @@ class NeteaseLoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PixelPlayTheme {
+            AurisTheme {
                 NeteaseWebLoginScreen(onClose = { finish() })
             }
         }

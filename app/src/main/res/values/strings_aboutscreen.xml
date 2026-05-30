@@ -2,7 +2,7 @@
 <resources>
     <string name="contributor_theo_display_name">Theo Vilardo</string>
     <string name="contributor_theo_role">Original creator</string>
-    <string name="contributor_theo_detail">This is the original creator of PixelPlayer.</string>
+    <string name="contributor_theo_detail">This is the original creator of Auris.</string>
 
     <string name="contributor_auris_display_name">Saymon Silva Pereira</string>
     <string name="contributor_auris_role">Auris maintainer</string>
@@ -20,6 +20,6 @@
 
     <string name="contributor_colby_display_name">@ColbyCabrera</string>
     <string name="contributor_colby_role">Early contributor</string>
-    <string name="contributor_colby_detail">Helped shape PixelPlayer in the first stages of the app.</string>
+    <string name="contributor_colby_detail">Helped shape Auris in the first stages of the app.</string>
     <string name="contributor_colby_badge">Early Support</string>
 </resources>

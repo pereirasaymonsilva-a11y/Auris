@@ -124,7 +124,7 @@ fun SongInfoBottomSheet(
     val context = LocalContext.current
     var showEditSheet by remember { mutableStateOf(false) }
     val audioMeta by songInfoViewModel.audioMeta.collectAsStateWithLifecycle()
-    val isPixelPlayWatchAvailable by songInfoViewModel.isPixelPlayWatchAvailable.collectAsStateWithLifecycle()
+    val isAurisWatchAvailable by songInfoViewModel.isAurisWatchAvailable.collectAsStateWithLifecycle()
     val isWatchAvailabilityResolved by songInfoViewModel.isWatchAvailabilityResolved.collectAsStateWithLifecycle()
     val isSendingToWatch by songInfoViewModel.isSendingToWatch.collectAsStateWithLifecycle()
     val watchTransfers by songInfoViewModel.watchTransfers.collectAsStateWithLifecycle()
@@ -175,14 +175,14 @@ fun SongInfoBottomSheet(
     val shouldOfferWatchTransfer = remember(
         canSendToWatch,
         currentSongTransfer,
-        isPixelPlayWatchAvailable,
+        isAurisWatchAvailable,
         isSongSavedOnWatch,
         isWatchAvailabilityResolved,
     ) {
         currentSongTransfer == null &&
                 canSendToWatch &&
                 isWatchAvailabilityResolved &&
-                isPixelPlayWatchAvailable &&
+                isAurisWatchAvailable &&
                 !isSongSavedOnWatch
     }
     val shouldShowWatchTransferLoading = remember(
@@ -586,12 +586,12 @@ fun SongInfoBottomSheet(
                                                         .fillMaxWidth()
                                                         .heightIn(min = 66.dp),
                                                     colors = ButtonDefaults.filledTonalButtonColors(
-                                                        containerColor = if (isPixelPlayWatchAvailable) {
+                                                        containerColor = if (isAurisWatchAvailable) {
                                                             sendToWatchContainerColor
                                                         } else {
                                                             MaterialTheme.colorScheme.surfaceContainerHigh
                                                         },
-                                                        contentColor = if (isPixelPlayWatchAvailable) {
+                                                        contentColor = if (isAurisWatchAvailable) {
                                                             sendToWatchContentColor
                                                         } else {
                                                             MaterialTheme.colorScheme.onSurfaceVariant
@@ -631,7 +631,7 @@ fun SongInfoBottomSheet(
                                                         Icon(
                                                             painter = painterResource(R.drawable.rounded_watch_arrow_down_24),
                                                             contentDescription = stringResource(
-                                                                if (isPixelPlayWatchAvailable) {
+                                                                if (isAurisWatchAvailable) {
                                                                     R.string.cd_send_song_to_watch
                                                                 } else {
                                                                     R.string.cd_watch_unavailable
@@ -641,7 +641,7 @@ fun SongInfoBottomSheet(
                                                         Spacer(Modifier.width(8.dp))
                                                         Text(
                                                             stringResource(
-                                                                if (isPixelPlayWatchAvailable) {
+                                                                if (isAurisWatchAvailable) {
                                                                     R.string.song_info_send_to_watch
                                                                 } else {
                                                                     R.string.song_info_watch_unavailable

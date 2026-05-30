@@ -20,13 +20,13 @@ import java.io.IOException
 class MusicDaoTest {
 
     private lateinit var musicDao: MusicDao
-    private lateinit var db: PixelPlayDatabase
+    private lateinit var db: AurisDatabase
 
     @Before
     fun createDb() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        db = Room.inMemoryDatabaseBuilder(context, PixelPlayDatabase::class.java)
-            .addCallback(PixelPlayDatabase.createRuntimeArtifactsCallback())
+        db = Room.inMemoryDatabaseBuilder(context, AurisDatabase::class.java)
+            .addCallback(AurisDatabase.createRuntimeArtifactsCallback())
             .allowMainThreadQueries() // Permite consultas en el hilo principal para tests
             .build()
         musicDao = db.musicDao()

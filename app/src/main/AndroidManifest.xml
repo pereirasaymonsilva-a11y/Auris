@@ -37,7 +37,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
-        android:name=".PixelPlayApplication"
+        android:name=".AurisApplication"
         android:allowBackup="true"
         android:enableOnBackInvokedCallback="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -46,7 +46,7 @@
         android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PixelPlay"
+        android:theme="@style/Theme.Auris"
         android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
@@ -54,7 +54,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.PixelPlay"
+            android:theme="@style/Theme.Auris"
             android:launchMode="singleTop"
             android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize">
             <intent-filter>
@@ -81,37 +81,37 @@
             android:name=".presentation.telegram.auth.TelegramLoginActivity"
             android:exported="false"
             android:label="Telegram Login"
-            android:theme="@style/Theme.PixelPlay" />
+            android:theme="@style/Theme.Auris" />
 
         <activity
             android:name=".presentation.netease.auth.NeteaseLoginActivity"
             android:exported="false"
             android:label="Netease Login"
-            android:theme="@style/Theme.PixelPlay" />
+            android:theme="@style/Theme.Auris" />
 
         <activity
             android:name=".presentation.gdrive.auth.GDriveLoginActivity"
             android:exported="false"
             android:label="Google Drive Login"
-            android:theme="@style/Theme.PixelPlay" />
+            android:theme="@style/Theme.Auris" />
 
         <activity
             android:name=".presentation.qqmusic.auth.QqMusicLoginActivity"
             android:exported="false"
             android:label="QQ Music Login"
-            android:theme="@style/Theme.PixelPlay" />
+            android:theme="@style/Theme.Auris" />
 
         <activity
             android:name=".presentation.navidrome.auth.NavidromeLoginActivity"
             android:exported="false"
             android:label="Navidrome Login"
-            android:theme="@style/Theme.PixelPlay" />
+            android:theme="@style/Theme.Auris" />
 
         <activity
             android:name=".presentation.jellyfin.auth.JellyfinLoginActivity"
             android:exported="false"
             android:label="Jellyfin Login"
-            android:theme="@style/Theme.PixelPlay" />
+            android:theme="@style/Theme.Auris" />
 
 
         <activity
@@ -119,7 +119,7 @@
             android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.PixelPlay.ExternalPlayer"
+            android:theme="@style/Theme.Auris.ExternalPlayer"
             android:excludeFromRecents="true"
             android:grantUriPermissions="true">
             <intent-filter>
@@ -159,14 +159,14 @@
             android:resource="@xml/automotive_app_desc" />
 
         <receiver
-            android:name=".ui.glancewidget.PixelPlayGlanceWidgetReceiver"
+            android:name=".ui.glancewidget.AurisGlanceWidgetReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/pixelplay_glance_widget_info" />
+                android:resource="@xml/auris_glance_widget_info" />
         </receiver>
 
         <receiver
@@ -206,7 +206,7 @@
 
         <!-- Media Button Receiver for external media controls (headphones, car, etc.) -->
         <receiver
-            android:name=".data.service.PixelPlayMediaButtonReceiver"
+            android:name=".data.service.AurisMediaButtonReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />

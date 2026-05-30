@@ -277,7 +277,7 @@ class MediaFileHttpServerService : Service() {
 
     private fun startForegroundService() {
         runCatching {
-            val channelId = "pixelplay_cast_server"
+            val channelId = "auris_cast_server"
             val channelName = getString(R.string.cast_server_channel_name)
             
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {

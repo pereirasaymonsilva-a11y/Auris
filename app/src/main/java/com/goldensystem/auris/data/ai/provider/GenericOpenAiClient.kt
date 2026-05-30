@@ -82,7 +82,7 @@ class GenericOpenAiClient(
                 .addHeader("Content-Type", "application/json")
             
             if (providerName.equals("OpenRouter", ignoreCase = true)) {
-                requestBuilder.addHeader("HTTP-Referer", "https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk")
+                requestBuilder.addHeader("HTTP-Referer", "https://github.com/pereirasaymonsilva-a11y/auris-apk")
                 requestBuilder.addHeader("X-Title", "Auris")
             }
 

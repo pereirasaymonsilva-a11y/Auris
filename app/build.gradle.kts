@@ -10,12 +10,12 @@ plugins {
     id("kotlin-kapt")          // necessário para outras libs (Room não, pq usa ksp, mas deixe)
 }
 
-val enableAbiSplits = providers.gradleProperty("pixelplay.enableAbiSplits")
+val enableAbiSplits = providers.gradleProperty("Auris.enableAbiSplits")
     .orElse("true")
     .map(String::toBoolean)
     .get()
 
-val enableComposeCompilerReports = providers.gradleProperty("pixelplay.enableComposeCompilerReports")
+val enableComposeCompilerReports = providers.gradleProperty("Auris.enableComposeCompilerReports")
     .orElse("false")
     .map(String::toBoolean)
     .get()

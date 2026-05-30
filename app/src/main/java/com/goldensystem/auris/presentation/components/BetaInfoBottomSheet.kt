@@ -41,7 +41,7 @@ import com.goldensystem.auris.R
 @Composable
 fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val feedbackUrl = "https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk/issues/new/choose"
+    val feedbackUrl = "https://github.com/pereirasaymonsilva-a11y/auris-apk/issues/new/choose"
     val donateUrl = "https://github.com/sponsors/pereirasaymonsilva-a11y"
 
     LazyColumn(

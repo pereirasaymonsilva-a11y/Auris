@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.goldensystem.auris.ui.theme.PixelPlayStatusBarStyle
+import com.goldensystem.auris.ui.theme.AurisStatusBarStyle
 import androidx.compose.ui.res.stringResource
 import com.goldensystem.auris.R
 
@@ -68,7 +68,7 @@ fun CollapsibleCommonTopBar(
     val statusBarFallbackColor = backgroundColor.compositeOver(MaterialTheme.colorScheme.surface)
 
     if (syncStatusBarWithContainer) {
-        PixelPlayStatusBarStyle(color = statusBarFallbackColor)
+        AurisStatusBarStyle(color = statusBarFallbackColor)
     }
     // We can also fade the content color if we want, but usually onSurface is fine.
     // GenreDetail interpolates content color, but for standard screens onSurface is usually correct for both states 

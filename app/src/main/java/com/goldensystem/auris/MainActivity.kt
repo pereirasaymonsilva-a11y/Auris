@@ -135,7 +135,7 @@ import com.goldensystem.auris.presentation.viewmodel.MainViewModel
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
 import com.goldensystem.auris.presentation.viewmodel.UpdateViewModel
 import com.goldensystem.auris.presentation.screens.UpdateScreen
-import com.goldensystem.auris.ui.theme.PixelPlayTheme
+import com.goldensystem.auris.ui.theme.AurisTheme
 import com.goldensystem.auris.utils.CrashHandler
 import com.goldensystem.auris.utils.AppLocaleManager
 import com.goldensystem.auris.utils.LogUtils
@@ -271,7 +271,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            PixelPlayTheme(darkTheme = useDarkTheme) {
+            AurisTheme(darkTheme = useDarkTheme) {
     // --- Verificação de integridade (anti-pirataria) ---
     val piracyViewModel: PiracyViewModel = hiltViewModel()
     val piracyUiState by piracyViewModel.uiState.collectAsState()

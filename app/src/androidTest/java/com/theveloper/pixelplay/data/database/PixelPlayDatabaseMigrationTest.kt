@@ -14,12 +14,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class PixelPlayDatabaseMigrationTest {
+class AurisDatabaseMigrationTest {
 
     @get:Rule
     val helper = MigrationTestHelper(
         InstrumentationRegistry.getInstrumentation(),
-        PixelPlayDatabase::class.java,
+        AurisDatabase::class.java,
         emptyList(),
         FrameworkSQLiteOpenHelperFactory()
     )
@@ -43,7 +43,7 @@ class PixelPlayDatabaseMigrationTest {
 
             helper.runMigrationsAndValidate(
                 databaseNameFor(startVersion),
-                PixelPlayDatabaseVersion.LATEST,
+                AurisDatabaseVersion.LATEST,
                 true,
                 *ALL_MIGRATIONS
             ).close()
@@ -58,7 +58,7 @@ class PixelPlayDatabaseMigrationTest {
             DB_NAME_33_TO_34,
             34,
             true,
-            PixelPlayDatabase.MIGRATION_33_34
+            AurisDatabase.MIGRATION_33_34
         ).let { db ->
             val cursor = db.query("PRAGMA table_info(`songs`)")
             try {
@@ -90,7 +90,7 @@ class PixelPlayDatabaseMigrationTest {
         val db = openHelper.writableDatabase
 
         try {
-            PixelPlayDatabase.MIGRATION_23_24.migrate(db)
+            AurisDatabase.MIGRATION_23_24.migrate(db)
 
             val columns = db.tableColumns("songs")
             assertTrue("date_added" in columns)
@@ -120,7 +120,7 @@ class PixelPlayDatabaseMigrationTest {
             DB_NAME_35_TO_36,
             36,
             true,
-            PixelPlayDatabase.MIGRATION_35_36
+            AurisDatabase.MIGRATION_35_36
         ).let { db ->
             val cursor = db.query("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'songs_fts'")
             try {
@@ -141,7 +141,7 @@ class PixelPlayDatabaseMigrationTest {
             DB_NAME_39_TO_40,
             40,
             true,
-            PixelPlayDatabase.MIGRATION_39_40
+            AurisDatabase.MIGRATION_39_40
         ).let { db ->
             try {
                 val indexes = db.tableIndexes("songs")
@@ -303,7 +303,7 @@ class PixelPlayDatabaseMigrationTest {
         return indexes
     }
 
-    private object PixelPlayDatabaseVersion {
+    private object AurisDatabaseVersion {
         const val LATEST = 40
     }
 
@@ -314,21 +314,21 @@ class PixelPlayDatabaseMigrationTest {
         private const val DB_NAME_39_TO_40 = "migration-test-39-to-40"
 
         private val ALL_MIGRATIONS = arrayOf(
-            PixelPlayDatabase.MIGRATION_25_26,
-            PixelPlayDatabase.MIGRATION_26_27,
-            PixelPlayDatabase.MIGRATION_27_28,
-            PixelPlayDatabase.MIGRATION_28_29,
-            PixelPlayDatabase.MIGRATION_29_30,
-            PixelPlayDatabase.MIGRATION_30_31,
-            PixelPlayDatabase.MIGRATION_31_32,
-            PixelPlayDatabase.MIGRATION_32_33,
-            PixelPlayDatabase.MIGRATION_33_34,
-            PixelPlayDatabase.MIGRATION_34_35,
-            PixelPlayDatabase.MIGRATION_35_36,
-            PixelPlayDatabase.MIGRATION_36_37,
-            PixelPlayDatabase.MIGRATION_37_38,
-            PixelPlayDatabase.MIGRATION_38_39,
-            PixelPlayDatabase.MIGRATION_39_40
+            AurisDatabase.MIGRATION_25_26,
+            AurisDatabase.MIGRATION_26_27,
+            AurisDatabase.MIGRATION_27_28,
+            AurisDatabase.MIGRATION_28_29,
+            AurisDatabase.MIGRATION_29_30,
+            AurisDatabase.MIGRATION_30_31,
+            AurisDatabase.MIGRATION_31_32,
+            AurisDatabase.MIGRATION_32_33,
+            AurisDatabase.MIGRATION_33_34,
+            AurisDatabase.MIGRATION_34_35,
+            AurisDatabase.MIGRATION_35_36,
+            AurisDatabase.MIGRATION_36_37,
+            AurisDatabase.MIGRATION_37_38,
+            AurisDatabase.MIGRATION_38_39,
+            AurisDatabase.MIGRATION_39_40
         )
     }
 }

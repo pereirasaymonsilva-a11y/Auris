@@ -68,7 +68,7 @@ class LocalArtworkUriTest {
     @Test
     fun extractCacheBustToken_readsTimestampQuery() {
         val cacheBustToken = LocalArtworkUri.extractCacheBustToken(
-            "pixelplay_local_art://song/99?t=456"
+            "auris_local_art://song/99?t=456"
         )
 
         assertThat(cacheBustToken).isEqualTo("456")

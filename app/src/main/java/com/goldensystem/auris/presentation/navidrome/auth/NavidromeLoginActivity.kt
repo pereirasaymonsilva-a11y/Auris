@@ -74,7 +74,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.goldensystem.auris.R
 import com.goldensystem.auris.ui.theme.GoogleSansRounded
-import com.goldensystem.auris.ui.theme.PixelPlayTheme
+import com.goldensystem.auris.ui.theme.AurisTheme
 import dagger.hilt.android.AndroidEntryPoint
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 
@@ -85,7 +85,7 @@ class NavidromeLoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PixelPlayTheme {
+            AurisTheme {
                 NavidromeLoginScreen(onClose = { finish() })
             }
         }

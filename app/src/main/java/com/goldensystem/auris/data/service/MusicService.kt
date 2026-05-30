@@ -45,7 +45,7 @@ import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
-import com.goldensystem.auris.PixelPlayApplication
+import com.goldensystem.auris.AurisApplication
 import com.goldensystem.auris.R
 import com.goldensystem.auris.data.model.PlayerInfo
 import com.goldensystem.auris.data.model.PlaybackQueueItemSnapshot
@@ -57,7 +57,7 @@ import com.goldensystem.auris.data.repository.MusicRepository
 import com.goldensystem.auris.data.service.player.DualPlayerEngine
 import com.goldensystem.auris.data.service.player.TransitionController
 import com.goldensystem.auris.ui.glancewidget.ControlWidget4x2
-import com.goldensystem.auris.ui.glancewidget.PixelPlayGlanceWidget
+import com.goldensystem.auris.ui.glancewidget.AurisGlanceWidget
 import com.goldensystem.auris.ui.glancewidget.PlayerActions
 import com.goldensystem.auris.ui.glancewidget.PlayerInfoStateDefinition
 import com.goldensystem.auris.utils.AlbumArtUtils
@@ -183,7 +183,7 @@ class MusicService : MediaLibraryService() {
     private var temporaryForegroundStartedInOnCreate = false
 
     companion object {
-        private const val TAG = "MusicService_PixelPlay"
+        private const val TAG = "MusicService_Auris"
         const val NOTIFICATION_ID = 101
         const val ACTION_SLEEP_TIMER_EXPIRED = "com.goldensystem.auris.ACTION_SLEEP_TIMER_EXPIRED"
         const val EXTRA_FORCE_FOREGROUND_ON_START =
@@ -585,7 +585,7 @@ class MusicService : MediaLibraryService() {
                     .setMediaId(AutoMediaBrowseTree.ROOT_ID)
                     .setMediaMetadata(
                         androidx.media3.common.MediaMetadata.Builder()
-                            .setTitle("PixelPlay")
+                            .setTitle("Auris")
                             .setIsBrowsable(true)
                             .setIsPlayable(false)
                             .setMediaType(androidx.media3.common.MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
@@ -876,7 +876,7 @@ class MusicService : MediaLibraryService() {
     private fun startTemporaryForegroundForCommand() {
         val notification = NotificationCompat.Builder(
             this,
-            PixelPlayApplication.NOTIFICATION_CHANNEL_ID
+            AurisApplication.NOTIFICATION_CHANNEL_ID
         )
             .setSmallIcon(R.drawable.monochrome_player)
             .setContentTitle(getString(R.string.app_name))
@@ -1026,7 +1026,7 @@ class MusicService : MediaLibraryService() {
             if (isPlaying && !engine.isTransitionRunning()) {
                 lastAppliedReplayGainVolume?.let { setPlayerVolume(player, it) }
             }
-            // Push state immediately so the watch can foreground PixelPlay before
+            // Push state immediately so the watch can foreground Auris before
             // system media surfaces take over.
             requestWidgetFullUpdate(force = true)
             mediaSession?.let { refreshMediaSessionUi(it) }
@@ -2485,10 +2485,10 @@ if (songId != null) {
             val glanceManager = GlanceAppWidgetManager(applicationContext)
             val widgetPlayerInfo = playerInfo.toWidgetTransportState()
 
-            val glanceIds = glanceManager.getGlanceIds(PixelPlayGlanceWidget::class.java)
+            val glanceIds = glanceManager.getGlanceIds(AurisGlanceWidget::class.java)
             glanceIds.forEach { id ->
                 updateAppWidgetState(applicationContext, PlayerInfoStateDefinition, id) { widgetPlayerInfo }
-                PixelPlayGlanceWidget().update(applicationContext, id)
+                AurisGlanceWidget().update(applicationContext, id)
             }
 
             val barGlanceIds = glanceManager.getGlanceIds(BarWidget4x1::class.java)

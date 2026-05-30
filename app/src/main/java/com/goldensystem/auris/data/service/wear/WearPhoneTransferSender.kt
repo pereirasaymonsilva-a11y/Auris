@@ -27,7 +27,7 @@ class WearPhoneTransferSender @Inject constructor(
     private val messageClient: MessageClient by lazy { Wearable.getMessageClient(application) }
     private val json = Json { ignoreUnknownKeys = true }
 
-    suspend fun isPixelPlayWatchAvailable(): Boolean {
+    suspend fun isAurisWatchAvailable(): Boolean {
         return runCatching {
             val capability = capabilityClient.getCapability(
                 WearCapabilities.PIXELPLAY_WEAR_APP,
@@ -37,7 +37,7 @@ class WearPhoneTransferSender @Inject constructor(
             capability.nodes.isNotEmpty()
         }.getOrElse { error ->
             transferStateStore.retainReachableWatchNodes(emptySet())
-            Timber.tag(TAG).w(error, "Failed checking PixelPlay Wear availability")
+            Timber.tag(TAG).w(error, "Failed checking Auris Wear availability")
             false
         }
     }
@@ -75,7 +75,7 @@ class WearPhoneTransferSender @Inject constructor(
             val nodes = capability.nodes
             transferStateStore.retainReachableWatchNodes(nodes.map { it.id }.toSet())
             if (nodes.isEmpty()) {
-                error("No reachable watch with PixelPlay")
+                error("No reachable watch with Auris")
             }
 
             val request = WearTransferRequest(

@@ -14,7 +14,7 @@ import androidx.work.WorkerParameters
 import androidx.work.testing.TestListenableWorkerBuilder
 import com.google.common.truth.Truth.assertThat
 import com.goldensystem.auris.data.database.MusicDao
-import com.goldensystem.auris.data.database.PixelPlayDatabase
+import com.goldensystem.auris.data.database.AurisDatabase
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
@@ -29,7 +29,7 @@ import java.io.IOException
 class SyncWorkerTest {
 
     private lateinit var context: Context
-    private lateinit var database: PixelPlayDatabase
+    private lateinit var database: AurisDatabase
     private lateinit var musicDao: MusicDao
     private lateinit var mockContentResolver: android.content.ContentResolver
 
@@ -69,8 +69,8 @@ class SyncWorkerTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        database = Room.inMemoryDatabaseBuilder(context, PixelPlayDatabase::class.java)
-            .addCallback(PixelPlayDatabase.createRuntimeArtifactsCallback())
+        database = Room.inMemoryDatabaseBuilder(context, AurisDatabase::class.java)
+            .addCallback(AurisDatabase.createRuntimeArtifactsCallback())
             .allowMainThreadQueries() // Para tests, está bien.
             .build()
         musicDao = database.musicDao()

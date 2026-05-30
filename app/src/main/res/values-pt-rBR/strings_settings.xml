@@ -221,8 +221,8 @@
     <string name="setcat_trigger_crash_title">Acionar Falha de Teste</string>
     <string name="setcat_trigger_crash_subtitle">Simular uma falha para testar o sistema de relatório de falhas.</string>
     <string name="setcat_application">Aplicativo</string>
-    <string name="setcat_about_pixelplayer_title">Sobre o Auris</string>
-    <string name="setcat_about_pixelplayer_subtitle">Versão do aplicativo, créditos e mais.</string>
+    <string name="setcat_about_auris_title">Sobre o Auris</string>
+    <string name="setcat_about_auris_subtitle">Versão do aplicativo, créditos e mais.</string>
 
     <string name="backup_summary_none">Nenhuma seção selecionada.</string>
     <string name="backup_summary_all">Todas as seções selecionadas.</string>

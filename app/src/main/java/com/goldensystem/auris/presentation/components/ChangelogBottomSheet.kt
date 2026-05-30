@@ -80,7 +80,7 @@ fun ChangelogBottomSheet(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val changelogUrl = "https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk/blob/main/CHANGELOG.md"
+    val changelogUrl = "https://github.com/pereirasaymonsilva-a11y/auris-apk/blob/main/CHANGELOG.md"
     val changelog = changelogVersions()
 
     val fabCornerRadius = 16.dp

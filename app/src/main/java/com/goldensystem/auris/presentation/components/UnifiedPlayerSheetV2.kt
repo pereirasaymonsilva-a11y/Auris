@@ -79,7 +79,7 @@ import com.goldensystem.auris.presentation.components.scoped.rememberSheetVisual
 import com.goldensystem.auris.presentation.viewmodel.PlayerSheetState
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
 import com.goldensystem.auris.presentation.viewmodel.StablePlayerState
-import com.goldensystem.auris.ui.theme.LocalPixelPlayDarkTheme
+import com.goldensystem.auris.ui.theme.LocalAurisDarkTheme
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -495,7 +495,7 @@ fun UnifiedPlayerSheetV2(
 
     val activePlayerSchemePair by playerViewModel.activePlayerColorSchemePair.collectAsStateWithLifecycle()
     val themedAlbumArtUri by playerViewModel.currentThemedAlbumArtUri.collectAsStateWithLifecycle()
-    val isDarkTheme = LocalPixelPlayDarkTheme.current
+    val isDarkTheme = LocalAurisDarkTheme.current
     val currentSong = infrequentPlayerState.currentSong
     val sheetThemeState = rememberSheetThemeState(
         activePlayerSchemePair = activePlayerSchemePair,

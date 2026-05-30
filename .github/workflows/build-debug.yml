@@ -26,7 +26,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Auris debug APK
-        run: ./gradlew :app:assembleDebug -Ppixelplay.enableAbiSplits=true
+        run: ./gradlew :app:assembleDebug -Pauris.enableAbiSplits=true
 
       - name: Verify Phone split APKs
         run: |

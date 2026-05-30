@@ -7,7 +7,7 @@ import androidx.media.session.MediaButtonReceiver
 import androidx.media3.common.util.UnstableApi
 import timber.log.Timber
 
-class PixelPlayMediaButtonReceiver : MediaButtonReceiver() {
+class AurisMediaButtonReceiver : MediaButtonReceiver() {
 
     @OptIn(UnstableApi::class)
     override fun onReceive(context: Context, intent: Intent) {

@@ -7,7 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.ambient.AmbientModeSupport
-import com.goldensystem.auris.presentation.theme.WearPixelPlayTheme
+import com.goldensystem.auris.presentation.theme.WearAurisTheme
 import com.goldensystem.auris.presentation.viewmodel.WearPlayerViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -36,7 +36,7 @@ class WearMainActivity : FragmentActivity(), AmbientModeSupport.AmbientCallbackP
             val paletteSeedArgb by playerViewModel.paletteSeedArgb.collectAsState()
             val themePalette by playerViewModel.themePalette.collectAsState()
 
-            WearPixelPlayTheme(
+            WearAurisTheme(
                 albumArt = albumArt,
                 seedColorArgb = paletteSeedArgb,
                 themePalette = themePalette,

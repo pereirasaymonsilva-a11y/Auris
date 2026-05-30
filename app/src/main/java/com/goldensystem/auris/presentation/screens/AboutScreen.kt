@@ -423,7 +423,7 @@ fun AboutScreen(
                 )
                 OutlinedButton(
                     onClick = {
-                        openUrl(context, "https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk/issues/new?template=blank")
+                        openUrl(context, "https://github.com/pereirasaymonsilva-a11y/auris-apk/issues/new?template=blank")
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -639,7 +639,7 @@ private fun AboutHeroCard(
                         color = MaterialTheme.colorScheme.primaryContainer,
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.pixelplay_base_monochrome),
+                            painter = painterResource(R.drawable.auris_base_monochrome),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.padding(10.dp).size(28.dp),

@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Um player de música elegante, poderoso e totalmente em português</strong><br>
-  Baseado no PixelPlayer · Construído com Jetpack Compose e Material Design 3
+  Baseado no Auris · Construído com Jetpack Compose e Material Design 3
 </p>
 
 <p align="center">
@@ -19,11 +19,11 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk/releases/latest">
-        <img src="https://img.shields.io/github/v/release/pereirasaymonsilva-a11y/pixelplayer-apk?include_prereleases&logo=github&style=for-the-badge&label=Última%20versão" alt="Última versão">
+    <a href="https://github.com/pereirasaymonsilva-a11y/auris-apk/releases/latest">
+        <img src="https://img.shields.io/github/v/release/pereirasaymonsilva-a11y/auris-apk?include_prereleases&logo=github&style=for-the-badge&label=Última%20versão" alt="Última versão">
     </a>
-    <a href="https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk/releases">
-        <img src="https://img.shields.io/github/downloads/pereirasaymonsilva-a11y/pixelplayer-apk/total?logo=github&style=for-the-badge" alt="Total de Downloads">
+    <a href="https://github.com/pereirasaymonsilva-a11y/auris-apk/releases">
+        <img src="https://img.shields.io/github/downloads/pereirasaymonsilva-a11y/auris-apk/total?logo=github&style=for-the-badge" alt="Total de Downloads">
     </a>
     <img src="https://img.shields.io/badge/Android-11%2B-green?style=for-the-badge&logo=android" alt="Android 11+">
     <img src="https://img.shields.io/badge/Kotlin-100%25-purple?style=for-the-badge&logo=kotlin" alt="Kotlin">
@@ -33,7 +33,7 @@
 
 ## ✨ Sobre o Auris
 
-O **Auris** é uma versão personalizada com carinho a partir do código aberto do **PixelPlayer**, criado por [theovilardo](https://github.com/theovilardo).  
+O **Auris** é uma versão personalizada com carinho a partir do código aberto do **Auris**, criado por [theovilardo](https://github.com/theovilardo).  
 Ele foi traduzido integralmente para o português (Brasil), ganhou um tema claro em dourado e preto, teve ícones e identidade visual renovados, e agora é mantido como um projeto independente focado na comunidade lusófona.
 
 Se você quer um player de música moderno, com Material You, equalizador, letras sincronizadas, suporte a múltiplos formatos e uma interface fluida, o Auris é para você.
@@ -111,7 +111,7 @@ Se você quer um player de música moderno, com Material You, equalizador, letra
 ## ⬇️ Download
 
 <p align="center">
-  <a href="https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk/releases/latest">
+  <a href="https://github.com/pereirasaymonsilva-a11y/auris-apk/releases/latest">
     <img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" alt="Baixar no GitHub" height="60">
   </a>
 </p>
@@ -153,7 +153,7 @@ app/src/main/java/com/goldensystem/auris/
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/pereirasaymonsilva-a11y/pixelplayer-apk.git
+   git clone https://github.com/pereirasaymonsilva-a11y/auris-apk.git
 ```
 
 1. Abra no Android Studio (Ladybug ou mais recente).
@@ -180,5 +180,5 @@ Para sugerir melhorias, abra uma issue ou envie um pull request.
 Este projeto está licenciado sob a Licença MIT.
 Consulte o arquivo LICENSE para mais informações.
 
-Auris é uma modificação do PixelPlayer, criado por theovilardo.
+Auris é uma modificação do Auris, criado por theovilardo.
 Modificações por Saymon Silva Pereira / Golden System Studios (2026).

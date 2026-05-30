@@ -15,7 +15,7 @@ import androidx.compose.runtime.getValue
 import dagger.hilt.android.AndroidEntryPoint
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
 import com.goldensystem.auris.presentation.components.external.ExternalPlayerOverlay
-import com.goldensystem.auris.ui.theme.PixelPlayTheme
+import com.goldensystem.auris.ui.theme.AurisTheme
 import android.content.Intent.EXTRA_STREAM
 import androidx.media3.common.util.UnstableApi
 import com.goldensystem.auris.data.preferences.AppThemeMode
@@ -51,7 +51,7 @@ class ExternalPlayerActivity : ComponentActivity() {
                 AppThemeMode.LIGHT -> false
                 else -> systemDarkTheme
             }
-            PixelPlayTheme(darkTheme = useDarkTheme) {
+            AurisTheme(darkTheme = useDarkTheme) {
                 ExternalPlayerOverlay(
                     playerViewModel = playerViewModel,
                     onDismiss = { finish() },

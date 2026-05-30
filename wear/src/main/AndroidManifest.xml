@@ -14,7 +14,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PixelPlayWear">
+        android:theme="@style/Theme.AurisWear">
 
         <uses-library
             android:name="com.google.android.wearable"
@@ -33,7 +33,7 @@
             android:exported="true"
             android:launchMode="singleTask"
             android:taskAffinity=""
-            android:theme="@style/Theme.PixelPlayWear">
+            android:theme="@style/Theme.AurisWear">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

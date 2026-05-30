@@ -271,7 +271,7 @@ class GDriveRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 if (!ensureValidToken()) return@withContext Result.failure(Exception("Failed to obtain valid token"))
-                val raw = api.createFolder("PixelPlay Music", parentId)
+                val raw = api.createFolder("Auris Music", parentId)
                 val json = JSONObject(raw)
                 val folder = DriveFolder(
                     id = json.optString("id"),

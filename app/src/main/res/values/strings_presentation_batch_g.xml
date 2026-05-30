@@ -182,7 +182,7 @@
     <string name="presentation_batch_g_artist_group_by_album_artist">Group by Album Artist</string>
     <string name="presentation_batch_g_artist_group_by_album_artist_sub">Show collaboration albums under the primary artist</string>
     <string name="presentation_batch_g_artist_info_title">About Multi‑Artist Parsing</string>
-    <string name="presentation_batch_g_artist_info_body">PixelPlay splits artist tags using character delimiters (/, ;, &amp;) and word delimiters (feat., ft., vs., x). Word delimiters are matched case‑insensitively.
+    <string name="presentation_batch_g_artist_info_body">Auris splits artist tags using character delimiters (/, ;, &amp;) and word delimiters (feat., ft., vs., x). Word delimiters are matched case‑insensitively.
 
 \"Extract Artists from Title\" detects patterns like (feat. Artist) in song titles.
 
@@ -267,9 +267,9 @@ Backslash (\\) can be used to escape character delimiters.</string>
     <string name="presentation_batch_g_playstore_open">Open Play Store</string>
     <string name="presentation_batch_g_playstore_continue_beta">Continue beta</string>
     <string name="presentation_batch_g_playstore_link_pending">Play Store link will be activated from GitHub configuration.</string>
-    <string name="presentation_batch_g_playstore_title">PixelPlay is now available on Google Play</string>
+    <string name="presentation_batch_g_playstore_title">Auris is now available on Google Play</string>
     <string name="presentation_batch_g_playstore_body">Use the stable channel on Google Play for release updates while we keep beta builds active.</string>
-    <string name="presentation_batch_g_playstore_app_name">PixelPlay</string>
+    <string name="presentation_batch_g_playstore_app_name">Auris</string>
     <string name="presentation_batch_g_playstore_release_announcement">Release announcement</string>
     <string name="presentation_batch_g_playstore_coming_soon">Coming soon</string>
     <string name="presentation_batch_g_genre_sort_title">Sort and Play</string>

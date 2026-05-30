@@ -15,7 +15,7 @@ import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.goldensystem.auris.BuildConfig
-import com.goldensystem.auris.PixelPlayApplication
+import com.goldensystem.auris.AurisApplication
 import com.goldensystem.auris.data.database.AlbumArtThemeDao
 import com.goldensystem.auris.data.database.EngagementDao
 import com.goldensystem.auris.data.database.FavoritesDao
@@ -25,7 +25,7 @@ import com.goldensystem.auris.data.database.AiCacheDao
 import com.goldensystem.auris.data.database.AiUsageDao
 import com.goldensystem.auris.data.database.LocalPlaylistDao
 import com.goldensystem.auris.data.database.MusicDao
-import com.goldensystem.auris.data.database.PixelPlayDatabase
+import com.goldensystem.auris.data.database.AurisDatabase
 import com.goldensystem.auris.data.database.SearchHistoryDao
 import com.goldensystem.auris.data.database.TransitionDao
 import com.goldensystem.auris.data.preferences.UserPreferencesRepository
@@ -69,8 +69,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideApplication(@ApplicationContext app: Context): PixelPlayApplication {
-        return app as PixelPlayApplication
+    fun provideApplication(@ApplicationContext app: Context): AurisApplication {
+        return app as AurisApplication
     }
 
     @Singleton
@@ -114,51 +114,51 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun providePixelPlayDatabase(@ApplicationContext context: Context): PixelPlayDatabase {
+    fun provideAurisDatabase(@ApplicationContext context: Context): AurisDatabase {
         val builder = Room.databaseBuilder(
             context.applicationContext,
-            PixelPlayDatabase::class.java,
-            "pixelplay_database"
+            AurisDatabase::class.java,
+            "auris_database"
         ).addMigrations(
-            PixelPlayDatabase.MIGRATION_3_4,
-            PixelPlayDatabase.MIGRATION_4_5,
-            PixelPlayDatabase.MIGRATION_5_6,
-            PixelPlayDatabase.MIGRATION_6_7,
-            PixelPlayDatabase.MIGRATION_7_8,
-            PixelPlayDatabase.MIGRATION_8_9,
-            PixelPlayDatabase.MIGRATION_9_10,
-            PixelPlayDatabase.MIGRATION_10_11,
-            PixelPlayDatabase.MIGRATION_11_12,
-            PixelPlayDatabase.MIGRATION_12_13,
-            PixelPlayDatabase.MIGRATION_13_14,
-            PixelPlayDatabase.MIGRATION_14_15,
-            PixelPlayDatabase.MIGRATION_15_16,
-            PixelPlayDatabase.MIGRATION_16_17,
-            PixelPlayDatabase.MIGRATION_17_18,
-            PixelPlayDatabase.MIGRATION_18_19,
-            PixelPlayDatabase.MIGRATION_19_20,
-            PixelPlayDatabase.MIGRATION_20_21,
-            PixelPlayDatabase.MIGRATION_21_22,
-            PixelPlayDatabase.MIGRATION_22_23,
-            PixelPlayDatabase.MIGRATION_23_24,
-            PixelPlayDatabase.MIGRATION_24_25,
-            PixelPlayDatabase.MIGRATION_25_26,
-            PixelPlayDatabase.MIGRATION_26_27,
-            PixelPlayDatabase.MIGRATION_27_28,
-            PixelPlayDatabase.MIGRATION_28_29,
-            PixelPlayDatabase.MIGRATION_29_30,
-            PixelPlayDatabase.MIGRATION_30_31,
-            PixelPlayDatabase.MIGRATION_31_32,
-            PixelPlayDatabase.MIGRATION_32_33,
-            PixelPlayDatabase.MIGRATION_33_34,
-            PixelPlayDatabase.MIGRATION_34_35,
-            PixelPlayDatabase.MIGRATION_35_36,
-            PixelPlayDatabase.MIGRATION_36_37,
-            PixelPlayDatabase.MIGRATION_37_38,
-            PixelPlayDatabase.MIGRATION_38_39,
-            PixelPlayDatabase.MIGRATION_39_40
+            AurisDatabase.MIGRATION_3_4,
+            AurisDatabase.MIGRATION_4_5,
+            AurisDatabase.MIGRATION_5_6,
+            AurisDatabase.MIGRATION_6_7,
+            AurisDatabase.MIGRATION_7_8,
+            AurisDatabase.MIGRATION_8_9,
+            AurisDatabase.MIGRATION_9_10,
+            AurisDatabase.MIGRATION_10_11,
+            AurisDatabase.MIGRATION_11_12,
+            AurisDatabase.MIGRATION_12_13,
+            AurisDatabase.MIGRATION_13_14,
+            AurisDatabase.MIGRATION_14_15,
+            AurisDatabase.MIGRATION_15_16,
+            AurisDatabase.MIGRATION_16_17,
+            AurisDatabase.MIGRATION_17_18,
+            AurisDatabase.MIGRATION_18_19,
+            AurisDatabase.MIGRATION_19_20,
+            AurisDatabase.MIGRATION_20_21,
+            AurisDatabase.MIGRATION_21_22,
+            AurisDatabase.MIGRATION_22_23,
+            AurisDatabase.MIGRATION_23_24,
+            AurisDatabase.MIGRATION_24_25,
+            AurisDatabase.MIGRATION_25_26,
+            AurisDatabase.MIGRATION_26_27,
+            AurisDatabase.MIGRATION_27_28,
+            AurisDatabase.MIGRATION_28_29,
+            AurisDatabase.MIGRATION_29_30,
+            AurisDatabase.MIGRATION_30_31,
+            AurisDatabase.MIGRATION_31_32,
+            AurisDatabase.MIGRATION_32_33,
+            AurisDatabase.MIGRATION_33_34,
+            AurisDatabase.MIGRATION_34_35,
+            AurisDatabase.MIGRATION_35_36,
+            AurisDatabase.MIGRATION_36_37,
+            AurisDatabase.MIGRATION_37_38,
+            AurisDatabase.MIGRATION_38_39,
+            AurisDatabase.MIGRATION_39_40
         )
-            .addCallback(PixelPlayDatabase.createRuntimeArtifactsCallback())
+            .addCallback(AurisDatabase.createRuntimeArtifactsCallback())
             .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
 
         // P2-4: Only allow destructive migration in debug builds.
@@ -173,84 +173,84 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideAlbumArtThemeDao(database: PixelPlayDatabase): AlbumArtThemeDao {
+    fun provideAlbumArtThemeDao(database: AurisDatabase): AlbumArtThemeDao {
         return database.albumArtThemeDao()
     }
 
     @Singleton
     @Provides
-    fun provideSearchHistoryDao(database: PixelPlayDatabase): SearchHistoryDao { // NUEVO MÉTODO
+    fun provideSearchHistoryDao(database: AurisDatabase): SearchHistoryDao { // NUEVO MÉTODO
         return database.searchHistoryDao()
     }
 
     @Singleton
     @Provides
-    fun provideMusicDao(database: PixelPlayDatabase): MusicDao { // Proveer MusicDao
+    fun provideMusicDao(database: AurisDatabase): MusicDao { // Proveer MusicDao
         return database.musicDao()
     }
 
     @Singleton
     @Provides
-    fun provideTransitionDao(database: PixelPlayDatabase): TransitionDao {
+    fun provideTransitionDao(database: AurisDatabase): TransitionDao {
         return database.transitionDao()
     }
 
     @Singleton
     @Provides
-    fun provideEngagementDao(database: PixelPlayDatabase): EngagementDao {
+    fun provideEngagementDao(database: AurisDatabase): EngagementDao {
         return database.engagementDao()
     }
 
     @Singleton
     @Provides
-    fun provideFavoritesDao(database: PixelPlayDatabase): FavoritesDao {
+    fun provideFavoritesDao(database: AurisDatabase): FavoritesDao {
         return database.favoritesDao()
     }
 
     @Singleton
     @Provides
-    fun provideLyricsDao(database: PixelPlayDatabase): LyricsDao {
+    fun provideLyricsDao(database: AurisDatabase): LyricsDao {
         return database.lyricsDao()
     }
 
     @Singleton
     @Provides
-    fun provideGDriveDao(database: PixelPlayDatabase): GDriveDao {
+    fun provideGDriveDao(database: AurisDatabase): GDriveDao {
         return database.gdriveDao()
     }
 
     @Singleton
     @Provides
-    fun provideLocalPlaylistDao(database: PixelPlayDatabase): LocalPlaylistDao {
+    fun provideLocalPlaylistDao(database: AurisDatabase): LocalPlaylistDao {
         return database.localPlaylistDao()
     }
 
     @Singleton
     @Provides
-    fun provideQqMusicDao(database: PixelPlayDatabase): com.goldensystem.auris.data.database.QqMusicDao {
+    fun provideQqMusicDao(database: AurisDatabase): com.goldensystem.auris.data.database.QqMusicDao {
         return database.qqmusicDao()
     }
 
     @Singleton
     @Provides
-    fun provideNavidromeDao(database: PixelPlayDatabase): com.goldensystem.auris.data.database.NavidromeDao {
+    fun provideNavidromeDao(database: AurisDatabase): com.goldensystem.auris.data.database.NavidromeDao {
         return database.navidromeDao()
     }
     
     @Singleton
     @Provides
-    fun provideAiCacheDao(database: PixelPlayDatabase): AiCacheDao {
+    fun provideAiCacheDao(database: AurisDatabase): AiCacheDao {
         return database.aiCacheDao()
     }
 
     @Provides
-    fun provideAiUsageDao(database: PixelPlayDatabase): AiUsageDao {
+    fun provideAiUsageDao(database: AurisDatabase): AiUsageDao {
         return database.aiUsageDao()
     }
 
     @Singleton
     @Provides
-    fun provideJellyfinDao(database: PixelPlayDatabase): com.goldensystem.auris.data.database.JellyfinDao {
+    fun provideJellyfinDao(database: AurisDatabase): com.goldensystem.auris.data.database.JellyfinDao {
         return database.jellyfinDao()
     }
 
@@ -333,13 +333,13 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideTelegramDao(database: PixelPlayDatabase): com.goldensystem.auris.data.database.TelegramDao {
+    fun provideTelegramDao(database: AurisDatabase): com.goldensystem.auris.data.database.TelegramDao {
         return database.telegramDao()
     }
 
     @Singleton
     @Provides
-    fun provideNeteaseDao(database: PixelPlayDatabase): com.goldensystem.auris.data.database.NeteaseDao {
+    fun provideNeteaseDao(database: AurisDatabase): com.goldensystem.auris.data.database.NeteaseDao {
         return database.neteaseDao()
     }
 
@@ -436,7 +436,7 @@ object AppModule {
             .addInterceptor { chain ->
                 val originalRequest = chain.request()
                 val requestWithUserAgent = originalRequest.newBuilder()
-                    .header("User-Agent", "PixelPlayer/1.0 (Android; Music Player)")
+                    .header("User-Agent", "Auris/1.0 (Android; Music Player)")
                     .build()
                 chain.proceed(requestWithUserAgent)
             }
@@ -492,7 +492,7 @@ object AppModule {
             .addInterceptor { chain ->
                 val originalRequest = chain.request()
                 val requestWithHeaders = originalRequest.newBuilder()
-                    .header("User-Agent", "PixelPlayer/1.0 (Android; Music Player)")
+                    .header("User-Agent", "Auris/1.0 (Android; Music Player)")
                     .header("Accept", "application/json")
                     .build()
                 chain.proceed(requestWithHeaders)

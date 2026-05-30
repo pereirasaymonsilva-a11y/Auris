@@ -25,7 +25,7 @@ import com.goldensystem.auris.presentation.viewmodel.ColorSchemePair
 import androidx.core.graphics.ColorUtils
 import androidx.compose.ui.unit.dp
 
-val LocalPixelPlayDarkTheme = staticCompositionLocalOf { false }
+val LocalAurisDarkTheme = staticCompositionLocalOf { false }
 
 private tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
@@ -34,7 +34,7 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
 }
 
 @Composable
-fun PixelPlayStatusBarStyle(
+fun AurisStatusBarStyle(
     color: Color,
     useDarkIcons: Boolean = ColorUtils.calculateLuminance(color.toArgb()) > 0.55
 ) {
@@ -51,18 +51,18 @@ fun PixelPlayStatusBarStyle(
 }
 
 val DarkColorScheme = darkColorScheme(
-    primary = PixelPlayPurplePrimary,
-    secondary = PixelPlayPink,
-    tertiary = PixelPlayOrange,
-    background = PixelPlayPurpleDark,
-    surface = PixelPlaySurface,
-    onPrimary = PixelPlayWhite,
-    onSecondary = PixelPlayWhite,
-    onTertiary = PixelPlayWhite,
-    onBackground = PixelPlayWhite,
-    onSurface = PixelPlayLightPurple, // Texto sobre superficies
+    primary = AurisPurplePrimary,
+    secondary = AurisPink,
+    tertiary = AurisOrange,
+    background = AurisPurpleDark,
+    surface = AurisSurface,
+    onPrimary = AurisWhite,
+    onSecondary = AurisWhite,
+    onTertiary = AurisWhite,
+    onBackground = AurisWhite,
+    onSurface = AurisLightPurple, // Texto sobre superficies
     error = Color(0xFFFF5252),
-    onError = PixelPlayWhite
+    onError = AurisWhite
 )
 
 val LightColorScheme = lightColorScheme(
@@ -90,7 +90,7 @@ val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun PixelPlayTheme(
+fun AurisTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     colorSchemePairOverride: ColorSchemePair? = null,
     content: @Composable () -> Unit
@@ -108,9 +108,9 @@ fun PixelPlayTheme(
         )
     )
 
-    PixelPlayStatusBarStyle(color = defaultStatusBarColor)
+    AurisStatusBarStyle(color = defaultStatusBarColor)
 
-    CompositionLocalProvider(LocalPixelPlayDarkTheme provides darkTheme) {
+    CompositionLocalProvider(LocalAurisDarkTheme provides darkTheme) {
         MaterialTheme(
             colorScheme = finalColorScheme,
             typography = Typography,

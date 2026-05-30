@@ -114,7 +114,7 @@ fun PlayStoreAnnouncementDialog(
                         color = MaterialTheme.colorScheme.primaryContainer,
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.pixelplay_base_monochrome),
+                            painter = painterResource(id = R.drawable.auris_base_monochrome),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier

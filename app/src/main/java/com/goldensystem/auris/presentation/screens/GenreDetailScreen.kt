@@ -72,7 +72,7 @@ import com.goldensystem.auris.presentation.viewmodel.SectionData
 import com.goldensystem.auris.presentation.viewmodel.AlbumData
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
 import com.goldensystem.auris.presentation.viewmodel.StablePlayerState
-import com.goldensystem.auris.ui.theme.LocalPixelPlayDarkTheme
+import com.goldensystem.auris.ui.theme.LocalAurisDarkTheme
 import com.goldensystem.auris.utils.formatDuration
 import com.goldensystem.auris.utils.formatSongCount
 import kotlinx.collections.immutable.persistentListOf
@@ -109,7 +109,7 @@ fun GenreDetailScreen(
     }
 
     val density = LocalDensity.current
-    val darkMode = LocalPixelPlayDarkTheme.current
+    val darkMode = LocalAurisDarkTheme.current
 
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()

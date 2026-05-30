@@ -103,7 +103,7 @@ import com.goldensystem.auris.R
 import com.goldensystem.auris.presentation.telegram.channel.TelegramChannelSearchSheet
 import com.goldensystem.auris.presentation.telegram.dashboard.TelegramDashboardScreen
 import com.goldensystem.auris.ui.theme.GoogleSansRounded
-import com.goldensystem.auris.ui.theme.PixelPlayTheme
+import com.goldensystem.auris.ui.theme.AurisTheme
 import dagger.hilt.android.AndroidEntryPoint
 import org.drinkless.tdlib.TdApi
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
@@ -115,7 +115,7 @@ class TelegramLoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            PixelPlayTheme {
+            AurisTheme {
                 TelegramLoginScreen(onFinish = { finish() })
             }
         }

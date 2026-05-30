@@ -262,7 +262,7 @@ class WatchTransferForegroundService : Service() {
 
     companion object {
         private const val TAG = "WatchTransferFgSvc"
-        private const val NOTIFICATION_CHANNEL_ID = "pixelplay_watch_transfers"
+        private const val NOTIFICATION_CHANNEL_ID = "auris_watch_transfers"
         private const val NOTIFICATION_ID = 1003
         private const val MAX_STYLE_LINES = 5
 

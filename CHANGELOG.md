@@ -1,8 +1,8 @@
 # Changelog
 
 > **✨ Auris – Edição Especial**  
-> Este aplicativo é uma versão modificada com carinho a partir do código aberto original de **theovilardo** (PixelPlayer).  
-> Para conhecer o projeto original, acesse: [https://github.com/theovilardo/PixelPlayer](https://github.com/theovilardo/PixelPlayer)
+> Este aplicativo é uma versão modificada com carinho a partir do código aberto original de **theovilardo** (Auris).  
+> Para conhecer o projeto original, acesse: [https://github.com/theovilardo/Auris](https://github.com/theovilardo/Auris)
 
 > ⚠️ **Aviso Importante**  
 > Sempre que for atualizar o Auris, **desinstale a versão anterior** antes de instalar a nova.  

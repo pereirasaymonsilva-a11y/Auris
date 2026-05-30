@@ -38,8 +38,8 @@ class SongInfoBottomSheetViewModel @Inject constructor(
     )
 
     private val _audioMeta = MutableStateFlow<AudioMeta?>(null)
-    private val _isPixelPlayWatchAvailable = MutableStateFlow(false)
-    val isPixelPlayWatchAvailable: StateFlow<Boolean> = _isPixelPlayWatchAvailable.asStateFlow()
+    private val _isAurisWatchAvailable = MutableStateFlow(false)
+    val isAurisWatchAvailable: StateFlow<Boolean> = _isAurisWatchAvailable.asStateFlow()
     private val _isWatchAvailabilityResolved = MutableStateFlow(false)
     val isWatchAvailabilityResolved: StateFlow<Boolean> = _isWatchAvailabilityResolved.asStateFlow()
     private val _isRefreshingWatchAvailability = MutableStateFlow(false)
@@ -109,8 +109,8 @@ class SongInfoBottomSheetViewModel @Inject constructor(
 
         viewModelScope.launch {
             _isRefreshingWatchAvailability.value = true
-            val available = wearPhoneTransferSender.isPixelPlayWatchAvailable()
-            _isPixelPlayWatchAvailable.value = available
+            val available = wearPhoneTransferSender.isAurisWatchAvailable()
+            _isAurisWatchAvailable.value = available
             _isWatchAvailabilityResolved.value = true
             _isRefreshingWatchAvailability.value = false
             if (available) {
@@ -140,8 +140,8 @@ class SongInfoBottomSheetViewModel @Inject constructor(
                 onComplete("Only local songs can be sent to watch")
                 return@launch
             }
-            if (!_isPixelPlayWatchAvailable.value) {
-                onComplete("No reachable watch with PixelPlay")
+            if (!_isAurisWatchAvailable.value) {
+                onComplete("No reachable watch with Auris")
                 refreshWatchAvailability()
                 return@launch
             }

@@ -39,7 +39,7 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.goldensystem.auris.data.gdrive.GDriveConstants
 import com.goldensystem.auris.ui.theme.GoogleSansRounded
-import com.goldensystem.auris.ui.theme.PixelPlayTheme
+import com.goldensystem.auris.ui.theme.AurisTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
@@ -53,7 +53,7 @@ class GDriveLoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PixelPlayTheme {
+            AurisTheme {
                 GDriveLoginScreen(onClose = { finish() })
             }
         }
@@ -211,7 +211,7 @@ private fun FolderSetupContent(state: GDriveLoginState.FolderSetup, cardShape: A
                 Icon(Icons.Rounded.CreateNewFolder, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(24.dp))
                 Spacer(Modifier.width(12.dp))
                 Column {
-                    Text(stringResource(R.string.auth_gdrive_create_pixelplay_music_title), style = MaterialTheme.typography.titleSmall, fontFamily = GoogleSansRounded, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                    Text(stringResource(R.string.auth_gdrive_create_auris_music_title), style = MaterialTheme.typography.titleSmall, fontFamily = GoogleSansRounded, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSecondaryContainer)
                     Text(stringResource(R.string.auth_gdrive_create_folder_here_hint), style = MaterialTheme.typography.bodySmall, fontFamily = GoogleSansRounded, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f))
                 }
             }
