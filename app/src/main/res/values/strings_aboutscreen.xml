@@ -2,7 +2,7 @@
 <resources>
     <string name="contributor_theo_display_name">Theo Vilardo</string>
     <string name="contributor_theo_role">Original creator</string>
-    <string name="contributor_theo_detail">This is the original creator of Auris.</string>
+    <string name="contributor_theo_detail">This is the original creator of PixelPlayer.</string>
 
     <string name="contributor_auris_display_name">Saymon Silva Pereira</string>
     <string name="contributor_auris_role">Auris maintainer</string>
@@ -23,3 +23,5 @@
     <string name="contributor_colby_detail">Helped shape Auris in the first stages of the app.</string>
     <string name="contributor_colby_badge">Early Support</string>
 </resources>
+
+    <string name="about_changelog_text">• Support for new audio formats\n• Player interface improvements\n• Bug fixes and optimizations\n• Library updates\n• Improved performance\n• Minor visual fixes </string>

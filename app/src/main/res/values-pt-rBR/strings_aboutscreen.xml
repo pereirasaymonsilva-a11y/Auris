@@ -3,7 +3,7 @@
     <!-- Strings da tela About (contribuidores) -->
     <string name="contributor_theo_display_name">Theo Vilardo</string>
     <string name="contributor_theo_role">Criador original</string>
-    <string name="contributor_theo_detail">Esse é o criador original do Auris.</string>
+    <string name="contributor_theo_detail">Esse é o criador original do PixelPlayer.</string>
 
     <string name="contributor_auris_display_name">Saymon Silva Pereira</string>
     <string name="contributor_auris_role">Mantenedor do Auris</string>
@@ -24,3 +24,5 @@
     <string name="contributor_colby_detail">Ajudou a moldar o Auris nos estágios iniciais.</string>
     <string name="contributor_colby_badge">Apoio Inicial</string>
 </resources>
+
+    <string name="about_changelog_text">• Suporte a novos formatos de áudio\n• Melhorias na interface do player\n• Correção de bugs e otimizações\n• Atualização de bibliotecas\n• Desempenho aprimorado\n• Pequenas correções visuais</string>
