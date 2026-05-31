@@ -36,7 +36,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         AiCacheEntity::class,
         AiUsageEntity::class
     ],
-    version = 41,   // <-- AUMENTADO
+    version = 41,
     exportSchema = true
 )
 abstract class AurisDatabase : RoomDatabase() {

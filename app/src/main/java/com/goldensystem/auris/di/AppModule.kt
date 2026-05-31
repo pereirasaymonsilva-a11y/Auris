@@ -156,7 +156,8 @@ object AppModule {
             AurisDatabase.MIGRATION_36_37,
             AurisDatabase.MIGRATION_37_38,
             AurisDatabase.MIGRATION_38_39,
-            AurisDatabase.MIGRATION_39_40
+            AurisDatabase.MIGRATION_39_40,
+            AurisDatabase.MIGRATION_40_41
         )
             .addCallback(AurisDatabase.createRuntimeArtifactsCallback())
             .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
