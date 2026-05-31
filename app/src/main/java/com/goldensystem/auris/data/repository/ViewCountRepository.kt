@@ -24,8 +24,11 @@ class ViewCountRepository @Inject constructor(
     }
 
     suspend fun incrementViewCount(videoId: Long) {
-        dao.increment(videoId)
+    val rowsUpdated = dao.incrementIfExists(videoId)
+    if (rowsUpdated == 0) {
+        dao.insertIfNotExists(ViewCountEntity(videoId, 1))
     }
+}
 
     suspend fun clearAll() {
         dao.clear()

@@ -180,21 +180,28 @@ class VideoGalleryViewModel @Inject constructor(
     }
 
     fun incrementViewCount(videoId: Long) {
-        viewModelScope.launch {
-            viewCountRepository.incrementViewCount(videoId)
-            val index = _allVideos.indexOfFirst { it.id == videoId }
-            if (index != -1) {
-                val old = _allVideos[index]
-                _allVideos[index] = old.copy(viewCount = old.viewCount + 1)
-                _uiState.update { state ->
-                    state.copy(
-                        allVideos = _allVideos,
-                        filteredVideos = applySortAndContext(_allVideos, state.currentContext, state.sortMode)
-                    )
-                }
-            }
+    viewModelScope.launch {
+        viewCountRepository.incrementViewCount(videoId)
+        
+        // Recarrega o mapa de contadores
+        val viewCountMap = withContext(Dispatchers.IO) {
+            viewCountRepository.getAllViewCountsFlow().first().toMap()
+        }
+        
+        // Atualiza os vídeos na lista com os novos contadores
+        _allVideos = _allVideos.map { video ->
+            video.copy(viewCount = viewCountMap[video.id] ?: 0)
+        }.toMutableList()
+        
+        // Atualiza o estado da UI
+        _uiState.update { state ->
+            state.copy(
+                allVideos = _allVideos,
+                filteredVideos = applySortAndContext(_allVideos, state.currentContext, state.sortMode)
+            )
         }
     }
+}
 
     fun getFeaturedVideo(): VideoItem? {
         val state = _uiState.value

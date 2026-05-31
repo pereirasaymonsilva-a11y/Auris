@@ -17,8 +17,13 @@ interface ViewCountDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(entity: ViewCountEntity)
 
+    // Retorna o número de linhas atualizadas (0 se não existir)
     @Query("UPDATE view_counts SET viewCount = viewCount + 1 WHERE videoId = :videoId")
-    suspend fun increment(videoId: Long)
+    suspend fun incrementIfExists(videoId: Long): Int
+
+    // Método auxiliar para inserir se não existir
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfNotExists(entity: ViewCountEntity)
 
     @Query("DELETE FROM view_counts")
     suspend fun clear()
