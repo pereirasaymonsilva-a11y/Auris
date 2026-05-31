@@ -22,7 +22,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "auris_database"
+                    "auris_viewcount"
                 ).fallbackToDestructiveMigration()
                  .build()
                 INSTANCE = instance
