@@ -38,7 +38,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -50,7 +49,6 @@ import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -88,8 +86,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp as lerpFloat
-import androidx.compose.ui.util.lerp as lerpDp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import androidx.media3.common.util.UnstableApi
@@ -98,7 +94,6 @@ import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.goldensystem.auris.R
-import com.goldensystem.auris.data.github.GitHubContributorService
 import com.goldensystem.auris.presentation.components.CollapsibleCommonTopBar
 import com.goldensystem.auris.presentation.components.MiniPlayerHeight
 import com.goldensystem.auris.presentation.components.SmartImage
@@ -110,7 +105,7 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import timber.log.Timber
 import kotlin.math.roundToInt
 
-// ---------- Dados de Contribuidores (agora com String) ----------
+// ---------- Dados de Contribuidores (apenas mantenedores) ----------
 
 private data class Contributor(
     val id: String,
@@ -122,16 +117,7 @@ private data class Contributor(
     val iconRes: Int? = null,
     val githubUrl: String? = null,
     val telegramUrl: String? = null,
-    val contributions: Int? = null,
 )
-
-private val pinnedAliases = mapOf(
-    "cromaguy" to setOf("chroma"),
-)
-
-private fun normalizeHandle(handle: String): String {
-    return handle.trim().removePrefix("@").lowercase()
-}
 
 // ---------- Tela Principal ----------
 
@@ -151,7 +137,7 @@ fun AboutScreen(
         "N/A"
     }
 
-    // ---------- Dados dos mantenedores e membros fixos (resolvidos com stringResource) ----------
+    // ---------- Dados dos mantenedores ----------
     val coreMaintainer = Contributor(
         id = "theovilardo",
         displayName = stringResource(R.string.contributor_theo_display_name),
@@ -173,105 +159,6 @@ fun AboutScreen(
         githubUrl = "https://github.com/pereirasaymonsilva-a11y",
         telegramUrl = "about.scream",
     )
-
-    val pinnedCommunityMembers = listOf(
-        Contributor(
-            id = "lostf1sh",
-            displayName = stringResource(R.string.contributor_lostf1sh_display_name),
-            role = stringResource(R.string.contributor_lostf1sh_role),
-            detail = stringResource(R.string.contributor_lostf1sh_detail),
-            badge = stringResource(R.string.contributor_lostf1sh_badge),
-            iconRes = R.drawable.rounded_celebration_24,
-            githubUrl = "https://github.com/lostf1sh",
-        ),
-        Contributor(
-            id = "cromaguy",
-            displayName = stringResource(R.string.contributor_cromaguy_display_name),
-            role = stringResource(R.string.contributor_cromaguy_role),
-            detail = stringResource(R.string.contributor_cromaguy_detail),
-            badge = stringResource(R.string.contributor_cromaguy_badge),
-            iconRes = R.drawable.round_developer_board_24,
-            githubUrl = "https://github.com/cromaguy",
-        ),
-        Contributor(
-            id = "colbycabrera",
-            displayName = stringResource(R.string.contributor_colby_display_name),
-            role = stringResource(R.string.contributor_colby_role),
-            detail = stringResource(R.string.contributor_colby_detail),
-            badge = stringResource(R.string.contributor_colby_badge),
-            iconRes = R.drawable.round_newspaper_24,
-            githubUrl = "https://github.com/ColbyCabrera",
-        ),
-    )
-
-    // ---------- Busca de contribuidores do GitHub ----------
-    var contributors by remember { mutableStateOf<List<Contributor>>(emptyList()) }
-    var isLoadingContributors by remember { mutableStateOf(true) }
-    val githubService = remember { GitHubContributorService() }
-
-    LaunchedEffect(Unit) {
-        try {
-            val result = githubService.fetchContributors()
-            result.onSuccess { githubContributors ->
-                contributors = githubContributors
-                    .filter { normalizeHandle(it.login) != coreMaintainer.id }
-                    .map { github ->
-                        Contributor(
-                            id = normalizeHandle(github.login),
-                            displayName = "@${github.login}",
-                            role = "Community contributor",
-                            avatarUrl = github.avatar_url,
-                            iconRes = R.drawable.rounded_person_24,
-                            githubUrl = github.html_url,
-                            contributions = github.contributions,
-                        )
-                    }
-            }
-            result.onFailure { exception ->
-                Timber.e(exception, "Failed to fetch contributors from GitHub")
-                contributors = emptyList()
-            }
-        } finally {
-            isLoadingContributors = false
-        }
-    }
-
-    val contributorsById = remember(contributors) {
-        contributors.associateBy { it.id }
-    }
-
-    val spotlightContributors = remember(contributorsById) {
-        pinnedCommunityMembers.map { pinned ->
-            val primaryMatch = contributorsById[pinned.id]
-            val aliasMatch = pinnedAliases[pinned.id]
-                ?.firstNotNullOfOrNull { alias -> contributorsById[alias] }
-            val match = primaryMatch ?: aliasMatch
-
-            if (match == null) {
-                pinned
-            } else {
-                pinned.copy(
-                    avatarUrl = match.avatarUrl ?: pinned.avatarUrl,
-                    contributions = match.contributions ?: pinned.contributions,
-                    githubUrl = match.githubUrl ?: pinned.githubUrl,
-                )
-            }
-        }
-    }
-
-    val excludedIds = remember(spotlightContributors) {
-        buildSet {
-            add(coreMaintainer.id)
-            spotlightContributors.forEach { spotlight ->
-                add(spotlight.id)
-                addAll(pinnedAliases[spotlight.id].orEmpty())
-            }
-        }
-    }
-
-    val communityContributors = remember(contributors, excludedIds) {
-        contributors.filterNot { it.id in excludedIds }
-    }
 
     // ---------- Animações de entrada ----------
     val transitionState = remember { MutableTransitionState(false) }
@@ -392,7 +279,7 @@ fun AboutScreen(
                 )
             }
 
-            // ---------- NOVA SEÇÃO: Changelog ----------
+            // ---------- Seção: Changelog (agora com uma única string) ----------
             item(key = "changelog_section") {
                 AboutSectionHeader(
                     title = stringResource(R.string.about_changelog_title),
@@ -400,21 +287,14 @@ fun AboutScreen(
                     modifier = Modifier.padding(top = 24.dp),
                 )
                 ChangelogCard(
-                    items = listOf(
-                        stringResource(R.string.about_changelog_item_1),
-                        stringResource(R.string.about_changelog_item_2),
-                        stringResource(R.string.about_changelog_item_3),
-                        stringResource(R.string.about_changelog_item_4),
-                        stringResource(R.string.about_changelog_item_5),
-                        stringResource(R.string.about_changelog_item_6),
-                    ),
+                    text = stringResource(R.string.about_changelog_text), // string única
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
 
-            // ---------- NOVA SEÇÃO: Feedback ----------
+            // ---------- Seção: Feedback ----------
             item(key = "feedback_section") {
                 AboutSectionHeader(
                     title = stringResource(R.string.about_feedback_title),
@@ -439,7 +319,7 @@ fun AboutScreen(
                 }
             }
 
-            // ---------- NOVA SEÇÃO: Doações ----------
+            // ---------- Seção: Doações ----------
             item(key = "donate_section") {
                 AboutSectionHeader(
                     title = stringResource(R.string.about_donate_title),
@@ -465,7 +345,7 @@ fun AboutScreen(
                 }
             }
 
-            // ---------- Mantenedores (Theo + Saymon) ----------
+            // ---------- Mantenedores ----------
             item(key = "maintainer_title") {
                 AboutSectionHeader(
                     title = stringResource(R.string.about_maintainer_title),
@@ -474,109 +354,27 @@ fun AboutScreen(
                 )
             }
 
-            item(key = "maintainer_card") {
+            item(key = "maintainer_card_theo") {
                 ContributorCard(
                     contributor = coreMaintainer,
-                    shape = expressiveListShape(index = 0, count = 1),
+                    shape = expressiveListShape(index = 0, count = 2),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    showContributionCount = false,
                     onCardClick = coreMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
                 )
             }
 
-            item(key = "auris_maintainer_card") {
+            item(key = "maintainer_card_saymon") {
                 ContributorCard(
                     contributor = aurisMaintainer,
-                    shape = expressiveListShape(index = 0, count = 1),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    showContributionCount = false,
-                    onCardClick = aurisMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
-                )
-            }
-
-            // ---------- Contribuidores em destaque ----------
-            item(key = "spotlight_title") {
-                AboutSectionHeader(
-                    title = stringResource(R.string.about_spotlight_title),
-                    subtitle = stringResource(R.string.about_spotlight_subtitle),
-                    modifier = Modifier.padding(top = 24.dp),
-                )
-            }
-
-            itemsIndexed(
-                items = spotlightContributors,
-                key = { _, contributor -> "spotlight_${contributor.id}" },
-            ) { index, contributor ->
-                ContributorCard(
-                    contributor = contributor,
-                    shape = expressiveListShape(index = index, count = spotlightContributors.size),
+                    shape = expressiveListShape(index = 1, count = 2),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
-                        .padding(top = if (index == 0) 0.dp else 3.dp),
-                    showContributionCount = true,
-                    onCardClick = contributor.githubUrl?.let { url -> { openUrl(context, url) } },
+                        .padding(top = 3.dp),
+                    onCardClick = aurisMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
                 )
-            }
-
-            // ---------- Demais contribuidores ----------
-            item(key = "contributors_title") {
-                AboutSectionHeader(
-                    title = stringResource(R.string.about_contributors_section_title),
-                    subtitle = stringResource(R.string.about_contributors_section_subtitle),
-                    modifier = Modifier.padding(top = 24.dp),
-                )
-            }
-
-            if (isLoadingContributors) {
-                item(key = "contributors_loading") {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 28.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            } else if (communityContributors.isEmpty()) {
-                item(key = "contributors_empty") {
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        shape = expressiveListShape(index = 0, count = 1),
-                        color = MaterialTheme.colorScheme.surfaceContainerLow,
-                        tonalElevation = 1.dp,
-                    ) {
-                        Text(
-                            text = stringResource(R.string.about_no_contributors),
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            } else {
-                itemsIndexed(
-                    items = communityContributors,
-                    key = { _, contributor -> "contributor_${contributor.id}" },
-                ) { index, contributor ->
-                    ContributorCard(
-                        contributor = contributor,
-                        shape = expressiveListShape(index = index, count = communityContributors.size),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .padding(top = if (index == 0) 0.dp else 3.dp),
-                        showContributionCount = true,
-                        onCardClick = contributor.githubUrl?.let { url -> { openUrl(context, url) } },
-                    )
-                }
             }
 
             item(key = "bottom_spacer") {
@@ -770,7 +568,7 @@ private fun AboutSectionHeader(
 
 @Composable
 private fun ChangelogCard(
-    items: List<String>,
+    text: String,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -779,16 +577,13 @@ private fun ChangelogCard(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         tonalElevation = 2.dp
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            items.forEach { item ->
-                Text(
-                    text = item,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(vertical = 2.dp)
-                )
-            }
-        }
+        Text(
+            text = text,
+            modifier = Modifier.padding(16.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
+        )
     }
 }
 
@@ -797,7 +592,6 @@ private fun ContributorCard(
     contributor: Contributor,
     shape: AbsoluteSmoothCornerShape,
     modifier: Modifier = Modifier,
-    showContributionCount: Boolean,
     onCardClick: (() -> Unit)? = null,
 ) {
     val clickableModifier = if (onCardClick != null) {
@@ -866,21 +660,9 @@ private fun ContributorCard(
                     )
                 }
 
-                Row(
-                    modifier = Modifier.padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    contributor.badge?.let { badge ->
+                contributor.badge?.let { badge ->
+                    Row(modifier = Modifier.padding(top = 8.dp)) {
                         ContributorLabel(text = badge)
-                    }
-                    if (showContributionCount && contributor.contributions != null) {
-                        ContributorLabel(
-                            text = stringResource(
-                                R.string.about_contributions_format,
-                                contributor.contributions,
-                            ),
-                        )
                     }
                 }
             }
