@@ -67,7 +67,6 @@ class VideoGalleryViewModel @Inject constructor(
     private var wasInFoldersMode: Boolean = false
 
     init { loadVideos() }
-
     fun loadVideos() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
