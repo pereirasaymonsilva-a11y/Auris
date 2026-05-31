@@ -23,6 +23,38 @@
     <string name="contributor_colby_role">Primeiro contribuidor</string>
     <string name="contributor_colby_detail">Ajudou a moldar o Auris nos estágios iniciais.</string>
     <string name="contributor_colby_badge">Apoio Inicial</string>
-</resources>
-
+    
+    
+    
+    
+    
+    
+    
+    
+      <!-- Aqui em baixo agente coloca as novidades da versao atual do auris, peste muita ATENCAO no uso de \n•, e muinto cuidado ao formatar -->
     <string name="about_changelog_text">• Suporte a novos formatos de áudio\n• Melhorias na interface do player\n• Correção de bugs e otimizações\n• Atualização de bibliotecas\n• Desempenho aprimorado\n• Pequenas correções visuais</string>
+    <!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        fim das novidades da versao -->
+    
+    
+    
+    
+    
+    
+    
+    
+        <!-- Tela Auris? (AboutScreen expandida) MUITA ATENCAO, ESSAS LINHAS NAO ESTAO MAIS SENDO ULTILIZADAS, AGORA E ULTILIZADO A STRING "about_changelog_title" -->
+    <string name="about_changelog_title">Novidades da versão</string>
+    <string name="about_changelog_item_1">• Versão 1.0.0: Primeira versão estável do Auris</string>
+    <string name="about_changelog_item_2">• Tema claro personalizado (amarelo dourado e preto)</string>
+    <string name="about_changelog_item_3">• Galeria de vídeos com player integrado</string>
+    <string name="about_changelog_item_4">• Sistema de atualização automática via planilha</string>
+    <string name="about_changelog_item_5">• Tradução completa para português (Brasil)</string>
+    <string name="about_changelog_item_6">• Correções de bugs e melhorias de desempenho</string>
+    <string name="about_feedback_title">Envie sua opinião</string>
+    <string name="about_feedback_subtitle">Reporte bugs, sugira melhorias ou faça um elogio</string>
+    <string name="about_feedback_button">Abrir Central de Feedback</string>
+    <string name="about_donate_title">Apoie o desenvolvimento</string>
+    <string name="about_donate_subtitle">Contribuições ajudam a manter o Auris livre e sem anúncios</string>
+    <string name="about_donate_button">Fazer uma doação</string>
+</resources>

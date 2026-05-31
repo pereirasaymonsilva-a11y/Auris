@@ -22,6 +22,32 @@
     <string name="contributor_colby_role">Early contributor</string>
     <string name="contributor_colby_detail">Helped shape Auris in the first stages of the app.</string>
     <string name="contributor_colby_badge">Early Support</string>
-</resources>
 
+
+
+
+
+      <!-- Aqui em baixo agente coloca as novidades da versao atual do auris, peste muita ATENCAO no uso de \n•, e muinto cuidado ao formatar -->
     <string name="about_changelog_text">• Support for new audio formats\n• Player interface improvements\n• Bug fixes and optimizations\n• Library updates\n• Improved performance\n• Minor visual fixes </string>
+    <!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        fim das novidades da versao -->
+    
+    
+    
+    
+        <!-- About screen (expanded)
+    MUITA ATENCAO, ESSAS LINHAS NAO ESTAO MAIS SENDO ULTILIZADAS, AGORA E ULTILIZADO A STRING "about_changelog_title" -->
+    <string name="about_changelog_title">What\'s new</string>
+    <string name="about_changelog_item_1">• Version 1.0.0: First stable Auris release</string>
+    <string name="about_changelog_item_2">• Custom light theme (golden yellow and black)</string>
+    <string name="about_changelog_item_3">• Video gallery with built-in player</string>
+    <string name="about_changelog_item_4">• Automatic update system via spreadsheet</string>
+    <string name="about_changelog_item_5">• Full Portuguese (Brazil) translation</string>
+    <string name="about_changelog_item_6">• Bug fixes and performance improvements</string>
+    <string name="about_feedback_title">Send your feedback</string>
+    <string name="about_feedback_subtitle">Report bugs, suggest improvements, or send a compliment</string>
+    <string name="about_feedback_button">Open Feedback Center</string>
+    <string name="about_donate_title">Support development</string>
+    <string name="about_donate_subtitle">Contributions help keep Auris free and ad-free</string>
+    <string name="about_donate_button">Make a donation</string>
+</resources>

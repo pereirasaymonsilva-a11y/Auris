@@ -227,18 +227,4 @@
     <string name="ui_format_percent_d">%1$d%%</string>
     <string name="backup_manifest_schema_v">v%1$d</string>
     <string name="backup_manifest_device_line">%1$s %2$s</string>
-    <!-- About screen (expanded) -->
-    <string name="about_changelog_title">What\'s new</string>
-    <string name="about_changelog_item_1">• Version 1.0.0: First stable Auris release</string>
-    <string name="about_changelog_item_2">• Custom light theme (golden yellow and black)</string>
-    <string name="about_changelog_item_3">• Video gallery with built-in player</string>
-    <string name="about_changelog_item_4">• Automatic update system via spreadsheet</string>
-    <string name="about_changelog_item_5">• Full Portuguese (Brazil) translation</string>
-    <string name="about_changelog_item_6">• Bug fixes and performance improvements</string>
-    <string name="about_feedback_title">Send your feedback</string>
-    <string name="about_feedback_subtitle">Report bugs, suggest improvements, or send a compliment</string>
-    <string name="about_feedback_button">Open Feedback Center</string>
-    <string name="about_donate_title">Support development</string>
-    <string name="about_donate_subtitle">Contributions help keep Auris free and ad-free</string>
-    <string name="about_donate_button">Make a donation</string>
 </resources>
