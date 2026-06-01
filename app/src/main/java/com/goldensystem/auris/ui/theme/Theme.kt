@@ -66,38 +66,30 @@ val DarkColorScheme = darkColorScheme(
 )
 
 val LightColorScheme = lightColorScheme(
-    // Cores principais (Amarelo dourado)
+    // Tudo IGUAL ao original, exceto secondary e secondaryContainer
     primary = LightPrimary,
-    onPrimary = Color(0xFF000000),           // Preto no amarelo (bom contraste)
+    onPrimary = Color(0xFF000000),
     primaryContainer = LightPrimaryContainer,
     onPrimaryContainer = LightOnPrimaryContainer,
     
-    // Cores secundárias (derivadas do amarelo, não preto sólido)
-    secondary = LightPrimary.copy(alpha = 0.8f),  // Amarelo com 80% de opacidade
-    onSecondary = Color(0xFF000000),              // Preto
+    // ÚNICA MUDANÇA: usa o amarelo com transparência em vez de preto
+    secondary = LightPrimary,                    // Amarelo (igual ao primary)
+    onSecondary = Color(0xFF000000),             // Preto (mantém)
     secondaryContainer = LightPrimary.copy(alpha = 0.2f),  // Amarelo transparente
-    onSecondaryContainer = LightPrimary,                  // Amarelo sólido
+    onSecondaryContainer = Color(0xFF000000),    // Preto (mantém)
     
-    // Cores terciárias (tom mais escuro/queimado)
-    tertiary = LightOutline,                     // Dourado escuro
-    onTertiary = Color(0xFFFFFFFF),              // Branco
-    tertiaryContainer = LightOutline.copy(alpha = 0.2f),
-    onTertiaryContainer = LightOutline,
-    
-    // Fundos e superfícies
+    // Resto tudo igual ao original
+    tertiary = Color(0xFF4D3E00),
+    onTertiary = Color(0xFFFFC107),
     background = LightBackground,
     onBackground = LightOnSurface,
     surface = LightSurface,
     onSurface = LightOnSurface,
     surfaceVariant = LightSurfaceVariant,
     onSurfaceVariant = LightOnSurfaceVariant,
-    
-    // Bordas e contornos
     outline = LightOutline,
-    outlineVariant = LightOutline.copy(alpha = 0.4f),
+    outlineVariant = LightOutline.copy(alpha = 0.6f),
     surfaceTint = LightPrimary,
-    
-    // Erros (mantém)
     error = Color(0xFFD32F2F),
     onError = Color(0xFFFFFFFF),
     errorContainer = Color(0xFFFFDAD6),
