@@ -66,29 +66,43 @@ val DarkColorScheme = darkColorScheme(
 )
 
 val LightColorScheme = lightColorScheme(
+    // Cores principais (Amarelo dourado)
     primary = LightPrimary,
-    onPrimary = Color(0xFF000000),              // Preto sobre elementos primários
+    onPrimary = Color(0xFF000000),           // Preto no amarelo (bom contraste)
     primaryContainer = LightPrimaryContainer,
     onPrimaryContainer = LightOnPrimaryContainer,
-    secondary = Color(0xFF000000),              // Preto para elementos secundários
-    onSecondary = Color(0xFFFFC107),            // Dourado sobre eles
-    secondaryContainer = Color(0xFF000000),     // Container secundário preto
-    onSecondaryContainer = Color(0xFFFFC107),   // Dourado no container secundário
-    tertiary = Color(0xFF4D3E00),               // Tom escuro para detalhes
-    onTertiary = Color(0xFFFFC107),             // Dourado sobre detalhes
+    
+    // Cores secundárias (derivadas do amarelo, não preto sólido)
+    secondary = LightPrimary.copy(alpha = 0.8f),  // Amarelo com 80% de opacidade
+    onSecondary = Color(0xFF000000),              // Preto
+    secondaryContainer = LightPrimary.copy(alpha = 0.2f),  // Amarelo transparente
+    onSecondaryContainer = LightPrimary,                  // Amarelo sólido
+    
+    // Cores terciárias (tom mais escuro/queimado)
+    tertiary = LightOutline,                     // Dourado escuro
+    onTertiary = Color(0xFFFFFFFF),              // Branco
+    tertiaryContainer = LightOutline.copy(alpha = 0.2f),
+    onTertiaryContainer = LightOutline,
+    
+    // Fundos e superfícies
     background = LightBackground,
     onBackground = LightOnSurface,
     surface = LightSurface,
     onSurface = LightOnSurface,
     surfaceVariant = LightSurfaceVariant,
     onSurfaceVariant = LightOnSurfaceVariant,
+    
+    // Bordas e contornos
     outline = LightOutline,
-    outlineVariant = LightOutline.copy(alpha = 0.6f),
+    outlineVariant = LightOutline.copy(alpha = 0.4f),
     surfaceTint = LightPrimary,
-    error = Color(0xFFD32F2F),                 // Vermelho para erros
-    onError = Color(0xFFFFFFFF)                 // Texto branco no erro
+    
+    // Erros (mantém)
+    error = Color(0xFFD32F2F),
+    onError = Color(0xFFFFFFFF),
+    errorContainer = Color(0xFFFFDAD6),
+    onErrorContainer = Color(0xFF410002)
 )
-
 @Composable
 fun AurisTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
