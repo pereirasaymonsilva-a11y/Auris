@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="songs">Músicas</string>
+    <string name="albums">Álbuns</string>
+    <string name="artists">Artistas</string>
+    <string name="playlists">Playlists</string>
+    <string name="folders">Pastas</string>
+    <string name="liked">Curtidas</string>
+
         <!-- Título do diálogo de cópia não autorizada -->
     <string name="piracy_dialog_title">⚠️ Cópia não autorizada</string>
     <string name="piracy_dialog_message">Parece que você está usando uma versão modificada do Auris.\n\nBaixe a versão original para garantir sua segurança.</string>

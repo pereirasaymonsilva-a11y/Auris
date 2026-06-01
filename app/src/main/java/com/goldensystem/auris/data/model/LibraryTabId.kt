@@ -1,19 +1,21 @@
 package com.goldensystem.auris.data.model
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
+import com.goldensystem.auris.R
 
 @Immutable
 enum class LibraryTabId(
     val storageKey: String,
-    val title: String,
+    @StringRes val titleRes: Int,
     val defaultSort: SortOption
 ) {
-    SONGS("SONGS", "SONGS", SortOption.SongTitleAZ),
-    ALBUMS("ALBUMS", "ALBUMS", SortOption.AlbumTitleAZ),
-    ARTISTS("ARTIST", "ARTIST", SortOption.ArtistNameAZ),
-    PLAYLISTS("PLAYLISTS", "PLAYLISTS", SortOption.PlaylistNameAZ),
-    FOLDERS("FOLDERS", "FOLDERS", SortOption.FolderNameAZ),
-    LIKED("LIKED", "LIKED", SortOption.LikedSongDateLiked);
+    SONGS("SONGS", R.string.songs, SortOption.SongTitleAZ),
+    ALBUMS("ALBUMS", R.string.albums, SortOption.AlbumTitleAZ),
+    ARTISTS("ARTIST", R.string.artists, SortOption.ArtistNameAZ),
+    PLAYLISTS("PLAYLISTS", R.string.playlists, SortOption.PlaylistNameAZ),
+    FOLDERS("FOLDERS", R.string.folders, SortOption.FolderNameAZ),
+    LIKED("LIKED", R.string.liked, SortOption.LikedSongDateLiked);
 
     companion object {
         fun fromStorageKey(key: String): LibraryTabId =

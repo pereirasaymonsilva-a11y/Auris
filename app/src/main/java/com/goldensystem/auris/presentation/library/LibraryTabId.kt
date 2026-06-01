@@ -1,21 +1,24 @@
 package com.goldensystem.auris.presentation.library
 
+import androidx.annotation.StringRes
+import com.goldensystem.auris.R
 import com.goldensystem.auris.data.model.SortOption
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 /**
- * Identificadores estáveis para cada aba da biblioteca. O [stableKey] é persistido,
- * portanto não deve ser alterado entre versões do app.
+ * Identificadores estáveis para cada aba da biblioteca.
+ * O [stableKey] é persistido, portanto não deve ser alterado.
  */
 enum class LibraryTabId(
     val stableKey: String,
-    val label: String,
+    @StringRes val labelRes: Int,
     val sortOptions: List<SortOption>
 ) {
+
     Songs(
         stableKey = "SONGS",
-        label = "Músicas",
+        labelRes = R.string.library_songs,
         sortOptions = listOf(
             SortOption.SongTitleAZ,
             SortOption.SongTitleZA,
@@ -29,9 +32,10 @@ enum class LibraryTabId(
             SortOption.SongDurationAsc
         )
     ),
+
     Albums(
         stableKey = "ALBUMS",
-        label = "Álbuns",
+        labelRes = R.string.library_albums,
         sortOptions = listOf(
             SortOption.AlbumTitleAZ,
             SortOption.AlbumTitleZA,
@@ -42,18 +46,20 @@ enum class LibraryTabId(
             SortOption.AlbumDateAdded
         )
     ),
+
     Artists(
         stableKey = "ARTIST",
-        label = "Artistas",
+        labelRes = R.string.library_artists,
         sortOptions = listOf(
             SortOption.ArtistNameAZ,
             SortOption.ArtistNameZA,
             SortOption.ArtistNumSongs
         )
     ),
+
     Playlists(
         stableKey = "PLAYLISTS",
-        label = "Playlists",
+        labelRes = R.string.library_playlists,
         sortOptions = listOf(
             SortOption.PlaylistNameAZ,
             SortOption.PlaylistNameZA,
@@ -61,9 +67,10 @@ enum class LibraryTabId(
             SortOption.PlaylistDateCreatedAsc
         )
     ),
+
     Folders(
         stableKey = "FOLDERS",
-        label = "Pastas",
+        labelRes = R.string.library_folders,
         sortOptions = listOf(
             SortOption.FolderNameAZ,
             SortOption.FolderNameZA,
@@ -73,9 +80,10 @@ enum class LibraryTabId(
             SortOption.FolderSubdirCountDesc
         )
     ),
+
     Liked(
         stableKey = "LIKED",
-        label = "Curtidas",
+        labelRes = R.string.library_liked,
         sortOptions = listOf(
             SortOption.LikedSongTitleAZ,
             SortOption.LikedSongTitleZA,
@@ -91,7 +99,8 @@ enum class LibraryTabId(
     companion object {
         val defaultOrder: List<LibraryTabId> = entries.toList()
 
-        fun fromStableKey(key: String): LibraryTabId? = entries.firstOrNull { it.stableKey == key }
+        fun fromStableKey(key: String): LibraryTabId? =
+            entries.firstOrNull { it.stableKey == key }
     }
 }
 
@@ -101,7 +110,10 @@ internal fun decodeLibraryTabOrder(orderJson: String?): List<LibraryTabId> {
     } ?: emptyList()
 
     val ordered = LinkedHashSet<LibraryTabId>()
-    storedKeys.mapNotNull { LibraryTabId.fromStableKey(it) }.forEach { ordered.add(it) }
+    storedKeys.mapNotNull { LibraryTabId.fromStableKey(it) }
+        .forEach { ordered.add(it) }
+
     LibraryTabId.defaultOrder.forEach { ordered.add(it) }
+
     return ordered.toList()
 }

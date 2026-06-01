@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    
+    <!--Nome das tabs -->
+    <string name="songs">Songs</string>
+    <string name="albums">Albums</string>
+    <string name="artists">Artists</string>
+    <string name="playlists">Playlists</string>
+    <string name="folders">Folders</string>
+    <string name="liked">Likes</string> 
 
     <string name="piracy_dialog_title">⚠️ Unauthorized copy</string>
     <string name="piracy_dialog_message">It looks like you are using a modified version of Auris.\n\nDownload the official version for your safety.</string>
