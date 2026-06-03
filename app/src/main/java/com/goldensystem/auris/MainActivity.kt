@@ -618,14 +618,27 @@ Trace.endSection()
     @Composable
     private fun MainUI(playerViewModel: PlayerViewModel, navController: NavHostController) {
         Trace.beginSection("MainActivity.MainUI")
-
-        val commonNavItems = remember {
-            persistentListOf(
-                BottomNavItem("Inicio", R.drawable.rounded_home_24, R.drawable.home_24_rounded_filled, Screen.Home),
-                BottomNavItem("Pesquisar", R.drawable.rounded_search_24, R.drawable.rounded_search_24, Screen.Search),
-                BottomNavItem("Musicas", R.drawable.rounded_library_music_24, R.drawable.round_library_music_24, Screen.Library)
-            )
-        }
+       //Aqui e onde define os botoes da tela inicial(inicio, pesquisar, musicas)
+        val commonNavItems = persistentListOf(
+   BottomNavItem(
+        stringResource(R.string.inicio),
+        R.drawable.rounded_home_24,
+        R.drawable.home_24_rounded_filled,
+        Screen.Home
+       ),
+    BottomNavItem(
+        stringResource(R.string.pesquisar),
+        R.drawable.rounded_search_24,
+        R.drawable.rounded_search_24,
+        Screen.Search
+       ),
+    BottomNavItem(
+        stringResource(R.string.musicas),
+        R.drawable.rounded_library_music_24,
+        R.drawable.round_library_music_24,
+        Screen.Library
+      )
+  )
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         var isSearchBarActive by remember { mutableStateOf(false) }

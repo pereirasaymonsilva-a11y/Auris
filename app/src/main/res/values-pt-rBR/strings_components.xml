@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  
+  
+     //Aqui define os nomes dos botoes(Inicio, Pesquisar, Musicas da tela inicial
+    <string name="inicio">Início</string>
+    <string name="pesquisar">Pesquisar</string>
+    <string name="musicas">Músicas</string>
+    
+    
     <string name="widget_tap_to_open">Toque para abrir</string>
     <string name="widget_album_art">Capa do álbum</string>
     <string name="widget_album_art_placeholder">Placeholder da capa do álbum</string>
