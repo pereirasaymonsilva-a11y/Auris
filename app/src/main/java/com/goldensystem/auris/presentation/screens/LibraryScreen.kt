@@ -2779,9 +2779,14 @@ private fun LibraryTabId.iconRes(): Int = when (this) {
     LibraryTabId.LIKED -> R.drawable.rounded_favorite_24
 }
 
+@Composable
 private fun LibraryTabId.displayTitle(): String =
-    stringResource(tabId.titleRes).lowercase().replaceFirstChar { char ->
-        if (char.isLowerCase()) char.titlecase(Locale.getDefault()) else char.toString()
+    stringResource(titleRes).lowercase().replaceFirstChar { char ->
+        if (char.isLowerCase()) {
+            char.titlecase(Locale.getDefault())
+        } else {
+            char.toString()
+        }
     }
 
 internal fun resolveFolderNavigationDirection(initialPath: String?, targetPath: String?): Int =
