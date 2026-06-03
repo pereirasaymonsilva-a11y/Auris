@@ -10,12 +10,12 @@ enum class LibraryTabId(
     @StringRes val titleRes: Int,
     val defaultSort: SortOption
 ) {
-    SONGS("SONGS", R.string.songs, SortOption.SongTitleAZ),
-    ALBUMS("ALBUMS", R.string.albums, SortOption.AlbumTitleAZ),
-    ARTISTS("ARTIST", R.string.artists, SortOption.ArtistNameAZ),
-    PLAYLISTS("PLAYLISTS", R.string.playlists, SortOption.PlaylistNameAZ),
-    FOLDERS("FOLDERS", R.string.folders, SortOption.FolderNameAZ),
-    LIKED("LIKED", R.string.liked, SortOption.LikedSongDateLiked);
+    SONGS("SONGS", R.string.library_songs, SortOption.SongTitleAZ),
+    ALBUMS("ALBUMS", R.string.library_albums, SortOption.AlbumTitleAZ),
+    ARTISTS("ARTIST", R.string.library_artists, SortOption.ArtistNameAZ),
+    PLAYLISTS("PLAYLISTS", R.string.library_playlists, SortOption.PlaylistNameAZ),
+    FOLDERS("FOLDERS", R.string.library_folders, SortOption.FolderNameAZ),
+    LIKED("LIKED", R.string.library_liked, SortOption.LikedSongDateLiked);
 
     companion object {
         fun fromStorageKey(key: String): LibraryTabId =
