@@ -2780,7 +2780,7 @@ private fun LibraryTabId.iconRes(): Int = when (this) {
 }
 
 private fun LibraryTabId.displayTitle(): String =
-    title.lowercase().replaceFirstChar { char ->
+    stringResource(tabId.titleRes).lowercase().replaceFirstChar { char ->
         if (char.isLowerCase()) char.titlecase(Locale.getDefault()) else char.toString()
     }
 
