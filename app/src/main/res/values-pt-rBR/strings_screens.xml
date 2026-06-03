@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="songs">Músicas</string>
-    <string name="albums">Álbuns</string>
-    <string name="artists">Artistas</string>
-    <string name="playlists">Playlists</string>
-    <string name="folders">Pastas</string>
-    <string name="liked">Curtidas</string>
+    <!-- Library tab titles -->
+    <string name="library_songs">Músicas</string>
+    <string name="library_albums">Álbuns</string>
+    <string name="library_artists">Artistas</string>
+    <string name="library_playlists">Playlists</string>
+    <string name="library_folders">Pastas</string>
+    <string name="library_liked">Favoritas</string>
 
         <!-- Título do diálogo de cópia não autorizada -->
     <string name="piracy_dialog_title">⚠️ Cópia não autorizada</string>
