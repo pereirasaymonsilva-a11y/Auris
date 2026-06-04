@@ -76,12 +76,11 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                         )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text(text = "• " + stringResource(R.string.about_changelog_item_1), style = MaterialTheme.typography.bodyMedium)
-                    Text(text = "• " + stringResource(R.string.about_changelog_item_2), style = MaterialTheme.typography.bodyMedium)
-                    Text(text = "• " + stringResource(R.string.about_changelog_item_3), style = MaterialTheme.typography.bodyMedium)
-                    Text(text = "• " + stringResource(R.string.about_changelog_item_4), style = MaterialTheme.typography.bodyMedium)
-                    Text(text = "• " + stringResource(R.string.about_changelog_item_5), style = MaterialTheme.typography.bodyMedium)
-                    Text(text = "• " + stringResource(R.string.about_changelog_item_6), style = MaterialTheme.typography.bodyMedium)
+                    // Usando uma única string com quebras de linha
+                    Text(
+                        text = stringResource(R.string.about_changelog_text),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
         }
