@@ -29,16 +29,16 @@ fun LollipopLandGame(
     onClose: () -> Unit,
 ) {
     val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.value
-    val screenHeight = configuration.screenHeightDp.value
+    val screenWidth = configuration.screenWidthDp.toFloat()
+    val screenHeight = configuration.screenHeightDp.toFloat()
     
     var score by remember { mutableStateOf(0) }
     var lives by remember { mutableStateOf(3) }
     var gameRunning by remember { mutableStateOf(true) }
     var playerX by remember { mutableStateOf(screenWidth / 2 - 30f) }
     
-    var lollipops by remember { mutableStateOf<List<FallingItem>>(emptyList()) }
-    var obstacles by remember { mutableStateOf<List<FallingItem>>(emptyList()) }
+    var lollipops by remember { mutableStateOf(emptyList<FallingItem>()) }
+    var obstacles by remember { mutableStateOf(emptyList<FallingItem>()) }
     
     val playerWidth = 60f
     val itemSize = 40f
