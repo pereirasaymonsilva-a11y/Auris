@@ -11,8 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.goldensystem.auris.R
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.goldensystem.auris.R
 import com.goldensystem.auris.presentation.components.brickbreaker.BrickBreakerOverlay
 import com.goldensystem.auris.presentation.components.lollipopland.LollipopLandGame
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
@@ -23,9 +24,9 @@ fun EasterEggScreen(
     onNavigationIconClick: () -> Unit,
 ) {
     val context = LocalContext.current
-    var isVisible by rememberSaveable { mutableStateOf(false) }
-    var hasShownFanToast by rememberSaveable { mutableStateOf(false) }
-    var selectedGame by rememberSaveable { mutableStateOf(0) } // 0 = BrickBreaker, 1 = LollipopLand
+    var isVisible by remember { mutableStateOf(false) }
+    var hasShownFanToast by remember { mutableStateOf(false) }
+    var selectedGame by remember { mutableStateOf(0) }
 
     val stablePlayerState by viewModel.stablePlayerState.collectAsStateWithLifecycle()
     val currentSong = stablePlayerState.currentSong
@@ -72,7 +73,6 @@ fun EasterEggScreen(
                 )
             }
             
-            // Botão para trocar de jogo
             FloatingActionButton(
                 onClick = { selectedGame = (selectedGame + 1) % 2 },
                 modifier = Modifier
@@ -80,7 +80,10 @@ fun EasterEggScreen(
                     .padding(16.dp),
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
             ) {
-                Text(text = if (selectedGame == 0) "🍭" else "🧱", fontSize = MaterialTheme.typography.titleLarge.fontSize)
+                Text(
+                    text = if (selectedGame == 0) "🍭" else "🧱",
+                    fontSize = 24.sp
+                )
             }
         }
     }

@@ -9,16 +9,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import kotlin.math.abs
 import kotlin.random.Random
 
 @Composable
@@ -36,12 +35,13 @@ fun LollipopLandGame(
     var gameRunning by remember { mutableStateOf(true) }
     var playerX by remember { mutableStateOf(screenWidth / 2 - 30f) }
     
-    var lollipops by remember { mutableStateOf(listOf<FallingItem>()) }
-    var obstacles by remember { mutableStateOf(listOf<FallingItem>()) }
+    var lollipops by remember { mutableStateOf<List<FallingItem>>(emptyList()) }
+    var obstacles by remember { mutableStateOf<List<FallingItem>>(emptyList()) }
     
     val playerWidth = 60f
     val itemSize = 40f
     
+    // Spawn de itens
     LaunchedEffect(gameRunning) {
         while (gameRunning) {
             delay(800L)
@@ -65,6 +65,7 @@ fun LollipopLandGame(
         }
     }
     
+    // Movimento dos itens
     LaunchedEffect(gameRunning) {
         while (gameRunning) {
             delay(16L)
@@ -83,18 +84,16 @@ fun LollipopLandGame(
         }
     }
     
+    // Colisões
     LaunchedEffect(lollipops, obstacles, playerX) {
         val playerLeft = playerX
         val playerRight = playerX + playerWidth
         val playerTop = screenHeight - 100
         val playerBottom = screenHeight - 40
         
-        val collected = mutableListOf<FallingItem>()
-        lollipops.forEach { item ->
-            if (item.x + itemSize > playerLeft && item.x < playerRight &&
-                item.y + itemSize > playerTop && item.y < playerBottom) {
-                collected.add(item)
-            }
+        val collected = lollipops.filter { item ->
+            item.x + itemSize > playerLeft && item.x < playerRight &&
+            item.y + itemSize > playerTop && item.y < playerBottom
         }
         
         if (collected.isNotEmpty()) {
@@ -102,12 +101,9 @@ fun LollipopLandGame(
             lollipops = lollipops - collected.toSet()
         }
         
-        val hit = mutableListOf<FallingItem>()
-        obstacles.forEach { item ->
-            if (item.x + itemSize > playerLeft && item.x < playerRight &&
-                item.y + itemSize > playerTop && item.y < playerBottom) {
-                hit.add(item)
-            }
+        val hit = obstacles.filter { item ->
+            item.x + itemSize > playerLeft && item.x < playerRight &&
+            item.y + itemSize > playerTop && item.y < playerBottom
         }
         
         if (hit.isNotEmpty()) {
@@ -152,6 +148,7 @@ fun LollipopLandGame(
             )
         }
         
+        // Área de controle
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -161,10 +158,11 @@ fun LollipopLandGame(
                     state = rememberDraggableState { delta ->
                         playerX = (playerX + delta).coerceIn(0f, screenWidth - playerWidth)
                     },
-                    orientation = Orientation.Horizontal
+                    orientation = androidx.compose.foundation.gestures.Orientation.Horizontal
                 )
         )
         
+        // UI do jogo
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -188,6 +186,7 @@ fun LollipopLandGame(
             }
         }
         
+        // Game Over Dialog
         if (!gameRunning) {
             AlertDialog(
                 onDismissRequest = { },
@@ -226,7 +225,7 @@ fun DrawScope.drawLollipop(center: Offset, size: Float) {
         moveTo(center.x, center.y + size * 0.3f)
         lineTo(center.x, center.y + size * 0.8f)
     }
-    drawPath(stick, Color(0xFF8B4513), style = androidx.compose.ui.graphics.drawscope.Stroke(width = size * 0.1f))
+    drawPath(stick, Color(0xFF8B4513), style = Stroke(width = size * 0.1f))
     
     drawCircle(
         color = Color(0xFFFF69B4),
@@ -278,7 +277,7 @@ fun DrawScope.drawMouth(x: Float, y: Float, width: Float, isHappy: Boolean) {
             quadraticBezierTo(x + width / 2, y, x + width, y + width * 0.4f)
         }
     }
-    drawPath(mouthPath, Color.White, style = androidx.compose.ui.graphics.drawscope.Stroke(width = width * 0.1f))
+    drawPath(mouthPath, Color.White, style = Stroke(width = width * 0.1f))
     drawCircle(Color.White, width * 0.15f, Offset(x + width * 0.2f, y - width * 0.1f))
     drawCircle(Color.White, width * 0.15f, Offset(x + width * 0.8f, y - width * 0.1f))
 }
