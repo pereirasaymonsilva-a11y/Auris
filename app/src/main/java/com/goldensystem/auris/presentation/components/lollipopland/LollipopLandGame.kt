@@ -160,7 +160,7 @@ fun LollipopLandGame(
                     state = rememberDraggableState { delta ->
                         playerX = (playerX + delta).coerceIn(0f, screenWidth - playerWidth)
                     },
-                    orientation = androidx.compose.foundation.gestures.Orientation.Horizontal
+                    orientation = Orientation.Horizontal
                 )
         )
         
