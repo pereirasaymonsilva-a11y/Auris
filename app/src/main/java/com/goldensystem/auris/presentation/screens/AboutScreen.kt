@@ -303,7 +303,7 @@ fun AboutScreen(
                 )
                 OutlinedButton(
                     onClick = {
-                        openUrl(context, "https://github.com/pereirasaymonsilva-a11y/auris-apk/issues/new?template=blank")
+                        openUrl(context, "https://github.com/pereirasaymonsilva-a11y/Auris/issues/new?template=blank")
                     },
                     modifier = Modifier
                         .fillMaxWidth()

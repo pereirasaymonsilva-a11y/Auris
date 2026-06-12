@@ -37,7 +37,7 @@ class GitHubAnnouncementPropertiesService @Inject constructor() {
      */
     suspend fun fetchPlayStoreAnnouncement(
         owner: String = "pereirasaymonsilva-a11y",
-        repo: String = "auris-apk",
+        repo: String = "Auris",
         branch: String = "main",
         configPath: String = "remote-config/app-announcements.properties",
     ): Result<PlayStoreAnnouncementRemoteConfig> {
