@@ -42,4 +42,4 @@ implementation("io.ktor:ktor-server-compression:2.3.7")
 ```
 
 ## Observação
-O lado Roku é um projeto separado em BrightScript/SceneGraph. A Roku documenta BrightScript e SceneGraph como base para apps de streaming na plataforma. O Ktor WebSockets e PartialContent são os plugins necessários para o servidor com comunicação em tempo real e HTTP Range requests. citeturn510412search0turn924052search0turn924052search2
+O lado Roku é um projeto separado em BrightScript/SceneGraph. A Roku documenta BrightScript e SceneGraph como base para apps de streaming na plataforma. O Ktor WebSockets e PartialContent são os plugins necessários para o servidor com comunicação em tempo real e HTTP Range requests.. citeturn510412search0turn924052search0turn924052search2
