@@ -25,10 +25,6 @@
 - **Tradução completa do aplicativo para português (Brasil)**: menus, opções, mensagens e textos internos.
 - **Tradução da documentação**: README, changelog, e demais descrições foram convertidas para português, mantendo referências técnicas intactas.
 
-### 📸 Capturas de Tela
-- **Adicionadas duas novas capturas de tela** na página do projeto, totalizando seis imagens.
-- **Redimensionamento sutil** das imagens para manter a diagramação limpa sem cortes.
-
 ### ⚙️ Engenharia e Build
 - **Workflow GitHub Actions ajustado**: configuração corrigida para dar permissão de execução ao gradlew antes do build.
 - **APK gerado automaticamente** a cada push, pronto para download na aba Actions, sem necessidade de PC.
