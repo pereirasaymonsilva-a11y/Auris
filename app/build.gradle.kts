@@ -79,7 +79,8 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = ".beta"
+            versionNameSuffix = "-beta"
             // signingConfig = signingConfigs.getByName("fixedDebug")
         }
         release {

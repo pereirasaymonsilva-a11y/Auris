@@ -23,6 +23,14 @@ class PiracyViewModel @Inject constructor(
     val uiState: StateFlow<PiracyUiState> = _uiState.asStateFlow()
 
     fun checkPackageIntegrity(scriptUrl: String) {
+        // 🔥 VERIFICA SE É VERSÃO BETA
+        val packageName = context.packageName
+        if (packageName.endsWith(".beta")) {
+            Log.d("PiracyViewModel", "🚫 Versão BETA detectada ($packageName) - Ignorando verificação de integridade")
+            _uiState.value = PiracyUiState.Valid
+            return
+        }
+
         viewModelScope.launch {
             updateRepository.fetchAppVersion(scriptUrl).fold(
                 onSuccess = { info ->
@@ -40,8 +48,7 @@ class PiracyViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     Log.e("PiracyViewModel", "Failed to fetch package info", error)
-                    // Se falhar, consideramos como válido para não bloquear o usuário? Ou mostramos erro?
-                    // Vou optar por considerar válido (evita falsos positivos)
+                    // Se falhar, consideramos como válido para não bloquear o usuário
                     _uiState.value = PiracyUiState.Valid
                 }
             )
@@ -49,6 +56,7 @@ class PiracyViewModel @Inject constructor(
     }
 
     fun reset() {
+        _uiState.value = PiracyUiState.Valid
     }
 }
 
