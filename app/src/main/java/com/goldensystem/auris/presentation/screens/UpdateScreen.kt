@@ -167,21 +167,20 @@ fun UpdateScreen(
                     Spacer(Modifier.height(12.dp))
 
                     // Botão do site oficial na cor VERMELHA
-                    OutlinedButton(
-                        onClick = {
-                            val websiteUrl = "https://pereirasaymonsilva-a11y.github.io/Auris-website/"
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(websiteUrl))
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            context.startActivity(intent)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error,
-                            borderColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text("Baixar do site oficial")
-                    }
+OutlinedButton(
+    onClick = {
+        val websiteUrl = "https://pereirasaymonsilva-a11y.github.io/Auris-website/"
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(websiteUrl))
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        context.startActivity(intent)
+    },
+    modifier = Modifier.fillMaxWidth(),
+    colors = ButtonDefaults.outlinedButtonColors(
+        contentColor = MaterialTheme.colorScheme.error
+    )
+) {
+    Text("Baixar do site oficial")
+}
 
                     Spacer(Modifier.height(12.dp))
 
