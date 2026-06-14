@@ -189,6 +189,7 @@ kapt {
 
 dependencies {
     implementation(libs.androidx.profileinstaller)
+    implementation("com.google.zxing:core:3.5.3")
     implementation(libs.androidx.paging.common)
     baselineProfile(project(":baselineprofile"))
     coreLibraryDesugaring(libs.desugar.jdk.libs)

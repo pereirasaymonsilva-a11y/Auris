@@ -46,7 +46,6 @@ import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Campaign
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -67,7 +66,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -95,6 +93,7 @@ import coil.request.ImageRequest
 import coil.size.Size
 import com.goldensystem.auris.R
 import com.goldensystem.auris.presentation.components.CollapsibleCommonTopBar
+import com.goldensystem.auris.presentation.components.DonateBottomSheet
 import com.goldensystem.auris.presentation.components.MiniPlayerHeight
 import com.goldensystem.auris.presentation.components.SmartImage
 import com.goldensystem.auris.presentation.navigation.Screen
@@ -102,7 +101,6 @@ import com.goldensystem.auris.presentation.navigation.navigateSafely
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
 import kotlinx.coroutines.launch
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
-import timber.log.Timber
 import kotlin.math.roundToInt
 
 // ---------- Dados de Contribuidores (apenas mantenedores) ----------
@@ -136,6 +134,9 @@ fun AboutScreen(
     } catch (_: Exception) {
         "N/A"
     }
+
+    // Estado para controlar o BottomSheet de doações
+    var showDonateSheet by remember { mutableStateOf(false) }
 
     // ---------- Dados dos mantenedores ----------
     val coreMaintainer = Contributor(
@@ -287,7 +288,7 @@ fun AboutScreen(
                     modifier = Modifier.padding(top = 24.dp),
                 )
                 ChangelogCard(
-                    text = stringResource(R.string.about_changelog_text), // string única
+                    text = stringResource(R.string.about_changelog_text),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -319,7 +320,7 @@ fun AboutScreen(
                 }
             }
 
-            // ---------- Seção: Doações ----------
+            // ---------- Seção: Doações (agora abre o BottomSheet) ----------
             item(key = "donate_section") {
                 AboutSectionHeader(
                     title = stringResource(R.string.about_donate_title),
@@ -327,9 +328,7 @@ fun AboutScreen(
                     modifier = Modifier.padding(top = 24.dp),
                 )
                 Button(
-                    onClick = {
-                        openUrl(context, "https://github.com/sponsors/pereirasaymonsilva-a11y")
-                    },
+                    onClick = { showDonateSheet = true },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -390,6 +389,11 @@ fun AboutScreen(
             expandedTitleStartPadding = 20.dp,
             collapsedTitleStartPadding = 68.dp
         )
+    }
+
+    // BottomSheet de doações
+    if (showDonateSheet) {
+        DonateBottomSheet(onDismiss = { showDonateSheet = false })
     }
 }
 
@@ -502,8 +506,8 @@ private fun AboutHeroCard(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CommunitySignalsRow() {
+    // "Código Aberto" foi REMOVIDO conforme solicitado
     val labels = listOf(
-        stringResource(R.string.about_signal_open_source) to Icons.Rounded.Public,
         stringResource(R.string.about_signal_community_first) to Icons.Rounded.AutoAwesome,
         stringResource(R.string.about_signal_material3) to Icons.Rounded.Palette,
     )
