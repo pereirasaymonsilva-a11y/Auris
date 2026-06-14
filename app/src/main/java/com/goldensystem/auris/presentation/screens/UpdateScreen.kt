@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,15 +39,13 @@ fun UpdateScreen(
     var downloadId by remember { mutableStateOf<Long?>(null) }
     var progress by remember { mutableIntStateOf(0) }
     var isDownloading by remember { mutableStateOf(false) }
-    var showDownloadOptions by remember { mutableStateOf(true) }
-    var installationCancelled by remember { mutableStateOf(false) }
-    var downloadedFilePath by remember { mutableStateOf<String?>(null) }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) {
-        if (it) {
-            showDownloadOptions = true
+        startDownloadUnique(context, updateInfo) { id ->
+            downloadId = id
+            isDownloading = true
         }
     }
 
@@ -55,26 +54,27 @@ fun UpdateScreen(
         val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
         while (true) {
-            val result = withContext(Dispatchers.IO) {
+            val done = withContext(Dispatchers.IO) {
                 val query = DownloadManager.Query().setFilterById(id)
                 manager.query(query).use { cursor ->
                     if (!cursor.moveToFirst()) return@use null
-                    
-                    val downloaded = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
-                    val total = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
-                    val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
-                    val localUri = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI))
-                    
-                    arrayOf(downloaded, total, status, localUri)
+
+                    val downloaded = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+                    )
+                    val total = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+                    )
+                    val status = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS)
+                    )
+                    Triple(downloaded, total, status)
                 }
             }
-            
-            if (result == null) break
-            
-            val downloaded = result[0] as Int
-            val total = result[1] as Int
-            val status = result[2] as Int
-            val localUri = result[3] as String?
+
+            if (done == null) break
+
+            val (downloaded, total, status) = done
 
             if (total > 0) {
                 progress = (downloaded * 100L / total).toInt()
@@ -83,29 +83,38 @@ fun UpdateScreen(
             when (status) {
                 DownloadManager.STATUS_SUCCESSFUL -> {
                     isDownloading = false
-                    val filePath = if (!localUri.isNullOrEmpty()) {
-                        if (localUri.startsWith("file://")) Uri.parse(localUri).path else localUri
-                    } else {
-                        manager.getUriForDownloadedFile(id)?.path
+                    val filePath = withContext(Dispatchers.IO) {
+                        val query = DownloadManager.Query().setFilterById(id)
+                        manager.query(query).use { cursor ->
+                            if (cursor.moveToFirst()) {
+                                val localUri = cursor.getString(
+                                    cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI)
+                                )
+                                if (localUri != null) {
+                                    if (localUri.startsWith("file://")) Uri.parse(localUri).path
+                                    else manager.getUriForDownloadedFile(id)?.path ?: localUri
+                                } else null
+                            } else null
+                        }
                     }
                     if (filePath != null) {
-                        downloadedFilePath = filePath
-                        installationCancelled = false
                         installApk(context, filePath)
                     }
                     break
                 }
-                DownloadManager.STATUS_FAILED, DownloadManager.STATUS_PAUSED -> {
+                DownloadManager.STATUS_FAILED,
+                DownloadManager.STATUS_PAUSED -> {
                     isDownloading = false
                     Toast.makeText(context, "Download interrompido", Toast.LENGTH_SHORT).show()
                     break
                 }
             }
+
             delay(500)
         }
     }
 
-    Dialog(onDismissRequest = { if (!updateInfo.isRequired && !installationCancelled) onCancelClick() }) {
+    Dialog(onDismissRequest = { if (!updateInfo.isRequired) onCancelClick() }) {
         Card(
             modifier = Modifier.padding(16.dp),
             shape = MaterialTheme.shapes.extraLarge,
@@ -115,16 +124,7 @@ fun UpdateScreen(
                 modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    when {
-                        installationCancelled -> "Instalação cancelada ⚠️"
-                        isDownloading -> "Baixando atualização 📥"
-                        else -> "Nova versão 🚀"
-                    },
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                
+                Text("Nova versão 🚀", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(12.dp))
                 Text("Atual: ${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyMedium)
                 Text("Nova: ${updateInfo.version}", style = MaterialTheme.typography.bodyMedium)
@@ -139,108 +139,59 @@ fun UpdateScreen(
 
                 Spacer(Modifier.height(20.dp))
 
-                when {
-                    installationCancelled -> {
-                        Card(
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                "Você cancelou a instalação. Deseja tentar novamente?",
-                                modifier = Modifier.padding(12.dp)
-                            )
-                        }
-                        
-                        Spacer(Modifier.height(16.dp))
-                        
-                        Button(
-                            onClick = {
-                                downloadedFilePath?.let { path ->
-                                    installationCancelled = false
-                                    installApk(context, path)
-                                } ?: run {
-                                    Toast.makeText(context, "Arquivo não encontrado", Toast.LENGTH_SHORT).show()
-                                    installationCancelled = false
-                                    showDownloadOptions = true
+                if (isDownloading) {
+                    LinearProgressIndicator(
+                        progress = { progress / 100f },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text("$progress%", style = MaterialTheme.typography.labelMedium)
+                } else {
+                    Button(
+                        onClick = {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                startDownloadUnique(context, updateInfo) { id ->
+                                    downloadId = id
+                                    isDownloading = true
                                 }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("🔄 Tentar instalar novamente")
-                        }
-                        
-                        if (!updateInfo.isRequired) {
-                            Spacer(Modifier.height(8.dp))
-                            TextButton(
-                                onClick = {
-                                    installationCancelled = false
-                                    showDownloadOptions = true
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text("Fazer novo download")
                             }
-                        }
+                        },
+                        enabled = !isDownloading,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Atualizar agora")
                     }
-                    
-                    isDownloading -> {
-                        LinearProgressIndicator(progress = { progress / 100f }, modifier = Modifier.fillMaxWidth())
-                        Spacer(Modifier.height(8.dp))
-                        Text("$progress%")
-                        Spacer(Modifier.height(8.dp))
-                        TextButton(onClick = {
-                            downloadId?.let { id ->
-                                val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                                manager.remove(id)
-                                downloadId = null
-                                isDownloading = false
-                                progress = 0
-                            }
-                        }) {
-                            Text("Cancelar download")
-                        }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    // Botão do site oficial na cor VERMELHA
+                    OutlinedButton(
+                        onClick = {
+                            val websiteUrl = "https://pereirasaymonsilva-a11y.github.io/Auris-website/"
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(websiteUrl))
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            context.startActivity(intent)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error,
+                            borderColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Baixar do site oficial")
                     }
-                    
-                    else -> {
-                        if (showDownloadOptions) {
-                            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Button(
-                                    onClick = {
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                        } else {
-                                            startDownloadUnique(context, updateInfo) { id ->
-                                                downloadId = id
-                                                isDownloading = true
-                                                showDownloadOptions = false
-                                            }
-                                        }
-                                    },
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text("📱 Baixar pelo app")
-                                }
 
-                                OutlinedButton(
-                                    onClick = { openOfficialWebsite(context) },
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text("🌐 Baixar do site oficial")
-                                }
+                    Spacer(Modifier.height(12.dp))
 
-                                if (!updateInfo.isRequired) {
-                                    Spacer(Modifier.height(8.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        TextButton(onClick = onRemindLaterClick) { Text("Lembrar depois") }
-                                        TextButton(onClick = onCancelClick) { Text("Fechar") }
-                                    }
-                                }
-                            }
-                        } else if (!updateInfo.isRequired) {
-                            TextButton(onClick = { showDownloadOptions = true }) { Text("Voltar") }
+                    if (!updateInfo.isRequired) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            TextButton(onClick = onRemindLaterClick) { Text("Lembrar depois") }
+                            TextButton(onClick = onCancelClick) { Text("Fechar") }
                         }
                     }
                 }
@@ -258,50 +209,63 @@ private fun startDownloadUnique(context: Context, updateInfo: AppVersionInfo, on
     var fileName: String
     
     do {
-        fileName = if (counter == 1) "$baseFileName.apk" else "$baseFileName($counter).apk"
+        fileName = if (counter == 1) {
+            "$baseFileName.apk"
+        } else {
+            "$baseFileName($counter).apk"
+        }
         finalFile = File(downloadsDir, fileName)
         counter++
     } while (finalFile.exists())
     
     val request = DownloadManager.Request(Uri.parse(updateInfo.downloadUrl))
-        .setTitle("Atualizando Auris - ${updateInfo.version}")
-        .setDescription("Baixando... (${fileName})")
+        .setTitle("Atualizando Auris")
+        .setDescription("Baixando nova versão...")
         .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
         .setAllowedOverMetered(true)
         .setDestinationUri(Uri.fromFile(finalFile))
 
     val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-    onIdReceived(manager.enqueue(request))
-    Toast.makeText(context, "Download: $fileName", Toast.LENGTH_SHORT).show()
-}
-
-private fun openOfficialWebsite(context: Context) {
-    try {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://pereirasaymonsilva-a11y.github.io/Auris-website/"))
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        context.startActivity(intent)
-    } catch (e: Exception) {
-        Toast.makeText(context, "Erro ao abrir site", Toast.LENGTH_SHORT).show()
-    }
+    val id = manager.enqueue(request)
+    onIdReceived(id)
 }
 
 private fun installApk(context: Context, filePath: String) {
     try {
-        val file = File(filePath)
-        if (!file.exists()) {
-            Toast.makeText(context, "Arquivo não encontrado", Toast.LENGTH_SHORT).show()
-            return
+        Toast.makeText(context, "Download concluído. Instalando...", Toast.LENGTH_SHORT).show()
+
+        val uri = Uri.parse(filePath)
+        val apkUri = if (uri.scheme == "content") {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val tempFile = File(context.cacheDir, "temp_auris_update.apk")
+            inputStream?.use { input ->
+                tempFile.outputStream().use { output -> input.copyTo(output) }
+            }
+            inputStream?.close()
+            FileProvider.getUriForFile(context, "${context.packageName}.provider", tempFile)
+        } else {
+            val file = File(uri.path ?: return)
+            FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
         }
-        
-        val apkUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-        
+
+        context.grantUriPermission(
+            "com.android.packageinstaller",
+            apkUri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION
+        )
+
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(apkUri, "application/vnd.android.package-archive")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        
-        context.startActivity(intent)
+
+        if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+        } else {
+            Toast.makeText(context, "Nenhum app para instalar", Toast.LENGTH_SHORT).show()
+        }
     } catch (e: Exception) {
-        Toast.makeText(context, "Erro: ${e.message}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Erro ao instalar APK: ${e.message}", Toast.LENGTH_LONG).show()
     }
 }
