@@ -63,9 +63,9 @@ fun DonateBottomSheet(
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         dragHandle = { BottomSheetDefaults.DragHandle() },
         properties = ModalBottomSheetProperties(
-    shouldDismissOnBackPress = true,
-    shouldDismissOnClickOutside = true
-)
+            shouldDismissOnBackPress = true,
+            shouldDismissOnClickOutside = true
+        )
     ) {
         Column(
             modifier = Modifier
@@ -218,11 +218,15 @@ fun DonateBottomSheet(
                         )
                     }
                     
-                    // Botão abrir app do banco
+                    // Botão para copiar payload PIX (alternativa ao app do banco que não funciona)
                     Button(
                         onClick = {
-                            // Tenta abrir o app do banco com o payload PIX
-                            openPixApp(context, pixPayload)
+                            clipboardManager.setText(AnnotatedString(pixPayload))
+                            scope.launch {
+                                showCopiedFeedback = true
+                                kotlinx.coroutines.delay(2000)
+                                showCopiedFeedback = false
+                            }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
@@ -233,7 +237,7 @@ fun DonateBottomSheet(
                     ) {
                         Icon(Icons.Default.QrCodeScanner, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.donate_pix_button))
+                        Text("Copiar código PIX")
                     }
                 }
             }
@@ -259,7 +263,10 @@ fun DonateBottomSheet(
                     modifier = Modifier
                         .weight(1f)
                         .height(56.dp),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    )
                 ) {
                     Text("💙 ", style = MaterialTheme.typography.bodyLarge)
                     Text(stringResource(R.string.donate_paypal))
@@ -273,7 +280,10 @@ fun DonateBottomSheet(
                     modifier = Modifier
                         .weight(1f)
                         .height(56.dp),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    )
                 ) {
                     Text("🐙 ", style = MaterialTheme.typography.bodyLarge)
                     Text(stringResource(R.string.donate_github))
@@ -292,42 +302,26 @@ fun DonateBottomSheet(
 }
 
 // Funções auxiliares
-private fun openPixApp(context: Context, pixPayload: String) {
-    try {
-        // Tenta abrir diretamente no app do banco (método padrão PIX)
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = "https://pix.bcb.gov.br/pay/$pixPayload".toUri()
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(intent)
-    } catch (e: ActivityNotFoundException) {
-        // Fallback: copiar payload ou abrir navegador
-        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-        val clip = android.content.ClipData.newPlainText("PIX Payload", pixPayload)
-        clipboard.setPrimaryClip(clip)
-        
-        // Mostrar snackbar ou toast (opcional)
-        android.widget.Toast.makeText(
-            context,
-            "Payload PIX copiado! Cole no seu app do banco.",
-            android.widget.Toast.LENGTH_LONG
-        ).show()
-    }
-}
-
 private fun openPayPal(context: Context, email: String) {
-    val paypalUrl = "https://paypal.me/$email"
-    val paypalUrlAlt = "https://www.paypal.com/paypalme/$email"
-    
     try {
+        // Tenta o link do PayPal.me primeiro
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = paypalUrl.toUri()
+            data = "https://paypal.me/$email".toUri()
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
     } catch (e: ActivityNotFoundException) {
-        // Fallback: abrir navegador com o email
-        openUrl(context, "https://www.paypal.com/donate/?business=$email&no_recurring=0&currency_code=BRL")
+        try {
+            // Fallback: tenta o link completo
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                data = "https://www.paypal.com/paypalme/$email".toUri()
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+        } catch (e2: ActivityNotFoundException) {
+            // Último fallback: abre no navegador
+            openUrl(context, "https://www.paypal.com/donate/?business=$email&no_recurring=0&currency_code=BRL")
+        }
     }
 }
 
