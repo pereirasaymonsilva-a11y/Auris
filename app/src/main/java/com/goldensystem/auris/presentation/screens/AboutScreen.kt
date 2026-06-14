@@ -44,7 +44,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Campaign
-import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -93,7 +92,6 @@ import coil.request.ImageRequest
 import coil.size.Size
 import com.goldensystem.auris.R
 import com.goldensystem.auris.presentation.components.CollapsibleCommonTopBar
-import com.goldensystem.auris.presentation.components.DonateBottomSheet
 import com.goldensystem.auris.presentation.components.MiniPlayerHeight
 import com.goldensystem.auris.presentation.components.SmartImage
 import com.goldensystem.auris.presentation.navigation.Screen
@@ -134,9 +132,6 @@ fun AboutScreen(
     } catch (_: Exception) {
         "N/A"
     }
-
-    // Estado para controlar o BottomSheet de doações
-    var showDonateSheet by remember { mutableStateOf(false) }
 
     // ---------- Dados dos mantenedores ----------
     val coreMaintainer = Contributor(
@@ -280,7 +275,7 @@ fun AboutScreen(
                 )
             }
 
-            // ---------- Seção: Changelog (agora com uma única string) ----------
+            // ---------- Seção: Changelog ----------
             item(key = "changelog_section") {
                 AboutSectionHeader(
                     title = stringResource(R.string.about_changelog_title),
@@ -317,30 +312,6 @@ fun AboutScreen(
                     Icon(Icons.Rounded.Campaign, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.about_feedback_button))
-                }
-            }
-
-            // ---------- Seção: Doações (agora abre o BottomSheet) ----------
-            item(key = "donate_section") {
-                AboutSectionHeader(
-                    title = stringResource(R.string.about_donate_title),
-                    subtitle = stringResource(R.string.about_donate_subtitle),
-                    modifier = Modifier.padding(top = 24.dp),
-                )
-                Button(
-                    onClick = { showDonateSheet = true },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Icon(Icons.Rounded.FavoriteBorder, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.about_donate_button))
                 }
             }
 
@@ -389,11 +360,6 @@ fun AboutScreen(
             expandedTitleStartPadding = 20.dp,
             collapsedTitleStartPadding = 68.dp
         )
-    }
-
-    // BottomSheet de doações
-    if (showDonateSheet) {
-        DonateBottomSheet(onDismiss = { showDonateSheet = false })
     }
 }
 
@@ -506,7 +472,6 @@ private fun AboutHeroCard(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CommunitySignalsRow() {
-    // "Código Aberto" foi REMOVIDO conforme solicitado
     val labels = listOf(
         stringResource(R.string.about_signal_community_first) to Icons.Rounded.AutoAwesome,
         stringResource(R.string.about_signal_material3) to Icons.Rounded.Palette,

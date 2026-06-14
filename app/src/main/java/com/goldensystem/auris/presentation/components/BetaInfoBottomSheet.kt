@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -17,10 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BugReport
-import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.VolunteerActivism
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,7 +38,6 @@ import com.goldensystem.auris.R
 fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val feedbackUrl = "https://github.com/pereirasaymonsilva-a11y/Auris/issues/new/choose"
-    val donateUrl = "https://github.com/sponsors/pereirasaymonsilva-a11y"
 
     LazyColumn(
         modifier = modifier
@@ -75,8 +70,7 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    // Usando uma única string com quebras de linha
+                    Spacer(modifier = Modifier.width(8.dp))  // altura ajustada
                     Text(
                         text = stringResource(R.string.about_changelog_text),
                         style = MaterialTheme.typography.bodyMedium
@@ -130,59 +124,6 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
                 }
             }
         }
-
-        // ---------- Doação ----------
-        item(key = "donate") {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                )
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Rounded.VolunteerActivism,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.about_donate_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    Text(
-                        text = "Ajude no desenvolvimento do Auris ❤️",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.about_donate_subtitle),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = { launchUrl(context, donateUrl) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
-                    ) {
-                        Icon(Icons.Rounded.FavoriteBorder, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.about_donate_button))
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -192,7 +133,5 @@ private fun launchUrl(context: Context, url: String) {
     }
     try {
         context.startActivity(intent)
-    } catch (_: ActivityNotFoundException) {
-        // Silently ignore if no browser is available.
-    }
+    } catch (_: ActivityNotFoundException) { }
 }
