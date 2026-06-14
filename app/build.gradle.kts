@@ -20,6 +20,9 @@ val enableComposeCompilerReports = providers.gradleProperty("Auris.enableCompose
     .map(String::toBoolean)
     .get()
 
+// 🔥 NOVA VARIÁVEL ADICIONADA AQUI
+val appVersionCode = (project.findProperty("APP_VERSION_CODE") as String).toInt()
+
 android {
     namespace = "com.goldensystem.auris"
     compileSdk = 35
@@ -56,7 +59,8 @@ android {
         applicationId = "com.goldensystem.auris"
         minSdk = 29
         targetSdk = 35
-        versionCode = (project.findProperty("APP_VERSION_CODE") as String).toInt()
+        // 🔥 TROCADO PARA USAR A VARIÁVEL
+        versionCode = appVersionCode
         versionName = project.findProperty("APP_VERSION_NAME") as String
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -80,7 +84,8 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".beta"
-            versionNameSuffix = "-beta"
+            // 🔥 TROCADO PARA INCLUIR O VERSION CODE
+            versionNameSuffix = ".$appVersionCode-beta"
             // signingConfig = signingConfigs.getByName("fixedDebug")
         }
         release {
