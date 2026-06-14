@@ -28,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import com.goldensystem.auris.R
 import com.goldensystem.auris.utils.generatePixQRCode
 import kotlinx.coroutines.launch
@@ -63,7 +62,10 @@ fun DonateBottomSheet(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         dragHandle = { BottomSheetDefaults.DragHandle() },
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = ModalBottomSheetProperties(
+    shouldDismissOnBackPress = true,
+    shouldDismissOnClickOutside = true
+)
     ) {
         Column(
             modifier = Modifier
