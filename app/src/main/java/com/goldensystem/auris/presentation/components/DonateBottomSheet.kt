@@ -2,8 +2,10 @@ package com.goldensystem.auris.presentation.components
 
 import android.content.ActivityNotFoundException
 import android.content.Context
+import androidx.core.net.toUri
 import android.content.Intent
 import android.graphics.Bitmap
+import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

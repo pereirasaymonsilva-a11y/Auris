@@ -25,6 +25,19 @@
 
 
 
+<string name="donate_title">Support development</string>
+<string name="donate_subtitle">Your contribution keeps Auris alive ❤️</string>
+<string name="donate_pix_title">PIX</string>
+<string name="donate_pix_key">Random key</string>
+<string name="donate_pix_copied">Key copied!</string>
+<string name="donate_pix_button">Open bank app</string>
+<string name="donate_other_methods">Other ways to contribute</string>
+<string name="donate_paypal">PayPal</string>
+<string name="donate_github">GitHub Sponsors</string>
+<string name="donate_thanks">💝 Thank you for your support!</string>
+ 
+
+
 
 
       <!-- Aqui em baixo agente coloca as novidades da versao atual do auris, peste muita ATENCAO no uso de \n•, e muinto cuidado ao formatar -->
