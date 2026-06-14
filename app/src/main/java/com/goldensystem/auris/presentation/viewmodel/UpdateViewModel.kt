@@ -28,13 +28,6 @@ class UpdateViewModel @Inject constructor(
     val showOverlay: StateFlow<Boolean> = _showOverlay.asStateFlow()
 
     fun checkForUpdate(scriptUrl: String, currentVersion: String) {
-        // 🔥 VERIFICA SE É VERSÃO BETA
-        val packageName = context.packageName
-        if (packageName.endsWith(".beta")) {
-            Log.d("UpdateViewModel", "🚫 Versão BETA detectada ($packageName) - Ignorando verificações de atualização")
-            return
-        }
-
         val prefs = context.getSharedPreferences("update", Context.MODE_PRIVATE)
         val remindUntil = prefs.getLong("remind_later_until", 0L)
         val now = System.currentTimeMillis()

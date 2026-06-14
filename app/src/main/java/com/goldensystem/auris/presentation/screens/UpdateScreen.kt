@@ -28,9 +28,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.io.File
 
-// 🔥 URL FIXA DO APK
-private const val FIXED_APK_DOWNLOAD_URL = "https://pereirasaymonsilva-a11y.github.io/Auris-website/auris/Auris.apk"
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdateScreen(
@@ -46,7 +43,7 @@ fun UpdateScreen(
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) {
-        startDownload(context) { id ->
+        startDownload(context, updateInfo) { id ->
             downloadId = id
             isDownloading = true
         }
@@ -155,7 +152,7 @@ fun UpdateScreen(
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             } else {
-                                startDownload(context) { id ->
+                                startDownload(context, updateInfo) { id ->
                                     downloadId = id
                                     isDownloading = true
                                 }
@@ -184,10 +181,9 @@ fun UpdateScreen(
     }
 }
 
-private fun startDownload(context: Context, onIdReceived: (Long) -> Unit) {
+private fun startDownload(context: Context, updateInfo: AppVersionInfo, onIdReceived: (Long) -> Unit) {
     val fileName = "auris_update_${System.currentTimeMillis()}.apk"
-    // 🔥 USANDO URL FIXA
-    val request = DownloadManager.Request(Uri.parse(FIXED_APK_DOWNLOAD_URL))
+    val request = DownloadManager.Request(Uri.parse(updateInfo.downloadUrl))
         .setTitle("Atualizando Auris")
         .setDescription("Baixando nova versão...")
         .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
