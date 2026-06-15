@@ -1,0 +1,2 @@
+Only in /storage/emulated/0/github/auris/app/src/main/java/com: goldensystem
+Only in /storage/emulated/0/github/PixelPlayer/app/src/main/java/com: theveloper
