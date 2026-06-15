@@ -1,184 +1,149 @@
-# Auris 🎶
+Auris 🎵
 
 <p align="center">
-  <img src="assets/icon.png" alt="Ícone do Auris" width="128"/>
-</p>
+  <img src="assets/icon.png" width="128"/>
+</p><h3 align="center">
+A experiência definitiva para sua música e vídeos no Android
+</h3><p align="center">
+Player moderno desenvolvido pela Golden System Studios com foco em desempenho, personalização e design Material 3.
+</p>---
+
+
+📸 Capturas de Tela
 
 <p align="center">
-  <strong>Um player de música elegante, poderoso e totalmente em português</strong><br>
-  Baseado no Auris · Construído com Jetpack Compose e Material Design 3
+  <img src="assets/screenshot1.jpg" width="180"/>
+  <img src="assets/screenshot2.jpg" width="180"/>
+  <img src="assets/screenshot3.jpg" width="180"/>
+</p><p align="center">
+  <img src="assets/screenshot4.jpg" width="180"/>
+  <img src="assets/screenshot5.jpg" width="180"/>
+  <img src="assets/screenshot6.jpg" width="180"/>
 </p>
 
-<p align="center">
-  <img src="assets/screenshot1.jpg" alt="Captura de Tela 1" width="150" style="border-radius:26px;"/>
-  <img src="assets/screenshot2.jpg" alt="Captura de Tela 2" width="150" style="border-radius:26px;"/>
-  <img src="assets/screenshot3.jpg" alt="Captura de Tela 3" width="150" style="border-radius:26px;"/>
-  <img src="assets/screenshot4.jpg" alt="Captura de Tela 4" width="150" style="border-radius:26px;"/>
-  <img src="assets/screenshot5.jpg" alt="Captura de Tela 5" width="150" style="border-radius:26px;"/>
-  <img src="assets/screenshot6.jpg" alt="Captura de Tela 6" width="150" style="border-radius:26px;"/>
-</p>
+✨ O que é o Auris?
 
-<p align="center">
-    <a href="https://github.com/pereirasaymonsilva-a11y/auris-apk/releases/latest">
-        <img src="https://img.shields.io/github/v/release/pereirasaymonsilva-a11y/auris-apk?include_prereleases&logo=github&style=for-the-badge&label=Última%20versão" alt="Última versão">
-    </a>
-    <a href="https://github.com/pereirasaymonsilva-a11y/auris-apk/releases">
-        <img src="https://img.shields.io/github/downloads/pereirasaymonsilva-a11y/auris-apk/total?logo=github&style=for-the-badge" alt="Total de Downloads">
-    </a>
-    <img src="https://img.shields.io/badge/Android-11%2B-green?style=for-the-badge&logo=android" alt="Android 11+">
-    <img src="https://img.shields.io/badge/Kotlin-100%25-purple?style=for-the-badge&logo=kotlin" alt="Kotlin">
-</p>
+O Auris é um aplicativo de mídia para Android desenvolvido com Kotlin e Jetpack Compose, criado para oferecer uma experiência moderna, fluida e elegante para reprodução de músicas e vídeos.
+
+Construído sobre uma base open source e completamente reformulado ao longo do tempo, o projeto evoluiu para uma plataforma própria com identidade visual exclusiva, recursos avançados e desenvolvimento ativo pela Golden System.
+
+O objetivo é simples: entregar um player bonito, rápido e poderoso sem abrir mão da experiência do usuário.
 
 ---
 
-## ✨ Sobre o Auris
+🚀 Destaques
 
-O **Auris** é uma versão personalizada com carinho a partir do código aberto do **Auris**, criado por [theovilardo](https://github.com/theovilardo).  
-Ele foi traduzido integralmente para o português (Brasil), ganhou um tema claro em dourado e preto, teve ícones e identidade visual renovados, e agora é mantido como um projeto independente focado na comunidade lusófona.
+🎵 Reprodução de Música
 
-Se você quer um player de música moderno, com Material You, equalizador, letras sincronizadas, suporte a múltiplos formatos e uma interface fluida, o Auris é para você.
+- Media3 ExoPlayer
+- Reprodução em segundo plano
+- Gapless Playback
+- Crossfade
+- Fila inteligente
+- Modo aleatório e repetição
+- Controle por notificação
 
----
+🎬 Reprodução de Vídeos
 
-## 🎨 Funcionalidades
+- Player de vídeo integrado
+- Suporte a múltiplos formatos
+- Controles modernos
+- Orientação automática
+- Continuação inteligente da reprodução
 
-### 🎵 Reprodução Poderosa
-- **Media3 ExoPlayer** com suporte a FFmpeg
-- Reprodução em segundo plano com controle total pela notificação
-- Fila com arrastar e soltar, modos aleatório e repetição
-- Transições suaves (gapless) e crossfade personalizável
+🎨 Interface Moderna
 
-### 🖼️ Interface Moderna
-- **Material You** – cores que se adaptam ao seu papel de parede
-- Animações fluidas e microinterações
-- Temas claro e escuro (agora com tema claro dourado exclusivo do Auris)
-- Extração de cores da capa do álbum
+- Material Design 3
+- Material You
+- Tema claro e escuro
+- Tema dourado exclusivo do Auris
+- Animações fluidas
+- Extração automática de cores
 
-### 📚 Biblioteca Completa
-- Suporte a MP3, FLAC, AAC, OGG, WAV, MP4 entre outros
-- Navegação por Músicas, Álbuns, Artistas, Gêneros e Pastas
-- Interpretação inteligente de múltiplos artistas (feat., ft., etc.)
-- Agrupamento por Artista do Álbum
+📚 Biblioteca Inteligente
 
-### 🎤 Letras Sincronizadas
+- Músicas
+- Álbuns
+- Artistas
+- Gêneros
+- Pastas
+- Busca avançada
+- Organização automática
+
+🎤 Letras
+
+- Letras sincronizadas
 - Busca automática via LRCLIB
-- Suporte a arquivos .LRC embarcados
-- Edição manual de letras e ajuste de sincronia
+- Arquivos LRC
+- Ajuste manual de sincronização
 
-### 📊 Estatísticas e Descoberta
-- Estatísticas de escuta detalhadas (hábitos, horários, faixas mais ouvidas)
-- Mix Diária gerada por IA com base no seu histórico
-- Busca completa na biblioteca
+⚙️ Recursos Avançados
 
-### 📲 Conectividade
-- Chromecast e Bluetooth
-- Widgets com Glance
-- Android Auto (em breve)
-
-### ⚙️ Avançado
-- Editor de tags completo (TagLib)
-- Equalizador de 10 bandas
-- Playlists com IA (Gemini)
+- Equalizador
+- Editor de tags
 - Backup e restauração
+- Widgets
+- Estatísticas de reprodução
+- Sistema de atualizações integrado
+- Canal Beta pelo GitHub Releases
+
 
 ---
 
-## 🛠️ Stack Tecnológico
+🛠️ Tecnologias
 
-| Categoria | Tecnologia |
-|----------|------------|
-| **Linguagem** | Kotlin 100% |
-| **UI** | Jetpack Compose + Material Design 3 |
-| **Áudio** | Media3 ExoPlayer + FFmpeg |
-| **Arquitetura** | MVVM com StateFlow/SharedFlow |
-| **Injeção de Dependência** | Hilt |
-| **Banco de Dados** | Room |
-| **Rede** | Retrofit + OkHttp |
-| **Imagens** | Coil |
-| **Assíncrono** | Kotlin Coroutines & Flow |
-| **Widgets** | Glance |
-| **Metadados** | TagLib |
+Tecnologia| Uso
+Kotlin| Desenvolvimento principal
+Jetpack Compose| Interface
+Material 3| Design
+Media3 ExoPlayer| Reprodução
+Hilt| Injeção de dependência
+Room| Banco de dados
+Retrofit| APIs
+Coil| Imagens
+Coroutines & Flow| Assíncrono
+WorkManager| Processamento em segundo plano
 
 ---
 
-## 📱 Requisitos
+📱 Requisitos
 
-- Android 11 (API 30) ou superior
-- 4 GB de RAM recomendados
-
----
-
-## ⬇️ Download
-
-<p align="center">
-  <a href="https://github.com/pereirasaymonsilva-a11y/auris-apk/releases/latest">
-    <img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" alt="Baixar no GitHub" height="60">
-  </a>
-</p>
-
-> ⚠️ **Aviso:** Sempre desinstale a versão anterior antes de instalar uma nova atualização do Auris.  
-> O app está em versão beta e podem ocorrer conflitos se instalado por cima.
+- Android 11 ou superior
+- Arquitetura ARM64 recomendada
 
 ---
 
-## 📂 Estrutura do Projeto
+📦 Download
 
-```
+Baixe sempre a versão mais recente através da página de Releases ou página oficial do Auris.
+### Links Oficiais
 
-app/src/main/java/com/goldensystem/auris/
-├── data/
-│   ├── database/       # Room (entidades, DAOs, migrações)
-│   ├── model/          # Modelos de domínio (Song, Album, Artist…)
-│   ├── network/        # APIs (LRCLIB, Deezer)
-│   ├── preferences/    # DataStore
-│   ├── repository/     # Repositórios de dados
-│   ├── service/        # MusicService, servidor HTTP
-│   └── worker/         # WorkManager
-├── di/                 # Módulos Hilt
-├── presentation/
-│   ├── components/     # Componentes Compose reutilizáveis
-│   ├── navigation/     # Grafo de navegação
-│   ├── screens/        # Telas
-│   └── viewmodel/      # ViewModels
-├── ui/
-│   ├── glancewidget/   # Widgets
-│   └── theme/          # Tema, cores, tipografia
-└── utils/              # Extensões e utilitários
+- 🌐 Site Oficial: https://pereirasaymonsilva-a11y.github.io/Auris-website/
+- 📦 Releases: https://github.com/pereirasaymonsilva-a11y/auris-apk/releases
 
-```
-
----
-
-## 🛠️ Como compilar (desenvolvedores)
-
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/pereirasaymonsilva-a11y/auris-apk.git
-```
-
-1. Abra no Android Studio (Ladybug ou mais recente).
-2. Sincronize o Gradle e compile (Build → Make Project).
-3. Execute em um dispositivo ou emulador.
+O Auris possui sistema de atualização integrado, permitindo receber novas versões beta diretamente pelo aplicativo.
 
 ---
 
 🤝 Contribuindo
 
-Contribuições são muito bem-vindas!
-Para sugerir melhorias, abra uma issue ou envie um pull request.
+Pull Requests, correções e sugestões são bem-vindos.
 
-1. Faça um fork do projeto
-2. Crie um branch (git checkout -b feature/MinhaFeature)
-3. Commit suas mudanças (git commit -m 'Adiciona nova feature')
-4. Push para o branch (git push origin feature/MinhaFeature)
-5. Abra um Pull Request
+1. Faça um Fork
+2. Crie sua branch
+3. Faça suas alterações
+4. Envie um Pull Request
 
 ---
 
 📄 Licença
 
-Este projeto está licenciado sob a Licença MIT.
-Consulte o arquivo LICENSE para mais informações.
+Distribuído sob licença MIT.
 
-Auris é uma modificação do Auris, criado por theovilardo.
-Modificações por Saymon Silva Pereira / Golden System Studios (2026).
+---
+
+Golden System Studios
+
+Desenvolvido e mantido por Saymon Silva Pereira.
+
+Projeto em desenvolvimento ativo.
