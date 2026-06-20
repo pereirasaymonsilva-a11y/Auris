@@ -19,8 +19,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.YouTube
-import androidx.compose.material.icons.rounded.Instagram
+import androidx.compose.material.icons.rounded.PlayCircle
+import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
