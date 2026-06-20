@@ -262,7 +262,6 @@ dependencies {
     implementation(libs.androidx.glance)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
-    implementation("androidx.compose.material:material-icons-extended:1.7.0")
 
     // Gson
     implementation(libs.gson)
