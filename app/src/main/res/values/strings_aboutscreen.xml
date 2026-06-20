@@ -63,4 +63,19 @@
     <string name="about_donate_title">Support development</string>
     <string name="about_donate_subtitle">Contributions help keep Auris free and ad-free</string>
     <string name="about_donate_button">Make a donation</string>
+    
+        <!-- Site Oficial -->
+    <string name="about_official_website_title">Site Oficial</string>
+    <string name="about_official_website_subtitle">Conheça mais sobre o Auris em nosso site oficial.</string>
+    <string name="about_official_website_button">Visitar Site Oficial</string>
+
+    <!-- YouTube -->
+    <string name="about_youtube_title">YouTube</string>
+    <string name="about_youtube_subtitle">Inscreva-se no nosso canal no YouTube.</string>
+    <string name="about_youtube_button">Acessar Canal</string>
+
+    <!-- Redes Sociais -->
+    <string name="about_social_media_title">Acompanhe-nos pelas redes sociais</string>
+    <string name="about_instagram">Instagram</string>
+    <string name="about_tiktok">TikTok</string>
 </resources>

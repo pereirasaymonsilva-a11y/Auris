@@ -45,8 +45,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Campaign
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.YouTube
+import androidx.compose.material.icons.rounded.Instagram
+import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -132,6 +138,12 @@ fun AboutScreen(
     } catch (_: Exception) {
         "N/A"
     }
+
+    // URLs
+    val officialWebsite = "https://pereirasaymonsilva-a11y.github.io/Auris-website/data/home.html"
+    val youtubeUrl = "https://www.youtube.com/@AurisMusicPlayer"
+    val instagramUrl = "https://www.instagram.com/aurismp"
+    val tiktokUrl = "https://www.tiktok.com/@auris_music_player"
 
     // ---------- Dados dos mantenedores ----------
     val coreMaintainer = Contributor(
@@ -288,6 +300,93 @@ fun AboutScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 )
+            }
+
+            // ---------- Seção: Site Oficial ----------
+            item(key = "official_website_section") {
+                AboutSectionHeader(
+                    title = stringResource(R.string.about_official_website_title),
+                    subtitle = stringResource(R.string.about_official_website_subtitle),
+                    modifier = Modifier.padding(top = 24.dp),
+                )
+                OutlinedButton(
+                    onClick = { openUrl(context, officialWebsite) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(Icons.Rounded.Language, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.about_official_website_button))
+                }
+            }
+
+            // ---------- Seção: YouTube ----------
+            item(key = "youtube_section") {
+                AboutSectionHeader(
+                    title = stringResource(R.string.about_youtube_title),
+                    subtitle = stringResource(R.string.about_youtube_subtitle),
+                    modifier = Modifier.padding(top = 24.dp),
+                )
+                OutlinedButton(
+                    onClick = { openUrl(context, youtubeUrl) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(Icons.Rounded.YouTube, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.about_youtube_button))
+                }
+            }
+
+            // ---------- Seção: Redes Sociais (Instagram e TikTok) ----------
+            item(key = "social_media_section") {
+                AboutSectionHeader(
+                    title = stringResource(R.string.about_social_media_title),
+                    subtitle = "",
+                    modifier = Modifier.padding(top = 24.dp),
+                )
+                
+                // Instagram
+                OutlinedButton(
+                    onClick = { openUrl(context, instagramUrl) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(Icons.Rounded.Instagram, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.about_instagram))
+                }
+                
+                // TikTok
+                OutlinedButton(
+                    onClick = { openUrl(context, tiktokUrl) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(Icons.Rounded.MusicNote, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.about_tiktok))
+                }
             }
 
             // ---------- Seção: Feedback ----------
@@ -526,12 +625,14 @@ private fun AboutSectionHeader(
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
         )
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 2.dp),
-        )
+        if (subtitle.isNotEmpty()) {
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 2.dp),
+            )
+        }
     }
 }
 
