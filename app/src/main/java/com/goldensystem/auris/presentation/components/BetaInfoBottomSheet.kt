@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -41,11 +41,23 @@ import com.goldensystem.auris.R
 @Composable
 fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val feedbackUrl = "https://github.com/pereirasaymonsilva-a11y/Auris/issues/new/choose"
-    val officialWebsite = "https://pereirasaymonsilva-a11y.github.io/Auris-website/data/home.html"
-    val youtubeUrl = "https://www.youtube.com/@AurisMusicPlayer"
-    val instagramUrl = "https://www.instagram.com/aurismp"
-    val tiktokUrl = "https://www.tiktok.com/@auris_music_player"
+    
+    // ✅ URLs lembradas para evitar recriação
+    val feedbackUrl = remember { 
+        "https://github.com/pereirasaymonsilva-a11y/Auris/issues/new/choose" 
+    }
+    val officialWebsite = remember { 
+        "https://pereirasaymonsilva-a11y.github.io/Auris-website/data/home.html" 
+    }
+    val youtubeUrl = remember { 
+        "https://www.youtube.com/@AurisMusicPlayer" 
+    }
+    val instagramUrl = remember { 
+        "https://www.instagram.com/aurismp" 
+    }
+    val tiktokUrl = remember { 
+        "https://www.tiktok.com/@auris_music_player" 
+    }
 
     LazyColumn(
         modifier = modifier
@@ -57,204 +69,197 @@ fun BetaInfoBottomSheet(modifier: Modifier = Modifier) {
     ) {
         // ---------- Changelog ----------
         item(key = "changelog") {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                )
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Rounded.Info,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.about_changelog_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
+            BetaInfoCard(
+                icon = Icons.Rounded.Info,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = stringResource(R.string.about_changelog_title),
+                content = {
                     Text(
                         text = stringResource(R.string.about_changelog_text),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
-            }
+            )
         }
 
         // ---------- Site Oficial ----------
         item(key = "official_website") {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                )
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = stringResource(R.string.about_official_website_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(R.string.about_official_website_subtitle),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedButton(
-                        onClick = { launchUrl(context, officialWebsite) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(Icons.Rounded.Language, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.about_official_website_button))
-                    }
-                }
-            }
+            BetaInfoCard(
+                title = stringResource(R.string.about_official_website_title),
+                subtitle = stringResource(R.string.about_official_website_subtitle),
+                buttonText = stringResource(R.string.about_official_website_button),
+                buttonIcon = Icons.Rounded.Language,
+                onClick = { launchUrl(context, officialWebsite) }
+            )
         }
 
         // ---------- YouTube ----------
         item(key = "youtube") {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                )
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = stringResource(R.string.about_youtube_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(R.string.about_youtube_subtitle),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedButton(
-                        onClick = { launchUrl(context, youtubeUrl) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(painterResource(R.drawable.ic_youtube), contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.about_youtube_button))
-                    }
-                }
-            }
+            BetaInfoCard(
+                title = stringResource(R.string.about_youtube_title),
+                subtitle = stringResource(R.string.about_youtube_subtitle),
+                buttonText = stringResource(R.string.about_youtube_button),
+                buttonIconRes = R.drawable.ic_youtube,
+                onClick = { launchUrl(context, youtubeUrl) }
+            )
         }
 
         // ---------- Redes Sociais (Instagram e TikTok) ----------
         item(key = "social_media") {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                )
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = stringResource(R.string.about_social_media_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    // Instagram
-                    OutlinedButton(
-                        onClick = { launchUrl(context, instagramUrl) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(painterResource(R.drawable.ic_instagram), contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.about_instagram))
-                    }
-                    
-                    // TikTok
-                    OutlinedButton(
-                        onClick = { launchUrl(context, tiktokUrl) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(painterResource(R.drawable.ic_tiktok), contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.about_tiktok))
+            BetaInfoCard(
+                title = stringResource(R.string.about_social_media_title),
+                content = {
+                    Column {
+                        // Instagram
+                        OutlinedButton(
+                            onClick = { launchUrl(context, instagramUrl) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_instagram), 
+                                contentDescription = null, 
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.about_instagram))
+                        }
+                        
+                        // TikTok
+                        OutlinedButton(
+                            onClick = { launchUrl(context, tiktokUrl) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_tiktok), 
+                                contentDescription = null, 
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.about_tiktok))
+                        }
                     }
                 }
-            }
+            )
         }
 
         // ---------- Feedback ----------
         item(key = "feedback") {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                )
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+            BetaInfoCard(
+                icon = Icons.Rounded.BugReport,
+                iconTint = MaterialTheme.colorScheme.error,
+                title = stringResource(R.string.about_feedback_title),
+                subtitle = stringResource(R.string.about_feedback_subtitle),
+                buttonText = stringResource(R.string.about_feedback_button),
+                buttonIcon = Icons.Rounded.BugReport,
+                onClick = { launchUrl(context, feedbackUrl) }
+            )
+        }
+    }
+}
+
+// ✅ Componente reutilizável e otimizado
+@Composable
+private fun BetaInfoCard(
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    iconTint: androidx.compose.ui.graphics.Color? = null,
+    iconRes: Int? = null,
+    title: String,
+    subtitle: String? = null,
+    buttonText: String? = null,
+    buttonIcon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    buttonIconRes: Int? = null,
+    onClick: (() -> Unit)? = null,
+    content: (@Composable () -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        )
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            // Header com ícone opcional
+            if (icon != null || iconRes != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (icon != null) {
                         Icon(
-                            imageVector = Icons.Rounded.BugReport,
+                            imageVector = icon,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error
+                            tint = iconTint ?: MaterialTheme.colorScheme.primary
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.about_feedback_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                    } else if (iconRes != null) {
+                        Icon(
+                            painter = painterResource(iconRes),
+                            contentDescription = null,
+                            tint = iconTint ?: MaterialTheme.colorScheme.primary
                         )
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = stringResource(R.string.about_feedback_subtitle),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 8.dp)
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedButton(
-                        onClick = { launchUrl(context, feedbackUrl) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(Icons.Rounded.BugReport, contentDescription = null, modifier = Modifier.size(18.dp))
+                }
+            } else {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            // Subtítulo
+            subtitle?.let {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Conteúdo customizado
+            content?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                it()
+            }
+
+            // Botão
+            if (buttonText != null && onClick != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedButton(
+                    onClick = onClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    if (buttonIcon != null) {
+                        Icon(buttonIcon, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.about_feedback_button))
+                    } else if (buttonIconRes != null) {
+                        Icon(
+                            painter = painterResource(buttonIconRes), 
+                            contentDescription = null, 
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                     }
+                    Text(buttonText)
                 }
             }
         }
@@ -267,5 +272,7 @@ private fun launchUrl(context: Context, url: String) {
     }
     try {
         context.startActivity(intent)
-    } catch (_: ActivityNotFoundException) { }
+    } catch (_: ActivityNotFoundException) { 
+        // Ignore
+    }
 }
