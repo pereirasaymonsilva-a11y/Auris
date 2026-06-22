@@ -17,8 +17,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,7 +46,11 @@ import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Campaign
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,18 +59,18 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -83,9 +87,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
+import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.goldensystem.auris.R
@@ -95,8 +101,6 @@ import com.goldensystem.auris.presentation.components.SmartImage
 import com.goldensystem.auris.presentation.navigation.Screen
 import com.goldensystem.auris.presentation.navigation.navigateSafely
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import kotlin.math.roundToInt
@@ -192,48 +196,15 @@ fun AboutScreen(
     val minTopBarHeightPx = with(density) { minTopBarHeight.toPx() }
     val maxTopBarHeightPx = with(density) { maxTopBarHeight.toPx() }
 
-    // ✅ STATE-DRIVEN APPROACH - SEM coroutine no scroll!
-    val topBarHeight = remember(maxTopBarHeightPx) {
-        Animatable(maxTopBarHeightPx)
-    }
-    
-    // ✅ State único: targetHeight - atualizado SINCronamente no scroll
-    var targetHeight by remember { mutableFloatStateOf(maxTopBarHeightPx) }
-    
-    // ✅ Altura atual para UI (derivada do Animatable)
-    var currentHeight by remember { mutableFloatStateOf(maxTopBarHeightPx) }
-    
-    // ✅ Sincroniza o Animatable com o targetHeight via LaunchedEffect
-    LaunchedEffect(targetHeight) {
-        // Evita animação se já estiver no valor correto
-        if (topBarHeight.value != targetHeight) {
-            topBarHeight.animateTo(
-                targetHeight,
-                spring(stiffness = Spring.StiffnessMedium)
-            )
-        }
-    }
-    
-    // ✅ Monitora mudanças do Animatable para atualizar currentHeight
-    LaunchedEffect(topBarHeight) {
-        snapshotFlow { topBarHeight.value }
-            .distinctUntilChanged()
-            .collectLatest { height ->
-                currentHeight = height
-            }
+    val topBarHeight = remember { Animatable(maxTopBarHeightPx) }
+    var collapseFraction by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(topBarHeight.value) {
+        collapseFraction = 1f - (
+            (topBarHeight.value - minTopBarHeightPx) / (maxTopBarHeightPx - minTopBarHeightPx)
+            ).coerceIn(0f, 1f)
     }
 
-    // ✅ collapseFraction derivado do currentHeight
-    val collapseFraction by remember {
-        derivedStateOf {
-            val range = maxTopBarHeightPx - minTopBarHeightPx
-            if (range == 0f) 0f else {
-                (1f - ((currentHeight - minTopBarHeightPx) / range)).coerceIn(0f, 1f)
-            }
-        }
-    }
-
-    // ✅ NESTEDSCROLL SEM COROUTINE - só atualiza o state!
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -247,12 +218,14 @@ fun AboutScreen(
                     return Offset.Zero
                 }
 
-                val newHeight = (currentHeight + delta).coerceIn(minTopBarHeightPx, maxTopBarHeightPx)
-                val consumed = newHeight - currentHeight
+                val previousHeight = topBarHeight.value
+                val newHeight = (previousHeight + delta).coerceIn(minTopBarHeightPx, maxTopBarHeightPx)
+                val consumed = newHeight - previousHeight
 
                 if (consumed.roundToInt() != 0) {
-                    // ✅ SEM coroutine! Só atualiza o state
-                    targetHeight = newHeight
+                    coroutineScope.launch {
+                        topBarHeight.snapTo(newHeight)
+                    }
                 }
 
                 val canConsumeScroll = !(isScrollingDown && newHeight == minTopBarHeightPx)
@@ -261,29 +234,17 @@ fun AboutScreen(
         }
     }
 
-    // ✅ Hysteresis para expand/collapse com thresholds
-    val expandThreshold = 0.7f
-    val collapseThreshold = 0.3f
-    
     LaunchedEffect(lazyListState.isScrollInProgress) {
         if (!lazyListState.isScrollInProgress) {
-            val currentFraction = collapseFraction
-            val shouldExpand = when {
-                currentFraction < collapseThreshold -> true
-                currentFraction > expandThreshold -> false
-                else -> {
-                    // Zona morta - manter estado atual
-                    val middlePoint = (minTopBarHeightPx + maxTopBarHeightPx) / 2
-                    currentHeight > middlePoint
-                }
-            }
-            
-            val canExpand = lazyListState.firstVisibleItemIndex == 0 && 
-                           lazyListState.firstVisibleItemScrollOffset == 0
+            val shouldExpand = topBarHeight.value > (minTopBarHeightPx + maxTopBarHeightPx) / 2
+            val canExpand =
+                lazyListState.firstVisibleItemIndex == 0 && lazyListState.firstVisibleItemScrollOffset == 0
             val targetValue = if (shouldExpand && canExpand) maxTopBarHeightPx else minTopBarHeightPx
 
-            if (targetHeight != targetValue) {
-                targetHeight = targetValue
+            if (topBarHeight.value != targetValue) {
+                coroutineScope.launch {
+                    topBarHeight.animateTo(targetValue, spring(stiffness = Spring.StiffnessMedium))
+                }
             }
         }
     }
@@ -297,7 +258,7 @@ fun AboutScreen(
                 translationY = contentOffset.toPx()
             },
     ) {
-        val currentTopBarHeightDp = with(density) { currentHeight.toDp() }
+        val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }
         LazyColumn(
             state = lazyListState,
             contentPadding = PaddingValues(
@@ -499,7 +460,7 @@ fun AboutScreen(
     }
 }
 
-// ---------- Componentes Auxiliares (mantidos iguais) ----------
+// ---------- Componentes Auxiliares ----------
 
 @Composable
 private fun AboutHeroCard(
@@ -822,6 +783,7 @@ private fun ContributorAvatar(
     val letterBackground = MaterialTheme.colorScheme.surfaceContainerHighest
     val letterTint = MaterialTheme.colorScheme.onSurfaceVariant
     val initial = name.removePrefix("@").firstOrNull()?.uppercase() ?: "?"
+    var cachedBitmap by remember(avatarUrl) { mutableStateOf<ImageBitmap?>(null) }
 
     Surface(
         modifier = modifier.size(48.dp),
@@ -830,12 +792,19 @@ private fun ContributorAvatar(
         tonalElevation = 2.dp,
     ) {
         when {
+            cachedBitmap != null -> {
+                Image(
+                    bitmap = cachedBitmap!!,
+                    contentDescription = stringResource(R.string.cd_contributor_avatar, name),
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+            }
             !avatarUrl.isNullOrBlank() -> {
                 SmartImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(avatarUrl)
                         .crossfade(true)
-                        .size(Size(96, 96))
                         .build(),
                     contentDescription = stringResource(R.string.cd_contributor_avatar, name),
                     modifier = Modifier.fillMaxSize(),
@@ -843,6 +812,16 @@ private fun ContributorAvatar(
                     contentScale = ContentScale.Crop,
                     placeholderResId = iconRes ?: R.drawable.ic_music_placeholder,
                     errorResId = R.drawable.rounded_broken_image_24,
+                    targetSize = Size(96, 96),
+                    onState = { state ->
+                        if (state is AsyncImagePainter.State.Success) {
+                            val drawable = state.result.drawable
+                            val bitmap = drawable?.toBitmap()?.asImageBitmap()
+                            if (bitmap != null) {
+                                cachedBitmap = bitmap
+                            }
+                        }
+                    },
                 )
             }
             iconRes != null -> {
@@ -887,7 +866,6 @@ private fun SocialIconButton(
 ) {
     if (url.isNullOrBlank()) return
     val context = LocalContext.current
-    
     IconButton(
         onClick = { openUrl(context, url) },
         modifier = modifier.size(40.dp),
