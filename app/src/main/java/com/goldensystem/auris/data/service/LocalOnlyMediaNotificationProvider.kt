@@ -19,7 +19,7 @@ import androidx.media3.session.MediaNotification.Provider.Callback
 @UnstableApi
 class LocalOnlyMediaNotificationProvider(
     private val context: Context,
-    private val delegate =
+    private val delegate: DefaultMediaNotificationProvider =
         DefaultMediaNotificationProvider.Builder(context)
             .setSmallIconResourceId(R.drawable.ic_stat_music)
             .build(),
