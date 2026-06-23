@@ -169,7 +169,8 @@
     <string name="dialog_delete_song_message">\"%1$s\" de %2$s\n\nEsta música será permanentemente excluída do seu dispositivo e não poderá ser recuperada.</string>
 
     <!-- Home / detail shared -->
-    <string name="home_your_mix_title">Mix\nDiaria</string>
+    <string name="home_your_mix_title">Seu\nMix</string>
+    <string name="your_mix_song">Sua lista de musica diaria</string>
     <string name="cd_shuffle_play">Reprodução Aleatória</string>
     <string name="cd_album_art_for_title">Capa do álbum para %1$s</string>
     <string name="cd_options">Opções</string>

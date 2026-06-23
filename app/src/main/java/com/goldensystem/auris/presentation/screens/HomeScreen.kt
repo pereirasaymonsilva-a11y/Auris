@@ -176,7 +176,7 @@ fun HomeScreen(
 
     ReportDrawnWhen { yourMixSongs.isNotEmpty() || isBenchmarkMode }
 
-    val yourMixSong: String = "Seu mix de cada dia"
+    val yourMixSong = context.getString(R.string.your_mix_song)
 
     val currentSong by remember(playerViewModel.stablePlayerState) {
         playerViewModel.stablePlayerState.map { it.currentSong }

@@ -160,6 +160,7 @@
 
     <!-- Home / detail shared -->
     <string name="home_your_mix_title">Your\nMix</string>
+    <string name="your_mix_song">Your daily music mix</string>
     <string name="cd_shuffle_play">Shuffle Play</string>
     <string name="cd_album_art_for_title">Album art for %1$s</string>
     <string name="cd_options">Options</string>
