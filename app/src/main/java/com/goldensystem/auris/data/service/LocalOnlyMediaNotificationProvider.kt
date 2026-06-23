@@ -10,31 +10,33 @@ import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaNotification
 import androidx.media3.session.MediaSession
 import com.google.common.collect.ImmutableList
-import androidx.media3.session.MediaNotification.Provider.Callback
 
-/**
- * Wraps Media3's default provider and marks playback notifications as local-only
- * so they don't get bridged to Wear OS as generic remote media controls.
- */
 @UnstableApi
 class LocalOnlyMediaNotificationProvider(
     private val context: Context,
     private val delegate: DefaultMediaNotificationProvider =
         DefaultMediaNotificationProvider.Builder(context)
-            .setSmallIcon(R.drawable.ic_stat_music)
             .build(),
 ) : MediaNotification.Provider {
 
+    private var smallIconResId: Int = R.drawable.ic_stat_music
+
     fun setSmallIcon(iconResId: Int) {
-        // O delegate já tem o ícone definido no construtor, então ignoramos
-        // Mas mantemos o método pra não quebrar o MusicService
+        smallIconResId = iconResId
+        // Tenta definir no delegate se possível
+        try {
+            delegate::class.java.getMethod("setSmallIcon", Int::class.java)
+                ?.invoke(delegate, iconResId)
+        } catch (_: Exception) {
+            // Ignora se não existir
+        }
     }
 
     override fun createNotification(
         mediaSession: MediaSession,
         customLayout: ImmutableList<CommandButton>,
         actionFactory: MediaNotification.ActionFactory,
-        callback: Callback,
+        callback: MediaNotification.Provider.Callback,
     ): MediaNotification {
 
         val notification = delegate.createNotification(
@@ -46,6 +48,7 @@ class LocalOnlyMediaNotificationProvider(
 
         val localOnlyNotification = runCatching {
             Notification.Builder.recoverBuilder(context, notification.notification)
+                .setSmallIcon(smallIconResId)  // <-- DEFINE O ÍCONE AQUI
                 .setLocalOnly(true)
                 .build()
         }.getOrElse {
