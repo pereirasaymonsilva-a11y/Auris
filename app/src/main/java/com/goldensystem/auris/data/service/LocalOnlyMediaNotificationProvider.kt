@@ -21,7 +21,7 @@ class LocalOnlyMediaNotificationProvider(
     private val context: Context,
     private val delegate: DefaultMediaNotificationProvider =
         DefaultMediaNotificationProvider.Builder(context)
-            .setSmallIconResourceId(R.drawable.ic_stat_music)
+            .setSmallIcon(R.drawable.ic_stat_music)
             .build(),
 ) : MediaNotification.Provider {
 
