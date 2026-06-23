@@ -10,6 +10,7 @@ import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaNotification
 import androidx.media3.session.MediaSession
 import com.google.common.collect.ImmutableList
+import androidx.media3.session.MediaNotification.Provider.Callback
 
 /**
  * Wraps Media3's default provider and marks playback notifications as local-only
@@ -33,7 +34,7 @@ class LocalOnlyMediaNotificationProvider(
         mediaSession: MediaSession,
         customLayout: ImmutableList<CommandButton>,
         actionFactory: MediaNotification.ActionFactory,
-        callback: MediaNotification.Provider.Callback,
+        callback: Callback,
     ): MediaNotification {
 
         val notification = delegate.createNotification(
