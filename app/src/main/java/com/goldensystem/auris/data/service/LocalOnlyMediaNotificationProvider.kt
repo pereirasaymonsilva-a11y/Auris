@@ -1,6 +1,7 @@
 package com.goldensystem.auris.data.service
 
 import android.app.Notification
+import com.goldensystem.auris.R
 import android.content.Context
 import android.os.Bundle
 import androidx.media3.common.util.UnstableApi
@@ -21,7 +22,7 @@ class LocalOnlyMediaNotificationProvider(
 
     private val delegate =
         DefaultMediaNotificationProvider.Builder(context)
-            .setSmallIconResourceId(R.drawable.ic_stat_music)
+            .setSmallIcon(R.drawable.ic_stat_music)
             .build()
 
     fun setSmallIcon(iconResId: Int) {
