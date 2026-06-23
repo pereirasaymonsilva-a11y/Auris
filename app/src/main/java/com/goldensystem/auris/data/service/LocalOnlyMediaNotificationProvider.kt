@@ -17,8 +17,10 @@ import com.google.common.collect.ImmutableList
 @UnstableApi
 class LocalOnlyMediaNotificationProvider(
     private val context: Context,
-    private val delegate: DefaultMediaNotificationProvider =
-        DefaultMediaNotificationProvider.Builder(context).build(),
+    private val delegate =
+    DefaultMediaNotificationProvider.Builder(context)
+        .setSmallIconResourceId(R.drawable.ic_stat_music)
+        .build(),
 ) : MediaNotification.Provider {
 
     fun setSmallIcon(iconResId: Int) {
