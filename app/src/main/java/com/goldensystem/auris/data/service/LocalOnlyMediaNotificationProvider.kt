@@ -17,11 +17,12 @@ import com.google.common.collect.ImmutableList
 @UnstableApi
 class LocalOnlyMediaNotificationProvider(
     private val context: Context,
-    private val delegate =
-    DefaultMediaNotificationProvider.Builder(context)
-        .setSmallIconResourceId(R.drawable.ic_stat_music)
-        .build(),
 ) : MediaNotification.Provider {
+
+    private val delegate =
+        DefaultMediaNotificationProvider.Builder(context)
+            .setSmallIconResourceId(R.drawable.ic_stat_music)
+            .build()
 
     fun setSmallIcon(iconResId: Int) {
         delegate.setSmallIcon(iconResId)
@@ -39,6 +40,7 @@ class LocalOnlyMediaNotificationProvider(
             actionFactory,
             callback
         )
+
         val localOnlyNotification = runCatching {
             Notification.Builder.recoverBuilder(context, notification.notification)
                 .setLocalOnly(true)
@@ -46,6 +48,7 @@ class LocalOnlyMediaNotificationProvider(
         }.getOrElse {
             notification.notification
         }
+
         return MediaNotification(notification.notificationId, localOnlyNotification)
     }
 
