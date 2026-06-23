@@ -1,6 +1,7 @@
 package com.goldensystem.auris.presentation.navigation
 
 import com.goldensystem.auris.presentation.screens.WordDelimiterConfigScreen
+import com.goldensystem.auris.presentation.screens.CustomThemeScreen
 import com.goldensystem.auris.presentation.screens.DelimiterConfigScreen
 import android.annotation.SuppressLint
 import androidx.annotation.OptIn
