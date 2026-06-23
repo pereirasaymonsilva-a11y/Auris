@@ -405,6 +405,9 @@ fun AppNavigation(
                     }
                 }
             }
+            composable(Screen.CustomTheme.route) {
+                  CustomThemeScreen(navController = navController)
+                        }
             composable(
                 route = Screen.ArtistDetail.route,
                 arguments = listOf(navArgument("artistId") { type = NavType.StringType }),

@@ -535,18 +535,25 @@ fun SettingsCategoryScreen(
                                     },
                                     leadingIcon = { Icon(Icons.Outlined.Language, null, tint = MaterialTheme.colorScheme.secondary) }
                                 )
-                                ThemeSelectorItem(
-                                    label = stringResource(R.string.setcat_app_theme_label),
-                                    description = stringResource(R.string.setcat_app_theme_desc),
-                                    options = mapOf(
-                                        AppThemeMode.LIGHT to stringResource(R.string.setcat_theme_light),
-                                        AppThemeMode.DARK to stringResource(R.string.setcat_theme_dark),
-                                        AppThemeMode.FOLLOW_SYSTEM to stringResource(R.string.setcat_theme_follow_system)
-                                    ),
-                                    selectedKey = uiState.appThemeMode,
-                                    onSelectionChanged = { settingsViewModel.setAppThemeMode(it) },
-                                    leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) }
-                                )
+// (adicionando a opção PERSONALIZADO):(SAYMON SILVA PEREIRA)
+    ThemeSelectorItem(
+        label = stringResource(R.string.setcat_app_theme_label),
+        description = stringResource(R.string.setcat_app_theme_desc),
+        options = mapOf(
+            AppThemeMode.LIGHT to stringResource(R.string.setcat_theme_light),
+            AppThemeMode.DARK to stringResource(R.string.setcat_theme_dark),
+            AppThemeMode.FOLLOW_SYSTEM to stringResource(R.string.setcat_theme_follow_system),
+            AppThemeMode.CUSTOM to stringResource(R.string.setcat_theme_custom)  // <-- NOVO(tema personalizado)
+        ),
+        selectedKey = uiState.appThemeMode,
+        onSelectionChanged = { 
+            settingsViewModel.setAppThemeMode(it)
+            if (it == AppThemeMode.CUSTOM) {
+                navController.navigateSafely(Screen.CustomTheme.route)
+            }
+        },
+        leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) }
+    )
                                 SwitchSettingItem(
                                     title = stringResource(R.string.setcat_smooth_corners_title),
                                     subtitle = stringResource(R.string.setcat_smooth_corners_subtitle),

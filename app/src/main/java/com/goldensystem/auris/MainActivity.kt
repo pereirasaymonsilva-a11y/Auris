@@ -1,9 +1,6 @@
 package com.goldensystem.auris
 
 import com.goldensystem.auris.presentation.navigation.navigateSafely
-
-// import androidx.compose.ui.platform.LocalView // No longer needed for this
-// import androidx.core.view.WindowInsetsCompat // No longer needed for this
 import com.goldensystem.auris.presentation.screens.PiracyDialog
 import androidx.compose.runtime.collectAsState
 import com.goldensystem.auris.data.gdrive.GDriveRepository
