@@ -3,6 +3,7 @@ package com.goldensystem.auris.ui.theme
 
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

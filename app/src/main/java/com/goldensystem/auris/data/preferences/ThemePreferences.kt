@@ -3,6 +3,7 @@ package com.goldensystem.auris.data.preferences
 
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.datastore.preferences.core.edit
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.core.DataStore
