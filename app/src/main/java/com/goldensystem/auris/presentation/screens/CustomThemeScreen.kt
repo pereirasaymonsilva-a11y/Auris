@@ -72,6 +72,13 @@ fun CustomThemeScreen(
     val previewColorScheme = remember(config) {
         customColorScheme(config, true)
     }
+    var resetTrigger by remember { mutableStateOf(false) }
+        LaunchedEffect(resetTrigger) {
+        if (resetTrigger) {
+        viewModel.resetToDefault()
+        resetTrigger = false
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -89,9 +96,8 @@ fun CustomThemeScreen(
                     }
                 },
                 actions = {
-                    // Reset
-                    IconButton(onClick = { viewModel.resetToDefault() }) {
-                        Icon(Icons.Rounded.RestartAlt, contentDescription = stringResource(R.string.cd_reset))
+                 IconButton(onClick = { resetTrigger = true }) {
+                 Icon(Icons.Rounded.RestartAlt, contentDescription = stringResource(R.string.cd_reset))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -284,7 +290,7 @@ private fun ColorPickerSection(
 
         // Cores pré-definidas
         val presetColors = listOf(
-            0xFF6750A4.toInt(), 0xFFF06292, 0xFFFF8A65, 0xFF4CAF50,
+            0xFF6750A4, 0xFFF06292, 0xFFFF8A65, 0xFF4CAF50,
             0xFF2196F3, 0xFFFFC107, 0xFF9C27B0, 0xFF3F51B5,
             0xFFE91E63, 0xFF00BCD4, 0xFFFF5722, 0xFF8BC34A
         )

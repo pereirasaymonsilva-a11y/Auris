@@ -64,10 +64,11 @@ class ThemePreferences @Inject constructor(
             backgroundColor = prefs[BACKGROUND_COLOR] ?: 0xFF1E1234.toInt(),
             surfaceColor = prefs[SURFACE_COLOR] ?: 0xFF2A1F40.toInt(),
             wallpaperType = try {
-                WallpaperType.valueOf(prefs[WALLPAPER_TYPE] ?: WallpaperType.SOLID.name)
-            } catch (_: Exception) {
-                WallpaperType.SOLID
-            },
+            val typeName = prefs[WALLPAPER_TYPE] ?: WallpaperType.SOLID.name
+            WallpaperType.valueOf(typeName)
+                } catch (_: Exception) {
+            WallpaperType.SOLID
+                },
             wallpaperColor = prefs[WALLPAPER_COLOR] ?: 0xFF1E1234.toInt(),
             wallpaperUri = prefs[WALLPAPER_URI],
             wallpaperUrl = prefs[WALLPAPER_URL],
