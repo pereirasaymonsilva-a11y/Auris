@@ -1,6 +1,7 @@
 package com.goldensystem.auris
 
 import com.goldensystem.auris.presentation.navigation.navigateSafely
+import com.goldensystem.auris.ui.theme.CustomThemeWrapper
 import com.goldensystem.auris.presentation.screens.PiracyDialog
 import androidx.compose.runtime.collectAsState
 import com.goldensystem.auris.data.gdrive.GDriveRepository

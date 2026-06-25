@@ -1,28 +1,25 @@
 // ui/theme/CustomThemeWrapper.kt
 package com.goldensystem.auris.ui.theme
 
-import android.graphics.BitmapFactory
 import android.net.Uri
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.foundation.Image
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.goldensystem.auris.data.preferences.CustomThemeConfig
 import com.goldensystem.auris.data.preferences.WallpaperType
 import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun CustomThemeWrapper(
@@ -31,7 +28,6 @@ fun CustomThemeWrapper(
 ) {
     val viewModel: CustomThemeViewModel = hiltViewModel()
     val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
-    val context = LocalContext.current
 
     if (config.isEnabled) {
         val colorScheme = customColorScheme(config, isDark)
@@ -42,7 +38,7 @@ fun CustomThemeWrapper(
             shapes = Shapes
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                // Wallpaper Background
+                // ===== WALLPAPER =====
                 when (config.wallpaperType) {
                     WallpaperType.SOLID -> {
                         Box(
@@ -60,8 +56,18 @@ fun CustomThemeWrapper(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .graphicsLayer {
-                                        // Aplicar blur e dim
-                                        // (implementar com RenderEffect se disponível)
+                                        // BLUR (Android 12+)
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                            val blurRadius = (config.wallpaperBlur * 25f).toInt()
+                                            if (blurRadius > 0) {
+                                                renderEffect = android.graphics.RenderEffect
+                                                    .createBlurEffect(
+                                                        blurRadius.toFloat(),
+                                                        blurRadius.toFloat(),
+                                                        android.graphics.Shader.TileMode.CLAMP
+                                                    )
+                                            }
+                                        }
                                     },
                                 contentScale = ContentScale.Crop
                             )
@@ -76,7 +82,18 @@ fun CustomThemeWrapper(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .graphicsLayer {
-                                        // Aplicar blur e dim
+                                        // BLUR (Android 12+)
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                            val blurRadius = (config.wallpaperBlur * 25f).toInt()
+                                            if (blurRadius > 0) {
+                                                renderEffect = android.graphics.RenderEffect
+                                                    .createBlurEffect(
+                                                        blurRadius.toFloat(),
+                                                        blurRadius.toFloat(),
+                                                        android.graphics.Shader.TileMode.CLAMP
+                                                    )
+                                            }
+                                        }
                                     },
                                 contentScale = ContentScale.Crop
                             )
@@ -84,7 +101,7 @@ fun CustomThemeWrapper(
                     }
                 }
 
-                // Dim overlay
+                // ===== DIM OVERLAY (escurecimento) =====
                 if (config.wallpaperType != WallpaperType.SOLID) {
                     Box(
                         modifier = Modifier
@@ -93,12 +110,18 @@ fun CustomThemeWrapper(
                     )
                 }
 
-                // Conteúdo
+                // ===== CONTEÚDO =====
                 content()
             }
         }
     } else {
-        // Tema padrão
-        content()
+        // ===== TEMA PADRÃO (SEM WALLPAPER) =====
+        MaterialTheme(
+            colorScheme = if (isDark) darkColorScheme() else lightColorScheme(),
+            typography = Typography,
+            shapes = Shapes
+        ) {
+            content()
+        }
     }
 }
