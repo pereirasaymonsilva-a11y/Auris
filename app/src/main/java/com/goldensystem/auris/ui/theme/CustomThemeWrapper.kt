@@ -53,24 +53,7 @@ fun CustomThemeWrapper(
                             AsyncImage(
                                 model = Uri.parse(uri),
                                 contentDescription = null,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .graphicsLayer {
-                                        // BLUR (Android 12+)
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                            val blurRadius = (config.wallpaperBlur * 25f).toInt()
-                                            if (blurRadius > 0) {
-                                                // Converte android.graphics.RenderEffect para androidx.compose.ui.graphics.RenderEffect
-                                                val effect = android.graphics.RenderEffect.createBlurEffect(
-                                                    blurRadius.toFloat(),
-                                                    blurRadius.toFloat(),
-                                                    android.graphics.Shader.TileMode.CLAMP
-                                                )
-                                                // Usa a extensão para converter
-                                                renderEffect = effect.toComposeRenderEffect()
-                                            }
-                                        }
-                                    },
+                                modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
                         } ?: Box(modifier = Modifier.fillMaxSize().background(Color(config.backgroundColor)))
@@ -81,22 +64,7 @@ fun CustomThemeWrapper(
                             AsyncImage(
                                 model = url,
                                 contentDescription = null,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .graphicsLayer {
-                                        // BLUR (Android 12+)
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                            val blurRadius = (config.wallpaperBlur * 25f).toInt()
-                                            if (blurRadius > 0) {
-                                                val effect = android.graphics.RenderEffect.createBlurEffect(
-                                                    blurRadius.toFloat(),
-                                                    blurRadius.toFloat(),
-                                                    android.graphics.Shader.TileMode.CLAMP
-                                                )
-                                                renderEffect = effect.toComposeRenderEffect()
-                                            }
-                                        }
-                                    },
+                                modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
                         } ?: Box(modifier = Modifier.fillMaxSize().background(Color(config.backgroundColor)))
@@ -125,15 +93,5 @@ fun CustomThemeWrapper(
         ) {
             content()
         }
-    }
-}
-
-// ===== FUNÇÃO DE CONVERSÃO =====
-@Suppress("DEPRECATION")
-private fun android.graphics.RenderEffect.toComposeRenderEffect(): androidx.compose.ui.graphics.RenderEffect? {
-    return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-        androidx.compose.ui.graphics.RenderEffect.createRenderEffect(this)
-    } else {
-        null
     }
 }
