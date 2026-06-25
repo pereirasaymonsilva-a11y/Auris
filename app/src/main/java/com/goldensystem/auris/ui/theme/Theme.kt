@@ -24,6 +24,17 @@ import androidx.core.view.WindowCompat
 import com.goldensystem.auris.presentation.viewmodel.ColorSchemePair
 import androidx.core.graphics.ColorUtils
 import androidx.compose.ui.unit.dp
+import android.net.Uri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import com.goldensystem.auris.data.preferences.WallpaperType
+import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
 
 val LocalAurisDarkTheme = staticCompositionLocalOf { false }
 
@@ -120,8 +131,56 @@ fun AurisTheme(
         MaterialTheme(
             colorScheme = finalColorScheme,
             typography = Typography,
-            shapes = Shapes,
-            content = content
-        )
+            shapes = Shapes
+        ) {
+            // ===== SÓ ISSO QUE MUDA =====
+            // Pega a config do tema personalizado
+            val viewModel: CustomThemeViewModel = hiltViewModel()
+            val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
+
+            if (config.isEnabled) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // Wallpaper
+                    when (config.wallpaperType) {
+                        WallpaperType.SOLID -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize().background(Color(config.wallpaperColor))
+                            )
+                        }
+                        WallpaperType.GALLERY -> {
+                            config.wallpaperUri?.let {
+                                AsyncImage(
+                                    model = Uri.parse(it),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                        }
+                        WallpaperType.SERVER -> {
+                            config.wallpaperUrl?.let {
+                                AsyncImage(
+                                    model = it,
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                        }
+                    }
+
+                    // Dim
+                    if (config.wallpaperType != WallpaperType.SOLID) {
+                        Box(
+                            modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = config.wallpaperDim))
+                        )
+                    }
+
+                    content()
+                }
+            } else {
+                content()
+            }
+        }
     }
 }
