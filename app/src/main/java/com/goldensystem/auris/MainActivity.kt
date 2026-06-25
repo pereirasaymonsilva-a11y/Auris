@@ -269,79 +269,81 @@ class MainActivity : ComponentActivity() {
             }
 
             AurisTheme(darkTheme = useDarkTheme) {
-    // --- Verificação de integridade (anti-pirataria) ---
-    val piracyViewModel: PiracyViewModel = hiltViewModel()
-    val piracyUiState by piracyViewModel.uiState.collectAsState()
+    CustomThemeWrapper(isDark = useDarkTheme) {  // <-- ABRE AQUI
+        // --- Verificação de integridade (anti-pirataria) ---
+        val piracyViewModel: PiracyViewModel = hiltViewModel()
+        val piracyUiState by piracyViewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        piracyViewModel.checkPackageIntegrity("https://script.google.com/macros/s/AKfycbzTsGXzvoq0vM8jVwJYsQxScgyuB0gKhaCzaXipNvI1W8G9hva8jmFixivYuky71flZ/exec")
-    }
-
-    when (piracyUiState) {
-        is PiracyUiState.Mismatch -> {
-            val mismatch = piracyUiState as PiracyUiState.Mismatch
-            PiracyDialog(
-                downloadUrl = mismatch.downloadUrl,
-                officialPackage = mismatch.officialPackage,
-                onExit = {
-                    finishAffinity()
-                    android.os.Process.killProcess(android.os.Process.myPid())
-                }
-            )
+        LaunchedEffect(Unit) {
+            piracyViewModel.checkPackageIntegrity("https://script.google.com/macros/s/AKfycbzTsGXzvoq0vM8jVwJYsQxScgyuB0gKhaCzaXipNvI1W8G9hva8jmFixivYuky71flZ/exec")
         }
-        is PiracyUiState.Valid -> {
-            var contentVisible by remember { mutableStateOf(false) }
-            val contentAlpha by animateFloatAsState(
-                targetValue = if (contentVisible) 1f else 0f,
-                animationSpec = tween(600, easing = LinearOutSlowInEasing),
-                label = "AppContentAlpha"
-            )
-            LaunchedEffect(Unit) {
-                delay(100)
-                contentVisible = true
+
+        when (piracyUiState) {
+            is PiracyUiState.Mismatch -> {
+                val mismatch = piracyUiState as PiracyUiState.Mismatch
+                PiracyDialog(
+                    downloadUrl = mismatch.downloadUrl,
+                    officialPackage = mismatch.officialPackage,
+                    onExit = {
+                        finishAffinity()
+                        android.os.Process.killProcess(android.os.Process.myPid())
+                    }
+                )
             }
-            Surface(
-                modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha },
-                color = MaterialTheme.colorScheme.background
-            ) {
-                if (showSetupScreen == null) {
-                    SetupGateLoadingScreen()
-                } else {
-                    AnimatedContent(
-                        targetState = showSetupScreen,
-                        transitionSpec = {
-                            if (targetState) {
-                                fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
+            is PiracyUiState.Valid -> {
+                var contentVisible by remember { mutableStateOf(false) }
+                val contentAlpha by animateFloatAsState(
+                    targetValue = if (contentVisible) 1f else 0f,
+                    animationSpec = tween(600, easing = LinearOutSlowInEasing),
+                    label = "AppContentAlpha"
+                )
+                LaunchedEffect(Unit) {
+                    delay(100)
+                    contentVisible = true
+                }
+                Surface(
+                    modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha },
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    if (showSetupScreen == null) {
+                        SetupGateLoadingScreen()
+                    } else {
+                        AnimatedContent(
+                            targetState = showSetupScreen,
+                            transitionSpec = {
+                                if (targetState) {
+                                    fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
+                                } else {
+                                    scaleIn(initialScale = 0.95f, animationSpec = tween(450)) + fadeIn(animationSpec = tween(450)) togetherWith
+                                            slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(450)) + fadeOut(animationSpec = tween(450))
+                                }
+                            },
+                            label = "SetupTransition"
+                        ) { shouldShowSetup ->
+                            if (shouldShowSetup) {
+                                SetupScreen(onSetupComplete = {})
                             } else {
-                                scaleIn(initialScale = 0.95f, animationSpec = tween(450)) + fadeIn(animationSpec = tween(450)) togetherWith
-                                        slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(450)) + fadeOut(animationSpec = tween(450))
+                                MainAppContent(playerViewModel, mainViewModel)
                             }
-                        },
-                        label = "SetupTransition"
-                    ) { shouldShowSetup ->
-                        if (shouldShowSetup) {
-                            SetupScreen(onSetupComplete = {})
-                        } else {
-                            MainAppContent(playerViewModel, mainViewModel)
                         }
                     }
                 }
             }
         }
-      }
 
-                    // Show crash report dialog if needed
-                    if (showCrashReportDialog && crashLogData != null) {
-                        CrashReportDialog(
-                            crashLog = crashLogData!!,
-                            onDismiss = {
-                                CrashHandler.clearCrashLog()
-                                crashLogData = null
-                                showCrashReportDialog = false
-                            }
-                        )
-                    }
+        // Show crash report dialog if needed
+        if (showCrashReportDialog && crashLogData != null) {
+            CrashReportDialog(
+                crashLog = crashLogData!!,
+                onDismiss = {
+                    CrashHandler.clearCrashLog()
+                    crashLogData = null
+                    showCrashReportDialog = false
                 }
+            )
+        }
+    }  // <-- FECHA AQUI
+}
             }
         handleIntent(intent)
     }
@@ -665,8 +667,9 @@ Trace.endSection()
                 Screen.DeviceCapabilities.route,
                 Screen.EasterEgg.route,
                 Screen.WordDelimiterConfig.route,
-                "video_gallery",            // <-- ADICIONADO
-                "video_player"              // <-- ADICIONADO
+                "video_gallery",
+                "video_player",
+                Screen.CustomTheme.route
             )
         }
         val shouldHideNavigationBar by remember(currentRoute, isSearchBarActive) {
@@ -1129,4 +1132,12 @@ Trace.endSection()
     override fun onResume() {
         super.onResume()
       }
+  }
+  
+    @Composable
+  fun CustomThemeWrapper(
+      isDark: Boolean,
+      content: @Composable () -> Unit
+  ) {
+      content()
   }
