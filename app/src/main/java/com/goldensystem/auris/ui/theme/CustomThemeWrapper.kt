@@ -2,18 +2,14 @@
 package com.goldensystem.auris.ui.theme
 
 import android.net.Uri
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,16 +28,23 @@ fun CustomThemeWrapper(
     if (config.isEnabled) {
         val colorScheme = customColorScheme(config, isDark)
         
-        // Substitui as cores do MaterialTheme
-        CompositionLocalProvider(
-            LocalColorScheme provides colorScheme
+        // Aplica o MaterialTheme com as cores personalizadas
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            shapes = Shapes
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                // Wallpaper
+                // ===== WALLPAPER =====
                 when (config.wallpaperType) {
                     WallpaperType.SOLID -> {
-                        Box(modifier = Modifier.fillMaxSize().background(Color(config.wallpaperColor)))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(config.wallpaperColor))
+                        )
                     }
+                    
                     WallpaperType.GALLERY -> {
                         config.wallpaperUri?.let { uri ->
                             AsyncImage(
@@ -52,6 +55,7 @@ fun CustomThemeWrapper(
                             )
                         }
                     }
+                    
                     WallpaperType.SERVER -> {
                         config.wallpaperUrl?.let { url ->
                             AsyncImage(
@@ -64,7 +68,7 @@ fun CustomThemeWrapper(
                     }
                 }
 
-                // Dim
+                // ===== DIM OVERLAY (escurecimento) =====
                 if (config.wallpaperType != WallpaperType.SOLID) {
                     Box(
                         modifier = Modifier
@@ -73,10 +77,12 @@ fun CustomThemeWrapper(
                     )
                 }
 
+                // ===== CONTEÚDO =====
                 content()
             }
         }
     } else {
+        // ===== TEMA PADRÃO (usa o que veio do AurisTheme) =====
         content()
     }
 }
