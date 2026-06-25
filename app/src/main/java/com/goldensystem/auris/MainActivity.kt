@@ -1131,36 +1131,3 @@ Trace.endSection()
         super.onResume()
       }
   }
-
-//Cuida de todo o tema do app(escuro, claro e personalizado)
-    @Composable
-fun CustomThemeWrapper(
-    isDark: Boolean,
-    content: @Composable () -> Unit
-) {
-    val viewModel: CustomThemeViewModel = hiltViewModel()
-    val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
-
-    if (config.isEnabled) {
-        val colorScheme = customColorScheme(config, isDark)
-        MaterialTheme(
-            colorScheme = colorScheme,
-            typography = Typography,
-            shapes = Shapes
-        ) {
-            // Wallpaper + conteúdo
-            Box(modifier = Modifier.fillMaxSize()) {
-                // wallpaper aqui
-                content()
-            }
-        }
-    } else {
-        MaterialTheme(
-            colorScheme = if (isDark) darkColorScheme() else lightColorScheme(),
-            typography = Typography,
-            shapes = Shapes
-        ) {
-            content()
-        }
-    }
-}
