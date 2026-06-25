@@ -86,8 +86,8 @@ class ThemePreferences @Inject constructor(
             prefs[SURFACE_COLOR] = config.surfaceColor
             prefs[WALLPAPER_TYPE] = config.wallpaperType.name
             prefs[WALLPAPER_COLOR] = config.wallpaperColor
-            prefs[WALLPAPER_URI] = config.wallpaperUri
-            prefs[WALLPAPER_URL] = config.wallpaperUrl
+            prefs[WALLPAPER_URI] = config.wallpaperUri ?: ""
+            prefs[WALLPAPER_URL] = config.wallpaperUrl ?: ""
             prefs[WALLPAPER_BLUR] = config.wallpaperBlur
             prefs[WALLPAPER_DIM] = config.wallpaperDim
         }

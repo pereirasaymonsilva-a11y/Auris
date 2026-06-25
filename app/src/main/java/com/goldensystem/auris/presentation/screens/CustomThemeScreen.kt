@@ -290,10 +290,10 @@ private fun ColorPickerSection(
 
         // Cores pré-definidas
         val presetColors = listOf(
-            0xFF6750A4, 0xFFF06292, 0xFFFF8A65, 0xFF4CAF50,
-            0xFF2196F3, 0xFFFFC107, 0xFF9C27B0, 0xFF3F51B5,
-            0xFFE91E63, 0xFF00BCD4, 0xFFFF5722, 0xFF8BC34A
-        )
+    0xFF6750A4.toInt(), 0xFFF06292.toInt(), 0xFFFF8A65.toInt(), 0xFF4CAF50.toInt(),
+    0xFF2196F3.toInt(), 0xFFFFC107.toInt(), 0xFF9C27B0.toInt(), 0xFF3F51B5.toInt(),
+    0xFFE91E63.toInt(), 0xFF00BCD4.toInt(), 0xFFFF5722.toInt(), 0xFF8BC34A.toInt()
+)
 
         // Cor Primária
         ColorPickerRow(
@@ -315,7 +315,7 @@ private fun ColorPickerSection(
         ColorPickerRow(
             label = stringResource(R.string.custom_theme_background_color),
             currentColor = config.backgroundColor,
-            presetColors = presetColors + listOf(0xFF000000, 0xFFFFFFFF, 0xFF1E1234),
+            presetColors = presetColors + listOf(0xFF000000.toInt(), 0xFFFFFFFF.toInt(), 0xFF1E1234.toInt()),
             onColorSelected = { viewModel.updateBackgroundColor(it) }
         )
 
@@ -460,10 +460,10 @@ private fun WallpaperSection(
                     label = stringResource(R.string.wallpaper_color),
                     currentColor = config.wallpaperColor,
                     presetColors = listOf(
-                        0xFF1E1234, 0xFF000000, 0xFFFFFFFF, 0xFF2196F3,
-                        0xFF4CAF50, 0xFFFFC107, 0xFFE91E63, 0xFF9C27B0,
-                        0xFFFF5722, 0xFF607D8B, 0xFF795548, 0xFF3F51B5
-                    ),
+    0xFF1E1234.toInt(), 0xFF000000.toInt(), 0xFFFFFFFF.toInt(), 0xFF2196F3.toInt(),
+    0xFF4CAF50.toInt(), 0xFFFFC107.toInt(), 0xFFE91E63.toInt(), 0xFF9C27B0.toInt(),
+    0xFFFF5722.toInt(), 0xFF607D8B.toInt(), 0xFF795548.toInt(), 0xFF3F51B5.toInt()
+),
                     onColorSelected = { viewModel.setWallpaperColor(it) }
                 )
             }
