@@ -268,8 +268,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            AurisTheme(darkTheme = useDarkTheme) {
-    CustomThemeWrapper(isDark = useDarkTheme) {  // <-- ABRE AQUI
+    CustomThemeWrapper(isDark = useDarkTheme) {
         // --- Verificação de integridade (anti-pirataria) ---
         val piracyViewModel: PiracyViewModel = hiltViewModel()
         val piracyUiState by piracyViewModel.uiState.collectAsState()
@@ -339,12 +338,11 @@ class MainActivity : ComponentActivity() {
                     CrashHandler.clearCrashLog()
                     crashLogData = null
                     showCrashReportDialog = false
-                }
-            )
-        }
-    }  // <-- FECHA AQUI
-}
+                    }
+                )
             }
+        }//<--FECHA O TEMA PERSONALIZADO AQUI
+    }
         handleIntent(intent)
     }
 
@@ -1133,11 +1131,36 @@ Trace.endSection()
         super.onResume()
       }
   }
-  
+
+//Cuida de todo o tema do app(escuro, claro e personalizado)
     @Composable
-  fun CustomThemeWrapper(
-      isDark: Boolean,
-      content: @Composable () -> Unit
-  ) {
-      content()
-  }
+fun CustomThemeWrapper(
+    isDark: Boolean,
+    content: @Composable () -> Unit
+) {
+    val viewModel: CustomThemeViewModel = hiltViewModel()
+    val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
+
+    if (config.isEnabled) {
+        val colorScheme = customColorScheme(config, isDark)
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            shapes = Shapes
+        ) {
+            // Wallpaper + conteúdo
+            Box(modifier = Modifier.fillMaxSize()) {
+                // wallpaper aqui
+                content()
+            }
+        }
+    } else {
+        MaterialTheme(
+            colorScheme = if (isDark) darkColorScheme() else lightColorScheme(),
+            typography = Typography,
+            shapes = Shapes
+        ) {
+            content()
+        }
+    }
+}
