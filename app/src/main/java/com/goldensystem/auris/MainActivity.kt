@@ -303,6 +303,86 @@ class MainActivity : ComponentActivity() {
 }
         handleIntent(intent)
     }
+    
+      @Composable
+fun AppContent(
+    showSetupScreen: Boolean?,
+    playerViewModel: PlayerViewModel,
+    mainViewModel: MainViewModel,
+    showCrashReportDialog: Boolean,
+    crashLogData: CrashLogData?,
+    onCrashDismiss: () -> Unit
+) {
+    // --- Verificação de integridade (anti-pirataria) ---
+    val piracyViewModel: PiracyViewModel = hiltViewModel()
+    val piracyUiState by piracyViewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        piracyViewModel.checkPackageIntegrity("https://script.google.com/macros/s/AKfycbzTsGXzvoq0vM8jVwJYsQxScgyuB0gKhaCzaXipNvI1W8G9hva8jmFixivYuky71flZ/exec")
+    }
+
+    when (piracyUiState) {
+        is PiracyUiState.Mismatch -> {
+            val mismatch = piracyUiState as PiracyUiState.Mismatch
+            PiracyDialog(
+                downloadUrl = mismatch.downloadUrl,
+                officialPackage = mismatch.officialPackage,
+                onExit = {
+                    (playerViewModel as? ComponentActivity)?.finishAffinity()
+                    android.os.Process.killProcess(android.os.Process.myPid())
+                }
+            )
+        }
+        is PiracyUiState.Valid -> {
+            var contentVisible by remember { mutableStateOf(false) }
+            val contentAlpha by animateFloatAsState(
+                targetValue = if (contentVisible) 1f else 0f,
+                animationSpec = tween(600, easing = LinearOutSlowInEasing),
+                label = "AppContentAlpha"
+            )
+            LaunchedEffect(Unit) {
+                delay(100)
+                contentVisible = true
+            }
+            Surface(
+                modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha },
+                color = MaterialTheme.colorScheme.background
+            ) {
+                if (showSetupScreen == null) {
+                    SetupGateLoadingScreen()
+                } else {
+                    AnimatedContent(
+                        targetState = showSetupScreen,
+                        transitionSpec = {
+                            if (targetState) {
+                                fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
+                            } else {
+                                scaleIn(initialScale = 0.95f, animationSpec = tween(450)) + fadeIn(animationSpec = tween(450)) togetherWith
+                                        slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(450)) + fadeOut(animationSpec = tween(450))
+                            }
+                        },
+                        label = "SetupTransition"
+                    ) { shouldShowSetup ->
+                        if (shouldShowSetup) {
+                            SetupScreen(onSetupComplete = {})
+                        } else {
+                            MainAppContent(playerViewModel, mainViewModel)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Show crash report dialog if needed
+    if (showCrashReportDialog && crashLogData != null) {
+        CrashReportDialog(
+            crashLog = crashLogData!!,
+            onDismiss = onCrashDismiss
+        )
+    }
+}
+
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -1089,82 +1169,3 @@ Trace.endSection()
         super.onResume()
       }
   }
-  
-  @Composable
-fun AppContent(
-    showSetupScreen: Boolean?,
-    playerViewModel: PlayerViewModel,
-    mainViewModel: MainViewModel,
-    showCrashReportDialog: Boolean,
-    crashLogData: CrashLogData?,
-    onCrashDismiss: () -> Unit
-) {
-    // --- Verificação de integridade (anti-pirataria) ---
-    val piracyViewModel: PiracyViewModel = hiltViewModel()
-    val piracyUiState by piracyViewModel.uiState.collectAsState()
-
-    LaunchedEffect(Unit) {
-        piracyViewModel.checkPackageIntegrity("https://script.google.com/macros/s/AKfycbzTsGXzvoq0vM8jVwJYsQxScgyuB0gKhaCzaXipNvI1W8G9hva8jmFixivYuky71flZ/exec")
-    }
-
-    when (piracyUiState) {
-        is PiracyUiState.Mismatch -> {
-            val mismatch = piracyUiState as PiracyUiState.Mismatch
-            PiracyDialog(
-                downloadUrl = mismatch.downloadUrl,
-                officialPackage = mismatch.officialPackage,
-                onExit = {
-                    (playerViewModel as? ComponentActivity)?.finishAffinity()
-                    android.os.Process.killProcess(android.os.Process.myPid())
-                }
-            )
-        }
-        is PiracyUiState.Valid -> {
-            var contentVisible by remember { mutableStateOf(false) }
-            val contentAlpha by animateFloatAsState(
-                targetValue = if (contentVisible) 1f else 0f,
-                animationSpec = tween(600, easing = LinearOutSlowInEasing),
-                label = "AppContentAlpha"
-            )
-            LaunchedEffect(Unit) {
-                delay(100)
-                contentVisible = true
-            }
-            Surface(
-                modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha },
-                color = MaterialTheme.colorScheme.background
-            ) {
-                if (showSetupScreen == null) {
-                    SetupGateLoadingScreen()
-                } else {
-                    AnimatedContent(
-                        targetState = showSetupScreen,
-                        transitionSpec = {
-                            if (targetState) {
-                                fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
-                            } else {
-                                scaleIn(initialScale = 0.95f, animationSpec = tween(450)) + fadeIn(animationSpec = tween(450)) togetherWith
-                                        slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(450)) + fadeOut(animationSpec = tween(450))
-                            }
-                        },
-                        label = "SetupTransition"
-                    ) { shouldShowSetup ->
-                        if (shouldShowSetup) {
-                            SetupScreen(onSetupComplete = {})
-                        } else {
-                            MainAppContent(playerViewModel, mainViewModel)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Show crash report dialog if needed
-    if (showCrashReportDialog && crashLogData != null) {
-        CrashReportDialog(
-            crashLog = crashLogData!!,
-            onDismiss = onCrashDismiss
-        )
-    }
-}
