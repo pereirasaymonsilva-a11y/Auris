@@ -222,128 +222,85 @@ class MainActivity : ComponentActivity() {
         val isBenchmarkMode = intent.getBooleanExtra("is_benchmark", false)
 
         setContent {
-            val systemDarkTheme = isSystemInDarkTheme()
-            val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.FOLLOW_SYSTEM)
-            val useDarkTheme = when (appThemeMode) {
-                AppThemeMode.DARK -> true
-                AppThemeMode.LIGHT -> false
-                else -> systemDarkTheme
-            }
-            val isSetupComplete by mainViewModel.isSetupComplete.collectAsStateWithLifecycle()
-            
-            // Crash report dialog state
-            var showCrashReportDialog by remember { mutableStateOf(false) }
-            var crashLogData by remember { mutableStateOf<CrashLogData?>(null) }
-            
-            // Permissions Logic
-            val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                listOf(Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
-            } else {
-                listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-            }
-            @OptIn(ExperimentalPermissionsApi::class)
-            val permissionState = rememberMultiplePermissionsState(permissions = permissions)
-            // Determine if we need to show Setup based on completion OR missing permissions
-            val permissionsValid = permissionState.allPermissionsGranted
-            val showSetupScreen = remember(isSetupComplete, permissionsValid, isBenchmarkMode) {
-                when {
-                    isBenchmarkMode -> false
-                    isSetupComplete == null -> null
-                    else -> !isSetupComplete!! || !permissionsValid
-                }
-            }
-
-            // Sync Trigger: When we are NOT showing setup (meaning permissions are good and setup is done)
-            LaunchedEffect(showSetupScreen) {
-                if (showSetupScreen == false) {
-                     LogUtils.i(this, "Setup complete/skipped and permissions valid. Starting sync.")
-                     mainViewModel.startSync()
-                }
-            }
-
-            // Check for crash log when app starts
-            LaunchedEffect(Unit) {
-                if (!isBenchmarkMode && CrashHandler.hasCrashLog()) {
-                    crashLogData = CrashHandler.getCrashLog()
-                    showCrashReportDialog = true
-                }
-            }
-
-    CustomThemeWrapper(isDark = useDarkTheme) {
-        // --- Verificação de integridade (anti-pirataria) ---
-        val piracyViewModel: PiracyViewModel = hiltViewModel()
-        val piracyUiState by piracyViewModel.uiState.collectAsState()
-
-        LaunchedEffect(Unit) {
-            piracyViewModel.checkPackageIntegrity("https://script.google.com/macros/s/AKfycbzTsGXzvoq0vM8jVwJYsQxScgyuB0gKhaCzaXipNvI1W8G9hva8jmFixivYuky71flZ/exec")
+    val systemDarkTheme = isSystemInDarkTheme()
+    val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.FOLLOW_SYSTEM)
+    val useDarkTheme = when (appThemeMode) {
+        AppThemeMode.DARK -> true
+        AppThemeMode.LIGHT -> false
+        else -> systemDarkTheme
+    }
+    val isSetupComplete by mainViewModel.isSetupComplete.collectAsStateWithLifecycle()
+    
+    // Crash report dialog state
+    var showCrashReportDialog by remember { mutableStateOf(false) }
+    var crashLogData by remember { mutableStateOf<CrashLogData?>(null) }
+    
+    // Permissions Logic
+    val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        listOf(Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
+    } else {
+        listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+    }
+    @OptIn(ExperimentalPermissionsApi::class)
+    val permissionState = rememberMultiplePermissionsState(permissions = permissions)
+    val permissionsValid = permissionState.allPermissionsGranted
+    val showSetupScreen = remember(isSetupComplete, permissionsValid, isBenchmarkMode) {
+        when {
+            isBenchmarkMode -> false
+            isSetupComplete == null -> null
+            else -> !isSetupComplete!! || !permissionsValid
         }
+    }
 
-        when (piracyUiState) {
-            is PiracyUiState.Mismatch -> {
-                val mismatch = piracyUiState as PiracyUiState.Mismatch
-                PiracyDialog(
-                    downloadUrl = mismatch.downloadUrl,
-                    officialPackage = mismatch.officialPackage,
-                    onExit = {
-                        finishAffinity()
-                        android.os.Process.killProcess(android.os.Process.myPid())
+    LaunchedEffect(showSetupScreen) {
+        if (showSetupScreen == false) {
+            LogUtils.i(this, "Setup complete/skipped and permissions valid. Starting sync.")
+            mainViewModel.startSync()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (!isBenchmarkMode && CrashHandler.hasCrashLog()) {
+            crashLogData = CrashHandler.getCrashLog()
+            showCrashReportDialog = true
+        }
+    }
+
+    // ===== AURIS THEME (controla Claro/Escuro/Seguir Sistema) =====
+    AurisTheme(darkTheme = useDarkTheme) {
+        // ===== SE FOR CUSTOM, USA O WRAPPER =====
+        if (appThemeMode == AppThemeMode.CUSTOM) {
+            CustomThemeWrapper(isDark = useDarkTheme) {
+                AppContent(
+                    showSetupScreen = showSetupScreen,
+                    playerViewModel = playerViewModel,
+                    mainViewModel = mainViewModel,
+                    showCrashReportDialog = showCrashReportDialog,
+                    crashLogData = crashLogData,
+                    onCrashDismiss = {
+                        CrashHandler.clearCrashLog()
+                        crashLogData = null
+                        showCrashReportDialog = false
                     }
                 )
             }
-            is PiracyUiState.Valid -> {
-                var contentVisible by remember { mutableStateOf(false) }
-                val contentAlpha by animateFloatAsState(
-                    targetValue = if (contentVisible) 1f else 0f,
-                    animationSpec = tween(600, easing = LinearOutSlowInEasing),
-                    label = "AppContentAlpha"
-                )
-                LaunchedEffect(Unit) {
-                    delay(100)
-                    contentVisible = true
-                }
-                Surface(
-                    modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha },
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    if (showSetupScreen == null) {
-                        SetupGateLoadingScreen()
-                    } else {
-                        AnimatedContent(
-                            targetState = showSetupScreen,
-                            transitionSpec = {
-                                if (targetState) {
-                                    fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
-                                } else {
-                                    scaleIn(initialScale = 0.95f, animationSpec = tween(450)) + fadeIn(animationSpec = tween(450)) togetherWith
-                                            slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(450)) + fadeOut(animationSpec = tween(450))
-                                }
-                            },
-                            label = "SetupTransition"
-                        ) { shouldShowSetup ->
-                            if (shouldShowSetup) {
-                                SetupScreen(onSetupComplete = {})
-                            } else {
-                                MainAppContent(playerViewModel, mainViewModel)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Show crash report dialog if needed
-        if (showCrashReportDialog && crashLogData != null) {
-            CrashReportDialog(
-                crashLog = crashLogData!!,
-                onDismiss = {
+        } else {
+            // ===== TEMA NORMAL (SEM CUSTOM) =====
+            AppContent(
+                showSetupScreen = showSetupScreen,
+                playerViewModel = playerViewModel,
+                mainViewModel = mainViewModel,
+                showCrashReportDialog = showCrashReportDialog,
+                crashLogData = crashLogData,
+                onCrashDismiss = {
                     CrashHandler.clearCrashLog()
                     crashLogData = null
                     showCrashReportDialog = false
-                    }
-                )
-            }
-        }//<--FECHA O TEMA PERSONALIZADO AQUI
+                }
+            )
+        }
     }
+}
         handleIntent(intent)
     }
 
@@ -1132,3 +1089,82 @@ Trace.endSection()
         super.onResume()
       }
   }
+  
+  @Composable
+fun AppContent(
+    showSetupScreen: Boolean?,
+    playerViewModel: PlayerViewModel,
+    mainViewModel: MainViewModel,
+    showCrashReportDialog: Boolean,
+    crashLogData: CrashLogData?,
+    onCrashDismiss: () -> Unit
+) {
+    // --- Verificação de integridade (anti-pirataria) ---
+    val piracyViewModel: PiracyViewModel = hiltViewModel()
+    val piracyUiState by piracyViewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        piracyViewModel.checkPackageIntegrity("https://script.google.com/macros/s/AKfycbzTsGXzvoq0vM8jVwJYsQxScgyuB0gKhaCzaXipNvI1W8G9hva8jmFixivYuky71flZ/exec")
+    }
+
+    when (piracyUiState) {
+        is PiracyUiState.Mismatch -> {
+            val mismatch = piracyUiState as PiracyUiState.Mismatch
+            PiracyDialog(
+                downloadUrl = mismatch.downloadUrl,
+                officialPackage = mismatch.officialPackage,
+                onExit = {
+                    (playerViewModel as? ComponentActivity)?.finishAffinity()
+                    android.os.Process.killProcess(android.os.Process.myPid())
+                }
+            )
+        }
+        is PiracyUiState.Valid -> {
+            var contentVisible by remember { mutableStateOf(false) }
+            val contentAlpha by animateFloatAsState(
+                targetValue = if (contentVisible) 1f else 0f,
+                animationSpec = tween(600, easing = LinearOutSlowInEasing),
+                label = "AppContentAlpha"
+            )
+            LaunchedEffect(Unit) {
+                delay(100)
+                contentVisible = true
+            }
+            Surface(
+                modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha },
+                color = MaterialTheme.colorScheme.background
+            ) {
+                if (showSetupScreen == null) {
+                    SetupGateLoadingScreen()
+                } else {
+                    AnimatedContent(
+                        targetState = showSetupScreen,
+                        transitionSpec = {
+                            if (targetState) {
+                                fadeIn(animationSpec = tween(400)) togetherWith fadeOut(animationSpec = tween(400))
+                            } else {
+                                scaleIn(initialScale = 0.95f, animationSpec = tween(450)) + fadeIn(animationSpec = tween(450)) togetherWith
+                                        slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(450)) + fadeOut(animationSpec = tween(450))
+                            }
+                        },
+                        label = "SetupTransition"
+                    ) { shouldShowSetup ->
+                        if (shouldShowSetup) {
+                            SetupScreen(onSetupComplete = {})
+                        } else {
+                            MainAppContent(playerViewModel, mainViewModel)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Show crash report dialog if needed
+    if (showCrashReportDialog && crashLogData != null) {
+        CrashReportDialog(
+            crashLog = crashLogData!!,
+            onDismiss = onCrashDismiss
+        )
+    }
+}

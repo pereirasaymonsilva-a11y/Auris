@@ -32,22 +32,16 @@ fun CustomThemeWrapper(
     if (config.isEnabled) {
         val colorScheme = customColorScheme(config, isDark)
         
-        MaterialTheme(
-            colorScheme = colorScheme,
-            typography = Typography,
-            shapes = Shapes
+        // Substitui as cores do MaterialTheme
+        CompositionLocalProvider(
+            LocalColorScheme provides colorScheme
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                // ===== WALLPAPER =====
+                // Wallpaper
                 when (config.wallpaperType) {
                     WallpaperType.SOLID -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(config.wallpaperColor))
-                        )
+                        Box(modifier = Modifier.fillMaxSize().background(Color(config.wallpaperColor)))
                     }
-                    
                     WallpaperType.GALLERY -> {
                         config.wallpaperUri?.let { uri ->
                             AsyncImage(
@@ -56,9 +50,8 @@ fun CustomThemeWrapper(
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
-                        } ?: Box(modifier = Modifier.fillMaxSize().background(Color(config.backgroundColor)))
+                        }
                     }
-                    
                     WallpaperType.SERVER -> {
                         config.wallpaperUrl?.let { url ->
                             AsyncImage(
@@ -67,11 +60,11 @@ fun CustomThemeWrapper(
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
-                        } ?: Box(modifier = Modifier.fillMaxSize().background(Color(config.backgroundColor)))
+                        }
                     }
                 }
 
-                // ===== DIM OVERLAY (escurecimento) =====
+                // Dim
                 if (config.wallpaperType != WallpaperType.SOLID) {
                     Box(
                         modifier = Modifier
@@ -80,18 +73,10 @@ fun CustomThemeWrapper(
                     )
                 }
 
-                // ===== CONTEÚDO =====
                 content()
             }
         }
     } else {
-        // ===== TEMA PADRÃO (SEM WALLPAPER) =====
-        MaterialTheme(
-            colorScheme = if (isDark) darkColorScheme() else lightColorScheme(),
-            typography = Typography,
-            shapes = Shapes
-        ) {
-            content()
-        }
+        content()
     }
 }
