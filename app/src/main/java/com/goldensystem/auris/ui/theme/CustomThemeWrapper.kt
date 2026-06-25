@@ -60,12 +60,14 @@ fun CustomThemeWrapper(
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                             val blurRadius = (config.wallpaperBlur * 25f).toInt()
                                             if (blurRadius > 0) {
-                                                renderEffect = android.graphics.RenderEffect
-                                                    .createBlurEffect(
-                                                        blurRadius.toFloat(),
-                                                        blurRadius.toFloat(),
-                                                        android.graphics.Shader.TileMode.CLAMP
-                                                    )
+                                                // Converte android.graphics.RenderEffect para androidx.compose.ui.graphics.RenderEffect
+                                                val effect = android.graphics.RenderEffect.createBlurEffect(
+                                                    blurRadius.toFloat(),
+                                                    blurRadius.toFloat(),
+                                                    android.graphics.Shader.TileMode.CLAMP
+                                                )
+                                                // Usa a extensão para converter
+                                                renderEffect = effect.toComposeRenderEffect()
                                             }
                                         }
                                     },
@@ -86,12 +88,12 @@ fun CustomThemeWrapper(
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                             val blurRadius = (config.wallpaperBlur * 25f).toInt()
                                             if (blurRadius > 0) {
-                                                renderEffect = android.graphics.RenderEffect
-                                                    .createBlurEffect(
-                                                        blurRadius.toFloat(),
-                                                        blurRadius.toFloat(),
-                                                        android.graphics.Shader.TileMode.CLAMP
-                                                    )
+                                                val effect = android.graphics.RenderEffect.createBlurEffect(
+                                                    blurRadius.toFloat(),
+                                                    blurRadius.toFloat(),
+                                                    android.graphics.Shader.TileMode.CLAMP
+                                                )
+                                                renderEffect = effect.toComposeRenderEffect()
                                             }
                                         }
                                     },
@@ -123,5 +125,15 @@ fun CustomThemeWrapper(
         ) {
             content()
         }
+    }
+}
+
+// ===== FUNÇÃO DE CONVERSÃO =====
+@Suppress("DEPRECATION")
+private fun android.graphics.RenderEffect.toComposeRenderEffect(): androidx.compose.ui.graphics.RenderEffect? {
+    return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+        androidx.compose.ui.graphics.RenderEffect.createRenderEffect(this)
+    } else {
+        null
     }
 }
