@@ -1,4 +1,3 @@
-// presentation/screens/CustomThemeScreen.kt
 package com.goldensystem.auris.presentation.screens
 
 import android.net.Uri
@@ -11,6 +10,7 @@ import androidx.navigation.NavController
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -37,25 +38,16 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.goldensystem.auris.R
 import com.goldensystem.auris.data.preferences.CustomThemeConfig
 import com.goldensystem.auris.data.preferences.WallpaperType
 import com.goldensystem.auris.presentation.navigation.Screen
 import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
+import com.goldensystem.auris.ui.theme.COLOR_PALETTE
+import com.goldensystem.auris.ui.theme.ColorPaletteItem
 import com.goldensystem.auris.ui.theme.customColorScheme
 import kotlinx.coroutines.launch
-
-// Links para wallpapers do servidor (substitua depois)
-val SERVER_WALLPAPERS = listOf(
-    "https://example.com/wallpaper1.jpg",
-    "https://example.com/wallpaper2.jpg",
-    "https://example.com/wallpaper3.jpg",
-    "https://example.com/wallpaper4.jpg",
-    "https://example.com/wallpaper5.jpg"
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,17 +58,17 @@ fun CustomThemeScreen(
     val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var selectedTab by remember { mutableStateOf(0) } // 0: Cores, 1: Wallpaper
+    var selectedTab by remember { mutableStateOf(0) }
 
-    // Preview do tema atual
     val previewColorScheme = remember(config) {
         customColorScheme(config, true)
     }
+    
     var resetTrigger by remember { mutableStateOf(false) }
-        LaunchedEffect(resetTrigger) {
+    LaunchedEffect(resetTrigger) {
         if (resetTrigger) {
-        viewModel.resetToDefault()
-        resetTrigger = false
+            viewModel.resetToDefault()
+            resetTrigger = false
         }
     }
 
@@ -96,8 +88,8 @@ fun CustomThemeScreen(
                     }
                 },
                 actions = {
-                 IconButton(onClick = { resetTrigger = true }) {
-                 Icon(Icons.Rounded.RestartAlt, contentDescription = stringResource(R.string.cd_reset))
+                    IconButton(onClick = { resetTrigger = true }) {
+                        Icon(Icons.Rounded.RestartAlt, contentDescription = stringResource(R.string.cd_reset))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -115,10 +107,8 @@ fun CustomThemeScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Preview do Player (mini)
             CustomThemePreviewCard(config = config)
 
-            // Tabs
             TabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = previewColorScheme.surface.copy(alpha = 0.8f)
@@ -140,7 +130,6 @@ fun CustomThemeScreen(
                 1 -> WallpaperSection(config = config, viewModel = viewModel)
             }
 
-            // Botão Salvar
             Button(
                 onClick = {
                     scope.launch {
@@ -193,7 +182,6 @@ private fun CustomThemePreviewCard(config: CustomThemeConfig) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Album Art Mock
                 Box(
                     modifier = Modifier
                         .size(80.dp)
@@ -223,7 +211,6 @@ private fun CustomThemePreviewCard(config: CustomThemeConfig) {
                     
                     Spacer(Modifier.height(8.dp))
                     
-                    // Botões de controle mock
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -249,7 +236,6 @@ private fun CustomThemePreviewCard(config: CustomThemeConfig) {
                 }
             }
 
-            // Cores usadas (mini amostras)
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -279,8 +265,17 @@ private fun ColorPickerSection(
     config: CustomThemeConfig,
     viewModel: CustomThemeViewModel
 ) {
+    var showColorPalette by remember { mutableStateOf(false) }
+    var pendingColorTarget by remember { mutableStateOf<((Int) -> Unit)?>(null) }
+    val sheetState = rememberModalBottomSheetState()
+    
+    val presetColors = remember { COLOR_PALETTE.map { it.color.toArgb() } }
+    val colorNameMap = remember { 
+        COLOR_PALETTE.associate { it.color.toArgb() to it.name }
+    }
+
     Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
             stringResource(R.string.custom_theme_colors_subtitle),
@@ -288,44 +283,75 @@ private fun ColorPickerSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        // Cores pré-definidas
-        val presetColors = listOf(
-    0xFF6750A4.toInt(), 0xFFF06292.toInt(), 0xFFFF8A65.toInt(), 0xFF4CAF50.toInt(),
-    0xFF2196F3.toInt(), 0xFFFFC107.toInt(), 0xFF9C27B0.toInt(), 0xFF3F51B5.toInt(),
-    0xFFE91E63.toInt(), 0xFF00BCD4.toInt(), 0xFFFF5722.toInt(), 0xFF8BC34A.toInt()
-)
-
-        // Cor Primária
         ColorPickerRow(
             label = stringResource(R.string.custom_theme_primary_color),
             currentColor = config.primaryColor,
             presetColors = presetColors,
-            onColorSelected = { viewModel.updatePrimaryColor(it) }
+            colorNameMap = colorNameMap,
+            onColorSelected = { viewModel.updatePrimaryColor(it) },
+            onOpenPalette = {
+                pendingColorTarget = viewModel::updatePrimaryColor
+                showColorPalette = true
+            }
         )
 
-        // Cor Secundária
         ColorPickerRow(
             label = stringResource(R.string.custom_theme_secondary_color),
             currentColor = config.secondaryColor,
             presetColors = presetColors,
-            onColorSelected = { viewModel.updateSecondaryColor(it) }
+            colorNameMap = colorNameMap,
+            onColorSelected = { viewModel.updateSecondaryColor(it) },
+            onOpenPalette = {
+                pendingColorTarget = viewModel::updateSecondaryColor
+                showColorPalette = true
+            }
         )
 
-        // Cor de Fundo
         ColorPickerRow(
             label = stringResource(R.string.custom_theme_background_color),
             currentColor = config.backgroundColor,
-            presetColors = presetColors + listOf(0xFF000000.toInt(), 0xFFFFFFFF.toInt(), 0xFF1E1234.toInt()),
-            onColorSelected = { viewModel.updateBackgroundColor(it) }
+            presetColors = presetColors + listOf(0xFF000000.toInt(), 0xFFFFFFFF.toInt()),
+            colorNameMap = colorNameMap,
+            onColorSelected = { viewModel.updateBackgroundColor(it) },
+            onOpenPalette = {
+                pendingColorTarget = viewModel::updateBackgroundColor
+                showColorPalette = true
+            }
         )
 
-        // Cor de Superfície
         ColorPickerRow(
             label = stringResource(R.string.custom_theme_surface_color),
             currentColor = config.surfaceColor,
             presetColors = presetColors,
-            onColorSelected = { viewModel.updateSurfaceColor(it) }
+            colorNameMap = colorNameMap,
+            onColorSelected = { viewModel.updateSurfaceColor(it) },
+            onOpenPalette = {
+                pendingColorTarget = viewModel::updateSurfaceColor
+                showColorPalette = true
+            }
         )
+    }
+
+    if (showColorPalette) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showColorPalette = false
+                pendingColorTarget = null
+            },
+            sheetState = sheetState
+        ) {
+            ColorPaletteSheetContent(
+                onColorSelected = { colorArgb ->
+                    pendingColorTarget?.invoke(colorArgb)
+                    showColorPalette = false
+                    pendingColorTarget = null
+                },
+                onDismiss = {
+                    showColorPalette = false
+                    pendingColorTarget = null
+                }
+            )
+        }
     }
 }
 
@@ -334,23 +360,44 @@ private fun ColorPickerRow(
     label: String,
     currentColor: Int,
     presetColors: List<Int>,
-    onColorSelected: (Int) -> Unit
+    colorNameMap: Map<Int, String> = emptyMap(),
+    onColorSelected: (Int) -> Unit,
+    onOpenPalette: () -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Medium
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                label,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium
+            )
+            
+            if (colorNameMap.isNotEmpty()) {
+                val currentColorName = colorNameMap[currentColor] ?: ""
+                if (currentColorName.isNotEmpty()) {
+                    Text(
+                        currentColorName,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
         
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(presetColors) { color ->
                 val isSelected = color == currentColor
+                val colorName = colorNameMap[color] ?: ""
+                
                 Box(
                     modifier = Modifier
                         .size(if (isSelected) 44.dp else 36.dp)
@@ -367,7 +414,7 @@ private fun ColorPickerRow(
                     if (isSelected) {
                         Icon(
                             Icons.Rounded.Check,
-                            contentDescription = null,
+                            contentDescription = colorName.ifEmpty { null },
                             tint = Color(color).contrastTextColor(),
                             modifier = Modifier.size(16.dp)
                         )
@@ -375,26 +422,119 @@ private fun ColorPickerRow(
                 }
             }
 
-            // Seletor de cor customizada (abre o color picker do sistema)
             item {
                 Box(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .clickable {
-                            // Abrir color picker nativo
-                            // Implementar com o ColorPicker do sistema ou uma biblioteca
-                        },
+                        .clickable { onOpenPalette() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Rounded.Add,
-                        contentDescription = stringResource(R.string.custom_theme_custom_color),
+                        contentDescription = "Abrir paleta de cores",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ColorPaletteSheetContent(
+    onColorSelected: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val colorCategories = remember {
+        val grouped = COLOR_PALETTE.groupBy { item ->
+            when {
+                item.name.contains("Rosa") || item.name.contains("Vermelho") || item.name.contains("Magenta") -> "Rosa / Vermelho"
+                item.name.contains("Roxo") || item.name.contains("Lilás") || item.name.contains("Violeta") -> "Roxo / Violeta"
+                item.name.contains("Índigo") || item.name.contains("Azul") && !item.name.contains("Ciano") && !item.name.contains("Turquesa") -> "Azul"
+                item.name.contains("Ciano") || item.name.contains("Teal") || item.name.contains("Turquesa") -> "Ciano / Teal"
+                item.name.contains("Verde") || item.name.contains("Menta") || item.name.contains("Limão") || item.name.contains("Esmeralda") -> "Verde"
+                item.name.contains("Amarelo") || item.name.contains("Ouro") || item.name.contains("Mostarda") -> "Amarelo / Ouro"
+                item.name.contains("Laranja") || item.name.contains("Pêssego") || item.name.contains("Salmão") -> "Laranja / Pêssego"
+                item.name.contains("Marrom") || item.name.contains("Café") || item.name.contains("Terra") -> "Marrom / Terra"
+                item.name.contains("Cinza") || item.name.contains("Branco") || item.name.contains("Preto") -> "Cinza / Neutros"
+                else -> "Cores Especiais"
+            }
+        }
+        grouped.toList().sortedBy { it.first }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Escolha uma cor",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            IconButton(onClick = onDismiss) {
+                Icon(Icons.Rounded.Close, contentDescription = "Fechar")
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.heightIn(max = 500.dp)
+        ) {
+            colorCategories.forEach { (category, items) ->
+                item {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = category,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(items) { item ->
+                                val colorArgb = item.color.toArgb()
+                                Box(
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .clip(CircleShape)
+                                        .background(item.color)
+                                        .clickable {
+                                            onColorSelected(colorArgb)
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = item.name.take(1),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = item.color.contrastTextColor(),
+                                        fontSize = 10.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -408,7 +548,6 @@ private fun WallpaperSection(
     val context = LocalContext.current
     var showImagePicker by remember { mutableStateOf(false) }
 
-    // Launcher para selecionar imagem da galeria
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -426,7 +565,6 @@ private fun WallpaperSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        // Tipo de Wallpaper
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -456,15 +594,18 @@ private fun WallpaperSection(
 
         when (config.wallpaperType) {
             WallpaperType.SOLID -> {
+                val presetColors = COLOR_PALETTE.map { it.color.toArgb() }
+                val colorNameMap = COLOR_PALETTE.associate { it.color.toArgb() to it.name }
+                
                 ColorPickerRow(
                     label = stringResource(R.string.wallpaper_color),
                     currentColor = config.wallpaperColor,
-                    presetColors = listOf(
-    0xFF1E1234.toInt(), 0xFF000000.toInt(), 0xFFFFFFFF.toInt(), 0xFF2196F3.toInt(),
-    0xFF4CAF50.toInt(), 0xFFFFC107.toInt(), 0xFFE91E63.toInt(), 0xFF9C27B0.toInt(),
-    0xFFFF5722.toInt(), 0xFF607D8B.toInt(), 0xFF795548.toInt(), 0xFF3F51B5.toInt()
-),
-                    onColorSelected = { viewModel.setWallpaperColor(it) }
+                    presetColors = presetColors,
+                    colorNameMap = colorNameMap,
+                    onColorSelected = { viewModel.setWallpaperColor(it) },
+                    onOpenPalette = {
+                        // Implementar se quiser abrir a paleta para wallpaper também
+                    }
                 )
             }
 
@@ -499,11 +640,19 @@ private fun WallpaperSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
+                val serverWallpapers = listOf(
+                    "https://example.com/wallpaper1.jpg",
+                    "https://example.com/wallpaper2.jpg",
+                    "https://example.com/wallpaper3.jpg",
+                    "https://example.com/wallpaper4.jpg",
+                    "https://example.com/wallpaper5.jpg"
+                )
+
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(SERVER_WALLPAPERS) { url ->
+                    items(serverWallpapers) { url ->
                         val isSelected = config.wallpaperUrl == url
                         Box(
                             modifier = Modifier
@@ -543,7 +692,6 @@ private fun WallpaperSection(
             }
         }
 
-        // Controles adicionais (blur e dim)
         if (config.wallpaperType != WallpaperType.SOLID) {
             Column {
                 SliderWithLabel(
@@ -595,7 +743,6 @@ private fun SliderWithLabel(
     }
 }
 
-// Utilitário para contraste de cor
 fun Color.contrastTextColor(): Color {
     val luminance = (0.299 * red + 0.587 * green + 0.114 * blue)
     return if (luminance > 0.5) Color.Black else Color.White
