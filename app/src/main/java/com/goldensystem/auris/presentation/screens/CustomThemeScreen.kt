@@ -10,7 +10,6 @@ import androidx.navigation.NavController
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -35,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,7 +45,6 @@ import com.goldensystem.auris.data.preferences.WallpaperType
 import com.goldensystem.auris.presentation.navigation.Screen
 import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
 import com.goldensystem.auris.ui.theme.COLOR_PALETTE
-import com.goldensystem.auris.ui.theme.ColorPaletteItem
 import com.goldensystem.auris.ui.theme.customColorScheme
 import kotlinx.coroutines.launch
 
@@ -63,7 +62,6 @@ fun CustomThemeScreen(
     val previewColorScheme = remember(config) {
         customColorScheme(config, true)
     }
-    
     var resetTrigger by remember { mutableStateOf(false) }
     LaunchedEffect(resetTrigger) {
         if (resetTrigger) {
@@ -267,12 +265,9 @@ private fun ColorPickerSection(
 ) {
     var showColorPalette by remember { mutableStateOf(false) }
     var pendingColorTarget by remember { mutableStateOf<((Int) -> Unit)?>(null) }
-    val sheetState = rememberModalBottomSheetState()
     
-    val presetColors = remember { COLOR_PALETTE.map { it.color.toArgb() } }
-    val colorNameMap = remember { 
-        COLOR_PALETTE.associate { it.color.toArgb() to it.name }
-    }
+    val presetColors = COLOR_PALETTE.map { it.color.toArgb() }
+    val colorNameMap = COLOR_PALETTE.associate { it.color.toArgb() to it.name }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -333,24 +328,31 @@ private fun ColorPickerSection(
     }
 
     if (showColorPalette) {
-        ModalBottomSheet(
+        Dialog(
             onDismissRequest = {
                 showColorPalette = false
                 pendingColorTarget = null
-            },
-            sheetState = sheetState
+            }
         ) {
-            ColorPaletteSheetContent(
-                onColorSelected = { colorArgb ->
-                    pendingColorTarget?.invoke(colorArgb)
-                    showColorPalette = false
-                    pendingColorTarget = null
-                },
-                onDismiss = {
-                    showColorPalette = false
-                    pendingColorTarget = null
-                }
-            )
+            Surface(
+                shape = RoundedCornerShape(28.dp),
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                ColorPaletteDialogContent(
+                    onColorSelected = { colorArgb ->
+                        pendingColorTarget?.invoke(colorArgb)
+                        showColorPalette = false
+                        pendingColorTarget = null
+                    },
+                    onDismiss = {
+                        showColorPalette = false
+                        pendingColorTarget = null
+                    }
+                )
+            }
         }
     }
 }
@@ -444,7 +446,7 @@ private fun ColorPickerRow(
 }
 
 @Composable
-private fun ColorPaletteSheetContent(
+private fun ColorPaletteDialogContent(
     onColorSelected: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
