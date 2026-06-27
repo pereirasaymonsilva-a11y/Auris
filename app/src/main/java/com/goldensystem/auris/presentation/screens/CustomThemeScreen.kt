@@ -491,53 +491,53 @@ private fun ColorPaletteDialogContent(
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.heightIn(max = 500.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 450.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             colorCategories.forEach { (category, items) ->
-                item {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = category,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(
-                            text = category,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(items) { item ->
-                                val colorArgb = item.color.toArgb()
-                                Box(
-                                    modifier = Modifier
-                                        .size(44.dp)
-                                        .clip(CircleShape)
-                                        .background(item.color)
-                                        .clickable {
-                                            onColorSelected(colorArgb)
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = item.name.take(1),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = item.color.contrastTextColor(),
-                                        fontSize = 10.sp
-                                    )
-                                }
+                        items(items) { item ->
+                            val colorArgb = item.color.toArgb()
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .clip(CircleShape)
+                                    .background(item.color)
+                                    .clickable {
+                                        onColorSelected(colorArgb)
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = item.name.take(1),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = item.color.contrastTextColor(),
+                                    fontSize = 10.sp
+                                )
                             }
                         }
                     }
                 }
             }
             
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
