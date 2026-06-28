@@ -346,7 +346,7 @@ fun AppContent(
             }
             Surface(
                 modifier = Modifier.fillMaxSize().graphicsLayer { alpha = contentAlpha },
-                color = MaterialTheme.colorScheme.background
+                color = Color.Transparent
             ) {
                 if (showSetupScreen == null) {
                     SetupGateLoadingScreen()
