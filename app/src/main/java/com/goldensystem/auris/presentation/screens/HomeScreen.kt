@@ -334,11 +334,12 @@ fun HomeScreen(
                         0.2f to Color.Transparent,
                         0.8f to MaterialTheme.colorScheme.surfaceContainerLowest,
                         1.0f to MaterialTheme.colorScheme.surfaceContainerLowest
-                    )
-                )
-            )
-    )
-    } // Fim do WallpaperBackground
+                       )
+                   )
+               )
+           )
+        }
+    }// Fim do WallpaperBackground
 
     // BottomSheets e dialogs (fora do WallpaperBackground para não serem afetados)
     if (showOptionsBottomSheet) {
