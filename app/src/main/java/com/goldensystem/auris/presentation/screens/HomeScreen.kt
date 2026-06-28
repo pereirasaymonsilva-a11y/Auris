@@ -320,23 +320,24 @@ fun HomeScreen(
         }
 
         // Gradiente de fade no fundo
-        Box(
+        // Gradiente de fade no fundo - CORRETO
+      Box(modifier = Modifier.fillMaxSize()) {
+          Box(
             modifier = Modifier
-                .fillMaxSize()
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .height(170.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colorStops = arrayOf(
-                            0.0f to Color.Transparent,
-                            0.2f to Color.Transparent,
-                            0.8f to MaterialTheme.colorScheme.surfaceContainerLowest,
-                            1.0f to MaterialTheme.colorScheme.surfaceContainerLowest
-                        )
+            .fillMaxWidth()
+            .align(Alignment.BottomCenter)
+            .height(170.dp)
+            .background(
+                brush = Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0.0f to Color.Transparent,
+                        0.2f to Color.Transparent,
+                        0.8f to MaterialTheme.colorScheme.surfaceContainerLowest,
+                        1.0f to MaterialTheme.colorScheme.surfaceContainerLowest
                     )
                 )
-        )
+            )
+    )
     } // Fim do WallpaperBackground
 
     // BottomSheets e dialogs (fora do WallpaperBackground para não serem afetados)
