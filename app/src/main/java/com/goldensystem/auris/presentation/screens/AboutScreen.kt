@@ -2,6 +2,8 @@ package com.goldensystem.auris.presentation.screens
 
 import android.content.ActivityNotFoundException
 import android.content.Context
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.content.Intent
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.Animatable
