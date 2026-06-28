@@ -96,6 +96,7 @@ import com.goldensystem.auris.presentation.viewmodel.SettingsViewModel
 import com.goldensystem.auris.presentation.viewmodel.StatsViewModel
 import com.goldensystem.auris.ui.theme.ExpTitleTypography
 import kotlinx.collections.immutable.persistentListOf
+import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
