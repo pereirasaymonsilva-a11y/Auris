@@ -322,6 +322,7 @@ fun HomeScreen(
         // Gradiente de fade no fundo
         Box(
             modifier = Modifier
+                .fillMaxSize()
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
                 .height(170.dp)

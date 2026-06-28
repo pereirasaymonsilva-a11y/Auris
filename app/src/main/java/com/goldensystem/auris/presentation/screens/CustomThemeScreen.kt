@@ -50,11 +50,11 @@ import kotlinx.coroutines.launch
 
 // Links para wallpapers do servidor (substitua depois)
 val SERVER_WALLPAPERS = listOf(
-    "https://example.com/wallpaper1.jpg",
-    "https://example.com/wallpaper2.jpg",
-    "https://example.com/wallpaper3.jpg",
-    "https://example.com/wallpaper4.jpg",
-    "https://example.com/wallpaper5.jpg"
+    "https://wallpaper.forfun.com/fetch/0f/0faffa5239e20701db8c7de8a72be9b8.jpeg",
+    "https://wallpaper.forfun.com/fetch/0f/0faffa5239e20701db8c7de8a72be9b8.jpeg",
+    "https://wallpaper.forfun.com/fetch/0f/0faffa5239e20701db8c7de8a72be9b8.jpeg",
+    "https://wallpaper.forfun.com/fetch/0f/0faffa5239e20701db8c7de8a72be9b8.jpeg",
+    "https://wallpaper.forfun.com/fetch/0f/0faffa5239e20701db8c7de8a72be9b8.jpeg"
 )
 
 // Cores principais (12 cores básicas)
