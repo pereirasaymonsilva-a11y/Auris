@@ -115,6 +115,8 @@ fun HomeScreen(
     jellyfinViewModel: JellyfinDashboardViewModel = hiltViewModel(),
     onOpenSidebar: () -> Unit
 ) {
+    val customThemeViewModel: CustomThemeViewModel = hiltViewModel()
+    val config by customThemeViewModel.customThemeConfig.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val isBenchmarkMode = remember {
         (context as? android.app.Activity)?.intent?.getBooleanExtra("is_benchmark", false) ?: false
@@ -204,8 +206,9 @@ fun HomeScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
+    modifier = Modifier.fillMaxSize(),
+    containerColor = if (config.isEnabled) Color.Transparent else MaterialTheme.colorScheme.background,
+           topBar = {
                 HomeGradientTopBar(
                     onNavigationIconClick = { navController.navigateSafely(Screen.Settings.route) },
                     onBetaClick = { showBetaInfoBottomSheet = true },
