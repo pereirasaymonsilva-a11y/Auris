@@ -28,8 +28,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -65,6 +65,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -72,22 +73,25 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.media3.common.util.UnstableApi
+import androidx.navigation.NavController
+import coil.compose.AsyncImagePainter
+import coil.request.ImageRequest
+import coil.size.Size
 import com.goldensystem.auris.R
 import com.goldensystem.auris.presentation.components.CollapsibleCommonTopBar
 import com.goldensystem.auris.presentation.components.ExpressiveTopBarContent
 import com.goldensystem.auris.presentation.components.MiniPlayerHeight
 import com.goldensystem.auris.presentation.model.SettingsCategory
 import com.goldensystem.auris.presentation.navigation.Screen
+import com.goldensystem.auris.presentation.navigation.navigateSafely
+import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
 import com.goldensystem.auris.presentation.viewmodel.SettingsViewModel
-import kotlin.math.roundToInt
+import com.goldensystem.auris.ui.theme.WallpaperBackground
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.common.util.UnstableApi
-import androidx.navigation.NavController
-import com.goldensystem.auris.data.preferences.LaunchTab
-
-// SettingsTopBar removed, replaced by CollapsibleCommonTopBar
+import kotlin.math.roundToInt
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,6 +102,8 @@ fun SettingsScreen(
         onNavigationIconClick: () -> Unit,
         settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
+    val customThemeViewModel: CustomThemeViewModel = hiltViewModel()
+    val config by customThemeViewModel.customThemeConfig.collectAsStateWithLifecycle()
 
     // Animation effects
     val transitionState = remember { MutableTransitionState(false) }
@@ -191,15 +197,19 @@ fun SettingsScreen(
         }
     }
 
-    Box(
+    // ===== WRAPPER COM WALLPAPER =====
+    WallpaperBackground(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Box(
             modifier =
                     Modifier.nestedScroll(nestedScrollConnection).fillMaxSize().graphicsLayer {
                         alpha = contentAlpha
                         translationY = contentOffset.toPx()
                     }
-    ) {
-        val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }
-        LazyColumn(
+        ) {
+            val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }
+            LazyColumn(
                 state = lazyListState,
                 contentPadding = PaddingValues(
                     top = currentTopBarHeightDp + 8.dp,
@@ -209,110 +219,112 @@ fun SettingsScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxSize()
-        ) {
-            item {
-                val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-                ExpressiveSettingsGroup {
-                    val mainCategories = SettingsCategory.entries.filter {
-                        it != SettingsCategory.ABOUT && 
-                        it != SettingsCategory.DEVICE_CAPABILITIES
-                    }
-
-                    val totalItems = mainCategories.size + 3 // Device + Accounts + About
-                    fun shapeFor(index: Int) =
-                        when {
-                            totalItems == 1 -> RoundedCornerShape(24.dp)
-                            index == 0 -> RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
-                            index == totalItems - 1 -> RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
-                            else -> RoundedCornerShape(4.dp)
+            ) {
+                item {
+                    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+                    ExpressiveSettingsGroup {
+                        val mainCategories = SettingsCategory.entries.filter {
+                            it != SettingsCategory.ABOUT && 
+                            it != SettingsCategory.DEVICE_CAPABILITIES
                         }
 
-                    var itemIndex = 0
+                        val totalItems = mainCategories.size + 3 // Device + Accounts + About
+                        fun shapeFor(index: Int) =
+                            when {
+                                totalItems == 1 -> RoundedCornerShape(24.dp)
+                                index == 0 -> RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 4.dp, bottomEnd = 4.dp)
+                                index == totalItems - 1 -> RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
+                                else -> RoundedCornerShape(4.dp)
+                            }
 
-                    mainCategories.forEach { category ->
-                        val colors = getCategoryColors(category, isDark)
+                        var itemIndex = 0
+
+                        mainCategories.forEach { category ->
+                            val colors = getCategoryColors(category, isDark)
+
+                            ExpressiveCategoryItem(
+                                category = category,
+                                customColors = colors,
+                                onClick = {
+                                    if (category == SettingsCategory.EQUALIZER) {
+                                        navController.navigateSafely(Screen.Equalizer.route)
+                                    } else {
+                                        navController.navigateSafely(Screen.SettingsCategory.createRoute(category.id))
+                                    }
+                                },
+                                shape = shapeFor(itemIndex)
+                            )
+                            if (itemIndex < totalItems - 1) {
+                                Spacer(modifier = Modifier.height(2.dp))
+                            }
+                            itemIndex++
+                        }
 
                         ExpressiveCategoryItem(
-                            category = category,
-                            customColors = colors,
-                            onClick = {
-                                if (category == SettingsCategory.EQUALIZER) {
-                                    navController.navigateSafely(Screen.Equalizer.route)
-                                } else {
-                                    navController.navigateSafely(Screen.SettingsCategory.createRoute(category.id))
-                                }
-                            },
+                            category = SettingsCategory.DEVICE_CAPABILITIES,
+                            customColors = getCategoryColors(SettingsCategory.DEVICE_CAPABILITIES, isDark),
+                            onClick = { navController.navigateSafely(Screen.DeviceCapabilities.route) },
                             shape = shapeFor(itemIndex)
                         )
                         if (itemIndex < totalItems - 1) {
                             Spacer(modifier = Modifier.height(2.dp))
                         }
                         itemIndex++
+
+                        ExpressiveNavigationItem(
+                            title = stringResource(R.string.settings_accounts_row_title),
+                            subtitle = stringResource(R.string.settings_accounts_row_subtitle),
+                            icon = Icons.Rounded.AccountCircle,
+                            colors = getAccountsColors(isDark),
+                            onClick = { navController.navigateSafely(Screen.Accounts.route) },
+                            shape = shapeFor(itemIndex)
+                        )
+                        if (itemIndex < totalItems - 1) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                        }
+                        itemIndex++
+
+                        ExpressiveCategoryItem(
+                            category = SettingsCategory.ABOUT,
+                            customColors = getCategoryColors(SettingsCategory.ABOUT, isDark),
+                            onClick = { navController.navigateSafely("about") },
+                            shape = shapeFor(itemIndex)
+                        )
                     }
 
-                    ExpressiveCategoryItem(
-                        category = SettingsCategory.DEVICE_CAPABILITIES,
-                        customColors = getCategoryColors(SettingsCategory.DEVICE_CAPABILITIES, isDark),
-                        onClick = { navController.navigateSafely(Screen.DeviceCapabilities.route) },
-                        shape = shapeFor(itemIndex)
-                    )
-                    if (itemIndex < totalItems - 1) {
-                        Spacer(modifier = Modifier.height(2.dp))
-                    }
-                    itemIndex++
-
-                    ExpressiveNavigationItem(
-                        title = stringResource(R.string.settings_accounts_row_title),
-                        subtitle = stringResource(R.string.settings_accounts_row_subtitle),
-                        icon = Icons.Rounded.AccountCircle,
-                        colors = getAccountsColors(isDark),
-                        onClick = { navController.navigateSafely(Screen.Accounts.route) },
-                        shape = shapeFor(itemIndex)
-                    )
-                    if (itemIndex < totalItems - 1) {
-                        Spacer(modifier = Modifier.height(2.dp))
-                    }
-                    itemIndex++
-
-                    ExpressiveCategoryItem(
-                        category = SettingsCategory.ABOUT,
-                        customColors = getCategoryColors(SettingsCategory.ABOUT, isDark),
-                        onClick = { navController.navigateSafely("about") },
-                        shape = shapeFor(itemIndex)
-                    )
+                    // for player active:
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
-
-                // for player active:
-                Spacer(modifier = Modifier.height(32.dp))
             }
-        }
-        CollapsibleCommonTopBar(
+            CollapsibleCommonTopBar(
                 title = stringResource(R.string.settings_top_bar_title),
                 collapseFraction = collapseFraction,
                 headerHeight = currentTopBarHeightDp,
-                onBackClick = onNavigationIconClick
-        )
+                onBackClick = onNavigationIconClick,
+                containerColor = if (config.isEnabled) Color.Transparent else MaterialTheme.colorScheme.surface
+            )
 
-        // Block interaction during transition
-        var isTransitioning by remember { mutableStateOf(true) }
-        LaunchedEffect(Unit) {
-            kotlinx.coroutines.delay(com.goldensystem.auris.presentation.navigation.TRANSITION_DURATION.toLong())
-            isTransitioning = false
-        }
+            // Block interaction during transition
+            var isTransitioning by remember { mutableStateOf(true) }
+            LaunchedEffect(Unit) {
+                kotlinx.coroutines.delay(com.goldensystem.auris.presentation.navigation.TRANSITION_DURATION.toLong())
+                isTransitioning = false
+            }
 
-        if (isTransitioning) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                     awaitPointerEventScope {
-                        while (true) {
-                            awaitPointerEvent()
+            if (isTransitioning) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                         awaitPointerEventScope {
+                            while (true) {
+                                awaitPointerEvent()
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
         }
-    }
+    } // Fim do WallpaperBackground
 }
 
 @Composable
@@ -435,22 +447,6 @@ fun ExpressiveCategoryItem(
             }
             
             Spacer(modifier = Modifier.width(8.dp))
-            
-//            // Chevron or indicator
-//             Box(
-//                contentAlignment = Alignment.Center,
-//                modifier = Modifier
-//                    .size(36.dp)
-//                    .clip(CircleShape)
-//                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-//            ) {
-//                 Icon(
-//                    imageVector = Icons.Rounded.ChevronRight,
-//                    contentDescription = null,
-//                    tint = MaterialTheme.colorScheme.onSurface,
-//                    modifier = Modifier.size(20.dp)
-//                )
-//            }
         }
     }
 }
@@ -486,7 +482,7 @@ private fun getCategoryColors(category: SettingsCategory, isDark: Boolean): Pair
             SettingsCategory.BACKUP_RESTORE -> Color(0xFF3B4869) to Color(0xFFD9E2FF)
             SettingsCategory.DEVELOPER -> Color(0xFF324F34) to Color(0xFFCBEFD0) 
             SettingsCategory.EQUALIZER -> Color(0xFF6E4E13) to Color(0xFFFFDEAC) 
-            SettingsCategory.DEVICE_CAPABILITIES -> Color(0xFF004D61) to Color(0xFFACEFEE) // Custom teal/cyan mix
+            SettingsCategory.DEVICE_CAPABILITIES -> Color(0xFF004D61) to Color(0xFFACEFEE)
             SettingsCategory.ABOUT -> Color(0xFF3F474D) to Color(0xFFDEE3EB) 
         }
     } else {

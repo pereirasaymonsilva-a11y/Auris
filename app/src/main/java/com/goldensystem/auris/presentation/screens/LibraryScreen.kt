@@ -5,6 +5,8 @@ package com.goldensystem.auris.presentation.screens
 import com.goldensystem.auris.presentation.navigation.navigateSafely
 
 import android.os.Trace
+import com.goldensystem.auris.ui.theme.WallpaperBackground
+import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
 import android.text.format.Formatter
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -440,6 +442,8 @@ fun LibraryScreen(
     // La recolección de estados de alto nivel se mantiene mínima.
     val context = LocalContext.current // Added context
     val haptic = LocalHapticFeedback.current
+    val customThemeViewModel: CustomThemeViewModel = hiltViewModel()
+    val config by customThemeViewModel.customThemeConfig.collectAsStateWithLifecycle()
     val lastTabIndex by playerViewModel.lastLibraryTabIndexFlow.collectAsStateWithLifecycle()
     val favoriteIds by playerViewModel.favoriteSongIds.collectAsStateWithLifecycle() // Reintroducir favoriteIds aquí
     val scope = rememberCoroutineScope() // Mantener si se usa para acciones de UI
@@ -835,9 +839,15 @@ fun LibraryScreen(
 
     val headerContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
 
-    Scaffold(
-        modifier = Modifier.background(brush = gradientBrush),
-        topBar = {
+    // ===== WRAPPER COM WALLPAPER =====
+     WallpaperBackground(
+         modifier = Modifier.fillMaxSize()
+     ) {
+         Scaffold(
+             modifier = Modifier.background(brush = gradientBrush),
+             containerColor = if (config.isEnabled) Color.Transparent else MaterialTheme.colorScheme.background,
+             topBar = {
+
             Column(
                 modifier = Modifier.background(headerContainerColor)
             ) {
@@ -1745,22 +1755,23 @@ fun LibraryScreen(
             }
             //Grad box
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .height(170.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colorStops = arrayOf(
-                                0.0f to Color.Transparent,
-                                0.2f to Color.Transparent,
-                                0.8f to MaterialTheme.colorScheme.surfaceContainerLowest,
-                                1.0f to MaterialTheme.colorScheme.surfaceContainerLowest
-                            )
-                        )
-                    )
-            ) {
+    modifier = Modifier
+        .fillMaxWidth()
+        .align(Alignment.BottomCenter)
+        .height(170.dp)
+        .background(
+            brush = Brush.verticalGradient(
+                colorStops = arrayOf(
+                    0.0f to Color.Transparent,
+                    0.2f to Color.Transparent,
+                    0.8f to (if (config.isEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerLowest),
+                    1.0f to (if (config.isEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerLowest)
+                )
+            )
+        )
+    ) {
 
+                }
             }
         }
     }

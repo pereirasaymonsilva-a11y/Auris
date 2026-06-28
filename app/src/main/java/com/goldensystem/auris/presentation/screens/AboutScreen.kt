@@ -69,6 +69,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -100,7 +101,9 @@ import com.goldensystem.auris.presentation.components.MiniPlayerHeight
 import com.goldensystem.auris.presentation.components.SmartImage
 import com.goldensystem.auris.presentation.navigation.Screen
 import com.goldensystem.auris.presentation.navigation.navigateSafely
+import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
 import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
+import com.goldensystem.auris.ui.theme.WallpaperBackground
 import kotlinx.coroutines.launch
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import kotlin.math.roundToInt
@@ -130,6 +133,9 @@ fun AboutScreen(
     onNavigationIconClick: () -> Unit,
 ) {
     val context = LocalContext.current
+    val customThemeViewModel: CustomThemeViewModel = hiltViewModel()
+    val config by customThemeViewModel.customThemeConfig.collectAsStateWithLifecycle()
+    
     val versionName: String = try {
         val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
         packageInfo.versionName ?: "N/A"
@@ -249,215 +255,221 @@ fun AboutScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .nestedScroll(nestedScrollConnection)
-            .fillMaxSize()
-            .graphicsLayer {
-                alpha = contentAlpha
-                translationY = contentOffset.toPx()
-            },
+    // ===== WRAPPER COM WALLPAPER =====
+    WallpaperBackground(
+        modifier = Modifier.fillMaxSize()
     ) {
-        val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }
-        LazyColumn(
-            state = lazyListState,
-            contentPadding = PaddingValues(
-                top = currentTopBarHeightDp + 8.dp,
-                bottom = MiniPlayerHeight +
-                    WindowInsets.navigationBars
-                        .asPaddingValues()
-                        .calculateBottomPadding() + 12.dp,
-            ),
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
+            modifier = Modifier
+                .nestedScroll(nestedScrollConnection)
+                .fillMaxSize()
+                .graphicsLayer {
+                    alpha = contentAlpha
+                    translationY = contentOffset.toPx()
+                },
         ) {
-            // ---------- Card principal (Auris) ----------
-            item(key = "hero_card") {
-                AboutHeroCard(
-                    versionName = versionName,
-                    onVersionLongPress = {
-                        navController.navigateSafely(Screen.EasterEgg.route)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 8.dp),
-                )
-            }
-
-            // ---------- Seção: Changelog ----------
-            item(key = "changelog_section") {
-                AboutSectionHeader(
-                    title = stringResource(R.string.about_changelog_title),
-                    subtitle = stringResource(R.string.about_version_format, versionName),
-                    modifier = Modifier.padding(top = 24.dp),
-                )
-                ChangelogCard(
-                    text = stringResource(R.string.about_changelog_text),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-            }
-
-            // ---------- Seção: Site Oficial ----------
-            item(key = "official_website_section") {
-                AboutSectionHeader(
-                    title = stringResource(R.string.about_official_website_title),
-                    subtitle = stringResource(R.string.about_official_website_subtitle),
-                    modifier = Modifier.padding(top = 24.dp),
-                )
-                OutlinedButton(
-                    onClick = { openUrl(context, officialWebsite) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary
+            val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }
+            LazyColumn(
+                state = lazyListState,
+                contentPadding = PaddingValues(
+                    top = currentTopBarHeightDp + 8.dp,
+                    bottom = MiniPlayerHeight +
+                        WindowInsets.navigationBars
+                            .asPaddingValues()
+                            .calculateBottomPadding() + 12.dp,
+                ),
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                // ---------- Card principal (Auris) ----------
+                item(key = "hero_card") {
+                    AboutHeroCard(
+                        versionName = versionName,
+                        onVersionLongPress = {
+                            navController.navigateSafely(Screen.EasterEgg.route)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 8.dp),
                     )
-                ) {
-                    Icon(Icons.Rounded.Language, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.about_official_website_button))
+                }
+
+                // ---------- Seção: Changelog ----------
+                item(key = "changelog_section") {
+                    AboutSectionHeader(
+                        title = stringResource(R.string.about_changelog_title),
+                        subtitle = stringResource(R.string.about_version_format, versionName),
+                        modifier = Modifier.padding(top = 24.dp),
+                    )
+                    ChangelogCard(
+                        text = stringResource(R.string.about_changelog_text),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+
+                // ---------- Seção: Site Oficial ----------
+                item(key = "official_website_section") {
+                    AboutSectionHeader(
+                        title = stringResource(R.string.about_official_website_title),
+                        subtitle = stringResource(R.string.about_official_website_subtitle),
+                        modifier = Modifier.padding(top = 24.dp),
+                    )
+                    OutlinedButton(
+                        onClick = { openUrl(context, officialWebsite) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(Icons.Rounded.Language, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.about_official_website_button))
+                    }
+                }
+
+                // ---------- Seção: YouTube ----------
+                item(key = "youtube_section") {
+                    AboutSectionHeader(
+                        title = stringResource(R.string.about_youtube_title),
+                        subtitle = stringResource(R.string.about_youtube_subtitle),
+                        modifier = Modifier.padding(top = 24.dp),
+                    )
+                    OutlinedButton(
+                        onClick = { openUrl(context, youtubeUrl) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(painterResource(R.drawable.ic_youtube), contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.about_youtube_button))
+                    }
+                }
+
+                // ---------- Seção: Redes Sociais (Instagram e TikTok) ----------
+                item(key = "social_media_section") {
+                    AboutSectionHeader(
+                        title = stringResource(R.string.about_social_media_title),
+                        subtitle = "",
+                        modifier = Modifier.padding(top = 24.dp),
+                    )
+                    
+                    // Instagram
+                    OutlinedButton(
+                        onClick = { openUrl(context, instagramUrl) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(painterResource(R.drawable.ic_instagram), contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.about_instagram))
+                    }
+                    
+                    // TikTok
+                    OutlinedButton(
+                        onClick = { openUrl(context, tiktokUrl) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(painterResource(R.drawable.ic_tiktok), contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.about_tiktok))
+                    }
+                }
+
+                // ---------- Seção: Feedback ----------
+                item(key = "feedback_section") {
+                    AboutSectionHeader(
+                        title = stringResource(R.string.about_feedback_title),
+                        subtitle = stringResource(R.string.about_feedback_subtitle),
+                        modifier = Modifier.padding(top = 24.dp),
+                    )
+                    OutlinedButton(
+                        onClick = {
+                            openUrl(context, "https://github.com/pereirasaymonsilva-a11y/Auris/issues/new?template=blank")
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(Icons.Rounded.Campaign, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.about_feedback_button))
+                    }
+                }
+
+                // ---------- Mantenedores ----------
+                item(key = "maintainer_title") {
+                    AboutSectionHeader(
+                        title = stringResource(R.string.about_maintainer_title),
+                        subtitle = stringResource(R.string.about_maintainer_subtitle),
+                        modifier = Modifier.padding(top = 24.dp),
+                    )
+                }
+
+                item(key = "maintainer_card_theo") {
+                    ContributorCard(
+                        contributor = coreMaintainer,
+                        shape = expressiveListShape(index = 0, count = 2),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        onCardClick = coreMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
+                    )
+                }
+
+                item(key = "maintainer_card_saymon") {
+                    ContributorCard(
+                        contributor = aurisMaintainer,
+                        shape = expressiveListShape(index = 1, count = 2),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 3.dp),
+                        onCardClick = aurisMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
+                    )
+                }
+
+                item(key = "bottom_spacer") {
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
 
-            // ---------- Seção: YouTube ----------
-            item(key = "youtube_section") {
-                AboutSectionHeader(
-                    title = stringResource(R.string.about_youtube_title),
-                    subtitle = stringResource(R.string.about_youtube_subtitle),
-                    modifier = Modifier.padding(top = 24.dp),
-                )
-                OutlinedButton(
-                    onClick = { openUrl(context, youtubeUrl) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Icon(painterResource(R.drawable.ic_youtube), contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.about_youtube_button))
-                }
-            }
-
-            // ---------- Seção: Redes Sociais (Instagram e TikTok) ----------
-            item(key = "social_media_section") {
-                AboutSectionHeader(
-                    title = stringResource(R.string.about_social_media_title),
-                    subtitle = "",
-                    modifier = Modifier.padding(top = 24.dp),
-                )
-                
-                // Instagram
-                OutlinedButton(
-                    onClick = { openUrl(context, instagramUrl) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Icon(painterResource(R.drawable.ic_instagram), contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.about_instagram))
-                }
-                
-                // TikTok
-                OutlinedButton(
-                    onClick = { openUrl(context, tiktokUrl) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Icon(painterResource(R.drawable.ic_tiktok), contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.about_tiktok))
-                }
-            }
-
-            // ---------- Seção: Feedback ----------
-            item(key = "feedback_section") {
-                AboutSectionHeader(
-                    title = stringResource(R.string.about_feedback_title),
-                    subtitle = stringResource(R.string.about_feedback_subtitle),
-                    modifier = Modifier.padding(top = 24.dp),
-                )
-                OutlinedButton(
-                    onClick = {
-                        openUrl(context, "https://github.com/pereirasaymonsilva-a11y/Auris/issues/new?template=blank")
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Icon(Icons.Rounded.Campaign, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.about_feedback_button))
-                }
-            }
-
-            // ---------- Mantenedores ----------
-            item(key = "maintainer_title") {
-                AboutSectionHeader(
-                    title = stringResource(R.string.about_maintainer_title),
-                    subtitle = stringResource(R.string.about_maintainer_subtitle),
-                    modifier = Modifier.padding(top = 24.dp),
-                )
-            }
-
-            item(key = "maintainer_card_theo") {
-                ContributorCard(
-                    contributor = coreMaintainer,
-                    shape = expressiveListShape(index = 0, count = 2),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    onCardClick = coreMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
-                )
-            }
-
-            item(key = "maintainer_card_saymon") {
-                ContributorCard(
-                    contributor = aurisMaintainer,
-                    shape = expressiveListShape(index = 1, count = 2),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 3.dp),
-                    onCardClick = aurisMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
-                )
-            }
-
-            item(key = "bottom_spacer") {
-                Spacer(modifier = Modifier.height(24.dp))
-            }
+            CollapsibleCommonTopBar(
+                title = stringResource(R.string.screen_about),
+                collapseFraction = collapseFraction,
+                headerHeight = currentTopBarHeightDp,
+                onBackClick = onNavigationIconClick,
+                expandedTitleStartPadding = 20.dp,
+                collapsedTitleStartPadding = 68.dp,
+                containerColor = if (config.isEnabled) Color.Transparent else MaterialTheme.colorScheme.surface
+            )
         }
-
-        CollapsibleCommonTopBar(
-            title = stringResource(R.string.screen_about),
-            collapseFraction = collapseFraction,
-            headerHeight = currentTopBarHeightDp,
-            onBackClick = onNavigationIconClick,
-            expandedTitleStartPadding = 20.dp,
-            collapsedTitleStartPadding = 68.dp
-        )
-    }
+    } // Fim do WallpaperBackground
 }
 
 // ---------- Componentes Auxiliares ----------
