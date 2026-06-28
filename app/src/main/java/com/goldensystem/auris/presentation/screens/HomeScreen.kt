@@ -1,7 +1,6 @@
 package com.goldensystem.auris.presentation.screens
 
 import com.goldensystem.auris.presentation.navigation.navigateSafely
-
 import android.content.Intent
 import androidx.activity.compose.ReportDrawnWhen
 import androidx.compose.foundation.background
@@ -103,6 +102,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 import androidx.compose.ui.res.stringResource
+import com.goldensystem.auris.ui.theme.WallpaperBackground
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -205,11 +205,18 @@ fun HomeScreen(
         settingsUiState.beta05CleanInstallDisclaimerDismissed == false &&
             !cleanInstallDisclaimerDismissedThisSession
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    // ===== WRAPPER COM WALLPAPER =====
+    WallpaperBackground(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // Toda a UI da HomeScreen fica dentro do WallpaperBackground
+        // O WallpaperBackground só mostra o wallpaper se config.isEnabled for true
+        // Se for false, mostra fundo transparente (que deixa o MaterialTheme aparecer)
+        
         Scaffold(
-    modifier = Modifier.fillMaxSize(),
-    containerColor = if (config.isEnabled) Color.Transparent else MaterialTheme.colorScheme.background,
-           topBar = {
+            modifier = Modifier.fillMaxSize(),
+            containerColor = if (config.isEnabled) Color.Transparent else MaterialTheme.colorScheme.background,
+            topBar = {
                 HomeGradientTopBar(
                     onNavigationIconClick = { navController.navigateSafely(Screen.Settings.route) },
                     onBetaClick = { showBetaInfoBottomSheet = true },
@@ -311,20 +318,27 @@ fun HomeScreen(
                 }
             }
         }
+
+        // Gradiente de fade no fundo
         Box(
-            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter).height(170.dp).background(
-                brush = Brush.verticalGradient(
-                    colorStops = arrayOf(
-                        0.0f to Color.Transparent,
-                        0.2f to Color.Transparent,
-                        0.8f to MaterialTheme.colorScheme.surfaceContainerLowest,
-                        1.0f to MaterialTheme.colorScheme.surfaceContainerLowest
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .height(170.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0.0f to Color.Transparent,
+                            0.2f to Color.Transparent,
+                            0.8f to MaterialTheme.colorScheme.surfaceContainerLowest,
+                            1.0f to MaterialTheme.colorScheme.surfaceContainerLowest
+                        )
                     )
                 )
-            )
         )
-    }
+    } // Fim do WallpaperBackground
 
+    // BottomSheets e dialogs (fora do WallpaperBackground para não serem afetados)
     if (showOptionsBottomSheet) {
         ModalBottomSheet(onDismissRequest = { showOptionsBottomSheet = false }, sheetState = sheetState) {
             HomeOptionsBottomSheet(
@@ -358,7 +372,7 @@ fun HomeScreen(
         )
     }
 
-    // ---------- DIÁLOGO DE PRIMEIRA INSTALAÇÃO ----------
+    // Diálogo de primeira instalação
     if (shouldShowCleanInstallDisclaimer) {
         Beta05CleanInstallDisclaimerDialog(
             onDismiss = { dontShowAgain ->
