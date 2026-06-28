@@ -217,7 +217,7 @@ fun HomeScreen(
         ) { innerPadding ->
             LazyColumn(
                 state = rememberLazyListState(),
-                modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
                     top = innerPadding.calculateTopPadding(),
                     bottom = paddingValuesParent.calculateBottomPadding() + 38.dp + bottomPadding

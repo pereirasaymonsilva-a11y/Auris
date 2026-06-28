@@ -165,7 +165,7 @@ fun PaletteStyleSettingsScreen(
     val contentBottomPadding = bottomInset + if (isMiniPlayerVisible) MiniPlayerHeight + 12.dp else 16.dp
 
     Scaffold(
-        containerColor = previewScheme.background,
+        containerColor = Color.Transparent,
         topBar = {
             PaletteStyleHeader(
                 scheme = previewScheme,

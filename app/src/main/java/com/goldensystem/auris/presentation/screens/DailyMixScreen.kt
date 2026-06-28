@@ -255,7 +255,6 @@ fun DailyMixScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundBrush)
     ) {
         if (dailyMixSongs.isEmpty()) {
             Box(

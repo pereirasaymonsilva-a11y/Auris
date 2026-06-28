@@ -539,7 +539,6 @@ private fun AboutHeroCard(
                 Box(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.tertiaryContainer)
                         .pointerInput(Unit) {
                             detectTapGestures(
                                 onLongPress = {

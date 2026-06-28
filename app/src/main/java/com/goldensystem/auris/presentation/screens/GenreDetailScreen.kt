@@ -268,7 +268,7 @@ fun GenreDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .nestedScroll(nestedScrollConnection)
-                .background(MaterialTheme.colorScheme.background) // Uses new theme background
+                //.background(MaterialTheme.colorScheme.background) //comentado para wallpaper funcionar
         ) {
             // Optimization: Cache Dp conversions
             val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }

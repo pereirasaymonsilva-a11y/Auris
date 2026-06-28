@@ -86,6 +86,9 @@ class CustomThemeViewModel @Inject constructor(
 
     suspend fun resetToDefault() {
         themePreferences.resetCustomTheme()
-        _config.value = CustomThemeConfig()
+        // Recarregar o config do SharedPreferences para garantir consistência
+        _config.value = themePreferences.getCustomTheme() // Se tiver esse método
+        // Ou simplesmente:
+        // _config.value = CustomThemeConfig()
     }
 }

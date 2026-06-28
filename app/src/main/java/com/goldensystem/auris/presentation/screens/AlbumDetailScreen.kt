@@ -278,9 +278,6 @@ fun AlbumDetailScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(
-                            color = MaterialTheme.colorScheme.surface
-                        )
                         .nestedScroll(nestedScrollConnection)
                 ) {
                     val currentTopBarHeightDp = with(density) { topBarHeight.value.toDp() }

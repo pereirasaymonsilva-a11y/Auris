@@ -288,36 +288,36 @@ private fun ColorPickerSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        // Cores principais (12 cores)
+        // Cores principais (12 cores básicas)
         val mainColors = listOf(
+            0xFF000000.toInt(), // Preto
+            0xFF795548.toInt(), // Marrom
             0xFFE53935.toInt(), // Vermelho
-            0xFFD81B60.toInt(), // Rosa
-            0xFF8E24AA.toInt(), // Roxo
-            0xFF5E35B1.toInt(), // Roxo escuro
-            0xFF3949AB.toInt(), // Índigo
-            0xFF1E88E5.toInt(), // Azul
-            0xFF039BE5.toInt(), // Azul claro
-            0xFF00ACC1.toInt(), // Ciano
-            0xFF00897B.toInt(), // Verde água
-            0xFF43A047.toInt(), // Verde
-            0xFFFDD835.toInt(), // Amarelo
-            0xFFFFB300.toInt()  // Laranja
+            0xFFFF9800.toInt(), // Laranja
+            0xFFFFEB3B.toInt(), // Amarelo
+            0xFF8BC34A.toInt(), // Verde claro
+            0xFF2E7D32.toInt(), // Verde escuro
+            0xFF42A5F5.toInt(), // Azul claro
+            0xFF0D47A1.toInt(), // Azul escuro
+            0xFF7B1FA2.toInt(), // Roxo
+            0xFFE91E63.toInt(), // Rosa
+            0xFFFFFFFF.toInt()  // Branco
         )
 
-        // Cores adicionais (tons neutros e variações)
+        // Cores adicionais (cores vibrantes e especiais)
         val additionalColors = listOf(
-            0xFFFF8A65.toInt(), // Laranja claro
-            0xFFA1887F.toInt(), // Marrom
-            0xFF90A4AE.toInt(), // Cinza azulado
-            0xFF607D8B.toInt(), // Cinza azul
-            0xFF795548.toInt(), // Marrom escuro
-            0xFFFFFFFF.toInt(), // Branco
-            0xFFF5F5F5.toInt(), // Cinza claro
-            0xFFE0E0E0.toInt(), // Cinza médio
-            0xFF9E9E9E.toInt(), // Cinza
-            0xFF616161.toInt(), // Cinza escuro
-            0xFF424242.toInt(), // Cinza muito escuro
-            0xFF000000.toInt()  // Preto
+            0xFFFF6F00.toInt(), // Âmbar
+            0xFF00BCD4.toInt(), // Ciano
+            0xFF00E676.toInt(), // Verde neon
+            0xFFFF4081.toInt(), // Rosa neon
+            0xFF651FFF.toInt(), // Roxo profundo
+            0xFF2979FF.toInt(), // Azul vibrante
+            0xFFFF6E40.toInt(), // Coral
+            0xFFF50057.toInt(), // Vermelho neon
+            0xFF00E5FF.toInt(), // Ciano claro
+            0xFF76FF03.toInt(), // Verde limão
+            0xFFD500F9.toInt(), // Magenta
+            0xFFFFAB00.toInt()  // Ouro
         )
 
         // Cor Primária
@@ -452,7 +452,6 @@ private fun WallpaperSection(
     viewModel: CustomThemeViewModel
 ) {
     val context = LocalContext.current
-    var showImagePicker by remember { mutableStateOf(false) }
 
     // Launcher para selecionar imagem da galeria
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -463,24 +462,35 @@ private fun WallpaperSection(
         }
     }
 
-    // Cores para o wallpaper sólido
-    val solidColors = listOf(
-        0xFF1E1234.toInt(), // Roxo escuro (padrão)
+    // Cores para o wallpaper sólido (mesmas cores principais + adicionais)
+    val solidMainColors = listOf(
         0xFF000000.toInt(), // Preto
-        0xFFFFFFFF.toInt(), // Branco
-        0xFFE53935.toInt(), // Vermelho
-        0xFFD81B60.toInt(), // Rosa
-        0xFF8E24AA.toInt(), // Roxo
-        0xFF3949AB.toInt(), // Índigo
-        0xFF1E88E5.toInt(), // Azul
-        0xFF00ACC1.toInt(), // Ciano
-        0xFF43A047.toInt(), // Verde
-        0xFFFDD835.toInt(), // Amarelo
-        0xFFFFB300.toInt(), // Laranja
-        0xFFFF8A65.toInt(), // Laranja claro
         0xFF795548.toInt(), // Marrom
-        0xFF607D8B.toInt(), // Cinza azul
-        0xFF9E9E9E.toInt()  // Cinza
+        0xFFE53935.toInt(), // Vermelho
+        0xFFFF9800.toInt(), // Laranja
+        0xFFFFEB3B.toInt(), // Amarelo
+        0xFF8BC34A.toInt(), // Verde claro
+        0xFF2E7D32.toInt(), // Verde escuro
+        0xFF42A5F5.toInt(), // Azul claro
+        0xFF0D47A1.toInt(), // Azul escuro
+        0xFF7B1FA2.toInt(), // Roxo
+        0xFFE91E63.toInt(), // Rosa
+        0xFFFFFFFF.toInt()  // Branco
+    )
+
+    val solidAdditionalColors = listOf(
+        0xFFFF6F00.toInt(), // Âmbar
+        0xFF00BCD4.toInt(), // Ciano
+        0xFF00E676.toInt(), // Verde neon
+        0xFFFF4081.toInt(), // Rosa neon
+        0xFF651FFF.toInt(), // Roxo profundo
+        0xFF2979FF.toInt(), // Azul vibrante
+        0xFFFF6E40.toInt(), // Coral
+        0xFFF50057.toInt(), // Vermelho neon
+        0xFF00E5FF.toInt(), // Ciano claro
+        0xFF76FF03.toInt(), // Verde limão
+        0xFFD500F9.toInt(), // Magenta
+        0xFFFFAB00.toInt()  // Ouro
     )
 
     Column(
@@ -522,7 +532,6 @@ private fun WallpaperSection(
 
         when (config.wallpaperType) {
             WallpaperType.SOLID -> {
-                // Usando o mesmo padrão de cores para wallpaper sólido
                 Column {
                     Text(
                         stringResource(R.string.wallpaper_color),
@@ -531,7 +540,6 @@ private fun WallpaperSection(
                         fontWeight = FontWeight.Medium
                     )
                     
-                    // Cores principais para wallpaper
                     Text(
                         "Principais",
                         style = MaterialTheme.typography.labelSmall,
@@ -540,7 +548,7 @@ private fun WallpaperSection(
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(solidColors.take(12)) { color ->
+                        items(solidMainColors) { color ->
                             ColorItem(
                                 color = color,
                                 isSelected = color == config.wallpaperColor,
@@ -551,7 +559,6 @@ private fun WallpaperSection(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // Cores adicionais para wallpaper
                     Text(
                         "Adicionais",
                         style = MaterialTheme.typography.labelSmall,
@@ -560,7 +567,7 @@ private fun WallpaperSection(
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(solidColors.drop(12)) { color ->
+                        items(solidAdditionalColors) { color ->
                             ColorItem(
                                 color = color,
                                 isSelected = color == config.wallpaperColor,
@@ -582,16 +589,40 @@ private fun WallpaperSection(
                     Text(stringResource(R.string.wallpaper_select_from_gallery))
                 }
 
-                config.wallpaperUri?.let { uri ->
+                // Mostrar a imagem selecionada
+                if (config.wallpaperUri != null) {
                     AsyncImage(
-                        model = Uri.parse(uri),
-                        contentDescription = null,
+                        model = Uri.parse(config.wallpaperUri),
+                        contentDescription = "Wallpaper selecionado",
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(150.dp)
                             .clip(RoundedCornerShape(12.dp)),
                         contentScale = ContentScale.Crop
                     )
+                } else {
+                    // Placeholder quando não há imagem
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                Icons.Rounded.Image,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                "Nenhuma imagem selecionada",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
 

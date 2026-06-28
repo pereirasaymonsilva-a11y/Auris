@@ -260,7 +260,6 @@ fun StatsScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
                 .nestedScroll(nestedScrollConnection)
         ) {
             if (uiState.isLoading && summary == null) {

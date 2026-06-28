@@ -10,10 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.goldensystem.auris.data.preferences.WallpaperType
 import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
 
@@ -24,11 +27,11 @@ fun CustomThemeWrapper(
 ) {
     val viewModel: CustomThemeViewModel = hiltViewModel()
     val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     if (config.isEnabled) {
         val colorScheme = customColorScheme(config, isDark)
         
-        // Aplica o MaterialTheme com as cores personalizadas
         MaterialTheme(
             colorScheme = colorScheme,
             typography = Typography,
@@ -48,10 +51,20 @@ fun CustomThemeWrapper(
                     WallpaperType.GALLERY -> {
                         config.wallpaperUri?.let { uri ->
                             AsyncImage(
-                                model = Uri.parse(uri),
-                                contentDescription = null,
+                                model = ImageRequest.Builder(context)
+                                    .data(Uri.parse(uri))
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "Wallpaper da galeria",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
+                            )
+                        } ?: run {
+                            // Fallback se não tiver URI
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(config.backgroundColor))
                             )
                         }
                     }
@@ -59,17 +72,27 @@ fun CustomThemeWrapper(
                     WallpaperType.SERVER -> {
                         config.wallpaperUrl?.let { url ->
                             AsyncImage(
-                                model = url,
-                                contentDescription = null,
+                                model = ImageRequest.Builder(context)
+                                    .data(url)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "Wallpaper do servidor",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
+                            )
+                        } ?: run {
+                            // Fallback se não tiver URL
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(config.backgroundColor))
                             )
                         }
                     }
                 }
 
                 // ===== DIM OVERLAY (escurecimento) =====
-                if (config.wallpaperType != WallpaperType.SOLID) {
+                if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperDim > 0f) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -77,12 +100,32 @@ fun CustomThemeWrapper(
                     )
                 }
 
-                // ===== CONTEÚDO =====
-                content()
+                // ===== BLUR OVERLAY (desfoque) - se tiver suporte =====
+                // Nota: O blur nativo no Android é complexo, isso é um placeholder
+                if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperBlur > 0f) {
+                    // Para blur real, você precisaria usar RenderScript ou bibliotecas como BlurKit
+                    // Por enquanto, apenas um overlay translúcido simulando blur
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Color.White.copy(
+                                    alpha = config.wallpaperBlur * 0.3f
+                                )
+                            )
+                    )
+                }
+
+                // ===== CONTEÚDO COM FUNDO TRANSPARENTE =====
+                // O conteúdo precisa ter fundo transparente para mostrar o wallpaper
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    content()
+                }
             }
         }
     } else {
-        // ===== TEMA PADRÃO (usa o que veio do AurisTheme) =====
         content()
     }
 }

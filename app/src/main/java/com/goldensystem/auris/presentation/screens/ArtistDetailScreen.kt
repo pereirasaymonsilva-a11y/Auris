@@ -240,9 +240,9 @@ fun ArtistDetailScreen(
         shapes = MaterialTheme.shapes
     ) {
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surface
-    ) {
+    modifier = Modifier.fillMaxSize(),
+    color = Color.Transparent
+       ) {
         Box(modifier = Modifier.nestedScroll(nestedScrollConnection)) {
             when {
                 uiState.isLoading && uiState.artist == null -> {

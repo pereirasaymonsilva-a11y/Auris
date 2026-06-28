@@ -163,7 +163,6 @@ fun NavBarCornerRadiusContent(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
                 .padding(top = paddingValues.calculateTopPadding())
                 .padding(bottom = if (isFullWidth) 0.dp else paddingValues.calculateBottomPadding())
         ) {

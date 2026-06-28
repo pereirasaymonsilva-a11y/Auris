@@ -175,7 +175,6 @@ fun RecentlyPlayedScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundBrush)
     ) {
         if (recentlyPlayedSourceSongs == null) {
             Box(
