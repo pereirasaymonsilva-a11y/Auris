@@ -87,8 +87,7 @@ class CustomThemeViewModel @Inject constructor(
     suspend fun resetToDefault() {
         themePreferences.resetCustomTheme()
         // Recarregar o config do SharedPreferences
-        // Como não temos getCustomTheme(), usamos o valor padrão
-        _config.value = CustomThemeConfig()
+        _config.value = CustomThemeConfig() // Isso já tem o backgroundColor padrão: 0xFF1E1234
         // E também recarregamos do SharedPreferences para garantir consistência
         themePreferences.customThemeConfig.collect { config ->
             _config.value = config

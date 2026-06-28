@@ -57,6 +57,38 @@ val SERVER_WALLPAPERS = listOf(
     "https://example.com/wallpaper5.jpg"
 )
 
+// Cores principais (12 cores básicas)
+val MAIN_COLORS = listOf(
+    0xFF000000.toInt(), // Preto
+    0xFF795548.toInt(), // Marrom
+    0xFFE53935.toInt(), // Vermelho
+    0xFFFF9800.toInt(), // Laranja
+    0xFFFFEB3B.toInt(), // Amarelo
+    0xFF8BC34A.toInt(), // Verde claro
+    0xFF2E7D32.toInt(), // Verde escuro
+    0xFF42A5F5.toInt(), // Azul claro
+    0xFF0D47A1.toInt(), // Azul escuro
+    0xFF7B1FA2.toInt(), // Roxo
+    0xFFE91E63.toInt(), // Rosa
+    0xFFFFFFFF.toInt()  // Branco
+)
+
+// Cores adicionais (cores vibrantes e especiais)
+val ADDITIONAL_COLORS = listOf(
+    0xFFFF6F00.toInt(), // Âmbar
+    0xFF00BCD4.toInt(), // Ciano
+    0xFF00E676.toInt(), // Verde neon
+    0xFFFF4081.toInt(), // Rosa neon
+    0xFF651FFF.toInt(), // Roxo profundo
+    0xFF2979FF.toInt(), // Azul vibrante
+    0xFFFF6E40.toInt(), // Coral
+    0xFFF50057.toInt(), // Vermelho neon
+    0xFF00E5FF.toInt(), // Ciano claro
+    0xFF76FF03.toInt(), // Verde limão
+    0xFFD500F9.toInt(), // Magenta
+    0xFFFFAB00.toInt()  // Ouro
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomThemeScreen(
@@ -288,44 +320,12 @@ private fun ColorPickerSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        // Cores principais (12 cores básicas)
-        val mainColors = listOf(
-            0xFF000000.toInt(), // Preto
-            0xFF795548.toInt(), // Marrom
-            0xFFE53935.toInt(), // Vermelho
-            0xFFFF9800.toInt(), // Laranja
-            0xFFFFEB3B.toInt(), // Amarelo
-            0xFF8BC34A.toInt(), // Verde claro
-            0xFF2E7D32.toInt(), // Verde escuro
-            0xFF42A5F5.toInt(), // Azul claro
-            0xFF0D47A1.toInt(), // Azul escuro
-            0xFF7B1FA2.toInt(), // Roxo
-            0xFFE91E63.toInt(), // Rosa
-            0xFFFFFFFF.toInt()  // Branco
-        )
-
-        // Cores adicionais (cores vibrantes e especiais)
-        val additionalColors = listOf(
-            0xFFFF6F00.toInt(), // Âmbar
-            0xFF00BCD4.toInt(), // Ciano
-            0xFF00E676.toInt(), // Verde neon
-            0xFFFF4081.toInt(), // Rosa neon
-            0xFF651FFF.toInt(), // Roxo profundo
-            0xFF2979FF.toInt(), // Azul vibrante
-            0xFFFF6E40.toInt(), // Coral
-            0xFFF50057.toInt(), // Vermelho neon
-            0xFF00E5FF.toInt(), // Ciano claro
-            0xFF76FF03.toInt(), // Verde limão
-            0xFFD500F9.toInt(), // Magenta
-            0xFFFFAB00.toInt()  // Ouro
-        )
-
         // Cor Primária
         ColorPickerRow(
             label = stringResource(R.string.custom_theme_primary_color),
             currentColor = config.primaryColor,
-            mainColors = mainColors,
-            additionalColors = additionalColors,
+            mainColors = MAIN_COLORS,
+            additionalColors = ADDITIONAL_COLORS,
             onColorSelected = { viewModel.updatePrimaryColor(it) }
         )
 
@@ -333,26 +333,20 @@ private fun ColorPickerSection(
         ColorPickerRow(
             label = stringResource(R.string.custom_theme_secondary_color),
             currentColor = config.secondaryColor,
-            mainColors = mainColors,
-            additionalColors = additionalColors,
+            mainColors = MAIN_COLORS,
+            additionalColors = ADDITIONAL_COLORS,
             onColorSelected = { viewModel.updateSecondaryColor(it) }
         )
 
-        // Cor de Fundo
-        ColorPickerRow(
-            label = stringResource(R.string.custom_theme_background_color),
-            currentColor = config.backgroundColor,
-            mainColors = mainColors,
-            additionalColors = additionalColors + listOf(0xFF1E1234.toInt()), // Adiciona roxo escuro personalizado
-            onColorSelected = { viewModel.updateBackgroundColor(it) }
-        )
+        // ===== COR DE FUNDO REMOVIDA DAQUI =====
+        // Agora ela está na seção Wallpaper > Sólido
 
         // Cor de Superfície
         ColorPickerRow(
             label = stringResource(R.string.custom_theme_surface_color),
             currentColor = config.surfaceColor,
-            mainColors = mainColors,
-            additionalColors = additionalColors,
+            mainColors = MAIN_COLORS,
+            additionalColors = ADDITIONAL_COLORS,
             onColorSelected = { viewModel.updateSurfaceColor(it) }
         )
     }
@@ -462,37 +456,6 @@ private fun WallpaperSection(
         }
     }
 
-    // Cores para o wallpaper sólido (mesmas cores principais + adicionais)
-    val solidMainColors = listOf(
-        0xFF000000.toInt(), // Preto
-        0xFF795548.toInt(), // Marrom
-        0xFFE53935.toInt(), // Vermelho
-        0xFFFF9800.toInt(), // Laranja
-        0xFFFFEB3B.toInt(), // Amarelo
-        0xFF8BC34A.toInt(), // Verde claro
-        0xFF2E7D32.toInt(), // Verde escuro
-        0xFF42A5F5.toInt(), // Azul claro
-        0xFF0D47A1.toInt(), // Azul escuro
-        0xFF7B1FA2.toInt(), // Roxo
-        0xFFE91E63.toInt(), // Rosa
-        0xFFFFFFFF.toInt()  // Branco
-    )
-
-    val solidAdditionalColors = listOf(
-        0xFFFF6F00.toInt(), // Âmbar
-        0xFF00BCD4.toInt(), // Ciano
-        0xFF00E676.toInt(), // Verde neon
-        0xFFFF4081.toInt(), // Rosa neon
-        0xFF651FFF.toInt(), // Roxo profundo
-        0xFF2979FF.toInt(), // Azul vibrante
-        0xFFFF6E40.toInt(), // Coral
-        0xFFF50057.toInt(), // Vermelho neon
-        0xFF00E5FF.toInt(), // Ciano claro
-        0xFF76FF03.toInt(), // Verde limão
-        0xFFD500F9.toInt(), // Magenta
-        0xFFFFAB00.toInt()  // Ouro
-    )
-
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -532,48 +495,36 @@ private fun WallpaperSection(
 
         when (config.wallpaperType) {
             WallpaperType.SOLID -> {
-                Column {
-                    Text(
-                        stringResource(R.string.wallpaper_color),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Medium
-                    )
-                    
-                    Text(
-                        "Principais",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(solidMainColors) { color ->
-                            ColorItem(
-                                color = color,
-                                isSelected = color == config.wallpaperColor,
-                                onColorSelected = { viewModel.setWallpaperColor(it) }
-                            )
-                        }
-                    }
+                // ===== COR DE FUNDO MOVIDA PARA CÁ =====
+                // Agora a cor de fundo está aqui, na seção Wallpaper > Sólido
+                ColorPickerRow(
+                    label = stringResource(R.string.custom_theme_background_color),
+                    currentColor = config.backgroundColor,
+                    mainColors = MAIN_COLORS,
+                    additionalColors = ADDITIONAL_COLORS + listOf(0xFF1E1234.toInt()),
+                    onColorSelected = { viewModel.updateBackgroundColor(it) }
+                )
 
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        "Adicionais",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                // Card de pré-visualização da cor
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(config.backgroundColor)
                     )
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        items(solidAdditionalColors) { color ->
-                            ColorItem(
-                                color = color,
-                                isSelected = color == config.wallpaperColor,
-                                onColorSelected = { viewModel.setWallpaperColor(it) }
-                            )
-                        }
+                        Text(
+                            "Pré-visualização do Wallpaper",
+                            color = Color(config.backgroundColor).contrastTextColor(),
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp
+                        )
                     }
                 }
             }
@@ -677,7 +628,7 @@ private fun WallpaperSection(
             }
         }
 
-        // Controles adicionais (blur e dim)
+        // Controles adicionais (blur e dim) - apenas para GALERY e SERVER
         if (config.wallpaperType != WallpaperType.SOLID) {
             Column {
                 SliderWithLabel(
