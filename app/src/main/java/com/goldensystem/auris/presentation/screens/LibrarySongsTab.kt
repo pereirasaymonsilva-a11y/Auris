@@ -34,41 +34,43 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
+import com.goldensystem.auris.R
 import com.goldensystem.auris.data.model.LibraryTabId
 import com.goldensystem.auris.data.model.Song
 import com.goldensystem.auris.data.model.StorageFilter
 import com.goldensystem.auris.data.model.SortOption
+import com.goldensystem.auris.presentation.components.ExpressiveScrollBar
 import com.goldensystem.auris.presentation.components.MiniPlayerHeight
-import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
+import com.goldensystem.auris.presentation.components.songFastScrollLabel
 import com.goldensystem.auris.presentation.components.subcomps.EnhancedSongListItem
+import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
+import com.goldensystem.auris.presentation.viewmodel.PlayerViewModel
+import com.goldensystem.auris.ui.theme.WallpaperBackground
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.LoadState
-import com.goldensystem.auris.R
-import com.goldensystem.auris.presentation.components.ExpressiveScrollBar
-import com.goldensystem.auris.presentation.components.songFastScrollLabel
-
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LibrarySongsTab(
-    songs: LazyPagingItems<Song>, // Changed from ImmutableList<Song>
-    isLoading: Boolean, // Kept for initial load or other states, though Paging has its own
+    songs: LazyPagingItems<Song>,
+    isLoading: Boolean,
     playerViewModel: PlayerViewModel,
     bottomBarHeight: Dp,
     onMoreOptionsClick: (Song) -> Unit,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    sortOption: SortOption, // Added sortOption parameter
-    // Multi-selection parameters
+    sortOption: SortOption,
     isSelectionMode: Boolean = false,
     selectedSongIds: Set<String> = emptySet(),
     onSongLongPress: (Song) -> Unit = {},
@@ -79,6 +81,11 @@ fun LibrarySongsTab(
     storageFilter: StorageFilter = StorageFilter.ALL,
     hasCurrentSong: Boolean = false
 ) {
+    // ===== ADICIONADO: CustomThemeViewModel para wallpaper =====
+    val customThemeViewModel: CustomThemeViewModel = hiltViewModel()
+    val config by customThemeViewModel.customThemeConfig.collectAsStateWithLifecycle()
+    // ============================================================
+    
     val listState = rememberLazyListState()
     val pullToRefreshState = rememberPullToRefreshState()
     val coroutineScope = rememberCoroutineScope()
@@ -101,10 +108,6 @@ fun LibrarySongsTab(
             .distinctUntilChanged()
     }.collectAsStateWithLifecycle(initialValue = null)
 
-    // Check if list is effectively empty (based on Paging state)
-    // val isListEmpty = songs.itemCount == 0 && songs.loadState.refresh is LoadState.NotLoading
-    
-    // Calculate current song index for button visibility
     val currentSongListIndex = remember(songs.itemSnapshotList, currentSongId) {
         if (currentSongId == null) -1
         else {
@@ -118,7 +121,6 @@ fun LibrarySongsTab(
         }
     }
 
-    // Scroll Handler from ViewModel
     LaunchedEffect(Unit) {
         playerViewModel.scrollToIndexEvent.collect { index ->
             if (index >= 0) {
@@ -129,7 +131,6 @@ fun LibrarySongsTab(
         }
     }
 
-    // New action just triggers the ViewModel request
     val locateCurrentSongAction: (() -> Unit)? = remember(currentSongId) {
         if (currentSongId == null) {
             null
@@ -153,7 +154,6 @@ fun LibrarySongsTab(
         listState.scrollToItem(0)
     }
 
-    // Apply a second reset after paging finishes refresh, to avoid key-anchor jumps.
     LaunchedEffect(songs.loadState.refresh, pendingSongSortScrollReset) {
         if (!pendingSongSortScrollReset) return@LaunchedEffect
         if (songs.loadState.refresh is LoadState.Loading) {
@@ -165,28 +165,17 @@ fun LibrarySongsTab(
         pendingSongSortScrollReset = false
     }
     
-    // Visibility Logic:
-    // If the song is NOT in the current snapshot (index == -1), we assume it's unloaded, so SHOW the button.
-    // If the song IS in the snapshot (index != -1), we check if it's visible on screen.
-    // - If visible -> Hide button
-    // - If not visible -> Show button
-
     LaunchedEffect(currentSongListIndex, songs, isLoading, listState) {
-        // If list is empty or loading, hide button
         if (songs.itemCount == 0 || isLoading) {
             visibilityCallback(false)
             return@LaunchedEffect
         }
         
-        // If song is not loaded in current Paging snapshot, we ALWAYS show the button
-        // because we don't know if it's visible or not, so we assume it's reachable via the button (which triggers DB lookup)
         if (currentSongListIndex == -1) {
-             // Only show if we actually have a current song
              visibilityCallback(currentSongId != null)
              return@LaunchedEffect
         }
 
-        // If song IS loaded, check visibility using layout info
         snapshotFlow {
             val visibleItems = listState.layoutInfo.visibleItemsInfo
             if (visibleItems.isEmpty()) {
@@ -208,7 +197,6 @@ fun LibrarySongsTab(
         }
     }
 
-    // Handle different loading states
     val refreshState = songs.loadState.refresh
     val reachedEndOfPagination = songs.loadState.append.endOfPaginationReached
     val shouldShowInitialLoading = songs.itemCount == 0 && (
@@ -241,7 +229,6 @@ fun LibrarySongsTab(
             }
         }
         shouldShowInitialLoading -> {
-            // Initial loading - show skeleton placeholders
             LazyColumn(
                 modifier = Modifier
                     .padding(start = 12.dp, end = 24.dp, bottom = 6.dp)
@@ -258,7 +245,7 @@ fun LibrarySongsTab(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + ListExtraBottomGap)
             ) {
-                items(12, key = { "skeleton_song_$it" }) { // Show 12 skeleton items
+                items(12, key = { "skeleton_song_$it" }) {
                     EnhancedSongListItem(
                         song = Song.emptySong(),
                         isPlaying = false,
@@ -278,107 +265,105 @@ fun LibrarySongsTab(
             )
         }
         else -> {
-            // Songs loaded
-            Box(modifier = Modifier.fillMaxSize()) {
-                PullToRefreshBox(
-                    isRefreshing = isRefreshing,
-                    onRefresh = onRefresh,
-                    state = pullToRefreshState,
-                    modifier = Modifier.fillMaxSize(),
-                    indicator = {
-                        PullToRefreshDefaults.LoadingIndicator(
-                            state = pullToRefreshState,
-                            isRefreshing = isRefreshing,
-                            modifier = Modifier.align(Alignment.TopCenter)
-                        )
-                    }
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        LazyColumn(
-                            modifier = Modifier
-                                .padding(start = 12.dp, end = if (listState.canScrollForward || listState.canScrollBackward) 22.dp else 12.dp, bottom = 6.dp)
-                                .clip(
-                                    RoundedCornerShape(
-                                        topStart = 26.dp,
-                                        topEnd = 26.dp,
-                                        bottomStart = PlayerSheetCollapsedCornerRadius,
-                                        bottomEnd = PlayerSheetCollapsedCornerRadius
-                                    )
-                                ),
-                            state = listState,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + 30.dp)
-                        ) {
-                            //item(key = "songs_top_spacer") { Spacer(Modifier.height(0.dp)) }
-
-                            items(
-                                count = songs.itemCount,
-                                key = { index -> songs.peek(index)?.id ?: index },
-                                contentType = { "song" }
-                            ) { index ->
-                                val song = songs[index]
-                                
-                                if (song != null) {
-                                    val isSelected = selectedSongIds.contains(song.id)
+            // ===== WRAPPER COM WALLPAPER =====
+            WallpaperBackground(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    PullToRefreshBox(
+                        isRefreshing = isRefreshing,
+                        onRefresh = onRefresh,
+                        state = pullToRefreshState,
+                        modifier = Modifier.fillMaxSize(),
+                        indicator = {
+                            PullToRefreshDefaults.LoadingIndicator(
+                                state = pullToRefreshState,
+                                isRefreshing = isRefreshing,
+                                modifier = Modifier.align(Alignment.TopCenter)
+                            )
+                        }
+                    ) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .padding(start = 12.dp, end = if (listState.canScrollForward || listState.canScrollBackward) 22.dp else 12.dp, bottom = 6.dp)
+                                    .clip(
+                                        RoundedCornerShape(
+                                            topStart = 26.dp,
+                                            topEnd = 26.dp,
+                                            bottomStart = PlayerSheetCollapsedCornerRadius,
+                                            bottomEnd = PlayerSheetCollapsedCornerRadius
+                                        )
+                                    ),
+                                state = listState,
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(bottom = bottomBarHeight + MiniPlayerHeight + 30.dp)
+                            ) {
+                                items(
+                                    count = songs.itemCount,
+                                    key = { index -> songs.peek(index)?.id ?: index },
+                                    contentType = { "song" }
+                                ) { index ->
+                                    val song = songs[index]
                                     
-                                    val rememberedOnMoreOptionsClick: (Song) -> Unit = remember(onMoreOptionsClick) {
-                                        { songFromListItem -> onMoreOptionsClick(songFromListItem) }
-                                    }
-                                    
-                                    // In selection mode, click toggles selection instead of playing
-                                    val rememberedOnClick: () -> Unit = remember(song, isSelectionMode) {
-                                        if (isSelectionMode) {
-                                            { onSongSelectionToggle(song) }
-                                        } else {
-                                            { playerViewModel.showAndPlaySongFromLibrary(song) }
+                                    if (song != null) {
+                                        val isSelected = selectedSongIds.contains(song.id)
+                                        
+                                        val rememberedOnMoreOptionsClick: (Song) -> Unit = remember(onMoreOptionsClick) {
+                                            { songFromListItem -> onMoreOptionsClick(songFromListItem) }
                                         }
-                                    }
-                                    
-                                    val rememberedOnLongPress: () -> Unit = remember(song) {
-                                        { onSongLongPress(song) }
-                                    }
+                                        
+                                        val rememberedOnClick: () -> Unit = remember(song, isSelectionMode) {
+                                            if (isSelectionMode) {
+                                                { onSongSelectionToggle(song) }
+                                            } else {
+                                                { playerViewModel.showAndPlaySongFromLibrary(song) }
+                                            }
+                                        }
+                                        
+                                        val rememberedOnLongPress: () -> Unit = remember(song) {
+                                            { onSongLongPress(song) }
+                                        }
 
-                                    LibraryPlaybackAwareSongItem(
-                                        song = song,
-                                        playerViewModel = playerViewModel,
-                                        isSelected = isSelected,
-                                        //albumArtSize = 46.dp,
-                                        isSelectionMode = isSelectionMode,
-                                        selectionIndex = if (isSelectionMode) getSelectionIndex(song.id) else null,
-                                        onLongPress = rememberedOnLongPress,
-                                        onMoreOptionsClick = rememberedOnMoreOptionsClick,
-                                        onClick = rememberedOnClick
-                                    )
-                                } else {
-                                     // Placeholder
-                                     EnhancedSongListItem(
-                                        song = Song.emptySong(),
-                                        isPlaying = false,
-                                        isLoading = true,
-                                        isCurrentSong = false,
-                                        onMoreOptionsClick = {},
-                                        onClick = {}
-                                     )
+                                        LibraryPlaybackAwareSongItem(
+                                            song = song,
+                                            playerViewModel = playerViewModel,
+                                            isSelected = isSelected,
+                                            isSelectionMode = isSelectionMode,
+                                            selectionIndex = if (isSelectionMode) getSelectionIndex(song.id) else null,
+                                            onLongPress = rememberedOnLongPress,
+                                            onMoreOptionsClick = rememberedOnMoreOptionsClick,
+                                            onClick = rememberedOnClick
+                                        )
+                                    } else {
+                                         EnhancedSongListItem(
+                                            song = Song.emptySong(),
+                                            isPlaying = false,
+                                            isLoading = true,
+                                            isCurrentSong = false,
+                                            onMoreOptionsClick = {},
+                                            onClick = {}
+                                         )
+                                    }
                                 }
                             }
-                        }
-                        
-                        // ScrollBar Overlay
-                        val bottomPadding = if (hasCurrentSong)
-                            bottomBarHeight + MiniPlayerHeight + 16.dp 
-                        else 
-                            bottomBarHeight + 16.dp
+                            
+                            val bottomPadding = if (hasCurrentSong)
+                                bottomBarHeight + MiniPlayerHeight + 16.dp 
+                            else 
+                                bottomBarHeight + 16.dp
 
-                        ExpressiveScrollBar(
-                            modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .padding(end = 4.dp, top = 16.dp, bottom = bottomPadding),
-                            listState = listState,
-                            dragLabelProvider = songFastScrollLabelProvider
-                        )
+                            ExpressiveScrollBar(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .padding(end = 4.dp, top = 16.dp, bottom = bottomPadding),
+                                listState = listState,
+                                dragLabelProvider = songFastScrollLabelProvider
+                            )
+                        }
                     }
                 }
-            }
+            } // Fim do WallpaperBackground
         }
     }
 }

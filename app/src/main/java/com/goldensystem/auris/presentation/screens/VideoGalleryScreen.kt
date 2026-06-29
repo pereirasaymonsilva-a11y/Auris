@@ -44,9 +44,11 @@ import com.goldensystem.auris.R
 import com.goldensystem.auris.data.model.QueueContext
 import com.goldensystem.auris.data.model.VideoItem
 import com.goldensystem.auris.data.model.VideoQueue
+import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
 import com.goldensystem.auris.presentation.viewmodel.GalleryUiState
 import com.goldensystem.auris.presentation.viewmodel.SortMode
 import com.goldensystem.auris.presentation.viewmodel.VideoGalleryViewModel
+import com.goldensystem.auris.ui.theme.WallpaperBackground
 import com.goldensystem.auris.utils.VideoQueueHolder
 import com.goldensystem.auris.utils.VideoUtils
 
@@ -59,6 +61,11 @@ fun VideoGalleryScreen(
 ) {
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    
+    // ===== ADICIONADO: CustomThemeViewModel para wallpaper =====
+    val customThemeViewModel: CustomThemeViewModel = hiltViewModel()
+    val config by customThemeViewModel.customThemeConfig.collectAsStateWithLifecycle()
+    // ============================================================
 
     val permission = if (Build.VERSION.SDK_INT >= 33) {
         Manifest.permission.READ_MEDIA_VIDEO
@@ -85,64 +92,79 @@ fun VideoGalleryScreen(
         }
     }
 
-    if (!hasPermission) {
-        PermissionScreen(onRequest = { permissionLauncher.launch(permission) })
-    } else {
-        Scaffold(
-            topBar = {
-                GalleryTopBar(
-                    state = state,
-                    onSearchChange = viewModel::setSearchQuery,
-                    onSortChange = viewModel::setSortMode,
-                    onContextChange = viewModel::setContext,
-                    onToggleShowFolders = viewModel::setShowFoldersOnly,
-                    onBack = {
-                        if (state.currentContext == QueueContext.FOLDER) viewModel.exitFolder()
-                        else onBack()
-                    }
-                )
-            }
-        ) { padding ->
-            Box(modifier = Modifier.padding(padding)) {
-                when {
-                    state.isLoading -> LoadingState()
-                    state.errorMessage != null -> ErrorState(state.errorMessage!!) { viewModel.loadVideos() }
-                    state.showFoldersOnly && state.folders.isEmpty() -> EmptyState()
-                    state.displayVideos.isEmpty() && !state.showFoldersOnly && state.searchQuery.isNotBlank() -> EmptySearchState()
-                    state.displayVideos.isEmpty() && !state.showFoldersOnly && state.searchQuery.isBlank() -> EmptyState()
-                    else -> {
-                        val showFeatured = !state.showFoldersOnly && state.searchQuery.isBlank() && state.currentContext != QueueContext.FOLDER
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(minSize = 120.dp),
-                            contentPadding = PaddingValues(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            if (state.showFoldersOnly) {
-                                items(state.folders, key = { it.path }) { folder ->
-                                    FolderItem(folder) { viewModel.enterFolder(folder.path) }
-                                }
-                            } else {
-                                val videos = state.displayVideos
-                                if (showFeatured && videos.isNotEmpty()) {
-                                    val featured = viewModel.getFeaturedVideo()
-                                    if (featured != null) {
-                                        item(span = { GridItemSpan(maxLineSpan) }) {
-                                            FeaturedVideoItem(
-                                                video = featured,
-                                                viewModel = viewModel,
-                                                onClick = { queue ->
-                                                    viewModel.incrementViewCount(featured.id)
+    // ===== WRAPPER COM WALLPAPER =====
+    WallpaperBackground(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (!hasPermission) {
+            PermissionScreen(onRequest = { permissionLauncher.launch(permission) })
+        } else {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = if (config.isEnabled) Color.Transparent else MaterialTheme.colorScheme.background,
+                topBar = {
+                    GalleryTopBar(
+                        state = state,
+                        onSearchChange = viewModel::setSearchQuery,
+                        onSortChange = viewModel::setSortMode,
+                        onContextChange = viewModel::setContext,
+                        onToggleShowFolders = viewModel::setShowFoldersOnly,
+                        onBack = {
+                            if (state.currentContext == QueueContext.FOLDER) viewModel.exitFolder()
+                            else onBack()
+                        }
+                    )
+                }
+            ) { padding ->
+                Box(modifier = Modifier.padding(padding)) {
+                    when {
+                        state.isLoading -> LoadingState()
+                        state.errorMessage != null -> ErrorState(state.errorMessage!!) { viewModel.loadVideos() }
+                        state.showFoldersOnly && state.folders.isEmpty() -> EmptyState()
+                        state.displayVideos.isEmpty() && !state.showFoldersOnly && state.searchQuery.isNotBlank() -> EmptySearchState()
+                        state.displayVideos.isEmpty() && !state.showFoldersOnly && state.searchQuery.isBlank() -> EmptyState()
+                        else -> {
+                            val showFeatured = !state.showFoldersOnly && state.searchQuery.isBlank() && state.currentContext != QueueContext.FOLDER
+                            LazyVerticalGrid(
+                                columns = GridCells.Adaptive(minSize = 120.dp),
+                                contentPadding = PaddingValues(12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                if (state.showFoldersOnly) {
+                                    items(state.folders, key = { it.path }) { folder ->
+                                        FolderItem(folder) { viewModel.enterFolder(folder.path) }
+                                    }
+                                } else {
+                                    val videos = state.displayVideos
+                                    if (showFeatured && videos.isNotEmpty()) {
+                                        val featured = viewModel.getFeaturedVideo()
+                                        if (featured != null) {
+                                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                                FeaturedVideoItem(
+                                                    video = featured,
+                                                    viewModel = viewModel,
+                                                    onClick = { queue ->
+                                                        viewModel.incrementViewCount(featured.id)
+                                                        VideoQueueHolder.setQueue(queue)
+                                                        onOpenPlayerWithQueue(queue)
+                                                    }
+                                                )
+                                            }
+                                            items(videos.filter { it.id != featured.id }, key = { it.id }) { video ->
+                                                VideoGridItem(video, viewModel) { queue ->
+                                                    viewModel.incrementViewCount(video.id)
                                                     VideoQueueHolder.setQueue(queue)
                                                     onOpenPlayerWithQueue(queue)
                                                 }
-                                            )
-                                        }
-                                        items(videos.filter { it.id != featured.id }, key = { it.id }) { video ->
-                                            VideoGridItem(video, viewModel) { queue ->
-                                                viewModel.incrementViewCount(video.id)
-                                                VideoQueueHolder.setQueue(queue)
-                                                onOpenPlayerWithQueue(queue)
+                                            }
+                                        } else {
+                                            items(videos, key = { it.id }) { video ->
+                                                VideoGridItem(video, viewModel) { queue ->
+                                                    viewModel.incrementViewCount(video.id)
+                                                    VideoQueueHolder.setQueue(queue)
+                                                    onOpenPlayerWithQueue(queue)
+                                                }
                                             }
                                         }
                                     } else {
@@ -154,14 +176,6 @@ fun VideoGalleryScreen(
                                             }
                                         }
                                     }
-                                } else {
-                                    items(videos, key = { it.id }) { video ->
-                                        VideoGridItem(video, viewModel) { queue ->
-                                            viewModel.incrementViewCount(video.id)
-                                            VideoQueueHolder.setQueue(queue)
-                                            onOpenPlayerWithQueue(queue)
-                                        }
-                                    }
                                 }
                             }
                         }
@@ -169,7 +183,7 @@ fun VideoGalleryScreen(
                 }
             }
         }
-    }
+    } // Fim do WallpaperBackground
 }
 
 @Composable
