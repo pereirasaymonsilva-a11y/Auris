@@ -10,6 +10,7 @@ import com.goldensystem.auris.data.preferences.CustomThemeConfig
 import com.goldensystem.auris.data.preferences.ThemePreferences
 import com.goldensystem.auris.data.preferences.WallpaperType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CustomThemeViewModel @Inject constructor(
     private val themePreferences: ThemePreferences,
-    private val context: Context  // 👈 ADICIONAR context
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _config = MutableStateFlow(CustomThemeConfig())
