@@ -1,7 +1,7 @@
 Auris 🎵
 
 <p align="center">
-  <img src="assets/icon.png" width="128"/>
+  <img src="assets/icon.auris" width="128"/>
 </p><h3 align="center">
 A experiência definitiva para sua música e vídeos no Android
 </h3><p align="center">
@@ -12,13 +12,13 @@ Player moderno desenvolvido pela Golden System Studios com foco em desempenho, p
 📸 Capturas de Tela
 
 <p align="center">
-  <img src="assets/screenshot1.jpg" width="180"/>
-  <img src="assets/screenshot2.jpg" width="180"/>
-  <img src="assets/screenshot3.jpg" width="180"/>
+  <img src="assets/screenshots/screenshot1.jpg" width="180"/>
+  <img src="assets/screeeshots/screenshot2.jpg" width="180"/>
+  <img src="assets/screenshots/screenshot3.jpg" width="180"/>
 </p><p align="center">
-  <img src="assets/screenshot4.jpg" width="180"/>
-  <img src="assets/screenshot5.jpg" width="180"/>
-  <img src="assets/screenshot6.jpg" width="180"/>
+  <img src="assets/screenshots/screenshot4.jpg" width="180"/>
+  <img src="assets/screenshots/screenshot5.jpg" width="180"/>
+  <img src="assets/screenshots/screenshot6.jpg" width="180"/>
 </p>
 
 ✨ O que é o Auris?
@@ -59,6 +59,10 @@ O objetivo é simples: entregar um player bonito, rápido e poderoso sem abrir m
 - Tema dourado exclusivo do Auris
 - Animações fluidas
 - Extração automática de cores
+- Tema totalmente personalizado
+- Papel de parede(você escolhe o papel de parede)
+    --PAPEL DE PAREDE--
+    Você escolhe uma imagem ou uma cor pra ficar visível no fundo das telas como a tela de início, tela de pesquisa, tela de reprodução de músicas, configurações entre outras...
 
 📚 Biblioteca Inteligente
 
@@ -109,7 +113,12 @@ WorkManager| Processamento em segundo plano
 📱 Requisitos
 
 - Android 11 ou superior
+- Android 12+ recomendado
 - Arquitetura ARM64 recomendada
+- 4RAM+
+- 400mb de memória disponível(recomendado)
+   --ATENÇÃO--
+    O app nao vai ultrapassar dos 400mb, pra uso comum ele costuma pesar cerca de 250mb, mas o app pode pesar mais caso não otimize ou utilize download via nuvem, ou também se você tiver muitas músicas no dispositivo ele pode ultrapassar o limite de cache caso você altere o limite nas configurações(vem por padrão 20mb)
 
 ---
 
