@@ -270,7 +270,7 @@ class MainActivity : ComponentActivity() {
     // ===== AURIS THEME (controla Claro/Escuro/Seguir Sistema) =====
     AurisTheme(darkTheme = useDarkTheme) {
         // ===== SE FOR CUSTOM, USA O WRAPPER =====
-        /*if (appThemeMode == AppThemeMode.CUSTOM) {*/
+        if (appThemeMode == AppThemeMode.CUSTOM) {
             CustomThemeWrapper(isDark = useDarkTheme) {
                 AppContent(
                     showSetupScreen = showSetupScreen,
@@ -285,7 +285,7 @@ class MainActivity : ComponentActivity() {
                     }
                 )
             }
-        /*} else {
+        } else {
             // ===== TEMA NORMAL (SEM CUSTOM) =====
             AppContent(
                 showSetupScreen = showSetupScreen,
@@ -299,7 +299,7 @@ class MainActivity : ComponentActivity() {
                     showCrashReportDialog = false
                 }
             )
-        }*/
+        }
     }
 }
         handleIntent(intent)

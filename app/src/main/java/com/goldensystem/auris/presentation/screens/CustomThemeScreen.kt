@@ -561,13 +561,13 @@ private fun WallpaperSection(
     val context = LocalContext.current
 
     // Launcher para selecionar imagem da galeria
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            viewModel.setWallpaperFromGallery(it.toString())
-        }
+   val galleryLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.GetContent()
+) { uri: Uri? ->
+    uri?.let {
+        viewModel.saveWallpaperFromGallery(it.toString())
     }
+}
 
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
