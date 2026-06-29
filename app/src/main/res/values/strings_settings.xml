@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  
-  
-<!-- res/values/strings_settings.xml -->
+
+
+
+<!-- Settings > Appearance > Custom Theme -->
+<string name="setcat_custom_theme_title">Tema Personalizado</string>
+<string name="setcat_custom_theme_subtitle">Personalize cores, wallpapers e estilo do app</string>
 <string name="setcat_theme_custom">Personalizado 🎨</string>
 <string name="custom_theme_container_color">Cor dos Containers</string>
 <string name="custom_theme_title">Tema Personalizado</string>
@@ -27,6 +30,7 @@
 
 
 
+<!-- res/values/strings_settings.xml -->
 <string name="setup_lyrics_title">Song lyrics</string>
 <string name="setup_lyrics_subtitle">Customize how lyrics are displayed during playback</string>
 <string name="setup_lyrics_source_label">Lyrics source</string>

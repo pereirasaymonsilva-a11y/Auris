@@ -537,23 +537,55 @@ fun SettingsCategoryScreen(
                                 )
 // (adicionando a opção PERSONALIZADO):(SAYMON SILVA PEREIRA)
     ThemeSelectorItem(
-        label = stringResource(R.string.setcat_app_theme_label),
-        description = stringResource(R.string.setcat_app_theme_desc),
-        options = mapOf(
-            AppThemeMode.LIGHT to stringResource(R.string.setcat_theme_light),
-            AppThemeMode.DARK to stringResource(R.string.setcat_theme_dark),
-            AppThemeMode.FOLLOW_SYSTEM to stringResource(R.string.setcat_theme_follow_system),
-            AppThemeMode.CUSTOM to stringResource(R.string.setcat_theme_custom)  // <-- NOVO(tema personalizado)
-        ),
-        selectedKey = uiState.appThemeMode,
-        onSelectionChanged = { 
-            settingsViewModel.setAppThemeMode(it)
-            if (it == AppThemeMode.CUSTOM) {
-                navController.navigateSafely(Screen.CustomTheme.route)
-            }
-        },
-        leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) }
-    )
+            label = stringResource(R.string.setcat_app_theme_label),
+            description = stringResource(R.string.setcat_app_theme_desc),
+            options = mapOf(
+                AppThemeMode.LIGHT to stringResource(R.string.setcat_theme_light),
+                AppThemeMode.DARK to stringResource(R.string.setcat_theme_dark),
+                AppThemeMode.FOLLOW_SYSTEM to stringResource(R.string.setcat_theme_follow_system),
+                AppThemeMode.CUSTOM to stringResource(R.string.setcat_theme_custom)
+            ),
+            selectedKey = uiState.appThemeMode,
+            onSelectionChanged = { settingsViewModel.setAppThemeMode(it) },
+            leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) }
+        )
+        
+        // Card de Tema Personalizado - aparece APENAS quando CUSTOM está selecionado
+        AnimatedVisibility(
+            visible = uiState.appThemeMode == AppThemeMode.CUSTOM,
+            enter = fadeIn() + expandVertically(
+                animationSpec = spring(
+                    dampingRatio = 0.8f,
+                    stiffness = 400f
+                )
+            ),
+            exit = fadeOut() + shrinkVertically(
+                animationSpec = spring(
+                    dampingRatio = 0.8f,
+                    stiffness = 500f
+                )
+            )
+        ) {
+            SettingsItem(
+                title = stringResource(R.string.setcat_custom_theme_title),
+                subtitle = stringResource(R.string.setcat_custom_theme_subtitle),
+                leadingIcon = { 
+                    Icon(
+                        Icons.Outlined.Style,  // Ou use Icons.Outlined.Palette se disponível
+                        null,
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                },
+                trailingIcon = { 
+                    Icon(
+                        Icons.Rounded.ChevronRight, 
+                        stringResource(R.string.cd_open), 
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                onClick = { navController.navigateSafely(Screen.CustomTheme.route) }
+            )
+        }
                                 SwitchSettingItem(
                                     title = stringResource(R.string.setcat_smooth_corners_title),
                                     subtitle = stringResource(R.string.setcat_smooth_corners_subtitle),

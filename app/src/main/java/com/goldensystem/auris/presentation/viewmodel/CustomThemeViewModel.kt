@@ -83,6 +83,11 @@ class CustomThemeViewModel @Inject constructor(
     fun setWallpaperDim(dim: Float) {
         _config.update { it.copy(wallpaperDim = dim) }
     }
+    
+    suspend fun disableCustomTheme() {
+    themePreferences.setCustomTheme(_config.value.copy(isEnabled = false))
+    _config.value = _config.value.copy(isEnabled = false)
+       }
 
     suspend fun saveCustomTheme() {
         themePreferences.setCustomTheme(_config.value.copy(isEnabled = true))
