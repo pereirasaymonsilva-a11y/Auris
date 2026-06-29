@@ -118,6 +118,9 @@ fun CustomThemeWrapper(
             }
         }
     } else {
-        content()
+        // 👇 CORREÇÃO: Volta para o tema normal (AurisTheme)
+        AurisTheme(darkTheme = isDark) {
+            content()
+        }
     }
 }
