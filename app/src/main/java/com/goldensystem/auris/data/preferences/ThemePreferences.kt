@@ -33,9 +33,9 @@ data class CustomThemeConfig(
 )
 
 enum class WallpaperType {
-    SOLID,      // Cor sólida
-    GALLERY,    // Foto da galeria
-    SERVER      // Servidor do app
+    SOLID,
+    GALLERY,
+    SERVER
 }
 
 @Singleton
@@ -48,6 +48,7 @@ class ThemePreferences @Inject constructor(
         private val SECONDARY_COLOR = intPreferencesKey("custom_secondary_color")
         private val BACKGROUND_COLOR = intPreferencesKey("custom_background_color")
         private val SURFACE_COLOR = intPreferencesKey("custom_surface_color")
+        private val CONTAINER_COLOR = intPreferencesKey("custom_container_color")
         
         private val WALLPAPER_TYPE = stringPreferencesKey("wallpaper_type")
         private val WALLPAPER_COLOR = intPreferencesKey("wallpaper_color")
@@ -55,7 +56,6 @@ class ThemePreferences @Inject constructor(
         private val WALLPAPER_URL = stringPreferencesKey("wallpaper_url")
         private val WALLPAPER_BLUR = floatPreferencesKey("wallpaper_blur")
         private val WALLPAPER_DIM = floatPreferencesKey("wallpaper_dim")
-        private val CONTAINER_COLOR = intPreferencesKey("custom_container_color")
     }
 
     val customThemeConfig: Flow<CustomThemeConfig> = dataStore.data.map { prefs ->
@@ -67,11 +67,11 @@ class ThemePreferences @Inject constructor(
             surfaceColor = prefs[SURFACE_COLOR] ?: 0xFF2A1F40.toInt(),
             containerColor = prefs[CONTAINER_COLOR] ?: 0xFF2A1F40.toInt(),
             wallpaperType = try {
-            val typeName = prefs[WALLPAPER_TYPE] ?: WallpaperType.SOLID.name
-            WallpaperType.valueOf(typeName)
-                } catch (_: Exception) {
-            WallpaperType.SOLID
-                },
+                val typeName = prefs[WALLPAPER_TYPE] ?: WallpaperType.SOLID.name
+                WallpaperType.valueOf(typeName)
+            } catch (_: Exception) {
+                WallpaperType.SOLID
+            },
             wallpaperColor = prefs[WALLPAPER_COLOR] ?: 0xFF1E1234.toInt(),
             wallpaperUri = prefs[WALLPAPER_URI],
             wallpaperUrl = prefs[WALLPAPER_URL],
@@ -87,13 +87,13 @@ class ThemePreferences @Inject constructor(
             prefs[SECONDARY_COLOR] = config.secondaryColor
             prefs[BACKGROUND_COLOR] = config.backgroundColor
             prefs[SURFACE_COLOR] = config.surfaceColor
+            prefs[CONTAINER_COLOR] = config.containerColor
             prefs[WALLPAPER_TYPE] = config.wallpaperType.name
             prefs[WALLPAPER_COLOR] = config.wallpaperColor
             prefs[WALLPAPER_URI] = config.wallpaperUri ?: ""
             prefs[WALLPAPER_URL] = config.wallpaperUrl ?: ""
             prefs[WALLPAPER_BLUR] = config.wallpaperBlur
             prefs[WALLPAPER_DIM] = config.wallpaperDim
-            prefs[CONTAINER_COLOR] = config.containerColor
         }
     }
 

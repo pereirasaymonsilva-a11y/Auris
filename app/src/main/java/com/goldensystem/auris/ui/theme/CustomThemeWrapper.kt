@@ -29,16 +29,7 @@ fun CustomThemeWrapper(
     val context = LocalContext.current
 
     if (config.isEnabled) {
-        val baseColorScheme = customColorScheme(config, isDark)
-        
-        // Cria um ColorScheme com containerColor personalizado
-        val colorScheme = baseColorScheme.copy(
-            surfaceContainer = Color(config.containerColor),
-            surfaceContainerLow = Color(config.containerColor).copy(alpha = 0.9f),
-            surfaceContainerHigh = Color(config.containerColor).copy(alpha = 0.8f),
-            surfaceContainerLowest = Color(config.containerColor).copy(alpha = 0.95f),
-            surfaceContainerHighest = Color(config.containerColor).copy(alpha = 0.7f)
-        )
+        val colorScheme = customColorScheme(config, isDark)
         
         MaterialTheme(
             colorScheme = colorScheme,
@@ -46,7 +37,6 @@ fun CustomThemeWrapper(
             shapes = Shapes
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                // ===== WALLPAPER =====
                 when (config.wallpaperType) {
                     WallpaperType.SOLID -> {
                         Box(
@@ -97,7 +87,6 @@ fun CustomThemeWrapper(
                     }
                 }
 
-                // ===== DIM OVERLAY (escurecimento) =====
                 if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperDim > 0f) {
                     Box(
                         modifier = Modifier
@@ -106,7 +95,6 @@ fun CustomThemeWrapper(
                     )
                 }
 
-                // ===== BLUR OVERLAY (desfoque) =====
                 if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperBlur > 0f) {
                     Box(
                         modifier = Modifier
@@ -119,7 +107,6 @@ fun CustomThemeWrapper(
                     )
                 }
 
-                // ===== CONTEÚDO =====
                 Box(
                     modifier = Modifier.fillMaxSize()
                 ) {

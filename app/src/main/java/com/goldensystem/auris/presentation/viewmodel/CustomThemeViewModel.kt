@@ -34,12 +34,12 @@ class CustomThemeViewModel @Inject constructor(
         _config.update { it.copy(primaryColor = color) }
     }
 
-    fun updateContainerColor(color: Int) {
-    _config.update { it.copy(containerColor = color) }
-    }
-
     fun updateSecondaryColor(color: Int) {
         _config.update { it.copy(secondaryColor = color) }
+    }
+
+    fun updateContainerColor(color: Int) {
+        _config.update { it.copy(containerColor = color) }
     }
 
     fun updateBackgroundColor(color: Int) {
@@ -90,9 +90,7 @@ class CustomThemeViewModel @Inject constructor(
 
     suspend fun resetToDefault() {
         themePreferences.resetCustomTheme()
-        // Recarregar o config do SharedPreferences
-        _config.value = CustomThemeConfig() // Isso já tem o backgroundColor padrão: 0xFF1E1234
-        // E também recarregamos do SharedPreferences para garantir consistência
+        _config.value = CustomThemeConfig()
         themePreferences.customThemeConfig.collect { config ->
             _config.value = config
         }

@@ -126,19 +126,11 @@ fun AurisTheme(
     AurisStatusBarStyle(color = defaultStatusBarColor)
 
     CompositionLocalProvider(LocalAurisDarkTheme provides darkTheme) {
-        // Pega a config do tema personalizado
         val viewModel: CustomThemeViewModel = hiltViewModel()
         val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
 
         if (config.isEnabled) {
-            // Cria um ColorScheme com containerColor personalizado
-            val customColorScheme = finalColorScheme.copy(
-                surfaceContainer = Color(config.containerColor),
-                surfaceContainerLow = Color(config.containerColor).copy(alpha = 0.9f),
-                surfaceContainerHigh = Color(config.containerColor).copy(alpha = 0.8f),
-                surfaceContainerLowest = Color(config.containerColor).copy(alpha = 0.95f),
-                surfaceContainerHighest = Color(config.containerColor).copy(alpha = 0.7f)
-            )
+            val customColorScheme = customColorScheme(config, darkTheme)
 
             MaterialTheme(
                 colorScheme = customColorScheme,
@@ -146,7 +138,6 @@ fun AurisTheme(
                 shapes = Shapes
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Wallpaper
                     when (config.wallpaperType) {
                         WallpaperType.SOLID -> {
                             Box(
@@ -175,7 +166,6 @@ fun AurisTheme(
                         }
                     }
 
-                    // Dim
                     if (config.wallpaperType != WallpaperType.SOLID) {
                         Box(
                             modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = config.wallpaperDim))
