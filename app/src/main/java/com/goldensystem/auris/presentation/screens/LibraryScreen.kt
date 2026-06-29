@@ -1028,22 +1028,27 @@ fun LibraryScreen(
                     .fillMaxSize()
             ) {
                 Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 0.dp, vertical = 0.dp), // Removed horizontal padding for more space
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = AbsoluteSmoothCornerShape(
-                        cornerRadiusTL = 34.dp,
-                        smoothnessAsPercentBL = 60,
-                        cornerRadiusBL = 0.dp,
-                        smoothnessAsPercentBR = 60,
-                        cornerRadiusBR = 0.dp,
-                        smoothnessAsPercentTR = 60,
-                        cornerRadiusTR = 34.dp,
-                        smoothnessAsPercentTL = 60
-                    )
-                    // shape = AbsoluteSmoothCornerShape(cornerRadiusTL = 24.dp, smoothnessAsPercentTR = 60, /*...*/) // Your custom shape
-                ) {
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(horizontal = 0.dp, vertical = 0.dp),
+    color = if (config.isEnabled) {
+        // Quando o wallpaper está ativo: fundo com transparência
+        MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+    } else {
+        // Quando wallpaper não está ativo: fundo normal
+        MaterialTheme.colorScheme.surface
+    },
+    shape = AbsoluteSmoothCornerShape(
+        cornerRadiusTL = 34.dp,
+        smoothnessAsPercentBL = 60,
+        cornerRadiusBL = 0.dp,
+        smoothnessAsPercentBR = 60,
+        cornerRadiusBR = 0.dp,
+        smoothnessAsPercentTR = 60,
+        cornerRadiusTR = 34.dp,
+        smoothnessAsPercentTL = 60
+    )
+) {
                     Column(Modifier.fillMaxSize()) {
                         // OPTIMIZACIÓN: La lógica de ordenamiento ahora es más eficiente.
                         val availableSortOptions by playerViewModel.availableSortOptions.collectAsStateWithLifecycle()
@@ -1261,27 +1266,23 @@ fun LibraryScreen(
                                 // AQUI COMEÇA A ALTERAÇÃO: Botão de sincronização Auris Online
                                 // ======================================================
                                 Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 26.dp,
-                        topEnd = 26.dp,
-                        bottomStart = if (currentTabId == LibraryTabId.SONGS) 26.dp else 0.dp,
-                        bottomEnd = if (currentTabId == LibraryTabId.SONGS) 26.dp else 0.dp
-                    )
-                ),
-            color = if (config.isEnabled) {
-        MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.7f)
-    } else {
-        MaterialTheme.colorScheme.surfaceContainerLow
-    },
-            shape = RoundedCornerShape(
+    modifier = Modifier
+        .fillMaxWidth()
+        .clip(
+            RoundedCornerShape(
                 topStart = 26.dp,
                 topEnd = 26.dp,
                 bottomStart = if (currentTabId == LibraryTabId.SONGS) 26.dp else 0.dp,
                 bottomEnd = if (currentTabId == LibraryTabId.SONGS) 26.dp else 0.dp
             )
+        ),
+    color = Color.Transparent,
+    shape = RoundedCornerShape(
+        topStart = 26.dp,
+        topEnd = 26.dp,
+        bottomStart = if (currentTabId == LibraryTabId.SONGS) 26.dp else 0.dp,
+        bottomEnd = if (currentTabId == LibraryTabId.SONGS) 26.dp else 0.dp
+    )
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
