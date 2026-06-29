@@ -29,7 +29,10 @@ fun CustomThemeWrapper(
     val context = LocalContext.current
 
     if (config.isEnabled) {
-        val colorScheme = customColorScheme(config, isDark)
+        val baseScheme = customColorScheme(config, isDark)
+        val colorScheme = baseScheme.copy(
+            surfaceContainer = Color(config.containerColor)
+        )
         
         MaterialTheme(
             colorScheme = colorScheme,

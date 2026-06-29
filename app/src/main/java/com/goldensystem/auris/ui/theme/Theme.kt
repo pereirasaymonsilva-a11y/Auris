@@ -130,7 +130,11 @@ fun AurisTheme(
         val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
 
         if (config.isEnabled) {
-            val customColorScheme = customColorScheme(config, darkTheme)
+            // USA O customColorScheme E SOBRESCREVE APENAS O surfaceContainer
+            val baseScheme = customColorScheme(config, darkTheme)
+            val customColorScheme = baseScheme.copy(
+                surfaceContainer = Color(config.containerColor)
+            )
 
             MaterialTheme(
                 colorScheme = customColorScheme,
