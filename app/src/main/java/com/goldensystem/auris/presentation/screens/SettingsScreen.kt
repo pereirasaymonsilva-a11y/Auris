@@ -301,7 +301,7 @@ fun SettingsScreen(
                 collapseFraction = collapseFraction,
                 headerHeight = currentTopBarHeightDp,
                 onBackClick = onNavigationIconClick,
-                containerColor = if (config.isEnabled) Color.Transparent else MaterialTheme.colorScheme.surface
+                containerColor = Color.Transparent
             )
 
             // Block interaction during transition
