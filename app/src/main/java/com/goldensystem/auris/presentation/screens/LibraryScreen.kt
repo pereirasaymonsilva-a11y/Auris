@@ -1260,63 +1260,87 @@ fun LibraryScreen(
                                 // ======================================================
                                 // AQUI COMEÇA A ALTERAÇÃO: Botão de sincronização Auris Online
                                 // ======================================================
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    LibraryActionRow(
-                                        modifier = Modifier.weight(1f),
-                                        onMainActionClick = {
-                                            when (tabTitles.getOrNull(currentTabIndex)?.toLibraryTabIdOrNull()) {
-                                                LibraryTabId.PLAYLISTS -> showPlaylistCreationTypeDialog = true
-                                                LibraryTabId.LIKED -> playerViewModel.shuffleFavoriteSongs()
-                                                LibraryTabId.ALBUMS -> playerViewModel.shuffleRandomAlbum()
-                                                LibraryTabId.ARTISTS -> playerViewModel.shuffleRandomArtist()
-                                                else -> playerViewModel.shuffleAllSongs()
-                                            }
-                                        },
-                                        iconRotation = iconRotation,
-                                        showSortButton = sanitizedSortOptions.isNotEmpty(),
-                                        showLocateButton = showLocateButton,
-                                        onSortClick = { playerViewModel.showSortingSheet() },
-                                        onLocateClick = { locateAction?.invoke() },
-                                        isPlaylistTab = currentTabId == LibraryTabId.PLAYLISTS,
-                                        isFoldersTab = currentTabId == LibraryTabId.FOLDERS && (!playerUiState.isFoldersPlaylistView || playerUiState.currentFolder != null),
-                                        onImportM3uClick = { m3uImportLauncher.launch("audio/x-mpegurl") },
-                                        currentFolder = playerUiState.currentFolder,
-                                        folderRootPath = playerUiState.folderSourceRootPath.ifBlank {
-                                            Environment.getExternalStorageDirectory().path
-                                        },
-                                        folderRootLabel = playerUiState.folderSource.displayName,
-                                        onFolderClick = { playerViewModel.navigateToFolder(it) },
-                                        onNavigateBack = { playerViewModel.navigateBackFolder() },
-                                        isShuffleEnabled = isShuffleEnabled,
-                                        showStorageFilterButton = currentTabId == LibraryTabId.SONGS ||
-                                                currentTabId == LibraryTabId.ALBUMS ||
-                                                currentTabId == LibraryTabId.ARTISTS ||
-                                                currentTabId == LibraryTabId.LIKED ||
-                                                (ENABLE_FOLDERS_STORAGE_FILTER && currentTabId == LibraryTabId.FOLDERS),
-                                        currentStorageFilter = playerUiState.currentStorageFilter,
-                                        onStorageFilterClick = { playerViewModel.toggleStorageFilter() }
-                                    )
-                                    // Botão de sincronização do Auris Online (visível apenas quando filtro Online está ativo)
-                                    if (playerUiState.currentStorageFilter == StorageFilter.ONLINE) {
-                                        IconButton(
-                                            onClick = {
-                                                playerViewModel.syncAurisOnline()
-                                                allSongsLazyPagingItems.refresh()
-                                                albumsLazyPagingItems.refresh()
-                                            },
-                                            modifier = Modifier.size(48.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Rounded.Sync,
-                                                contentDescription = "Sincronizar Auris Online",
-                                                tint = MaterialTheme.colorScheme.primary
-                                            )
-                                        }
-                                    }
-                                }
+                                Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 26.dp,
+                        topEnd = 26.dp,
+                        bottomStart = if (currentTabId == LibraryTabId.SONGS) 26.dp else 0.dp,
+                        bottomEnd = if (currentTabId == LibraryTabId.SONGS) 26.dp else 0.dp
+                    )
+                ),
+            color = if (config.isEnabled) {
+        MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.7f)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerLow
+    },
+            shape = RoundedCornerShape(
+                topStart = 26.dp,
+                topEnd = 26.dp,
+                bottomStart = if (currentTabId == LibraryTabId.SONGS) 26.dp else 0.dp,
+                bottomEnd = if (currentTabId == LibraryTabId.SONGS) 26.dp else 0.dp
+            )
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                LibraryActionRow(
+                    modifier = Modifier.weight(1f),
+                    onMainActionClick = {
+                        when (tabTitles.getOrNull(currentTabIndex)?.toLibraryTabIdOrNull()) {
+                            LibraryTabId.PLAYLISTS -> showPlaylistCreationTypeDialog = true
+                            LibraryTabId.LIKED -> playerViewModel.shuffleFavoriteSongs()
+                            LibraryTabId.ALBUMS -> playerViewModel.shuffleRandomAlbum()
+                            LibraryTabId.ARTISTS -> playerViewModel.shuffleRandomArtist()
+                            else -> playerViewModel.shuffleAllSongs()
+                        }
+                    },
+                    iconRotation = iconRotation,
+                    showSortButton = sanitizedSortOptions.isNotEmpty(),
+                    showLocateButton = showLocateButton,
+                    onSortClick = { playerViewModel.showSortingSheet() },
+                    onLocateClick = { locateAction?.invoke() },
+                    isPlaylistTab = currentTabId == LibraryTabId.PLAYLISTS,
+                    isFoldersTab = currentTabId == LibraryTabId.FOLDERS && (!playerUiState.isFoldersPlaylistView || playerUiState.currentFolder != null),
+                    onImportM3uClick = { m3uImportLauncher.launch("audio/x-mpegurl") },
+                    currentFolder = playerUiState.currentFolder,
+                    folderRootPath = playerUiState.folderSourceRootPath.ifBlank {
+                        Environment.getExternalStorageDirectory().path
+                    },
+                    folderRootLabel = playerUiState.folderSource.displayName,
+                    onFolderClick = { playerViewModel.navigateToFolder(it) },
+                    onNavigateBack = { playerViewModel.navigateBackFolder() },
+                    isShuffleEnabled = isShuffleEnabled,
+                    showStorageFilterButton = currentTabId == LibraryTabId.SONGS ||
+                            currentTabId == LibraryTabId.ALBUMS ||
+                            currentTabId == LibraryTabId.ARTISTS ||
+                            currentTabId == LibraryTabId.LIKED ||
+                            (ENABLE_FOLDERS_STORAGE_FILTER && currentTabId == LibraryTabId.FOLDERS),
+                    currentStorageFilter = playerUiState.currentStorageFilter,
+                    onStorageFilterClick = { playerViewModel.toggleStorageFilter() }
+                )
+                // Botão de sincronização do Auris Online
+                if (playerUiState.currentStorageFilter == StorageFilter.ONLINE) {
+                    IconButton(
+                        onClick = {
+                            playerViewModel.syncAurisOnline()
+                            allSongsLazyPagingItems.refresh()
+                            albumsLazyPagingItems.refresh()
+                        },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Sync,
+                            contentDescription = "Sincronizar Auris Online",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        } // Fim do Surface
                                 // ======================================================
                                 // FIM DA ALTERAÇÃO
                                 // ======================================================
