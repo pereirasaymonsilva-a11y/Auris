@@ -96,7 +96,7 @@ val ADDITIONAL_COLORS = listOf(
     0xFFFFAB00.toInt()  // Ouro
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun CustomThemeScreen(
     navController: NavController,
