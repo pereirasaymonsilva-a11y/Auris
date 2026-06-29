@@ -1,6 +1,9 @@
 // presentation/viewmodel/CustomThemeViewModel.kt
 package com.goldensystem.auris.presentation.viewmodel
 
+import android.content.Context
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldensystem.auris.data.preferences.CustomThemeConfig
@@ -12,11 +15,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 
 @HiltViewModel
 class CustomThemeViewModel @Inject constructor(
-    private val themePreferences: ThemePreferences
+    private val themePreferences: ThemePreferences,
+    private val context: Context  // 👈 ADICIONAR context
 ) : ViewModel() {
 
     private val _config = MutableStateFlow(CustomThemeConfig())
@@ -85,9 +91,9 @@ class CustomThemeViewModel @Inject constructor(
     }
     
     suspend fun disableCustomTheme() {
-    themePreferences.setCustomTheme(_config.value.copy(isEnabled = false))
-    _config.value = _config.value.copy(isEnabled = false)
-       }
+        themePreferences.setCustomTheme(_config.value.copy(isEnabled = false))
+        _config.value = _config.value.copy(isEnabled = false)
+    }
 
     suspend fun saveCustomTheme() {
         themePreferences.setCustomTheme(_config.value.copy(isEnabled = true))
@@ -98,6 +104,54 @@ class CustomThemeViewModel @Inject constructor(
         _config.value = CustomThemeConfig()
         themePreferences.customThemeConfig.collect { config ->
             _config.value = config
+        }
+    }
+
+    // 👇 FUNÇÃO CORRIGIDA DENTRO DA CLASSE
+    fun saveWallpaperFromGallery(uriString: String) {
+        viewModelScope.launch {
+            try {
+                val uri = Uri.parse(uriString)
+                val inputStream = context.contentResolver.openInputStream(uri)
+                
+                if (inputStream != null) {
+                    val cacheDir = File(context.cacheDir, "wallpapers")
+                    if (!cacheDir.exists()) cacheDir.mkdirs()
+                    
+                    val outputFile = File(cacheDir, "wallpaper_${System.currentTimeMillis()}.jpg")
+                    
+                    FileOutputStream(outputFile).use { output ->
+                        inputStream.copyTo(output)
+                    }
+                    
+                    _config.update { currentConfig ->
+                        currentConfig.copy(
+                            wallpaperUri = outputFile.absolutePath,
+                            wallpaperType = WallpaperType.GALLERY
+                        )
+                    }
+                    
+                    // Salva no preferences
+                    themePreferences.setCustomTheme(_config.value)
+                    
+                    Log.d("CustomTheme", "Wallpaper salvo em: ${outputFile.absolutePath}")
+                }
+            } catch (e: Exception) {
+                Log.e("CustomTheme", "Erro ao salvar wallpaper: ${e.message}")
+            }
+        }
+    }
+
+    // 👇 FUNÇÃO PARA RESETAR O WALLPAPER (quando o arquivo for deletado)
+    fun resetWallpaper() {
+        _config.update { currentConfig ->
+            currentConfig.copy(
+                wallpaperUri = null,
+                wallpaperType = WallpaperType.SOLID
+            )
+        }
+        viewModelScope.launch {
+            themePreferences.setCustomTheme(_config.value)
         }
     }
 }
