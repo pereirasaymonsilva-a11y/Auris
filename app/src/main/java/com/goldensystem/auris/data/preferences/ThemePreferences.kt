@@ -93,7 +93,7 @@ class ThemePreferences @Inject constructor(
             prefs[WALLPAPER_URL] = config.wallpaperUrl ?: ""
             prefs[WALLPAPER_BLUR] = config.wallpaperBlur
             prefs[WALLPAPER_DIM] = config.wallpaperDim
-.           prefs[CONTAINER_COLOR] = config.containerColo
+.           prefs[CONTAINER_COLOR] = config.containerColor
         }
     }
 

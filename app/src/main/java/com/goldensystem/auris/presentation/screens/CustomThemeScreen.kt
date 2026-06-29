@@ -5,12 +5,14 @@ import android.net.Uri
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.navigation.NavController
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -163,7 +165,7 @@ fun CustomThemeScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
-                .graphicsLayer { alpha = animatedAlpha },
+                .graphicsLayer(alpha = animatedAlpha),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Preview do Player (mini)
