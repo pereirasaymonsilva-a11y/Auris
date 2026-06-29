@@ -56,10 +56,9 @@ O objetivo é simples: entregar um player bonito, rápido e poderoso sem abrir m
 - Material Design 3
 - Material You
 - Tema claro e escuro
-- Tema dourado exclusivo do Auris
+- Tema totalmente personalizado
 - Animações fluidas
 - Extração automática de cores
-- Tema totalmente personalizado
 - Papel de parede(você escolhe o papel de parede)
     --PAPEL DE PAREDE--
     Você escolhe uma imagem ou uma cor pra ficar visível no fundo das telas como a tela de início, tela de pesquisa, tela de reprodução de músicas, configurações entre outras...
@@ -73,6 +72,9 @@ O objetivo é simples: entregar um player bonito, rápido e poderoso sem abrir m
 - Pastas
 - Busca avançada
 - Organização automática
+- integração de IA(DeepSeek, Gemini, OpenAI, Grok, entre outras...)
+- Chromecast
+- Criação de playlist com IA
 
 🎤 Letras
 

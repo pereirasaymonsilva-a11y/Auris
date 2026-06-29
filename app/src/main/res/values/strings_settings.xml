@@ -4,6 +4,7 @@
   
 <!-- res/values/strings_settings.xml -->
 <string name="setcat_theme_custom">Personalizado 🎨</string>
+<string name="custom_theme_container_color">Cor dos Containers</string>
 <string name="custom_theme_title">Tema Personalizado</string>
 <string name="custom_theme_colors">Cores</string>
 <string name="custom_theme_wallpaper">Papel de Parede</string>

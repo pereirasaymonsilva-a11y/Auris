@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,7 +29,16 @@ fun CustomThemeWrapper(
     val context = LocalContext.current
 
     if (config.isEnabled) {
-        val colorScheme = customColorScheme(config, isDark)
+        val baseColorScheme = customColorScheme(config, isDark)
+        
+        // Cria um ColorScheme com containerColor personalizado
+        val colorScheme = baseColorScheme.copy(
+            surfaceContainer = Color(config.containerColor),
+            surfaceContainerLow = Color(config.containerColor).copy(alpha = 0.9f),
+            surfaceContainerHigh = Color(config.containerColor).copy(alpha = 0.8f),
+            surfaceContainerLowest = Color(config.containerColor).copy(alpha = 0.95f),
+            surfaceContainerHighest = Color(config.containerColor).copy(alpha = 0.7f)
+        )
         
         MaterialTheme(
             colorScheme = colorScheme,
@@ -44,7 +52,7 @@ fun CustomThemeWrapper(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color(config.wallpaperColor))
+                                .background(Color(config.backgroundColor))
                         )
                     }
                     
@@ -60,7 +68,6 @@ fun CustomThemeWrapper(
                                 contentScale = ContentScale.Crop
                             )
                         } ?: run {
-                            // Fallback se não tiver URI
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -81,7 +88,6 @@ fun CustomThemeWrapper(
                                 contentScale = ContentScale.Crop
                             )
                         } ?: run {
-                            // Fallback se não tiver URL
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -100,11 +106,8 @@ fun CustomThemeWrapper(
                     )
                 }
 
-                // ===== BLUR OVERLAY (desfoque) - se tiver suporte =====
-                // Nota: O blur nativo no Android é complexo, isso é um placeholder
+                // ===== BLUR OVERLAY (desfoque) =====
                 if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperBlur > 0f) {
-                    // Para blur real, você precisaria usar RenderScript ou bibliotecas como BlurKit
-                    // Por enquanto, apenas um overlay translúcido simulando blur
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -116,8 +119,7 @@ fun CustomThemeWrapper(
                     )
                 }
 
-                // ===== CONTEÚDO COM FUNDO TRANSPARENTE =====
-                // O conteúdo precisa ter fundo transparente para mostrar o wallpaper
+                // ===== CONTEÚDO =====
                 Box(
                     modifier = Modifier.fillMaxSize()
                 ) {

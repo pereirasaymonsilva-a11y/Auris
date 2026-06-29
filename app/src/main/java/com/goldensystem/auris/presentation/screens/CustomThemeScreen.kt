@@ -5,11 +5,15 @@ import android.net.Uri
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.navigation.NavController
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -24,6 +28,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -112,6 +117,13 @@ fun CustomThemeScreen(
         }
     }
 
+    // Animações de entrada
+    val animatedAlpha by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+        label = "screen_alpha"
+    )
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -123,12 +135,18 @@ fun CustomThemeScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(
+                        onClick = { navController.popBackStack() },
+                        modifier = Modifier
+                    ) {
                         Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.auth_cd_back))
                     }
                 },
                 actions = {
-                    IconButton(onClick = { resetTrigger = true }) {
+                    IconButton(
+                        onClick = { resetTrigger = true },
+                        modifier = Modifier
+                    ) {
                         Icon(Icons.Rounded.RestartAlt, contentDescription = stringResource(R.string.cd_reset))
                     }
                 },
@@ -144,35 +162,57 @@ fun CustomThemeScreen(
                 .background(previewColorScheme.background)
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+                .padding(16.dp)
+                .graphicsLayer { alpha = animatedAlpha },
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Preview do Player (mini)
             CustomThemePreviewCard(config = config)
 
-            // Tabs
+            // Tabs com animação
             TabRow(
                 selectedTabIndex = selectedTab,
-                containerColor = previewColorScheme.surface.copy(alpha = 0.8f)
+                containerColor = previewColorScheme.surface.copy(alpha = 0.8f),
+                modifier = Modifier.clip(RoundedCornerShape(16.dp))
             ) {
                 Tab(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    text = { Text(stringResource(R.string.custom_theme_colors)) }
+                    text = { Text(stringResource(R.string.custom_theme_colors)) },
+                    modifier = Modifier
                 )
                 Tab(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    text = { Text(stringResource(R.string.custom_theme_wallpaper)) }
+                    text = { Text(stringResource(R.string.custom_theme_wallpaper)) },
+                    modifier = Modifier
                 )
             }
 
-            when (selectedTab) {
-                0 -> ColorPickerSection(config = config, viewModel = viewModel)
-                1 -> WallpaperSection(config = config, viewModel = viewModel)
+            // Conteúdo com animação de transição
+            AnimatedContent(
+                targetState = selectedTab,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(300, delayMillis = 50)) with
+                            fadeOut(animationSpec = tween(200))
+                },
+                label = "tab_content"
+            ) { tab ->
+                when (tab) {
+                    0 -> ColorPickerSection(config = config, viewModel = viewModel)
+                    1 -> WallpaperSection(config = config, viewModel = viewModel)
+                }
             }
 
-            // Botão Salvar
+            // Botão Salvar com animação
+            val buttonInteractionSource = remember { MutableInteractionSource() }
+            val isButtonPressed by buttonInteractionSource.collectIsPressedAsState()
+            val buttonScale by animateFloatAsState(
+                targetValue = if (isButtonPressed) 0.97f else 1f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy),
+                label = "button_scale"
+            )
+
             Button(
                 onClick = {
                     scope.launch {
@@ -180,12 +220,16 @@ fun CustomThemeScreen(
                         navController.popBackStack()
                     }
                 },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .scale(buttonScale),
+                shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = previewColorScheme.primary,
                     contentColor = previewColorScheme.onPrimary
-                )
+                ),
+                interactionSource = buttonInteractionSource
             ) {
                 Icon(Icons.Rounded.Check, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
@@ -198,13 +242,28 @@ fun CustomThemeScreen(
 @Composable
 private fun CustomThemePreviewCard(config: CustomThemeConfig) {
     val colorScheme = remember(config) { customColorScheme(config, true) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val cardScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.98f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy),
+        label = "preview_card_scale"
+    )
     
     Card(
-        modifier = Modifier.fillMaxWidth().height(160.dp),
-        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .scale(cardScale)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { /* Apenas para feedback visual */ },
+        shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
             containerColor = colorScheme.primary.copy(alpha = 0.15f)
-        )
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(
             modifier = Modifier
@@ -229,7 +288,7 @@ private fun CustomThemePreviewCard(config: CustomThemeConfig) {
                 Box(
                     modifier = Modifier
                         .size(80.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(16.dp))
                         .background(colorScheme.primary)
                 ) {
                     Icon(
@@ -255,7 +314,7 @@ private fun CustomThemePreviewCard(config: CustomThemeConfig) {
                     
                     Spacer(Modifier.height(8.dp))
                     
-                    // Botões de controle mock
+                    // Botões de controle mock com animação
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -263,11 +322,28 @@ private fun CustomThemePreviewCard(config: CustomThemeConfig) {
                             Icons.Rounded.SkipPrevious,
                             Icons.Rounded.PlayArrow,
                             Icons.Rounded.SkipNext
-                        ).forEach { icon ->
+                        ).forEachIndexed { index, icon ->
+                            val controlInteractionSource = remember { MutableInteractionSource() }
+                            val isControlPressed by controlInteractionSource.collectIsPressedAsState()
+                            val controlScale by animateFloatAsState(
+                                targetValue = if (isControlPressed) 0.85f else 1f,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessMedium
+                                ),
+                                label = "control_scale_$index"
+                            )
+                            
                             Surface(
                                 shape = CircleShape,
                                 color = colorScheme.primary.copy(alpha = 0.2f),
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .scale(controlScale)
+                                    .clickable(
+                                        interactionSource = controlInteractionSource,
+                                        indication = null
+                                    ) { /* Apenas feedback */ }
                             ) {
                                 Icon(
                                     icon,
@@ -338,8 +414,13 @@ private fun ColorPickerSection(
             onColorSelected = { viewModel.updateSecondaryColor(it) }
         )
 
-        // ===== COR DE FUNDO REMOVIDA DAQUI =====
-        // Agora ela está na seção Wallpaper > Sólido
+        ColorPickerRow(
+            label = stringResource(R.string.custom_theme_container_color),
+            currentColor = config.containerColor,
+            mainColors = MAIN_COLORS,
+            additionalColors = ADDITIONAL_COLORS + listOf(0xFF2A1F40.toInt()),
+            onColorSelected = { viewModel.updateContainerColor(it) }
+        )
 
         // Cor de Superfície
         ColorPickerRow(
@@ -416,26 +497,56 @@ private fun ColorItem(
     isSelected: Boolean,
     onColorSelected: (Int) -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val itemScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.90f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy),
+        label = "color_item_scale"
+    )
+    val borderWidth by animateDpAsState(
+        targetValue = if (isSelected) 3.dp else 0.dp,
+        animationSpec = tween(durationMillis = 200),
+        label = "color_item_border"
+    )
+    val size by animateDpAsState(
+        targetValue = if (isSelected) 44.dp else 36.dp,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy),
+        label = "color_item_size"
+    )
+
     Box(
         modifier = Modifier
-            .size(if (isSelected) 44.dp else 36.dp)
+            .size(size)
+            .scale(itemScale)
             .clip(CircleShape)
             .background(Color(color))
-            .clickable { onColorSelected(color) }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { onColorSelected(color) }
             .then(
                 if (isSelected) {
-                    Modifier.border(3.dp, Color.White, CircleShape)
+                    Modifier.border(borderWidth, Color.White, CircleShape)
                 } else Modifier
             ),
         contentAlignment = Alignment.Center
     ) {
         if (isSelected) {
-            Icon(
-                Icons.Rounded.Check,
-                contentDescription = null,
-                tint = Color(color).contrastTextColor(),
-                modifier = Modifier.size(16.dp)
-            )
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn(animationSpec = tween(150)) + scaleIn(
+                    initialScale = 0.5f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)
+                )
+            ) {
+                Icon(
+                    Icons.Rounded.Check,
+                    contentDescription = null,
+                    tint = Color(color).contrastTextColor(),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }
@@ -472,6 +583,14 @@ private fun WallpaperSection(
         ) {
             WallpaperType.entries.forEach { type ->
                 val isSelected = config.wallpaperType == type
+                val interactionSource = remember { MutableInteractionSource() }
+                val isPressed by interactionSource.collectIsPressedAsState()
+                val chipScale by animateFloatAsState(
+                    targetValue = if (isPressed) 0.96f else 1f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy),
+                    label = "chip_scale_${type.name}"
+                )
+                
                 FilterChip(
                     selected = isSelected,
                     onClick = { viewModel.setWallpaperType(type) },
@@ -484,11 +603,14 @@ private fun WallpaperSection(
                             }
                         )
                     },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .scale(chipScale),
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.primary,
                         selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                    ),
+                    interactionSource = interactionSource
                 )
             }
         }
@@ -496,7 +618,6 @@ private fun WallpaperSection(
         when (config.wallpaperType) {
             WallpaperType.SOLID -> {
                 // ===== COR DE FUNDO MOVIDA PARA CÁ =====
-                // Agora a cor de fundo está aqui, na seção Wallpaper > Sólido
                 ColorPickerRow(
                     label = stringResource(R.string.custom_theme_background_color),
                     currentColor = config.backgroundColor,
@@ -509,11 +630,12 @@ private fun WallpaperSection(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(100.dp),
-                    shape = RoundedCornerShape(12.dp),
+                        .height(180.dp),
+                    shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = Color(config.backgroundColor)
-                    )
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -523,7 +645,7 @@ private fun WallpaperSection(
                             "Pré-visualização do Wallpaper",
                             color = Color(config.backgroundColor).contrastTextColor(),
                             fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp
+                            fontSize = 18.sp
                         )
                     }
                 }
@@ -533,45 +655,59 @@ private fun WallpaperSection(
                 Button(
                     onClick = { galleryLauncher.launch("image/*") },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Icon(Icons.Rounded.PhotoLibrary, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.wallpaper_select_from_gallery))
                 }
 
-                // Mostrar a imagem selecionada
+                // Mostrar a imagem selecionada - VERTICAL
                 if (config.wallpaperUri != null) {
-                    AsyncImage(
-                        model = Uri.parse(config.wallpaperUri),
-                        contentDescription = "Wallpaper selecionado",
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(150.dp)
-                            .clip(RoundedCornerShape(12.dp)),
-                        contentScale = ContentScale.Crop
-                    )
+                            .height(250.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        AsyncImage(
+                            model = Uri.parse(config.wallpaperUri),
+                            contentDescription = "Wallpaper selecionado",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                 } else {
                     // Placeholder quando não há imagem
-                    Box(
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(150.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentAlignment = Alignment.Center
+                            .height(180.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                Icons.Rounded.Image,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                "Nenhuma imagem selecionada",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    Icons.Rounded.Image,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                Text(
+                                    "Nenhuma imagem selecionada",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                 }
@@ -584,20 +720,34 @@ private fun WallpaperSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
+                // Wallpapers do servidor em formato VERTICAL
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().height(200.dp)
                 ) {
                     items(SERVER_WALLPAPERS) { url ->
                         val isSelected = config.wallpaperUrl == url
+                        val interactionSource = remember { MutableInteractionSource() }
+                        val isPressed by interactionSource.collectIsPressedAsState()
+                        val itemScale by animateFloatAsState(
+                            targetValue = if (isPressed) 0.95f else 1f,
+                            animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy),
+                            label = "server_item_scale"
+                        )
+                        
                         Box(
                             modifier = Modifier
-                                .size(120.dp, 80.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { viewModel.setWallpaperFromServer(url) }
+                                .width(120.dp)
+                                .height(180.dp)
+                                .scale(itemScale)
+                                .clip(RoundedCornerShape(16.dp))
+                                .clickable(
+                                    interactionSource = interactionSource,
+                                    indication = null
+                                ) { viewModel.setWallpaperFromServer(url) }
                                 .then(
                                     if (isSelected) {
-                                        Modifier.border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                                        Modifier.border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp))
                                     } else Modifier
                                 )
                         ) {
@@ -618,7 +768,7 @@ private fun WallpaperSection(
                                         Icons.Rounded.Check,
                                         contentDescription = null,
                                         tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
+                                        modifier = Modifier.size(32.dp)
                                     )
                                 }
                             }
@@ -630,7 +780,10 @@ private fun WallpaperSection(
 
         // Controles adicionais (blur e dim) - apenas para GALERY e SERVER
         if (config.wallpaperType != WallpaperType.SOLID) {
-            Column {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
                 SliderWithLabel(
                     label = stringResource(R.string.wallpaper_blur),
                     value = config.wallpaperBlur,

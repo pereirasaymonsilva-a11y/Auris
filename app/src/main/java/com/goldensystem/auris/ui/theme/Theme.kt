@@ -1,3 +1,4 @@
+// ui/theme/Theme.kt
 package com.goldensystem.auris.ui.theme
 
 import android.app.Activity
@@ -72,25 +73,20 @@ val DarkColorScheme = darkColorScheme(
     onSecondary = AurisWhite,
     onTertiary = AurisWhite,
     onBackground = AurisWhite,
-    onSurface = AurisLightPurple, // Texto sobre superficies
+    onSurface = AurisLightPurple,
     error = Color(0xFFFF5252),
     onError = AurisWhite
 )
 
 val LightColorScheme = lightColorScheme(
-    // Tudo IGUAL ao original, exceto secondary e secondaryContainer
     primary = LightPrimary,
     onPrimary = Color(0xFF000000),
     primaryContainer = LightPrimaryContainer,
     onPrimaryContainer = LightOnPrimaryContainer,
-    
-    // ÚNICA MUDANÇA: usa o amarelo com transparência em vez de preto
-    secondary = LightPrimary,                    // Amarelo (igual ao primary)
-    onSecondary = Color(0xFF000000),             // Preto (mantém)
-    secondaryContainer = LightPrimary.copy(alpha = 0.2f),  // Amarelo transparente
-    onSecondaryContainer = Color(0xFF000000),    // Preto (mantém)
-    
-    // Resto tudo igual ao original
+    secondary = LightPrimary,
+    onSecondary = Color(0xFF000000),
+    secondaryContainer = LightPrimary.copy(alpha = 0.2f),
+    onSecondaryContainer = Color(0xFF000000),
     tertiary = Color(0xFF4D3E00),
     onTertiary = Color(0xFFFFC107),
     background = LightBackground,
@@ -107,6 +103,7 @@ val LightColorScheme = lightColorScheme(
     errorContainer = Color(0xFFFFDAD6),
     onErrorContainer = Color(0xFF410002)
 )
+
 @Composable
 fun AurisTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -129,23 +126,31 @@ fun AurisTheme(
     AurisStatusBarStyle(color = defaultStatusBarColor)
 
     CompositionLocalProvider(LocalAurisDarkTheme provides darkTheme) {
-        MaterialTheme(
-            colorScheme = finalColorScheme,
-            typography = Typography,
-            shapes = Shapes
-        ) {
-            // ===== SÓ ISSO QUE MUDA =====
-            // Pega a config do tema personalizado
-            val viewModel: CustomThemeViewModel = hiltViewModel()
-            val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
+        // Pega a config do tema personalizado
+        val viewModel: CustomThemeViewModel = hiltViewModel()
+        val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
 
-            if (config.isEnabled) {
+        if (config.isEnabled) {
+            // Cria um ColorScheme com containerColor personalizado
+            val customColorScheme = finalColorScheme.copy(
+                surfaceContainer = Color(config.containerColor),
+                surfaceContainerLow = Color(config.containerColor).copy(alpha = 0.9f),
+                surfaceContainerHigh = Color(config.containerColor).copy(alpha = 0.8f),
+                surfaceContainerLowest = Color(config.containerColor).copy(alpha = 0.95f),
+                surfaceContainerHighest = Color(config.containerColor).copy(alpha = 0.7f)
+            )
+
+            MaterialTheme(
+                colorScheme = customColorScheme,
+                typography = Typography,
+                shapes = Shapes
+            ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     // Wallpaper
                     when (config.wallpaperType) {
                         WallpaperType.SOLID -> {
                             Box(
-                                modifier = Modifier.fillMaxSize().background(Color(config.wallpaperColor))
+                                modifier = Modifier.fillMaxSize().background(Color(config.backgroundColor))
                             )
                         }
                         WallpaperType.GALLERY -> {
@@ -179,7 +184,13 @@ fun AurisTheme(
 
                     content()
                 }
-            } else {
+            }
+        } else {
+            MaterialTheme(
+                colorScheme = finalColorScheme,
+                typography = Typography,
+                shapes = Shapes
+            ) {
                 content()
             }
         }

@@ -21,6 +21,7 @@ data class CustomThemeConfig(
     val isEnabled: Boolean = false,
     val primaryColor: Int = 0xFF6750A4.toInt(),
     val secondaryColor: Int = 0xFFF06292.toInt(),
+    val containerColor: Int = 0xFF2A1F40.toInt(),
     val backgroundColor: Int = 0xFF1E1234.toInt(),
     val surfaceColor: Int = 0xFF2A1F40.toInt(),
     val wallpaperType: WallpaperType = WallpaperType.SOLID,
@@ -54,6 +55,7 @@ class ThemePreferences @Inject constructor(
         private val WALLPAPER_URL = stringPreferencesKey("wallpaper_url")
         private val WALLPAPER_BLUR = floatPreferencesKey("wallpaper_blur")
         private val WALLPAPER_DIM = floatPreferencesKey("wallpaper_dim")
+        private val CONTAINER_COLOR = intPreferencesKey("custom_container_color")
     }
 
     val customThemeConfig: Flow<CustomThemeConfig> = dataStore.data.map { prefs ->
@@ -63,6 +65,7 @@ class ThemePreferences @Inject constructor(
             secondaryColor = prefs[SECONDARY_COLOR] ?: 0xFFF06292.toInt(),
             backgroundColor = prefs[BACKGROUND_COLOR] ?: 0xFF1E1234.toInt(),
             surfaceColor = prefs[SURFACE_COLOR] ?: 0xFF2A1F40.toInt(),
+            containerColor = prefs[CONTAINER_COLOR] ?: 0xFF2A1F40.toInt(),
             wallpaperType = try {
             val typeName = prefs[WALLPAPER_TYPE] ?: WallpaperType.SOLID.name
             WallpaperType.valueOf(typeName)
@@ -90,6 +93,7 @@ class ThemePreferences @Inject constructor(
             prefs[WALLPAPER_URL] = config.wallpaperUrl ?: ""
             prefs[WALLPAPER_BLUR] = config.wallpaperBlur
             prefs[WALLPAPER_DIM] = config.wallpaperDim
+.           prefs[CONTAINER_COLOR] = config.containerColo
         }
     }
 

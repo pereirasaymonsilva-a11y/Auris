@@ -34,6 +34,10 @@ class CustomThemeViewModel @Inject constructor(
         _config.update { it.copy(primaryColor = color) }
     }
 
+    fun updateContainerColor(color: Int) {
+    _config.update { it.copy(containerColor = color) }
+    }
+
     fun updateSecondaryColor(color: Int) {
         _config.update { it.copy(secondaryColor = color) }
     }
