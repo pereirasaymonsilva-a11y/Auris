@@ -196,6 +196,7 @@ fun SettingsCategoryScreen(
     
     // State Collection (Duplicated from SettingsScreen for now to ensure functionality)
     val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
+    val customThemeViewModel: CustomThemeViewModel = hiltViewModel()
     val currentAiApiKey by settingsViewModel.currentAiApiKey.collectAsStateWithLifecycle()
     val currentAiModel by settingsViewModel.currentAiModel.collectAsStateWithLifecycle()
     val currentAiSystemPrompt by settingsViewModel.currentAiSystemPrompt.collectAsStateWithLifecycle()
@@ -550,16 +551,14 @@ fun SettingsCategoryScreen(
     onSelectionChanged = { mode ->
         settingsViewModel.setAppThemeMode(mode)
         
-        // 👇 QUANDO NÃO FOR CUSTOM, DESATIVA O TEMA PERSONALIZADO
         if (mode != AppThemeMode.CUSTOM) {
-            val customViewModel: CustomThemeViewModel = hiltViewModel()
             coroutineScope.launch {
-                customViewModel.disableCustomTheme()
+                customThemeViewModel.disableCustomTheme()  // ✅ CORRETO
             }
         }
     },
     leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) }
-      )
+)
         
         // Card de Tema Personalizado - aparece APENAS quando CUSTOM está selecionado
         AnimatedVisibility(
