@@ -141,8 +141,8 @@ fun AurisTheme(
             }
         }
 
+        // 👇 SE CUSTOM ESTIVER ATIVO, USA TEMA PERSONALIZADO + WALLPAPER
         if (config.isEnabled) {
-            // USA O customColorScheme E SOBRESCREVE APENAS O surfaceContainer
             val baseScheme = customColorScheme(config, darkTheme)
             val customColorScheme = baseScheme.copy(
                 surfaceContainer = Color(config.containerColor)
@@ -154,6 +154,7 @@ fun AurisTheme(
                 shapes = Shapes
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
+                    // WALLPAPER
                     when (config.wallpaperType) {
                         WallpaperType.SOLID -> {
                             Box(
@@ -204,12 +205,14 @@ fun AurisTheme(
                         }
                     }
 
+                    // DIM
                     if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperDim > 0f) {
                         Box(
                             modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = config.wallpaperDim))
                         )
                     }
 
+                    // BLUR
                     if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperBlur > 0f) {
                         Box(
                             modifier = Modifier.fillMaxSize().background(
@@ -222,6 +225,7 @@ fun AurisTheme(
                 }
             }
         } else {
+            // 👇 TEMA NORMAL (SEM CUSTOM)
             MaterialTheme(
                 colorScheme = finalColorScheme,
                 typography = Typography,
