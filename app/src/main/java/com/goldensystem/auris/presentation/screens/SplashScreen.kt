@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -25,22 +24,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.goldensystem.auris.R
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun SplashScreen(
     onAnimationComplete: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-    
     // Animações usando Animatable para controle preciso
     val scale = remember { Animatable(0.2f) }
     val rotation = remember { Animatable(-15f) }
     val alpha = remember { Animatable(0f) }
     val glowProgress = remember { Animatable(0f) }
     val textAlpha = remember { Animatable(0f) }
+    val textTranslationY = remember { Animatable(20f) } // Texto sobe 20dp
     val shadeAlpha = remember { Animatable(0f) }
     val finalFade = remember { Animatable(1f) }
+    val impactScale = remember { Animatable(1f) } // Efeito de impacto
 
     // Estado para controlar a transição
     var isAnimationComplete by remember { mutableStateOf(false) }
@@ -66,79 +64,62 @@ fun SplashScreen(
         )
         delay(150)
 
-        // Fase 2: Sombras e profundidade
+        // Fase 2: Efeito de IMPACTO (logo cresce e volta rápido)
+        impactScale.animateTo(
+            targetValue = 1.04f,
+            animationSpec = tween(80, easing = FastOutSlowInEasing)
+        )
+        impactScale.animateTo(
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessHigh
+            )
+        )
+        delay(50)
+
+        // Fase 3: Sombras e profundidade
         shadeAlpha.animateTo(1f, animationSpec = tween(300, easing = FastOutSlowInEasing))
         delay(100)
 
-        // Fase 3: Brilho diagonal passando
+        // Fase 4: Brilho DIAGONAL ANDANDO (translationX)
         glowProgress.animateTo(
             targetValue = 1f,
-            animationSpec = tween(400, easing = FastOutSlowInEasing)
+            animationSpec = tween(500, easing = FastOutSlowInEasing)
         )
         delay(100)
         glowProgress.animateTo(
             targetValue = 0f,
             animationSpec = tween(300, easing = FastOutSlowInEasing)
         )
-        delay(100)
+        delay(150)
 
-        // Fase 4: Micro-vibração (2px de tremor) - usando StiffnessMedium em vez de VeryHigh
-        val shakeAmount = 2f
-        scale.animateTo(
-            targetValue = 1f + 0.008f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessMedium
-            )
-        )
-        rotation.animateTo(
-            targetValue = shakeAmount,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessHigh
-            )
-        )
-        delay(20)
-        rotation.animateTo(
-            targetValue = -shakeAmount,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessHigh
-            )
-        )
-        delay(20)
-        rotation.animateTo(
-            targetValue = shakeAmount * 0.5f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessMedium
-            )
-        )
-        delay(20)
+        // Fase 5: Micro-vibração usando keyframes (mais natural)
         rotation.animateTo(
             targetValue = 0f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessMedium
-            )
+            animationSpec = keyframes {
+                durationMillis = 120
+                -2f at 0
+                2f at 30
+                -1.5f at 55
+                1.5f at 75
+                0f at 120
+            }
         )
-        scale.animateTo(
-            targetValue = 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessMedium
-            )
-        )
-        delay(100)
+        delay(50)
 
-        // Fase 5: Texto "Auris" aparece
+        // Fase 6: Texto "Auris" aparece (com subida suave)
         textAlpha.animateTo(1f, animationSpec = tween(350, easing = FastOutSlowInEasing))
-        delay(200)
+        textTranslationY.animateTo(
+            targetValue = 0f,
+            animationSpec = tween(400, easing = FastOutSlowInEasing)
+        )
+        delay(300)
 
-        // Fase 6: Pausa antes de desaparecer
+        // Fase 7: Pausa antes de desaparecer
         delay(400)
 
-        // Fase 7: Fade out suave
+        // Fase 8: Fade out suave
         finalFade.animateTo(
             targetValue = 0f,
             animationSpec = tween(350, easing = FastOutSlowInEasing)
@@ -150,7 +131,7 @@ fun SplashScreen(
     // Quando a animação terminar, navega
     LaunchedEffect(isAnimationComplete) {
         if (isAnimationComplete) {
-            delay(50) // Pequeno delay para o fade completar
+            delay(50)
             onAnimationComplete()
         }
     }
@@ -163,6 +144,9 @@ fun SplashScreen(
             Color(0xFF0D0D17)
         )
     )
+
+    // Cálculo do brilho andando (translationX)
+    val glowTranslationX = (glowProgress.value * 300f) - 150f
 
     Surface(
         modifier = Modifier
@@ -178,7 +162,7 @@ fun SplashScreen(
                 .background(gradientBrush),
             contentAlignment = Alignment.Center
         ) {
-            // Partículas de fundo (efeito sutil de "estrelas")
+            // Partículas de fundo (usando InfiniteTransition)
             FloatingParticles()
 
             // Container principal com animações
@@ -186,8 +170,8 @@ fun SplashScreen(
                 modifier = Modifier
                     .wrapContentSize()
                     .graphicsLayer {
-                        scaleX = scale.value
-                        scaleY = scale.value
+                        scaleX = scale.value * impactScale.value
+                        scaleY = scale.value * impactScale.value
                         rotationZ = rotation.value
                         alpha = alpha.value
                     }
@@ -195,7 +179,7 @@ fun SplashScreen(
                 // Logo com sombra suave
                 Box(
                     modifier = Modifier
-                        .size(140.dp)
+                        .size(170.dp) // Aumentado de 140 para 170
                         .shadow(
                             elevation = 24.dp,
                             shape = androidx.compose.foundation.shape.CircleShape,
@@ -215,7 +199,7 @@ fun SplashScreen(
                 ) {
                     // Logo oficial do Auris
                     Image(
-                        painter = painterResource(R.drawable.ic_auris_logo_transparent), // Use a logo que você tem disponível
+                        painter = painterResource(R.drawable.ic_auris_logo_transparent),
                         contentDescription = "Auris Logo",
                         modifier = Modifier
                             .fillMaxSize()
@@ -224,24 +208,23 @@ fun SplashScreen(
                     )
                 }
 
-                // Efeito de brilho diagonal (shine)
+                // Efeito de brilho diagonal ANDANDO (como Samsung)
                 if (glowProgress.value > 0.01f) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .graphicsLayer {
                                 alpha = glowProgress.value * 0.35f
+                                translationX = glowTranslationX
                             }
                             .background(
                                 Brush.linearGradient(
                                     colors = listOf(
                                         Color.Transparent,
-                                        Color.White.copy(alpha = 0.7f),
-                                        Color.White.copy(alpha = 0.4f),
+                                        Color.White.copy(alpha = 0.6f),
+                                        Color.White.copy(alpha = 0.3f),
                                         Color.Transparent
-                                    ),
-                                    start = Offset(0f, 0f),
-                                    end = Offset(200f, 200f)
+                                    )
                                 )
                             )
                     )
@@ -267,13 +250,14 @@ fun SplashScreen(
                 )
             }
 
-            // Texto "Auris" com efeito elegante
+            // Texto "Auris" com efeito elegante (sobe 15dp)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .padding(top = 210.dp)
+                    .padding(top = 240.dp) // Ajustado para logo maior
                     .graphicsLayer {
                         alpha = textAlpha.value
+                        translationY = textTranslationY.value
                     }
             ) {
                 Text(
@@ -285,13 +269,13 @@ fun SplashScreen(
                     modifier = Modifier.alpha(0.9f)
                 )
                 
-                // Linha decorativa sutil
+                // Linha decorativa sutil (também animada)
                 Box(
                     modifier = Modifier
                         .width(40.dp)
                         .height(2.dp)
                         .padding(top = 4.dp)
-                        .alpha(0.3f)
+                        .alpha(0.3f * textAlpha.value)
                         .background(
                             Brush.horizontalGradient(
                                 colors = listOf(
@@ -309,43 +293,56 @@ fun SplashScreen(
 
 @Composable
 private fun FloatingParticles() {
+    val infiniteTransition = rememberInfiniteTransition(label = "particles")
+
+    // Partículas com posições aleatórias
     val particles = remember {
-        List(20) { idx ->
-            Triple(
-                (0..1000).random() / 1000f,
-                (0..1000).random() / 1000f,
-                (200 + (0..300).random()).toFloat()
+        List(25) { idx ->
+            ParticleData(
+                x = (0..1000).random() / 1000f,
+                y = (0..1000).random() / 1000f,
+                delayMs = (200 + (0..300).random()).toLong(),
+                speed = 1f + (0..500).random() / 1000f,
+                size = (1.5f + (0..3).random()).dp,
+                alphaBase = 0.08f + (0..200).random() / 1000f * 0.25f
             )
         }
     }
 
-    particles.forEachIndexed { idx, particle ->
-        val (x, y, delayMs) = particle
-        val floatAnim = remember { Animatable(0f) }
-        
-        LaunchedEffect(idx) {
-            delay(delayMs.toLong())
-            while (true) {
-                floatAnim.animateTo(
-                    targetValue = 1f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(2000 + (0..1000).random(), easing = FastOutSlowInEasing),
-                        repeatMode = RepeatMode.Reverse
-                    )
-                )
-                delay(100)
-            }
-        }
+    particles.forEach { particle ->
+        // Animação infinita de flutuação
+        val floatValue by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = (1500 + (0..1000).random()).toInt(),
+                    easing = FastOutSlowInEasing
+                ),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "particle_${particle.hashCode()}"
+        )
 
         Box(
             modifier = Modifier
                 .offset(
-                    x = (x * 300 - 150).dp,
-                    y = (y * 500 - 250).dp + (floatAnim.value * 30).dp
+                    x = (particle.x * 300 - 150).dp,
+                    y = (particle.y * 500 - 250).dp + (floatValue * 35).dp
                 )
-                .size(2.dp)
-                .alpha(0.1f + (0.2f * (1f - floatAnim.value.coerceIn(0f, 1f))))
+                .size(particle.size)
+                .alpha(particle.alphaBase + (0.15f * (1f - floatValue.coerceIn(0f, 1f))))
                 .background(Color.White, androidx.compose.foundation.shape.CircleShape)
         )
     }
 }
+
+// Classe para dados da partícula
+private data class ParticleData(
+    val x: Float,
+    val y: Float,
+    val delayMs: Long,
+    val speed: Float,
+    val size: androidx.compose.ui.unit.Dp,
+    val alphaBase: Float
+)
