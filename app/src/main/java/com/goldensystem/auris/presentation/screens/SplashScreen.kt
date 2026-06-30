@@ -43,7 +43,6 @@ fun SplashScreen(
     val finalFade = remember { Animatable(1f) }
 
     // Estado para controlar a transição
-    var isReadyToNavigate by remember { mutableStateOf(false) }
     var isAnimationComplete by remember { mutableStateOf(false) }
 
     // Controlador da sequência de animação
@@ -83,20 +82,20 @@ fun SplashScreen(
         )
         delay(100)
 
-        // Fase 4: Micro-vibração (2px de tremor)
+        // Fase 4: Micro-vibração (2px de tremor) - usando StiffnessMedium em vez de VeryHigh
         val shakeAmount = 2f
         scale.animateTo(
             targetValue = 1f + 0.008f,
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessHigh
+                stiffness = Spring.StiffnessMedium
             )
         )
         rotation.animateTo(
             targetValue = shakeAmount,
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessVeryHigh
+                stiffness = Spring.StiffnessHigh
             )
         )
         delay(20)
@@ -104,7 +103,7 @@ fun SplashScreen(
             targetValue = -shakeAmount,
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessVeryHigh
+                stiffness = Spring.StiffnessHigh
             )
         )
         delay(20)
@@ -112,7 +111,7 @@ fun SplashScreen(
             targetValue = shakeAmount * 0.5f,
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessHigh
+                stiffness = Spring.StiffnessMedium
             )
         )
         delay(20)
@@ -146,7 +145,6 @@ fun SplashScreen(
         )
         
         isAnimationComplete = true
-        isReadyToNavigate = true
     }
 
     // Quando a animação terminar, navega
@@ -217,7 +215,7 @@ fun SplashScreen(
                 ) {
                     // Logo oficial do Auris
                     Image(
-                        painter = painterResource(R.drawable.ic_auris_logo), // Use sua logo oficial
+                        painter = painterResource(R.drawable.ic_auris_logo_transparent), // Use a logo que você tem disponível
                         contentDescription = "Auris Logo",
                         modifier = Modifier
                             .fillMaxSize()
