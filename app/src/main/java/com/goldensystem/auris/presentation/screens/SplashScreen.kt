@@ -5,328 +5,264 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.goldensystem.auris.R
 import kotlinx.coroutines.delay
+import kotlin.random.Random
 
 @Composable
 fun SplashScreen(
-    onAnimationComplete: () -> Unit
+    onFinish: () -> Unit
 ) {
-    val scale = remember { Animatable(0.2f) }
-    val rotation = remember { Animatable(-15f) }
-    val alphaAnim = remember { Animatable(0f) }
-    val glowProgress = remember { Animatable(0f) }
-    val textAlphaAnim = remember { Animatable(0f) }
-    val textTranslationY = remember { Animatable(20f) }
-    val shadeAlpha = remember { Animatable(0f) }
-    val finalFade = remember { Animatable(1f) }
-    val impactScale = remember { Animatable(1f) }
+    /* =======================
+       ANIMATIONS (STABLE)
+    ======================= */
 
-    var isAnimationComplete by remember { mutableStateOf(false) }
+    val scale = remember { Animatable(0.6f) }
+    val alpha = remember { Animatable(0f) }
+    val rotation = remember { Animatable(-8f) }
+    val textAlpha = remember { Animatable(0f) }
+    val textOffset = remember { Animatable(20f) }
+    val glow = remember { Animatable(0f) }
+
+    var finished by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        alphaAnim.animateTo(1f, animationSpec = tween(400, easing = FastOutSlowInEasing))
-        delay(50)
+        alpha.animateTo(1f, tween(500))
         scale.animateTo(
-            targetValue = 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessMediumLow
+            1f,
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
             )
         )
-        rotation.animateTo(
-            targetValue = 0f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessMedium
-            )
-        )
-        delay(150)
 
-        impactScale.animateTo(
-            targetValue = 1.04f,
-            animationSpec = tween(80, easing = FastOutSlowInEasing)
-        )
-        impactScale.animateTo(
-            targetValue = 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessHigh
-            )
-        )
-        delay(50)
+        rotation.animateTo(0f, spring())
 
-        shadeAlpha.animateTo(1f, animationSpec = tween(300, easing = FastOutSlowInEasing))
-        delay(100)
+        glow.animateTo(1f, tween(400))
+        glow.animateTo(0f, tween(300))
 
-        glowProgress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(500, easing = FastOutSlowInEasing)
-        )
-        delay(100)
-        glowProgress.animateTo(
-            targetValue = 0f,
-            animationSpec = tween(300, easing = FastOutSlowInEasing)
-        )
-        delay(150)
+        textAlpha.animateTo(1f, tween(400))
+        textOffset.animateTo(0f, tween(400))
 
-        rotation.animateTo(
-            targetValue = 0f,
-            animationSpec = keyframes {
-                durationMillis = 120
-                -2f at 0
-                2f at 30
-                -1.5f at 55
-                1.5f at 75
-                0f at 120
-            }
-        )
-        delay(50)
+        delay(700)
 
-        textAlphaAnim.animateTo(1f, animationSpec = tween(350, easing = FastOutSlowInEasing))
-        textTranslationY.animateTo(
-            targetValue = 0f,
-            animationSpec = tween(400, easing = FastOutSlowInEasing)
-        )
+        scale.animateTo(0.92f, tween(250))
+        scale.animateTo(1f, spring())
+
         delay(300)
 
-        delay(400)
+        alpha.animateTo(0f, tween(400))
 
-        finalFade.animateTo(
-            targetValue = 0f,
-            animationSpec = tween(350, easing = FastOutSlowInEasing)
-        )
-        
-        isAnimationComplete = true
+        finished = true
     }
 
-    LaunchedEffect(isAnimationComplete) {
-        if (isAnimationComplete) {
-            delay(50)
-            onAnimationComplete()
-        }
+    LaunchedEffect(finished) {
+        if (finished) onFinish()
     }
 
-    val gradientBrush = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFF0A0A12),
-            Color(0xFF12121F),
-            Color(0xFF0D0D17)
+    /* =======================
+       BACKGROUND
+    ======================= */
+
+    val background = Brush.verticalGradient(
+        listOf(
+            Color(0xFF0B0B12),
+            Color(0xFF10101A),
+            Color(0xFF0B0B12)
         )
     )
 
-    val glowTranslationX = (glowProgress.value * 300f) - 150f
-
-    Surface(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .graphicsLayer {
-                alpha = finalFade.value
-            },
-        color = Color.Transparent
+            .background(background)
     ) {
+
+        /* =======================
+           PARTICLES (SAFE LAYER)
+        ======================= */
+
+        FloatingParticles()
+
+        /* =======================
+           CENTER LOGO (LOCKED)
+        ======================= */
+
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .background(gradientBrush)
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            // CAMADA 1: Partículas (sem interferência)
-            FloatingParticles()
 
-            // CAMADA 2: Logo - FORÇADO no centro com align
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
                     .graphicsLayer {
-                        alpha = finalFade.value
+                        this.alpha = alpha.value
+                        scaleX = scale.value
+                        scaleY = scale.value
+                        rotationZ = rotation.value
                     }
             ) {
+
+                // glow base
                 Box(
                     modifier = Modifier
-                        .align(Alignment.Center) // <--- FORÇA CENTRO ABSOLUTO
-                        .graphicsLayer {
-                            scaleX = scale.value * impactScale.value
-                            scaleY = scale.value * impactScale.value
-                            rotationZ = rotation.value
-                            alpha = alphaAnim.value
-                        }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(170.dp)
-                            .shadow(
-                                elevation = 24.dp,
-                                shape = androidx.compose.foundation.shape.CircleShape,
-                                clip = false,
-                                spotColor = Color(0xFF6C5CE7).copy(alpha = 0.3f * shadeAlpha.value)
-                            )
-                            .background(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        Color(0xFF6C5CE7).copy(alpha = 0.15f),
-                                        Color.Transparent
-                                    ),
-                                    radius = 80f
-                                ),
-                                shape = androidx.compose.foundation.shape.CircleShape
-                            )
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_auris_logo_transparent),
-                            contentDescription = "Auris Logo",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(12.dp),
-                            contentScale = ContentScale.Fit
-                        )
-                    }
-
-                    if (glowProgress.value > 0.01f) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .graphicsLayer {
-                                    alpha = glowProgress.value * 0.35f
-                                    translationX = glowTranslationX
-                                }
-                                .background(
-                                    Brush.linearGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            Color.White.copy(alpha = 0.6f),
-                                            Color.White.copy(alpha = 0.3f),
-                                            Color.Transparent
-                                        )
-                                    )
-                                )
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .graphicsLayer {
-                                alpha = (1f - scale.value.coerceIn(0f, 1f)) * 0.3f
-                            }
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(
-                                        Color(0xFF6C5CE7).copy(alpha = 0.1f),
-                                        Color.Transparent
-                                    ),
-                                    radius = 60f
-                                ),
-                                shape = androidx.compose.foundation.shape.CircleShape
-                            )
-                    )
-                }
-            }
-
-            // CAMADA 3: Texto
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 240.dp)
-                    .graphicsLayer {
-                        alpha = textAlphaAnim.value
-                        translationY = textTranslationY.value
-                    }
-            ) {
-                Text(
-                    text = "Auris",
-                    color = Color.White,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.5.sp,
-                    modifier = Modifier.alpha(0.9f)
-                )
-                
-                Box(
-                    modifier = Modifier
-                        .width(40.dp)
-                        .height(2.dp)
-                        .padding(top = 4.dp)
-                        .alpha(0.3f * textAlphaAnim.value)
+                        .size(180.dp)
+                        .clip(CircleShape)
                         .background(
-                            Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color(0xFF6C5CE7),
+                            Brush.radialGradient(
+                                listOf(
+                                    Color(0xFF6C5CE7).copy(alpha = 0.25f),
                                     Color.Transparent
                                 )
                             )
                         )
                 )
+
+                Image(
+                    painter = painterResource(R.drawable.ic_auris_logo_transparent),
+                    contentDescription = "Auris Logo",
+                    modifier = Modifier
+                        .size(160.dp)
+                        .align(Alignment.Center)
+                )
             }
+        }
+
+        /* =======================
+           TEXT (SAFE POSITION)
+        ======================= */
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 420.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                text = "Auris",
+                fontSize = 30.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White,
+                modifier = Modifier
+                    .alpha(textAlpha.value)
+                    .graphicsLayer {
+                        translationY = textOffset.value
+                    }
+            )
+
+            Box(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .size(width = 60.dp, height = 2.dp)
+                    .alpha(textAlpha.value * 0.4f)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                Color.Transparent,
+                                Color(0xFF6C5CE7),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
+        }
+
+        /* =======================
+           GLOW SWEEP (CONTROLLED)
+        ======================= */
+
+        if (glow.value > 0f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        alpha = glow.value * 0.25f
+                        translationX = (glow.value * 600f) - 300f
+                        rotationZ = -15f
+                    }
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                Color.Transparent,
+                                Color.White.copy(alpha = 0.6f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
         }
     }
 }
 
+/* =======================
+   PARTICLES
+======================= */
+
 @Composable
 private fun FloatingParticles() {
-    val infiniteTransition = rememberInfiniteTransition(label = "particles")
 
     val particles = remember {
-        List(25) { idx ->
-            ParticleData(
-                x = (0..1000).random() / 1000f,
-                y = (0..1000).random() / 1000f,
-                delayMs = (200 + (0..300).random()).toLong(),
-                size = (1.5f + (0..3).random()).dp,
-                alphaBase = 0.08f + (0..200).random() / 1000f * 0.25f
+        List(20) {
+            Particle(
+                x = Random.nextFloat(),
+                y = Random.nextFloat(),
+                size = (2..5).random().dp,
+                alpha = Random.nextFloat() * 0.2f
             )
         }
     }
 
-    particles.forEach { particle ->
-        val floatValue by infiniteTransition.animateFloat(
+    val transition = rememberInfiniteTransition()
+
+    particles.forEach { p ->
+
+        val anim by transition.animateFloat(
             initialValue = 0f,
             targetValue = 1f,
             animationSpec = infiniteRepeatable(
-                animation = tween(
-                    durationMillis = (1500 + (0..1000).random()).toInt(),
-                    easing = FastOutSlowInEasing
-                ),
-                repeatMode = RepeatMode.Reverse
-            ),
-            label = "particle_${particle.hashCode()}"
+                tween(2000 + (0..1000).random()),
+                RepeatMode.Reverse
+            )
         )
 
         Box(
             modifier = Modifier
-                .offset(
-                    x = (particle.x * 300 - 150).dp,
-                    y = (particle.y * 500 - 250).dp + (floatValue * 35).dp
-                )
-                .size(particle.size)
-                .alpha(particle.alphaBase + (0.15f * (1f - floatValue.coerceIn(0f, 1f))))
-                .background(Color.White, androidx.compose.foundation.shape.CircleShape)
-        )
+                .fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier
+                    .offset(
+                        x = (p.x * 400).dp,
+                        y = (p.y * 800 + anim * 20).dp
+                    )
+                    .size(p.size)
+                    .alpha(p.alpha)
+                    .background(Color.White, CircleShape)
+            )
+        }
     }
 }
 
-private data class ParticleData(
+private data class Particle(
     val x: Float,
     val y: Float,
-    val delayMs: Long,
     val size: androidx.compose.ui.unit.Dp,
-    val alphaBase: Float
+    val alpha: Float
 )
