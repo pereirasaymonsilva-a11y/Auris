@@ -29,7 +29,6 @@ import kotlinx.coroutines.delay
 fun SplashScreen(
     onAnimationComplete: () -> Unit
 ) {
-    // Animações usando Animatable para controle preciso
     val scale = remember { Animatable(0.2f) }
     val rotation = remember { Animatable(-15f) }
     val alphaAnim = remember { Animatable(0f) }
@@ -43,7 +42,6 @@ fun SplashScreen(
     var isAnimationComplete by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        // Fase 1: Logo aparece (fade + escala + rotação)
         alphaAnim.animateTo(1f, animationSpec = tween(400, easing = FastOutSlowInEasing))
         delay(50)
         scale.animateTo(
@@ -62,7 +60,6 @@ fun SplashScreen(
         )
         delay(150)
 
-        // Fase 2: Efeito de IMPACTO
         impactScale.animateTo(
             targetValue = 1.04f,
             animationSpec = tween(80, easing = FastOutSlowInEasing)
@@ -76,11 +73,9 @@ fun SplashScreen(
         )
         delay(50)
 
-        // Fase 3: Sombras
         shadeAlpha.animateTo(1f, animationSpec = tween(300, easing = FastOutSlowInEasing))
         delay(100)
 
-        // Fase 4: Brilho diagonal
         glowProgress.animateTo(
             targetValue = 1f,
             animationSpec = tween(500, easing = FastOutSlowInEasing)
@@ -92,7 +87,6 @@ fun SplashScreen(
         )
         delay(150)
 
-        // Fase 5: Micro-vibração
         rotation.animateTo(
             targetValue = 0f,
             animationSpec = keyframes {
@@ -106,7 +100,6 @@ fun SplashScreen(
         )
         delay(50)
 
-        // Fase 6: Texto aparece
         textAlphaAnim.animateTo(1f, animationSpec = tween(350, easing = FastOutSlowInEasing))
         textTranslationY.animateTo(
             targetValue = 0f,
@@ -114,10 +107,8 @@ fun SplashScreen(
         )
         delay(300)
 
-        // Fase 7: Pausa
         delay(400)
 
-        // Fase 8: Fade out
         finalFade.animateTo(
             targetValue = 0f,
             animationSpec = tween(350, easing = FastOutSlowInEasing)
@@ -154,96 +145,106 @@ fun SplashScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(gradientBrush),
-            contentAlignment = Alignment.Center
+                .background(gradientBrush)
         ) {
+            // CAMADA 1: Partículas (sem interferência)
             FloatingParticles()
 
+            // CAMADA 2: Logo - FORÇADO no centro com align
             Box(
                 modifier = Modifier
-                    .wrapContentSize()
+                    .fillMaxSize()
                     .graphicsLayer {
-                        scaleX = scale.value * impactScale.value
-                        scaleY = scale.value * impactScale.value
-                        rotationZ = rotation.value
-                        alpha = alphaAnim.value
+                        alpha = finalFade.value
                     }
             ) {
                 Box(
                     modifier = Modifier
-                        .size(170.dp)
-                        .shadow(
-                            elevation = 24.dp,
-                            shape = androidx.compose.foundation.shape.CircleShape,
-                            clip = false,
-                            spotColor = Color(0xFF6C5CE7).copy(alpha = 0.3f * shadeAlpha.value)
-                        )
-                        .background(
-                            brush = Brush.radialGradient(
-                                colors = listOf(
-                                    Color(0xFF6C5CE7).copy(alpha = 0.15f),
-                                    Color.Transparent
-                                ),
-                                radius = 80f
-                            ),
-                            shape = androidx.compose.foundation.shape.CircleShape
-                        )
+                        .align(Alignment.Center) // <--- FORÇA CENTRO ABSOLUTO
+                        .graphicsLayer {
+                            scaleX = scale.value * impactScale.value
+                            scaleY = scale.value * impactScale.value
+                            rotationZ = rotation.value
+                            alpha = alphaAnim.value
+                        }
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_auris_logo_transparent),
-                        contentDescription = "Auris Logo",
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(12.dp),
-                        contentScale = ContentScale.Fit
-                    )
-                }
+                            .size(170.dp)
+                            .shadow(
+                                elevation = 24.dp,
+                                shape = androidx.compose.foundation.shape.CircleShape,
+                                clip = false,
+                                spotColor = Color(0xFF6C5CE7).copy(alpha = 0.3f * shadeAlpha.value)
+                            )
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF6C5CE7).copy(alpha = 0.15f),
+                                        Color.Transparent
+                                    ),
+                                    radius = 80f
+                                ),
+                                shape = androidx.compose.foundation.shape.CircleShape
+                            )
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_auris_logo_transparent),
+                            contentDescription = "Auris Logo",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(12.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
 
-                if (glowProgress.value > 0.01f) {
+                    if (glowProgress.value > 0.01f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .graphicsLayer {
+                                    alpha = glowProgress.value * 0.35f
+                                    translationX = glowTranslationX
+                                }
+                                .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            Color.White.copy(alpha = 0.6f),
+                                            Color.White.copy(alpha = 0.3f),
+                                            Color.Transparent
+                                        )
+                                    )
+                                )
+                        )
+                    }
+
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .graphicsLayer {
-                                alpha = glowProgress.value * 0.35f
-                                translationX = glowTranslationX
+                                alpha = (1f - scale.value.coerceIn(0f, 1f)) * 0.3f
                             }
                             .background(
-                                Brush.linearGradient(
+                                Brush.radialGradient(
                                     colors = listOf(
-                                        Color.Transparent,
-                                        Color.White.copy(alpha = 0.6f),
-                                        Color.White.copy(alpha = 0.3f),
+                                        Color(0xFF6C5CE7).copy(alpha = 0.1f),
                                         Color.Transparent
-                                    )
-                                )
+                                    ),
+                                    radius = 60f
+                                ),
+                                shape = androidx.compose.foundation.shape.CircleShape
                             )
                     )
                 }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            alpha = (1f - scale.value.coerceIn(0f, 1f)) * 0.3f
-                        }
-                        .background(
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    Color(0xFF6C5CE7).copy(alpha = 0.1f),
-                                    Color.Transparent
-                                ),
-                                radius = 60f
-                            ),
-                            shape = androidx.compose.foundation.shape.CircleShape
-                        )
-                )
             }
 
-            // SÓ MUDOU ISSO: o padding de 240.dp virou 160.dp
+            // CAMADA 3: Texto
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .padding(top = 160.dp) // <-- SÓ ISSO MUDOU
+                    .fillMaxSize()
+                    .padding(top = 240.dp)
                     .graphicsLayer {
                         alpha = textAlphaAnim.value
                         translationY = textTranslationY.value
