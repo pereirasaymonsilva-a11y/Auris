@@ -155,124 +155,138 @@ fun SplashScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(gradientBrush),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center // <-- Centraliza TUDO
         ) {
             FloatingParticles()
 
-            Box(
+            // COLUNA PRINCIPAL CENTRALIZADA
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center, // <-- Centraliza verticalmente
                 modifier = Modifier
+                    .fillMaxSize()
                     .wrapContentSize()
-                    .graphicsLayer {
-                        scaleX = scale.value * impactScale.value
-                        scaleY = scale.value * impactScale.value
-                        rotationZ = rotation.value
-                        alpha = alphaAnim.value
-                    }
             ) {
+                // Logo com animação
                 Box(
                     modifier = Modifier
                         .size(170.dp)
-                        .shadow(
-                            elevation = 24.dp,
-                            shape = androidx.compose.foundation.shape.CircleShape,
-                            clip = false,
-                            spotColor = Color(0xFF6C5CE7).copy(alpha = 0.3f * shadeAlpha.value)
-                        )
-                        .background(
-                            brush = Brush.radialGradient(
-                                colors = listOf(
-                                    Color(0xFF6C5CE7).copy(alpha = 0.15f),
-                                    Color.Transparent
-                                ),
-                                radius = 80f
-                            ),
-                            shape = androidx.compose.foundation.shape.CircleShape
-                        )
+                        .graphicsLayer {
+                            scaleX = scale.value * impactScale.value
+                            scaleY = scale.value * impactScale.value
+                            rotationZ = rotation.value
+                            alpha = alphaAnim.value
+                        }
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_auris_logo_transparent),
-                        contentDescription = "Auris Logo",
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(12.dp),
-                        contentScale = ContentScale.Fit
-                    )
-                }
+                            .shadow(
+                                elevation = 24.dp,
+                                shape = androidx.compose.foundation.shape.CircleShape,
+                                clip = false,
+                                spotColor = Color(0xFF6C5CE7).copy(alpha = 0.3f * shadeAlpha.value)
+                            )
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF6C5CE7).copy(alpha = 0.15f),
+                                        Color.Transparent
+                                    ),
+                                    radius = 80f
+                                ),
+                                shape = androidx.compose.foundation.shape.CircleShape
+                            )
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_auris_logo_transparent),
+                            contentDescription = "Auris Logo",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(12.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
 
-                if (glowProgress.value > 0.01f) {
+                    // Brilho diagonal
+                    if (glowProgress.value > 0.01f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .graphicsLayer {
+                                    alpha = glowProgress.value * 0.35f
+                                    translationX = glowTranslationX
+                                }
+                                .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            Color.White.copy(alpha = 0.6f),
+                                            Color.White.copy(alpha = 0.3f),
+                                            Color.Transparent
+                                        )
+                                    )
+                                )
+                        )
+                    }
+
+                    // Efeito de brilho radial
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .graphicsLayer {
-                                alpha = glowProgress.value * 0.35f
-                                translationX = glowTranslationX
+                                alpha = (1f - scale.value.coerceIn(0f, 1f)) * 0.3f
                             }
                             .background(
-                                Brush.linearGradient(
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        Color(0xFF6C5CE7).copy(alpha = 0.1f),
+                                        Color.Transparent
+                                    ),
+                                    radius = 60f
+                                ),
+                                shape = androidx.compose.foundation.shape.CircleShape
+                            )
+                    )
+                }
+
+                // Espaço entre logo e texto
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Texto "Auris"
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.graphicsLayer {
+                        alpha = textAlphaAnim.value
+                        translationY = textTranslationY.value
+                    }
+                ) {
+                    Text(
+                        text = "Auris",
+                        color = Color.White,
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.5.sp,
+                        modifier = Modifier.alpha(0.9f)
+                    )
+                    
+                    Box(
+                        modifier = Modifier
+                            .width(40.dp)
+                            .height(2.dp)
+                            .padding(top = 4.dp)
+                            .alpha(0.3f * textAlphaAnim.value)
+                            .background(
+                                Brush.horizontalGradient(
                                     colors = listOf(
                                         Color.Transparent,
-                                        Color.White.copy(alpha = 0.6f),
-                                        Color.White.copy(alpha = 0.3f),
+                                        Color(0xFF6C5CE7),
                                         Color.Transparent
                                     )
                                 )
                             )
                     )
                 }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            alpha = (1f - scale.value.coerceIn(0f, 1f)) * 0.3f
-                        }
-                        .background(
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    Color(0xFF6C5CE7).copy(alpha = 0.1f),
-                                    Color.Transparent
-                                ),
-                                radius = 60f
-                            ),
-                            shape = androidx.compose.foundation.shape.CircleShape
-                        )
-                )
-            }
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .padding(top = 240.dp)
-                    .graphicsLayer {
-                        alpha = textAlphaAnim.value
-                        translationY = textTranslationY.value
-                    }
-            ) {
-                Text(
-                    text = "Auris",
-                    color = Color.White,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.5.sp,
-                    modifier = Modifier.alpha(0.9f)
-                )
-                
-                Box(
-                    modifier = Modifier
-                        .width(40.dp)
-                        .height(2.dp)
-                        .padding(top = 4.dp)
-                        .alpha(0.3f * textAlphaAnim.value)
-                        .background(
-                            Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color(0xFF6C5CE7),
-                                    Color.Transparent
-                                )
-                            )
-                        )
-                )
             }
         }
     }
