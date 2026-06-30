@@ -55,13 +55,41 @@ import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
 import com.goldensystem.auris.ui.theme.customColorScheme
 import kotlinx.coroutines.launch
 
-// Links para wallpapers do servidor (substitua depois)
+// Links para wallpapers do servidor(PROVISORIO NO FUTURO VAI SER PEGO NO SERVIDOR DA GOLDENSYSTEM)
 val SERVER_WALLPAPERS = listOf(
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper24.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper7.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper31.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper14.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper3.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper19.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper11.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper26.jpg",
     "https://wallpaper.forfun.com/fetch/0f/0faffa5239e20701db8c7de8a72be9b8.jpeg",
-    "https://mrwallpaper.com/images/high/a-car-is-on-the-road-at-night-yagjbzto9b57cb7h.jpg",
-    "https://i.pinimg.com/originals/a0/22/c6/a022c668083bf4f8b496614729f5e0cd.jpg",
-    "https://i.pinimg.com/originals/31/b8/0b/31b80bd952f3999a4310207fd00ad73a.jpg",
-    "https://i.pinimg.com/originals/b8/6a/f2/b86af24be084d3ce9f1b97ff4df0fdda.jpg"
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper5.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper22.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper15.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper9.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper28.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper17.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper2.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper20.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper12.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper6.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper23.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper29.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper16.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper8.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper25.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper13.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper21.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper4.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper18.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper10.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper27.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper1.jpg",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/auris_wallpaper.png",
+    "https://github.com/pereirasaymonsilva-a11y/Auris/blob/main/assets/wallpaper/Wallpaper30.jpg"
 )
 
 // Cores principais (12 cores básicas)

@@ -155,138 +155,125 @@ fun SplashScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(gradientBrush),
-            contentAlignment = Alignment.Center // <-- Centraliza TUDO
+            contentAlignment = Alignment.Center
         ) {
             FloatingParticles()
 
-            // COLUNA PRINCIPAL CENTRALIZADA
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center, // <-- Centraliza verticalmente
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
                     .wrapContentSize()
+                    .graphicsLayer {
+                        scaleX = scale.value * impactScale.value
+                        scaleY = scale.value * impactScale.value
+                        rotationZ = rotation.value
+                        alpha = alphaAnim.value
+                    }
             ) {
-                // Logo com animação
                 Box(
                     modifier = Modifier
                         .size(170.dp)
-                        .graphicsLayer {
-                            scaleX = scale.value * impactScale.value
-                            scaleY = scale.value * impactScale.value
-                            rotationZ = rotation.value
-                            alpha = alphaAnim.value
-                        }
+                        .shadow(
+                            elevation = 24.dp,
+                            shape = androidx.compose.foundation.shape.CircleShape,
+                            clip = false,
+                            spotColor = Color(0xFF6C5CE7).copy(alpha = 0.3f * shadeAlpha.value)
+                        )
+                        .background(
+                            brush = Brush.radialGradient(
+                                colors = listOf(
+                                    Color(0xFF6C5CE7).copy(alpha = 0.15f),
+                                    Color.Transparent
+                                ),
+                                radius = 80f
+                            ),
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        )
                 ) {
-                    Box(
+                    Image(
+                        painter = painterResource(R.drawable.ic_auris_logo_transparent),
+                        contentDescription = "Auris Logo",
                         modifier = Modifier
                             .fillMaxSize()
-                            .shadow(
-                                elevation = 24.dp,
-                                shape = androidx.compose.foundation.shape.CircleShape,
-                                clip = false,
-                                spotColor = Color(0xFF6C5CE7).copy(alpha = 0.3f * shadeAlpha.value)
-                            )
-                            .background(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        Color(0xFF6C5CE7).copy(alpha = 0.15f),
-                                        Color.Transparent
-                                    ),
-                                    radius = 80f
-                                ),
-                                shape = androidx.compose.foundation.shape.CircleShape
-                            )
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_auris_logo_transparent),
-                            contentDescription = "Auris Logo",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(12.dp),
-                            contentScale = ContentScale.Fit
-                        )
-                    }
+                            .padding(12.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
 
-                    // Brilho diagonal
-                    if (glowProgress.value > 0.01f) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .graphicsLayer {
-                                    alpha = glowProgress.value * 0.35f
-                                    translationX = glowTranslationX
-                                }
-                                .background(
-                                    Brush.linearGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            Color.White.copy(alpha = 0.6f),
-                                            Color.White.copy(alpha = 0.3f),
-                                            Color.Transparent
-                                        )
-                                    )
-                                )
-                        )
-                    }
-
-                    // Efeito de brilho radial
+                if (glowProgress.value > 0.01f) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .graphicsLayer {
-                                alpha = (1f - scale.value.coerceIn(0f, 1f)) * 0.3f
+                                alpha = glowProgress.value * 0.35f
+                                translationX = glowTranslationX
                             }
                             .background(
-                                Brush.radialGradient(
-                                    colors = listOf(
-                                        Color(0xFF6C5CE7).copy(alpha = 0.1f),
-                                        Color.Transparent
-                                    ),
-                                    radius = 60f
-                                ),
-                                shape = androidx.compose.foundation.shape.CircleShape
-                            )
-                    )
-                }
-
-                // Espaço entre logo e texto
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Texto "Auris"
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.graphicsLayer {
-                        alpha = textAlphaAnim.value
-                        translationY = textTranslationY.value
-                    }
-                ) {
-                    Text(
-                        text = "Auris",
-                        color = Color.White,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.5.sp,
-                        modifier = Modifier.alpha(0.9f)
-                    )
-                    
-                    Box(
-                        modifier = Modifier
-                            .width(40.dp)
-                            .height(2.dp)
-                            .padding(top = 4.dp)
-                            .alpha(0.3f * textAlphaAnim.value)
-                            .background(
-                                Brush.horizontalGradient(
+                                Brush.linearGradient(
                                     colors = listOf(
                                         Color.Transparent,
-                                        Color(0xFF6C5CE7),
+                                        Color.White.copy(alpha = 0.6f),
+                                        Color.White.copy(alpha = 0.3f),
                                         Color.Transparent
                                     )
                                 )
                             )
                     )
                 }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            alpha = (1f - scale.value.coerceIn(0f, 1f)) * 0.3f
+                        }
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    Color(0xFF6C5CE7).copy(alpha = 0.1f),
+                                    Color.Transparent
+                                ),
+                                radius = 60f
+                            ),
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        )
+                )
+            }
+
+            // SÓ MUDOU ISSO: o padding de 240.dp virou 160.dp
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(top = 160.dp) // <-- SÓ ISSO MUDOU
+                    .graphicsLayer {
+                        alpha = textAlphaAnim.value
+                        translationY = textTranslationY.value
+                    }
+            ) {
+                Text(
+                    text = "Auris",
+                    color = Color.White,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.5.sp,
+                    modifier = Modifier.alpha(0.9f)
+                )
+                
+                Box(
+                    modifier = Modifier
+                        .width(40.dp)
+                        .height(2.dp)
+                        .padding(top = 4.dp)
+                        .alpha(0.3f * textAlphaAnim.value)
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color(0xFF6C5CE7),
+                                    Color.Transparent
+                                )
+                            )
+                        )
+                )
             }
         }
     }
