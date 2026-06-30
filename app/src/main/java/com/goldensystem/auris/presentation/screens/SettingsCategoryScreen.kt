@@ -5,6 +5,7 @@ import com.goldensystem.auris.presentation.components.BackupModuleSelectionDialo
 import com.goldensystem.auris.data.preferences.AiPreferencesRepository
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.goldensystem.auris.presentation.viewmodel.CustomThemeViewModel
 import java.util.Date
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.draw.rotate
@@ -535,20 +536,30 @@ fun SettingsCategoryScreen(
                                     },
                                     leadingIcon = { Icon(Icons.Outlined.Language, null, tint = MaterialTheme.colorScheme.secondary) }
                                 )
-// (adicionando a opção PERSONALIZADO):(SAYMON SILVA PEREIRA)
-    ThemeSelectorItem(
-            label = stringResource(R.string.setcat_app_theme_label),
-            description = stringResource(R.string.setcat_app_theme_desc),
-            options = mapOf(
-                AppThemeMode.LIGHT to stringResource(R.string.setcat_theme_light),
-                AppThemeMode.DARK to stringResource(R.string.setcat_theme_dark),
-                AppThemeMode.FOLLOW_SYSTEM to stringResource(R.string.setcat_theme_follow_system),
-                AppThemeMode.CUSTOM to stringResource(R.string.setcat_theme_custom)
-            ),
-            selectedKey = uiState.appThemeMode,
-            onSelectionChanged = { settingsViewModel.setAppThemeMode(it) },
-            leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) }
-        )
+  // (adicionando a opção PERSONALIZADO):(SAYMON SILVA PEREIRA)
+  ThemeSelectorItem(
+    label = stringResource(R.string.setcat_app_theme_label),
+    description = stringResource(R.string.setcat_app_theme_desc),
+    options = mapOf(
+        AppThemeMode.LIGHT to stringResource(R.string.setcat_theme_light),
+        AppThemeMode.DARK to stringResource(R.string.setcat_theme_dark),
+        AppThemeMode.FOLLOW_SYSTEM to stringResource(R.string.setcat_theme_follow_system),
+        AppThemeMode.CUSTOM to stringResource(R.string.setcat_theme_custom)
+    ),
+    selectedKey = uiState.appThemeMode,
+    onSelectionChanged = { mode ->
+        settingsViewModel.setAppThemeMode(mode)
+        
+        // 👇 QUANDO NÃO FOR CUSTOM, DESATIVA O TEMA PERSONALIZADO
+        if (mode != AppThemeMode.CUSTOM) {
+            val customViewModel: CustomThemeViewModel = hiltViewModel()
+            coroutineScope.launch {
+                customViewModel.disableCustomTheme()
+            }
+        }
+    },
+    leadingIcon = { Icon(Icons.Outlined.LightMode, null, tint = MaterialTheme.colorScheme.secondary) }
+      )
         
         // Card de Tema Personalizado - aparece APENAS quando CUSTOM está selecionado
         AnimatedVisibility(
