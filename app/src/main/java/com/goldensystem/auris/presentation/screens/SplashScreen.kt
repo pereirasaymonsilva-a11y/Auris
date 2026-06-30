@@ -302,7 +302,6 @@ private fun FloatingParticles() {
                 x = (0..1000).random() / 1000f,
                 y = (0..1000).random() / 1000f,
                 delayMs = (200 + (0..300).random()).toLong(),
-                speed = 1f + (0..500).random() / 1000f,
                 size = (1.5f + (0..3).random()).dp,
                 alphaBase = 0.08f + (0..200).random() / 1000f * 0.25f
             )
@@ -342,7 +341,6 @@ private data class ParticleData(
     val x: Float,
     val y: Float,
     val delayMs: Long,
-    val speed: Float,
     val size: androidx.compose.ui.unit.Dp,
     val alphaBase: Float
 )
