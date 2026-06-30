@@ -3,6 +3,7 @@ package com.goldensystem.auris
 import com.goldensystem.auris.presentation.navigation.navigateSafely
 import com.goldensystem.auris.presentation.screens.PiracyDialog
 import androidx.compose.runtime.collectAsState
+import com.goldensystem.auris.presentation.screens.SplashScreen
 import com.goldensystem.auris.data.gdrive.GDriveRepository
 import com.goldensystem.auris.presentation.viewmodel.PiracyUiState
 import com.goldensystem.auris.presentation.viewmodel.PiracyViewModel
@@ -222,65 +223,71 @@ class MainActivity : ComponentActivity() {
         val isBenchmarkMode = intent.getBooleanExtra("is_benchmark", false)
 
         setContent {
-    val systemDarkTheme = isSystemInDarkTheme()
-    val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.FOLLOW_SYSTEM)
-    val useDarkTheme = when (appThemeMode) {
-        AppThemeMode.DARK -> true
-        AppThemeMode.LIGHT -> false
-        else -> systemDarkTheme
-    }
-    val isSetupComplete by mainViewModel.isSetupComplete.collectAsStateWithLifecycle()
+    var showSplash by remember { mutableStateOf(true) }
     
-    // Crash report dialog state
-    var showCrashReportDialog by remember { mutableStateOf(false) }
-    var crashLogData by remember { mutableStateOf<CrashLogData?>(null) }
-    
-    // Permissions Logic
-    val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        listOf(Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
-    } else {
-        listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-    }
-    @OptIn(ExperimentalPermissionsApi::class)
-    val permissionState = rememberMultiplePermissionsState(permissions = permissions)
-    val permissionsValid = permissionState.allPermissionsGranted
-    val showSetupScreen = remember(isSetupComplete, permissionsValid, isBenchmarkMode) {
-        when {
-            isBenchmarkMode -> false
-            isSetupComplete == null -> null
-            else -> !isSetupComplete!! || !permissionsValid
-        }
-    }
-
-    LaunchedEffect(showSetupScreen) {
-        if (showSetupScreen == false) {
-            LogUtils.i(this, "Setup complete/skipped and permissions valid. Starting sync.")
-            mainViewModel.startSync()
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        if (!isBenchmarkMode && CrashHandler.hasCrashLog()) {
-            crashLogData = CrashHandler.getCrashLog()
-            showCrashReportDialog = true
-        }
-    }
-
-    // ===== AURIS THEME (controla Claro/Escuro/Seguir Sistema) =====
-    AurisTheme(darkTheme = useDarkTheme) {
-    // 👇 SÓ ISSO! O AurisTheme já decide se usa CUSTOM ou não
-    AppContent(
-        showSetupScreen = showSetupScreen,
-        playerViewModel = playerViewModel,
-        mainViewModel = mainViewModel,
-        showCrashReportDialog = showCrashReportDialog,
-        crashLogData = crashLogData,
-        onCrashDismiss = {
-            CrashHandler.clearCrashLog()
-            crashLogData = null
-            showCrashReportDialog = false
+    if (showSplash) {
+        SplashScreen(
+            onAnimationComplete = {
+                showSplash = false
             }
         )
+    } else {
+        val systemDarkTheme = isSystemInDarkTheme()
+        val appThemeMode by themePreferencesRepository.appThemeModeFlow.collectAsStateWithLifecycle(initialValue = AppThemeMode.FOLLOW_SYSTEM)
+        val useDarkTheme = when (appThemeMode) {
+            AppThemeMode.DARK -> true
+            AppThemeMode.LIGHT -> false
+            else -> systemDarkTheme
+        }
+        val isSetupComplete by mainViewModel.isSetupComplete.collectAsStateWithLifecycle()
+        
+        var showCrashReportDialog by remember { mutableStateOf(false) }
+        var crashLogData by remember { mutableStateOf<CrashLogData?>(null) }
+        
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            listOf(Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        @OptIn(ExperimentalPermissionsApi::class)
+        val permissionState = rememberMultiplePermissionsState(permissions = permissions)
+        val permissionsValid = permissionState.allPermissionsGranted
+        val showSetupScreen = remember(isSetupComplete, permissionsValid, isBenchmarkMode) {
+            when {
+                isBenchmarkMode -> false
+                isSetupComplete == null -> null
+                else -> !isSetupComplete!! || !permissionsValid
+            }
+        }
+
+        LaunchedEffect(showSetupScreen) {
+            if (showSetupScreen == false) {
+                LogUtils.i(this, "Setup complete/skipped and permissions valid. Starting sync.")
+                mainViewModel.startSync()
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            if (!isBenchmarkMode && CrashHandler.hasCrashLog()) {
+                crashLogData = CrashHandler.getCrashLog()
+                showCrashReportDialog = true
+            }
+        }
+
+        AurisTheme(darkTheme = useDarkTheme) {
+            AppContent(
+                showSetupScreen = showSetupScreen,
+                playerViewModel = playerViewModel,
+                mainViewModel = mainViewModel,
+                showCrashReportDialog = showCrashReportDialog,
+                crashLogData = crashLogData,
+                onCrashDismiss = {
+                    CrashHandler.clearCrashLog()
+                    crashLogData = null
+                    showCrashReportDialog = false
+                }
+            )
+        }
     }
 }
         handleIntent(intent)
