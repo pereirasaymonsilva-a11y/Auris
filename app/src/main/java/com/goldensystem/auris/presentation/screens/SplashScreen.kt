@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -28,12 +27,8 @@ import kotlin.random.Random
 fun SplashScreen(
     onFinish: () -> Unit
 ) {
-    /* =======================
-       ANIMATIONS (STABLE)
-    ======================= */
-
     val scale = remember { Animatable(0.6f) }
-    val alpha = remember { Animatable(0f) }
+    val logoAlpha = remember { Animatable(0f) }  // ← MUDOU DE "alpha" PARA "logoAlpha"
     val rotation = remember { Animatable(-8f) }
     val textAlpha = remember { Animatable(0f) }
     val textOffset = remember { Animatable(20f) }
@@ -42,7 +37,7 @@ fun SplashScreen(
     var finished by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        alpha.animateTo(1f, tween(500))
+        logoAlpha.animateTo(1f, tween(500))  // ← MUDOU
         scale.animateTo(
             1f,
             spring(
@@ -66,7 +61,7 @@ fun SplashScreen(
 
         delay(300)
 
-        alpha.animateTo(0f, tween(400))
+        logoAlpha.animateTo(0f, tween(400))  // ← MUDOU
 
         finished = true
     }
@@ -74,10 +69,6 @@ fun SplashScreen(
     LaunchedEffect(finished) {
         if (finished) onFinish()
     }
-
-    /* =======================
-       BACKGROUND
-    ======================= */
 
     val background = Brush.verticalGradient(
         listOf(
@@ -92,34 +83,22 @@ fun SplashScreen(
             .fillMaxSize()
             .background(background)
     ) {
-
-        /* =======================
-           PARTICLES (SAFE LAYER)
-        ======================= */
-
         FloatingParticles()
-
-        /* =======================
-           CENTER LOGO (LOCKED)
-        ======================= */
 
         Box(
             modifier = Modifier
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-
             Box(
                 modifier = Modifier
                     .graphicsLayer {
-                        this.alpha = alpha.value
+                        this.alpha = logoAlpha.value  // ← MUDOU
                         scaleX = scale.value
                         scaleY = scale.value
                         rotationZ = rotation.value
                     }
             ) {
-
-                // glow base
                 Box(
                     modifier = Modifier
                         .size(180.dp)
@@ -144,17 +123,12 @@ fun SplashScreen(
             }
         }
 
-        /* =======================
-           TEXT (SAFE POSITION)
-        ======================= */
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 420.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Text(
                 text = "Auris",
                 fontSize = 30.sp,
@@ -184,10 +158,6 @@ fun SplashScreen(
             )
         }
 
-        /* =======================
-           GLOW SWEEP (CONTROLLED)
-        ======================= */
-
         if (glow.value > 0f) {
             Box(
                 modifier = Modifier
@@ -211,13 +181,8 @@ fun SplashScreen(
     }
 }
 
-/* =======================
-   PARTICLES
-======================= */
-
 @Composable
 private fun FloatingParticles() {
-
     val particles = remember {
         List(20) {
             Particle(
@@ -232,7 +197,6 @@ private fun FloatingParticles() {
     val transition = rememberInfiniteTransition()
 
     particles.forEach { p ->
-
         val anim by transition.animateFloat(
             initialValue = 0f,
             targetValue = 1f,
