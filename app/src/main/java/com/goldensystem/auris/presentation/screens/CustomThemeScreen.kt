@@ -264,6 +264,7 @@ fun CustomThemeScreen(
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.action_apply), fontSize = 16.sp)
             }
+        Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }

@@ -182,54 +182,49 @@ fun SplashScreen(
             }
 
             // LOGO - sem a CAMADA 3 (fundo radial roxo)
-            Box(
-                modifier = Modifier
-                    .size(170.dp)
-                    .graphicsLayer {
-                        scaleX = scale.value * impactScale.value
-                        scaleY = scale.value * impactScale.value
-                        rotationZ = rotation.value
-                        alpha = alphaAnim.value
-                        transformOrigin = TransformOrigin(0.5f, 0.5f)
-                    }
-                    .shadow(
-                        elevation = 24.dp,
-                        shape = androidx.compose.foundation.shape.CircleShape,
-                        clip = false,
-                        spotColor = Color(0xFF6C5CE7).copy(alpha = 0.3f * shadeAlpha.value)
-                    )
-                    .background(Color.Transparent), // FUNDO TRANSPARENTE (removeu o losango)
-                contentAlignment = Alignment.Center
-            ) {
-                // Imagem do logo
-                Image(
-                    painter = painterResource(R.drawable.ic_auris_logo_transparent),
-                    contentDescription = "Auris Logo",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(12.dp),
-                    contentScale = ContentScale.Fit
-                )
+            // LOGO - sem shadow
+Box(
+    modifier = Modifier
+        .size(170.dp)
+        .graphicsLayer {
+            scaleX = scale.value * impactScale.value
+            scaleY = scale.value * impactScale.value
+            rotationZ = rotation.value
+            alpha = alphaAnim.value
+            transformOrigin = TransformOrigin(0.5f, 0.5f)
+        }
+        .background(Color.Transparent), // FUNDO TRANSPARENTE
+    contentAlignment = Alignment.Center
+) {
+    // Imagem do logo
+    Image(
+        painter = painterResource(R.drawable.ic_auris_logo_transparent),
+        contentDescription = "Auris Logo",
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(12.dp),
+        contentScale = ContentScale.Fit
+    )
 
-                // Efeito de brilho radial pulsante (mantido)
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            alpha = (1f - scale.value.coerceIn(0f, 1f)) * 0.3f
-                        }
-                        .background(
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    Color(0xFF6C5CE7).copy(alpha = 0.1f),
-                                    Color.Transparent
-                                ),
-                                radius = 60f
-                            ),
-                            shape = androidx.compose.foundation.shape.CircleShape
-                        )
-                )
+    // Efeito de brilho radial pulsante (mantido)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer {
+                alpha = (1f - scale.value.coerceIn(0f, 1f)) * 0.3f
             }
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFF6C5CE7).copy(alpha = 0.1f),
+                        Color.Transparent
+                    ),
+                    radius = 60f
+                ),
+                shape = androidx.compose.foundation.shape.CircleShape
+            )
+    )
+}
 
             // Texto "Auris"
             Column(

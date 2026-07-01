@@ -4,29 +4,29 @@
 
 
 <!-- Settings > Appearance > Custom Theme -->
-<string name="setcat_custom_theme_title">Tema Personalizado</string>
-<string name="setcat_custom_theme_subtitle">Personalize cores, wallpapers e estilo do app</string>
-<string name="setcat_theme_custom">Personalizado 🎨</string>
-<string name="custom_theme_container_color">Cor dos Containers</string>
-<string name="custom_theme_title">Tema Personalizado</string>
-<string name="custom_theme_colors">Cores</string>
-<string name="custom_theme_wallpaper">Papel de Parede</string>
-<string name="custom_theme_colors_subtitle">Escolha as cores principais do app</string>
-<string name="custom_theme_primary_color">Cor Primária</string>
-<string name="custom_theme_secondary_color">Cor Secundária</string>
-<string name="custom_theme_background_color">Cor de Fundo</string>
-<string name="custom_theme_surface_color">Cor de Superfície</string>
-<string name="custom_theme_custom_color">Cor personalizada</string>
-<string name="custom_theme_wallpaper_subtitle">Escolha o fundo do app</string>
-<string name="wallpaper_type_solid">Cor Sólida</string>
-<string name="wallpaper_type_gallery">Galeria</string>
-<string name="wallpaper_type_server">Servidor</string>
-<string name="wallpaper_color">Cor do Wallpaper</string>
-<string name="wallpaper_select_from_gallery">Selecionar da Galeria</string>
-<string name="wallpaper_server_subtitle">Escolha um wallpaper do servidor</string>
-<string name="wallpaper_blur">Desfoque</string>
-<string name="wallpaper_dim">Escurecimento</string>
-<string name="action_apply">Aplicar</string>
+<string name="setcat_custom_theme_title">Custom Theme</string>
+<string name="setcat_custom_theme_subtitle">Customize colors, wallpapers and app style</string>
+<string name="setcat_theme_custom">Custom 🎨</string>
+<string name="custom_theme_container_color">Container Color</string>
+<string name="custom_theme_title">Custom Theme</string>
+<string name="custom_theme_colors">Colors</string>
+<string name="custom_theme_wallpaper">Wallpaper</string>
+<string name="custom_theme_colors_subtitle">Choose the app's main colors</string>
+<string name="custom_theme_primary_color">Primary Color</string>
+<string name="custom_theme_secondary_color">Secondary Color</string>
+<string name="custom_theme_background_color">Background Color</string>
+<string name="custom_theme_surface_color">Surface Color</string>
+<string name="custom_theme_custom_color">Custom color</string>
+<string name="custom_theme_wallpaper_subtitle">Choose app background</string>
+<string name="wallpaper_type_solid">Solid Color</string>
+<string name="wallpaper_type_gallery">Gallery</string>
+<string name="wallpaper_type_server">Server</string>
+<string name="wallpaper_color">Wallpaper Color</string>
+<string name="wallpaper_select_from_gallery">Select from Gallery</string>
+<string name="wallpaper_server_subtitle">Choose a wallpaper from the server</string>
+<string name="wallpaper_blur">Blur</string>
+<string name="wallpaper_dim">Dimming</string>
+<string name="action_apply">Apply</string> 
 
 
 
