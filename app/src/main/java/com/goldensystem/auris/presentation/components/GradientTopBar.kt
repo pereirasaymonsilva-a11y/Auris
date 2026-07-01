@@ -107,7 +107,7 @@ fun HomeGradientTopBar(
     AurisStatusBarStyle(color = surfaceColor)
 
     val gradientColors = listOf(
-        surfaceColor,
+        surfaceColor.copy(alpha = 0.85f),
         Color.Transparent
     ).toImmutableList()
 

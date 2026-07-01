@@ -1032,8 +1032,7 @@ fun LibraryScreen(
         .fillMaxSize()
         .padding(horizontal = 0.dp, vertical = 0.dp),
     color = if (config.isEnabled) {
-        // Quando o wallpaper está ativo: fundo com transparência
-        MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+        Color.Transparent
     } else {
         // Quando wallpaper não está ativo: fundo normal
         MaterialTheme.colorScheme.surface
