@@ -11,13 +11,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -81,15 +79,15 @@ fun SplashScreen(
         shadeAlpha.animateTo(1f, animationSpec = tween(300, easing = FastOutSlowInEasing))
         delay(100)
 
-        // Fase 4: Brilho diagonal
+        // Fase 4: Brilho diagonal - agora na tela toda
         glowProgress.animateTo(
             targetValue = 1f,
-            animationSpec = tween(500, easing = FastOutSlowInEasing)
+            animationSpec = tween(600, easing = FastOutSlowInEasing) // mais lento pra atravessar
         )
         delay(100)
         glowProgress.animateTo(
             targetValue = 0f,
-            animationSpec = tween(300, easing = FastOutSlowInEasing)
+            animationSpec = tween(400, easing = FastOutSlowInEasing) // mais lento pra sumir
         )
         delay(150)
 
@@ -142,7 +140,8 @@ fun SplashScreen(
         )
     )
 
-    val glowTranslationX = (glowProgress.value * 300f) - 150f
+    // Brilho diagonal - agora se move pela TELA INTEIRA (de -300% a 300%)
+    val glowTranslationX = (glowProgress.value * 600f) - 300f // -300 a +300 (tela toda)
 
     Surface(
         modifier = Modifier
@@ -160,17 +159,38 @@ fun SplashScreen(
         ) {
             FloatingParticles()
 
-            // LOGO CORRIGIDO - tamanho fixo com animação no mesmo Box
+            // BRILHO DIAGONAL - AGORA NA TELA TODA (em cima de tudo, mas atrás do texto)
+            if (glowProgress.value > 0.01f) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            alpha = glowProgress.value * 0.15f // mais sutil pra não ofuscar
+                            translationX = glowTranslationX
+                        }
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White.copy(alpha = 0.3f),
+                                    Color.White.copy(alpha = 0.15f),
+                                    Color.Transparent
+                                )
+                            )
+                        )
+                )
+            }
+
+            // LOGO - sem a CAMADA 3 (fundo radial roxo)
             Box(
                 modifier = Modifier
-                    .size(170.dp) // tamanho fixo, sem wrapContentSize
+                    .size(170.dp)
                     .graphicsLayer {
-                        // Aplica todas as transformações no mesmo Box
                         scaleX = scale.value * impactScale.value
                         scaleY = scale.value * impactScale.value
                         rotationZ = rotation.value
                         alpha = alphaAnim.value
-                        transformOrigin = TransformOrigin(0.5f, 0.5f) // centro exato
+                        transformOrigin = TransformOrigin(0.5f, 0.5f)
                     }
                     .shadow(
                         elevation = 24.dp,
@@ -178,19 +198,10 @@ fun SplashScreen(
                         clip = false,
                         spotColor = Color(0xFF6C5CE7).copy(alpha = 0.3f * shadeAlpha.value)
                     )
-                    .background(
-                        brush = Brush.radialGradient(
-                            colors = listOf(
-                                Color(0xFF6C5CE7).copy(alpha = 0.15f),
-                                Color.Transparent
-                            ),
-                            radius = 80f
-                        ),
-                        shape = androidx.compose.foundation.shape.CircleShape
-                    ),
+                    .background(Color.Transparent), // FUNDO TRANSPARENTE (removeu o losango)
                 contentAlignment = Alignment.Center
             ) {
-                // Imagem do logo - centralizada dentro do Box
+                // Imagem do logo
                 Image(
                     painter = painterResource(R.drawable.ic_auris_logo_transparent),
                     contentDescription = "Auris Logo",
@@ -200,29 +211,7 @@ fun SplashScreen(
                     contentScale = ContentScale.Fit
                 )
 
-                // Efeito de brilho diagonal
-                if (glowProgress.value > 0.01f) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .graphicsLayer {
-                                alpha = glowProgress.value * 0.35f
-                                translationX = glowTranslationX
-                            }
-                            .background(
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        Color.White.copy(alpha = 0.6f),
-                                        Color.White.copy(alpha = 0.3f),
-                                        Color.Transparent
-                                    )
-                                )
-                            )
-                    )
-                }
-
-                // Efeito de brilho radial (pulse)
+                // Efeito de brilho radial pulsante (mantido)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
