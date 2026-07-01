@@ -5,228 +5,330 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.goldensystem.auris.R
 import kotlinx.coroutines.delay
-import kotlin.random.Random
 
 @Composable
 fun SplashScreen(
-    onFinish: () -> Unit
+    onAnimationComplete: () -> Unit
 ) {
-    val scale = remember { Animatable(0.6f) }
-    val logoAlpha = remember { Animatable(0f) }  // ← MUDOU DE "alpha" PARA "logoAlpha"
-    val rotation = remember { Animatable(-8f) }
-    val textAlpha = remember { Animatable(0f) }
-    val textOffset = remember { Animatable(20f) }
-    val glow = remember { Animatable(0f) }
+    // Animações usando Animatable para controle preciso
+    val scale = remember { Animatable(0.2f) }
+    val rotation = remember { Animatable(-15f) }
+    val alphaAnim = remember { Animatable(0f) }
+    val glowProgress = remember { Animatable(0f) }
+    val textAlphaAnim = remember { Animatable(0f) }
+    val textTranslationY = remember { Animatable(20f) }
+    val shadeAlpha = remember { Animatable(0f) }
+    val finalFade = remember { Animatable(1f) }
+    val impactScale = remember { Animatable(1f) }
 
-    var finished by remember { mutableStateOf(false) }
+    var isAnimationComplete by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        logoAlpha.animateTo(1f, tween(500))  // ← MUDOU
+        // Fase 1: Logo aparece (fade + escala + rotação)
+        alphaAnim.animateTo(1f, animationSpec = tween(400, easing = FastOutSlowInEasing))
+        delay(50)
         scale.animateTo(
-            1f,
-            spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessLow
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessMediumLow
             )
         )
+        rotation.animateTo(
+            targetValue = 0f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessMedium
+            )
+        )
+        delay(150)
 
-        rotation.animateTo(0f, spring())
+        // Fase 2: Efeito de IMPACTO
+        impactScale.animateTo(
+            targetValue = 1.04f,
+            animationSpec = tween(80, easing = FastOutSlowInEasing)
+        )
+        impactScale.animateTo(
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessHigh
+            )
+        )
+        delay(50)
 
-        glow.animateTo(1f, tween(400))
-        glow.animateTo(0f, tween(300))
+        // Fase 3: Sombras
+        shadeAlpha.animateTo(1f, animationSpec = tween(300, easing = FastOutSlowInEasing))
+        delay(100)
 
-        textAlpha.animateTo(1f, tween(400))
-        textOffset.animateTo(0f, tween(400))
+        // Fase 4: Brilho diagonal
+        glowProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(500, easing = FastOutSlowInEasing)
+        )
+        delay(100)
+        glowProgress.animateTo(
+            targetValue = 0f,
+            animationSpec = tween(300, easing = FastOutSlowInEasing)
+        )
+        delay(150)
 
-        delay(700)
+        // Fase 5: Micro-vibração
+        rotation.animateTo(
+            targetValue = 0f,
+            animationSpec = keyframes {
+                durationMillis = 120
+                -2f at 0
+                2f at 30
+                -1.5f at 55
+                1.5f at 75
+                0f at 120
+            }
+        )
+        delay(50)
 
-        scale.animateTo(0.92f, tween(250))
-        scale.animateTo(1f, spring())
-
+        // Fase 6: Texto aparece
+        textAlphaAnim.animateTo(1f, animationSpec = tween(350, easing = FastOutSlowInEasing))
+        textTranslationY.animateTo(
+            targetValue = 0f,
+            animationSpec = tween(400, easing = FastOutSlowInEasing)
+        )
         delay(300)
 
-        logoAlpha.animateTo(0f, tween(400))  // ← MUDOU
+        // Fase 7: Pausa
+        delay(400)
 
-        finished = true
+        // Fase 8: Fade out
+        finalFade.animateTo(
+            targetValue = 0f,
+            animationSpec = tween(350, easing = FastOutSlowInEasing)
+        )
+        
+        isAnimationComplete = true
     }
 
-    LaunchedEffect(finished) {
-        if (finished) onFinish()
+    LaunchedEffect(isAnimationComplete) {
+        if (isAnimationComplete) {
+            delay(50)
+            onAnimationComplete()
+        }
     }
 
-    val background = Brush.verticalGradient(
-        listOf(
-            Color(0xFF0B0B12),
-            Color(0xFF10101A),
-            Color(0xFF0B0B12)
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF0A0A12),
+            Color(0xFF12121F),
+            Color(0xFF0D0D17)
         )
     )
 
-    Box(
+    val glowTranslationX = (glowProgress.value * 300f) - 150f
+
+    Surface(
         modifier = Modifier
             .fillMaxSize()
-            .background(background)
+            .graphicsLayer {
+                alpha = finalFade.value
+            },
+        color = Color.Transparent
     ) {
-        FloatingParticles()
-
         Box(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .background(gradientBrush),
             contentAlignment = Alignment.Center
         ) {
+            FloatingParticles()
+
+            // LOGO CORRIGIDO - tamanho fixo com animação no mesmo Box
             Box(
                 modifier = Modifier
+                    .size(170.dp) // tamanho fixo, sem wrapContentSize
                     .graphicsLayer {
-                        this.alpha = logoAlpha.value  // ← MUDOU
-                        scaleX = scale.value
-                        scaleY = scale.value
+                        // Aplica todas as transformações no mesmo Box
+                        scaleX = scale.value * impactScale.value
+                        scaleY = scale.value * impactScale.value
                         rotationZ = rotation.value
+                        alpha = alphaAnim.value
+                        transformOrigin = TransformOrigin(0.5f, 0.5f) // centro exato
                     }
+                    .shadow(
+                        elevation = 24.dp,
+                        shape = androidx.compose.foundation.shape.CircleShape,
+                        clip = false,
+                        spotColor = Color(0xFF6C5CE7).copy(alpha = 0.3f * shadeAlpha.value)
+                    )
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                Color(0xFF6C5CE7).copy(alpha = 0.15f),
+                                Color.Transparent
+                            ),
+                            radius = 80f
+                        ),
+                        shape = androidx.compose.foundation.shape.CircleShape
+                    ),
+                contentAlignment = Alignment.Center
             ) {
+                // Imagem do logo - centralizada dentro do Box
+                Image(
+                    painter = painterResource(R.drawable.ic_auris_logo_transparent),
+                    contentDescription = "Auris Logo",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(12.dp),
+                    contentScale = ContentScale.Fit
+                )
+
+                // Efeito de brilho diagonal
+                if (glowProgress.value > 0.01f) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer {
+                                alpha = glowProgress.value * 0.35f
+                                translationX = glowTranslationX
+                            }
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        Color.White.copy(alpha = 0.6f),
+                                        Color.White.copy(alpha = 0.3f),
+                                        Color.Transparent
+                                    )
+                                )
+                            )
+                    )
+                }
+
+                // Efeito de brilho radial (pulse)
                 Box(
                     modifier = Modifier
-                        .size(180.dp)
-                        .clip(CircleShape)
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            alpha = (1f - scale.value.coerceIn(0f, 1f)) * 0.3f
+                        }
                         .background(
                             Brush.radialGradient(
-                                listOf(
-                                    Color(0xFF6C5CE7).copy(alpha = 0.25f),
+                                colors = listOf(
+                                    Color(0xFF6C5CE7).copy(alpha = 0.1f),
+                                    Color.Transparent
+                                ),
+                                radius = 60f
+                            ),
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        )
+                )
+            }
+
+            // Texto "Auris"
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(top = 240.dp)
+                    .graphicsLayer {
+                        alpha = textAlphaAnim.value
+                        translationY = textTranslationY.value
+                    }
+            ) {
+                Text(
+                    text = "Auris",
+                    color = Color.White,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.5.sp,
+                    modifier = Modifier.alpha(0.9f)
+                )
+                
+                Box(
+                    modifier = Modifier
+                        .width(40.dp)
+                        .height(2.dp)
+                        .padding(top = 4.dp)
+                        .alpha(0.3f * textAlphaAnim.value)
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color(0xFF6C5CE7),
                                     Color.Transparent
                                 )
                             )
                         )
                 )
-
-                Image(
-                    painter = painterResource(R.drawable.ic_auris_logo_transparent),
-                    contentDescription = "Auris Logo",
-                    modifier = Modifier
-                        .size(160.dp)
-                        .align(Alignment.Center)
-                )
             }
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 420.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Auris",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White,
-                modifier = Modifier
-                    .alpha(textAlpha.value)
-                    .graphicsLayer {
-                        translationY = textOffset.value
-                    }
-            )
-
-            Box(
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .size(width = 60.dp, height = 2.dp)
-                    .alpha(textAlpha.value * 0.4f)
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                Color.Transparent,
-                                Color(0xFF6C5CE7),
-                                Color.Transparent
-                            )
-                        )
-                    )
-            )
-        }
-
-        if (glow.value > 0f) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        alpha = glow.value * 0.25f
-                        translationX = (glow.value * 600f) - 300f
-                        rotationZ = -15f
-                    }
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                Color.Transparent,
-                                Color.White.copy(alpha = 0.6f),
-                                Color.Transparent
-                            )
-                        )
-                    )
-            )
         }
     }
 }
 
 @Composable
 private fun FloatingParticles() {
+    val infiniteTransition = rememberInfiniteTransition(label = "particles")
+
     val particles = remember {
-        List(20) {
-            Particle(
-                x = Random.nextFloat(),
-                y = Random.nextFloat(),
-                size = (2..5).random().dp,
-                alpha = Random.nextFloat() * 0.2f
+        List(25) { idx ->
+            ParticleData(
+                x = (0..1000).random() / 1000f,
+                y = (0..1000).random() / 1000f,
+                delayMs = (200 + (0..300).random()).toLong(),
+                size = (1.5f + (0..3).random()).dp,
+                alphaBase = 0.08f + (0..200).random() / 1000f * 0.25f
             )
         }
     }
 
-    val transition = rememberInfiniteTransition()
-
-    particles.forEach { p ->
-        val anim by transition.animateFloat(
+    particles.forEach { particle ->
+        val floatValue by infiniteTransition.animateFloat(
             initialValue = 0f,
             targetValue = 1f,
             animationSpec = infiniteRepeatable(
-                tween(2000 + (0..1000).random()),
-                RepeatMode.Reverse
-            )
+                animation = tween(
+                    durationMillis = (1500 + (0..1000).random()).toInt(),
+                    easing = FastOutSlowInEasing
+                ),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "particle_${particle.hashCode()}"
         )
 
         Box(
             modifier = Modifier
-                .fillMaxSize()
-        ) {
-            Box(
-                modifier = Modifier
-                    .offset(
-                        x = (p.x * 400).dp,
-                        y = (p.y * 800 + anim * 20).dp
-                    )
-                    .size(p.size)
-                    .alpha(p.alpha)
-                    .background(Color.White, CircleShape)
-            )
-        }
+                .offset(
+                    x = (particle.x * 300 - 150).dp,
+                    y = (particle.y * 500 - 250).dp + (floatValue * 35).dp
+                )
+                .size(particle.size)
+                .alpha(particle.alphaBase + (0.15f * (1f - floatValue.coerceIn(0f, 1f))))
+                .background(Color.White, androidx.compose.foundation.shape.CircleShape)
+        )
     }
 }
 
-private data class Particle(
+private data class ParticleData(
     val x: Float,
     val y: Float,
+    val delayMs: Long,
     val size: androidx.compose.ui.unit.Dp,
-    val alpha: Float
+    val alphaBase: Float
 )
