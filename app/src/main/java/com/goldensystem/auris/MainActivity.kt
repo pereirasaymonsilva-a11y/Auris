@@ -227,7 +227,7 @@ class MainActivity : ComponentActivity() {
     
     if (showSplash) {
         SplashScreen(
-            onAnimationComplete = {
+            onFinish = {
                 showSplash = false
             }
         )
