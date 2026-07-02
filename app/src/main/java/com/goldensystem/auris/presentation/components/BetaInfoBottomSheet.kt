@@ -2,6 +2,7 @@ package com.goldensystem.auris.presentation.components
 
 import android.content.ActivityNotFoundException
 import android.content.Context
+import androidx.compose.material.icons.rounded.Star
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
