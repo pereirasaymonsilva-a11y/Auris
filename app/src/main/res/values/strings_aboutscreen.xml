@@ -35,13 +35,30 @@
 <string name="donate_paypal">PayPal</string>
 <string name="donate_github">GitHub Sponsors</string>
 <string name="donate_thanks">💝 Thank you for your support!</string>
+<!-- About Screen - Golden System -->
+<string name="contributor_golden_role">Desenvolvedora Oficial</string>
+<string name="contributor_golden_detail">Empresa responsável pelo desenvolvimento e manutenção do Auris</string>
+
+<!-- Social Media Descriptions -->
+<string name="cd_open_instagram">Abrir Instagram</string>
+<string name="cd_open_tiktok">Abrir TikTok</string>
  
 
 
 
 
       <!-- Aqui em baixo agente coloca as novidades da versao atual do auris, peste muita ATENCAO no uso de \n•, e muinto cuidado ao formatar -->
-    <string name="about_changelog_text">• Support for new audio formats\n• Player interface improvements\n• Bug fixes and optimizations\n• Library updates\n• Improved performance\n• Minor visual fixes </string>
+    <string name="about_changelog_text">
+• First stable release of Auris.\n\n
+• Added custom theme support.\n
+• Wallpaper support.\n
+• Performance improvements.\n
+• Support for Portuguese and English.\n
+• You can now make the player transparent by going to Settings > Appearance > Player Theme > Dynamic System.\n
+• You can now add wallpapers to Auris. Go to Settings > Appearance, select the Custom Theme, and use the customization panel to personalize the app your way.\n
+• Visit the official website below to learn more about Auris and discover all its features.\n\n
+Thank you for choosing Auris! ❤️
+</string>
     <!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^
         fim das novidades da versao -->
     

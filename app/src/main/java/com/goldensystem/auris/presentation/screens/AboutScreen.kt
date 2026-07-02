@@ -53,6 +53,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -88,6 +89,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
@@ -122,6 +124,8 @@ private data class Contributor(
     val iconRes: Int? = null,
     val githubUrl: String? = null,
     val telegramUrl: String? = null,
+    val instagramUrl: String? = null,
+    val tiktokUrl: String? = null,
 )
 
 // ---------- Tela Principal ----------
@@ -152,15 +156,17 @@ fun AboutScreen(
     val tiktokUrl = "https://www.tiktok.com/@auris_music_player"
 
     // ---------- Dados dos mantenedores ----------
-    val coreMaintainer = Contributor(
-        id = "theovilardo",
-        displayName = stringResource(R.string.contributor_theo_display_name),
-        role = stringResource(R.string.contributor_theo_role),
-        detail = stringResource(R.string.contributor_theo_detail),
-        avatarUrl = "https://avatars.githubusercontent.com/u/26845343?v=4",
-        iconRes = R.drawable.round_developer_board_24,
-        githubUrl = "https://github.com/theovilardo",
-        telegramUrl = "https://t.me/thevelopersupport",
+    val goldenSystem = Contributor(
+        id = "goldensystem",
+        displayName = "Golden System Studios",
+        role = stringResource(R.string.contributor_golden_role),
+        detail = stringResource(R.string.contributor_golden_detail),
+        avatarUrl = "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/app/src/main/res/drawable/goldensystem_icon.png",
+        iconRes = R.drawable.ic_auris_icon,
+        githubUrl = null,
+        telegramUrl = null,
+        instagramUrl = "https://www.instagram.com/goldensystem.enterprise",
+        tiktokUrl = "https://www.tiktok.com/@goldensystem.enterprise",
     )
 
     val aurisMaintainer = Contributor(
@@ -171,7 +177,9 @@ fun AboutScreen(
         avatarUrl = "https://avatars.githubusercontent.com/u/255678043?v=4&size=64",
         iconRes = R.drawable.ic_music_placeholder,
         githubUrl = "https://github.com/pereirasaymonsilva-a11y",
-        telegramUrl = "about.scream",
+        telegramUrl = null,
+        instagramUrl = null,
+        tiktokUrl = null,
     )
 
     // ---------- Animações de entrada ----------
@@ -433,14 +441,14 @@ fun AboutScreen(
                     )
                 }
 
-                item(key = "maintainer_card_theo") {
+                item(key = "maintainer_card_golden") {
                     ContributorCard(
-                        contributor = coreMaintainer,
+                        contributor = goldenSystem,
                         shape = expressiveListShape(index = 0, count = 2),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                        onCardClick = coreMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
+                        onCardClick = null,
                     )
                 }
 
@@ -452,8 +460,51 @@ fun AboutScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                             .padding(top = 3.dp),
-                        onCardClick = aurisMaintainer.githubUrl?.let { url -> { openUrl(context, url) } },
+                        onCardClick = null,
                     )
+                }
+
+                // ---------- Seção: Copyright ----------
+                item(key = "copyright_section") {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Divider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 32.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Text(
+                            text = "Copyright (c) 2024 theovilardo",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(vertical = 2.dp)
+                        )
+                        
+                        Text(
+                            text = "Copyright (c) 2026 Saymon Silva Pereira",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(vertical = 2.dp)
+                        )
+                        
+                        Text(
+                            text = "Copyright (c) 2026 Golden System Studios",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(vertical = 2.dp)
+                        )
+                    }
                 }
 
                 item(key = "bottom_spacer") {
@@ -748,20 +799,41 @@ private fun ContributorCard(
                 }
             }
 
+            // Ícones sociais personalizados
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                SocialIconButton(
-                    painterRes = R.drawable.github,
-                    contentDescription = stringResource(R.string.cd_open_github_profile),
-                    url = contributor.githubUrl,
-                )
-                SocialIconButton(
-                    painterRes = R.drawable.telegram,
-                    contentDescription = stringResource(R.string.cd_open_telegram),
-                    url = contributor.telegramUrl,
-                )
+                // Para Golden System: mostrar Instagram e TikTok
+                if (contributor.id == "goldensystem") {
+                    SocialIconButton(
+                        painterRes = R.drawable.ic_instagram,
+                        contentDescription = stringResource(R.string.cd_open_instagram),
+                        url = contributor.instagramUrl,
+                    )
+                    SocialIconButton(
+                        painterRes = R.drawable.ic_tiktok,
+                        contentDescription = stringResource(R.string.cd_open_tiktok),
+                        url = contributor.tiktokUrl,
+                    )
+                } 
+                // Para Saymon: não mostrar nenhum ícone
+                else if (contributor.id == "pereirasaymonsilva-a11y") {
+                    // Não mostrar nenhum ícone
+                }
+                // Para outros casos (fallback)
+                else {
+                    SocialIconButton(
+                        painterRes = R.drawable.github,
+                        contentDescription = stringResource(R.string.cd_open_github_profile),
+                        url = contributor.githubUrl,
+                    )
+                    SocialIconButton(
+                        painterRes = R.drawable.telegram,
+                        contentDescription = stringResource(R.string.cd_open_telegram),
+                        url = contributor.telegramUrl,
+                    )
+                }
             }
         }
     }
