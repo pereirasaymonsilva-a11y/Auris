@@ -162,7 +162,7 @@ fun AboutScreen(
         role = stringResource(R.string.contributor_golden_role),
         detail = stringResource(R.string.contributor_golden_detail),
         avatarUrl = "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/app/src/main/res/drawable/goldensystem_icon.png",
-        iconRes = R.drawable.ic_auris_icon,
+        iconRes = R.drawable.ic_music_placeholder,
         githubUrl = null,
         telegramUrl = null,
         instagramUrl = "https://www.instagram.com/goldensystem.enterprise",
