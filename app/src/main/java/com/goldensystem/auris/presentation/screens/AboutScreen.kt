@@ -174,7 +174,7 @@ fun AboutScreen(
         displayName = stringResource(R.string.contributor_auris_display_name),
         role = stringResource(R.string.contributor_auris_role),
         detail = stringResource(R.string.contributor_auris_detail),
-        avatarUrl = "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/refs/heads/main/app/src/main/res/drawable/GC.guarafox_ft.png",
+        avatarUrl = "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/refs/heads/main/app/src/main/res/drawable/ic_guarafox_ft.png",
         iconRes = R.drawable.ic_music_placeholder,
         githubUrl = "https://github.com/pereirasaymonsilva-a11y",
         telegramUrl = null,
