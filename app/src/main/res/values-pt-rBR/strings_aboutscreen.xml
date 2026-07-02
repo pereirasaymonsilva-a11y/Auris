@@ -24,6 +24,17 @@
     <string name="contributor_colby_detail">Ajudou a moldar o Auris nos estágios iniciais.</string>
     <string name="contributor_colby_badge">Apoio Inicial</string>
     
+    <!--auris recurssos -->
+    <string name="about_signal_update">Atualizações sempre</string>
+    
+    <!-- About Screen - Golden System -->
+    <string name="contributor_golden_role">Empresa</string>
+    <string name="contributor_golden_detail">Empresa responsável pelo desenvolvimento e manutenção do Auris</string>
+
+    <!-- Social Media Descriptions -->
+    <string name="cd_open_instagram">Abrir Instagram</string>
+    <string name="cd_open_tiktok">Abrir TikTok</string>
+    
     
     
     

@@ -35,13 +35,13 @@
 <string name="donate_paypal">PayPal</string>
 <string name="donate_github">GitHub Sponsors</string>
 <string name="donate_thanks">💝 Thank you for your support!</string>
-<!-- About Screen - Golden System -->
-<string name="contributor_golden_role">Desenvolvedora Oficial</string>
-<string name="contributor_golden_detail">Empresa responsável pelo desenvolvimento e manutenção do Auris</string>
-
-<!-- Social Media Descriptions -->
-<string name="cd_open_instagram">Abrir Instagram</string>
-<string name="cd_open_tiktok">Abrir TikTok</string>
+    <!-- About Screen - Golden System -->
+    <string name="contributor_golden_role">Empresa</string>
+    <string name="contributor_golden_detail">Empresa responsável pelo desenvolvimento e manutenção do Auris</string>
+ 
+    <!-- Social Media Descriptions -->
+    <string name="cd_open_instagram">Abrir Instagram</string>
+    <string name="cd_open_tiktok">Abrir TikTok</string>
  
 
 

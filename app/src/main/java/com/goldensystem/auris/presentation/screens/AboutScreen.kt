@@ -158,7 +158,7 @@ fun AboutScreen(
     // ---------- Dados dos mantenedores ----------
     val goldenSystem = Contributor(
         id = "goldensystem",
-        displayName = "Golden System Studios",
+        displayName = "Golden System",
         role = stringResource(R.string.contributor_golden_role),
         detail = stringResource(R.string.contributor_golden_detail),
         avatarUrl = "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/app/src/main/res/drawable/goldensystem_icon.png",
@@ -571,7 +571,7 @@ private fun AboutHeroCard(
                         Icon(
                             painter = painterResource(R.drawable.auris_base_monochrome),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(10.dp).size(28.dp),
                         )
                     }
@@ -636,6 +636,7 @@ private fun CommunitySignalsRow() {
     val labels = listOf(
         stringResource(R.string.about_signal_community_first) to Icons.Rounded.AutoAwesome,
         stringResource(R.string.about_signal_material3) to Icons.Rounded.Palette,
+        stringResource(R.string.about_signal_update) to Icons.Rounded.AutoAwesome,
     )
 
     FlowRow(
@@ -706,8 +707,12 @@ private fun ChangelogCard(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        tonalElevation = 2.dp
+        color = Color.Transparent, // Fundo transparente
+        tonalElevation = 0.dp, // Sem elevação
+        border = androidx.compose.foundation.BorderStroke(
+            width = 1.5.dp,
+            color = Color.White.copy(alpha = 0.8f) // Borda branca com transparência
+        )
     ) {
         Text(
             text = text,
@@ -959,6 +964,7 @@ private fun SocialIconButton(
             painter = painterResource(painterRes),
             contentDescription = contentDescription,
             tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
         )
     }
 }
