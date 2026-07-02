@@ -40,6 +40,27 @@
     <string name="video_gallery_title">Vídeos</string>
     <string name="video_gallery_subtitle">Assista vídeos diretamente no app</string>
     <string name="video_gallery_open">Abrir Galeria de Vídeos</string>
+    
+    <!-- About Sheet - Novos Recursos -->
+    <string name="aurissheet_newfeatures">Novos Recursos</string>
+    <string name="aurissheet_custom_theme_subtitle">Personalize cores e wallpapers</string>
+    <string name="aurissheet_video_subtitle">Assista vídeos no app</string>
+    <string name="aurissheet_open">Abrir</string>
+        <!-- YouTube -->
+    <string name="about_youtube_title">YouTube</string>
+    <string name="about_youtube_subtitle">Inscreva-se no nosso canal no YouTube.</string>
+    <string name="about_youtube_button">Acessar Canal</string>
+    <!-- Redes Sociais -->
+    <string name="about_social_media_title">Acompanhe-nos pelas redes sociais</string>
+    <string name="about_instagram">Instagram</string>
+    <string name="about_tiktok">TikTok</string>
+        <!-- Site Oficial -->
+    <string name="about_official_website_title">Site Oficial</string>
+    <string name="about_official_website_subtitle">Conheça mais sobre o Auris em nosso site oficial.</string>
+    <string name="about_official_website_button">Visitar Site Oficial</string>
+    
+    
+    
     <!-- About Screen - Update -->
     <string name="about_signal_update">Atualizações frequentes</string>
     
@@ -86,19 +107,4 @@ Obrigado por escolher o Auris! ❤️
     <string name="about_donate_title">Apoie o desenvolvimento</string>
     <string name="about_donate_subtitle">Contribuições ajudam a manter o Auris livre e sem anúncios</string>
     <string name="about_donate_button">Fazer uma doação</string>
-    
-    <!-- Site Oficial -->
-    <string name="about_official_website_title">Site Oficial</string>
-    <string name="about_official_website_subtitle">Conheça mais sobre o Auris em nosso site oficial.</string>
-    <string name="about_official_website_button">Visitar Site Oficial</string>
-
-    <!-- YouTube -->
-    <string name="about_youtube_title">YouTube</string>
-    <string name="about_youtube_subtitle">Inscreva-se no nosso canal no YouTube.</string>
-    <string name="about_youtube_button">Acessar Canal</string>
-
-    <!-- Redes Sociais -->
-    <string name="about_social_media_title">Acompanhe-nos pelas redes sociais</string>
-    <string name="about_instagram">Instagram</string>
-    <string name="about_tiktok">TikTok</string>
 </resources>

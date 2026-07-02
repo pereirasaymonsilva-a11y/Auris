@@ -25,10 +25,8 @@ import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.VideoLibrary
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -62,7 +60,7 @@ import racra.compose.smooth_corner_rect_library.AbsoluteSmoothCornerShape
 @Composable
 fun BetaInfoBottomSheet(
     modifier: Modifier = Modifier,
-    navController: NavController? = null  // <-- ADICIONADO
+    navController: NavController? = null
 ) {
     val context = LocalContext.current
     
@@ -137,33 +135,40 @@ fun BetaInfoBottomSheet(
                 }
             }
 
-            // ---------- NOVO: Tema Personalizado ----------
-            item(key = "custom_theme") {
-                ActionCard(
-                    icon = Icons.Rounded.Palette,
-                    iconTint = MaterialTheme.colorScheme.secondary,
-                    title = stringResource(R.string.custom_theme_title),
-                    subtitle = stringResource(R.string.custom_theme_subtitle, "Personalize as cores e wallpapers do app"),
-                    buttonText = stringResource(R.string.custom_theme_open),
-                    onClick = { 
-                        navController?.navigate(Screen.CustomTheme.route) 
-                    }
+            // ---------- SEÇÃO: RECURSOS NOVOS (EXPANSÍVEL) ----------
+            item(key = "new_features") {
+    ExpandableSection(
+        title = stringResource(R.string.aurissheet_newfeatures),
+        icon = Icons.Rounded.Star,
+        iconTint = MaterialTheme.colorScheme.tertiary,
+        initiallyExpanded = true
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            // Tema Personalizado
+            ActionCardSmall(
+                icon = Icons.Rounded.Palette,
+                iconTint = MaterialTheme.colorScheme.secondary,
+                title = stringResource(R.string.custom_theme_title),
+                subtitle = stringResource(R.string.aurissheet_custom_theme_subtitle),
+                buttonText = stringResource(R.string.aurissheet_open),
+                onClick = { 
+                    navController?.navigate(Screen.CustomTheme.route) 
+                }
+            )
+            
+            // Vídeos
+            ActionCardSmall(
+                icon = Icons.Rounded.VideoLibrary,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = stringResource(R.string.video_gallery_title),
+                subtitle = stringResource(R.string.aurissheet_video_subtitle),
+                buttonText = stringResource(R.string.aurissheet_open),
+                onClick = { 
+                    navController?.navigate(Screen.VideoGallery.route) }
                 )
             }
-
-            // ---------- NOVO: Vídeos ----------
-            item(key = "videos") {
-                ActionCard(
-                    icon = Icons.Rounded.VideoLibrary,
-                    iconTint = MaterialTheme.colorScheme.tertiary,
-                    title = stringResource(R.string.video_gallery_title),
-                    subtitle = stringResource(R.string.video_gallery_subtitle, "Assista vídeos diretamente no app"),
-                    buttonText = stringResource(R.string.video_gallery_open),
-                    onClick = { 
-                        navController?.navigate(Screen.VideoGallery.route) 
-                    }
-                )
-            }
+        }
+    }
 
             // ---------- SITE OFICIAL ----------
             item(key = "official_website") {
@@ -346,7 +351,7 @@ private fun ExpandableSection(
     }
 }
 
-// ---------- COMPONENTE: Card com Ação ----------
+// ---------- COMPONENTE: Card com Ação (Grande) ----------
 @Composable
 private fun ActionCard(
     icon: ImageVector? = null,
@@ -416,6 +421,69 @@ private fun ActionCard(
                 colors = buttonColors
             ) {
                 Text(buttonText)
+            }
+        }
+    }
+}
+
+// ---------- COMPONENTE: Card com Ação (Pequeno - para dentro de seções) ----------
+@Composable
+private fun ActionCardSmall(
+    icon: ImageVector,
+    iconTint: Color = MaterialTheme.colorScheme.primary,
+    title: String,
+    subtitle: String,
+    buttonText: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = AbsoluteSmoothCornerShape(16.dp, 60),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(iconTint.copy(alpha = 0.15f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            OutlinedButton(
+                onClick = onClick,
+                shape = AbsoluteSmoothCornerShape(12.dp, 60),
+                modifier = Modifier.height(32.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text(buttonText, fontSize = MaterialTheme.typography.labelMedium.fontSize)
             }
         }
     }

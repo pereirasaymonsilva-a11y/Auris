@@ -51,6 +51,12 @@
     <string name="video_gallery_title">Videos</string>
     <string name="video_gallery_subtitle">Watch videos directly in the app</string>
     <string name="video_gallery_open">Open Video Gallery</string>
+    <!-- About Sheet - New Features -->
+    <string name="aurissheet_newfeatures">New Features</string>
+    <string name="aurissheet_custom_theme_subtitle">Customize colors and wallpapers</string>
+    <string name="aurissheet_video_subtitle">Watch videos in the app</string>
+    <string name="aurissheet_open">Open</string>
+    
      <!-- About Screen - Update -->
     <string name="about_signal_update">Frequent Updates</string> 
  
@@ -99,11 +105,11 @@ Thank you for choosing Auris! ❤️
 
     <!-- YouTube -->
     <string name="about_youtube_title">YouTube</string>
-    <string name="about_youtube_subtitle">Inscreva-se no nosso canal no YouTube.</string>
-    <string name="about_youtube_button">Acessar Canal</string>
+    <string name="about_youtube_subtitle">Subscribe to our YouTube channel.</string>
+    <string name="about_youtube_button">Visit Channel</string>
 
-    <!-- Redes Sociais -->
-    <string name="about_social_media_title">Acompanhe-nos pelas redes sociais</string>
+    <!-- Social Media -->
+    <string name="about_social_media_title">Follow us on social media</string>
     <string name="about_instagram">Instagram</string>
     <string name="about_tiktok">TikTok</string>
 </resources>
