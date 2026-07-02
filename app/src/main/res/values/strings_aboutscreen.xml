@@ -25,23 +25,34 @@
 
 
 
-<string name="donate_title">Support development</string>
-<string name="donate_subtitle">Your contribution keeps Auris alive ❤️</string>
-<string name="donate_pix_title">PIX</string>
-<string name="donate_pix_key">Random key</string>
-<string name="donate_pix_copied">Key copied!</string>
-<string name="donate_pix_button">Open bank app</string>
-<string name="donate_other_methods">Other ways to contribute</string>
-<string name="donate_paypal">PayPal</string>
-<string name="donate_github">GitHub Sponsors</string>
-<string name="donate_thanks">💝 Thank you for your support!</string>
+    <string name="donate_title">Support development</string>
+    <string name="donate_subtitle">Your contribution keeps Auris alive ❤️</string>
+    <string name="donate_pix_title">PIX</string>
+    <string name="donate_pix_key">Random key</string>
+    <string name="donate_pix_copied">Key copied!</string>
+    <string name="donate_pix_button">Open bank app</string>
+    <string name="donate_other_methods">Other ways to contribute</string>
+    <string name="donate_paypal">PayPal</string>
+    <string name="donate_github">GitHub Sponsors</string>
+    <string name="donate_thanks">💝 Thank you for your support!</string>
+
+
     <!-- About Screen - Golden System -->
-    <string name="contributor_golden_role">Empresa</string>
-    <string name="contributor_golden_detail">Empresa responsável pelo desenvolvimento e manutenção do Auris</string>
- 
+    <string name="contributor_golden_role">Company</string>
+
+    <string name="contributor_golden_detail">Company responsible for the development and maintenance of Auris</string>
+
     <!-- Social Media Descriptions -->
-    <string name="cd_open_instagram">Abrir Instagram</string>
-    <string name="cd_open_tiktok">Abrir TikTok</string>
+    <string name="cd_open_instagram">Open Instagram</string>
+    <string name="cd_open_tiktok">Open TikTok</string>
+    <string name="custom_theme_subtitle">Customize the apps colors and wallpapers</string>
+    <string name="custom_theme_open">Open Custom Theme</string>
+    <!-- Video Gallery -->
+    <string name="video_gallery_title">Videos</string>
+    <string name="video_gallery_subtitle">Watch videos directly in the app</string>
+    <string name="video_gallery_open">Open Video Gallery</string>
+     <!-- About Screen - Update -->
+    <string name="about_signal_update">Frequent Updates</string> 
  
 
 

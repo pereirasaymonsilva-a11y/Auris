@@ -35,6 +35,17 @@
     <string name="cd_open_instagram">Abrir Instagram</string>
     <string name="cd_open_tiktok">Abrir TikTok</string>
     
+    <!-- aurisbuttonsheet -->
+    <!-- Custom Theme -->
+    <string name="custom_theme_subtitle">Personalize as cores e wallpapers do app</string>
+    <string name="custom_theme_open">Abrir Tema Personalizado</string>
+    <!-- Video Gallery -->
+    <string name="video_gallery_title">Vídeos</string>
+    <string name="video_gallery_subtitle">Assista vídeos diretamente no app</string>
+    <string name="video_gallery_open">Abrir Galeria de Vídeos</string>
+    <!-- About Screen - Update -->
+    <string name="about_signal_update">Atualizações frequentes</string>
+    
     
     
     
