@@ -32,7 +32,7 @@
     
     
       <!-- Aqui em baixo agente coloca as novidades da versao atual do auris, peste muita ATENCAO no uso de \n•, e muinto cuidado ao formatar -->
-    <string name="about_changelog_text">• Suporte a novos formatos de áudio\n• Melhorias na interface do player\n• Correção de bugs e otimizações\n• Atualização de bibliotecas\n• Desempenho aprimorado\n• Pequenas correções visuais</string>
+    <string name="about_changelog_text">• Primeira versão estavel do Auris\n• Adicao do tema persolnalizado\n• Suporte a papeis de parede\n• melhoria no Desempenho\n• suporte aos idiomas padroes português/ingles\n• agora voce pode escolher deixar o player transparente nas configuracoes/aparencia/thema do player/n•</string>
     <!-- ^^^^^^^^^^^^^^^^^^^^^^^^^^^
         fim das novidades da versao -->
     
