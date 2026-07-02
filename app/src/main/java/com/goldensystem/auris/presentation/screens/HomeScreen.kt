@@ -222,7 +222,7 @@ fun HomeScreen(
                     onBetaClick = { showBetaInfoBottomSheet = true },
                     onTelegramClick = { showStreamingProviderSheet = true },
                     onMenuClick = { },
-                    onVideoGalleryClick = { navController.navigate("video_gallery") }
+                    onVideoGalleryClick = { navController.navigate(Screen.VideoGallery.route) }
                 )
             }
         ) { innerPadding ->
@@ -359,7 +359,9 @@ fun HomeScreen(
 
     if (showBetaInfoBottomSheet) {
         ModalBottomSheet(onDismissRequest = { showBetaInfoBottomSheet = false }, sheetState = betaSheetState) {
-            BetaInfoBottomSheet()
+            BetaInfoBottomSheet(
+              navController = navController
+            )
         }
     }
 
