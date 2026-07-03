@@ -341,7 +341,7 @@ private fun ConnectedAccountCard(
     val loggingOut = stringResource(R.string.presentation_batch_b_accounts_logging_out)
     val logOut = stringResource(R.string.cd_logout)
     val palette = servicePalette(account.service)
-    val isComingSoon = false
+    val isComingSoon = account.service == ExternalServiceAccount.GOOGLE_DRIVE
     val cardShape = AbsoluteSmoothCornerShape(28.dp, 60)
 
     Card(
@@ -700,7 +700,7 @@ private fun serviceDisplayName(service: ExternalServiceAccount): String {
     return when (service) {
         ExternalServiceAccount.TELEGRAM -> stringResource(R.string.presentation_batch_b_service_telegram)
         ExternalServiceAccount.GOOGLE_DRIVE -> {
-              val beta = stringResource(R.string.presentation_batch_h_beta_glyph) // ← substitua pelo ID real
+               // ← substitua pelo ID real
               val name = stringResource(R.string.auth_gdrive_title)
                   "$beta $name"
             }

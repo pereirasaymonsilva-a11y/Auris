@@ -115,7 +115,7 @@ fun StreamingProviderSheet(
                         title = "Google Drive",
                         subtitle = "Google Drive Account Manager",
                         shape = providerSegmentItemShape,
-                        enabled = true,
+                        enabled = false,
                         onClick = { }
                     )
 

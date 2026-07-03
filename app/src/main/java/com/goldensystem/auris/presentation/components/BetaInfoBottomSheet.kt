@@ -126,7 +126,7 @@ fun BetaInfoBottomSheet(
                     title = stringResource(R.string.about_changelog_title),
                     icon = Icons.Rounded.Info,
                     iconTint = MaterialTheme.colorScheme.primary,
-                    initiallyExpanded = true
+                    initiallyExpanded = false
                 ) {
                     Text(
                         text = stringResource(R.string.about_changelog_text),
@@ -142,7 +142,7 @@ fun BetaInfoBottomSheet(
         title = stringResource(R.string.aurissheet_newfeatures),
         icon = Icons.Rounded.Star,
         iconTint = MaterialTheme.colorScheme.tertiary,
-        initiallyExpanded = true
+        initiallyExpanded = false
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             // Tema Personalizado
