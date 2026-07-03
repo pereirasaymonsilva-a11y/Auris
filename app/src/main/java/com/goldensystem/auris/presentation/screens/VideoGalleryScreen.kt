@@ -2,6 +2,7 @@ package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
 import androidx.compose.material.icons.filled.*
+import androidx.compose.foundation.Image
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
