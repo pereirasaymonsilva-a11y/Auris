@@ -702,7 +702,7 @@ private fun serviceDisplayName(service: ExternalServiceAccount): String {
         ExternalServiceAccount.GOOGLE_DRIVE -> {
                // ← substitua pelo ID real
               val name = stringResource(R.string.auth_gdrive_title)
-                  "$beta $name"
+                  "$name"
             }
         ExternalServiceAccount.NAVIDROME -> stringResource(R.string.cd_subsonic_logo)
         ExternalServiceAccount.JELLYFIN -> stringResource(R.string.auth_jellyfin_title)
