@@ -2,8 +2,10 @@ package com.goldensystem.auris.presentation.viewmodel
 
 import android.content.ContentUris
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Size
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goldensystem.auris.data.model.QueueContext
@@ -60,13 +62,14 @@ class VideoGalleryViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(GalleryUiState())
     val uiState: StateFlow<GalleryUiState> = _uiState.asStateFlow()
 
-    // Lista mutável interna para atualizações eficientes
     private var _allVideos = mutableListOf<VideoItem>()
+    private val thumbnailCache = mutableMapOf<Long, Bitmap>()
 
     private var previousContext: QueueContext = QueueContext.ALL
     private var wasInFoldersMode: Boolean = false
 
     init { loadVideos() }
+
     fun loadVideos() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -93,6 +96,39 @@ class VideoGalleryViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
             }
         }
+    }
+
+    fun getVideoThumbnail(videoId: Long): Bitmap? {
+        // Verifica se já está no cache
+        thumbnailCache[videoId]?.let { return it }
+
+        val bitmap = try {
+            val uri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videoId)
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Android 10+ (API 29+) - método novo e recomendado
+                context.contentResolver.loadThumbnail(uri, Size(320, 180), null)
+            } else {
+                // Android 9 ou inferior - método antigo
+                @Suppress("DEPRECATION")
+                MediaStore.Video.Thumbnails.getThumbnail(
+                    context.contentResolver,
+                    videoId,
+                    MediaStore.Video.Thumbnails.MICRO_KIND,
+                    null
+                )
+            }
+        } catch (e: Exception) {
+            null
+        }
+
+        // Guarda no cache se não for null
+        bitmap?.let { thumbnailCache[videoId] = it }
+        return bitmap
+    }
+
+    fun clearThumbnailCache() {
+        thumbnailCache.clear()
     }
 
     fun setSearchQuery(query: String) = _uiState.update { it.copy(searchQuery = query) }
@@ -180,28 +216,25 @@ class VideoGalleryViewModel @Inject constructor(
     }
 
     fun incrementViewCount(videoId: Long) {
-    viewModelScope.launch {
-        viewCountRepository.incrementViewCount(videoId)
-        
-        // Recarrega o mapa de contadores
-        val viewCountMap = withContext(Dispatchers.IO) {
-            viewCountRepository.getAllViewCountsFlow().first().toMap()
-        }
-        
-        // Atualiza os vídeos na lista com os novos contadores
-        _allVideos = _allVideos.map { video ->
-            video.copy(viewCount = viewCountMap[video.id] ?: 0)
-        }.toMutableList()
-        
-        // Atualiza o estado da UI
-        _uiState.update { state ->
-            state.copy(
-                allVideos = _allVideos,
-                filteredVideos = applySortAndContext(_allVideos, state.currentContext, state.sortMode)
-            )
+        viewModelScope.launch {
+            viewCountRepository.incrementViewCount(videoId)
+            
+            val viewCountMap = withContext(Dispatchers.IO) {
+                viewCountRepository.getAllViewCountsFlow().first().toMap()
+            }
+            
+            _allVideos = _allVideos.map { video ->
+                video.copy(viewCount = viewCountMap[video.id] ?: 0)
+            }.toMutableList()
+            
+            _uiState.update { state ->
+                state.copy(
+                    allVideos = _allVideos,
+                    filteredVideos = applySortAndContext(_allVideos, state.currentContext, state.sortMode)
+                )
+            }
         }
     }
-}
 
     fun getFeaturedVideo(): VideoItem? {
         val state = _uiState.value

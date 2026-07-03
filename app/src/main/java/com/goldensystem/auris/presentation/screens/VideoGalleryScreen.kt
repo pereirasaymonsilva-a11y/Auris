@@ -1,6 +1,11 @@
 package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
+import android.graphics.Bitmap
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import android.content.ContentUris
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -435,7 +440,19 @@ private fun VideoGridItem(
     val elevation by animateDpAsState(targetValue = if (isPressed) 8.dp else 2.dp, animationSpec = tween(100))
     val glowAlpha by animateFloatAsState(targetValue = if (isPressed) 0.5f else 0f, animationSpec = tween(150))
 
-    val contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, video.id)
+    var thumbnail by remember { mutableStateOf<ImageBitmap?>(null) }
+    var isLoadingThumbnail by remember { mutableStateOf(true) }
+    val context = LocalContext.current
+
+    // Carrega a thumbnail
+    LaunchedEffect(video.id) {
+        isLoadingThumbnail = true
+        withContext(Dispatchers.IO) {
+            val bitmap = viewModel.getVideoThumbnail(video.id)
+            thumbnail = bitmap?.asImageBitmap()
+        }
+        isLoadingThumbnail = false
+    }
 
     val isRecent = remember(video.dateAddedMs) {
         val now = System.currentTimeMillis()
@@ -470,23 +487,57 @@ private fun VideoGridItem(
             )
 
             Box(modifier = Modifier.aspectRatio(16f / 9f)) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(contentUri)
-                        .videoFrameMillis(1000)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = video.title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                // Thumbnail do vídeo
+                if (thumbnail != null) {
+                    Image(
+                        bitmap = thumbnail!!,
+                        contentDescription = video.title,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    // Placeholder enquanto carrega
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Filled.VideoLibrary,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+                }
+
                 Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f)))))
-                Text(video.durationFormatted, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Medium, modifier = Modifier.align(Alignment.BottomEnd).padding(6.dp))
+                
+                // Duração do vídeo
+                Text(
+                    video.durationFormatted,
+                    color = Color.White,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(6.dp)
+                        .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(4.dp))
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                )
+                
                 CustomPlayIcon(modifier = Modifier.align(Alignment.Center).size(32.dp), alpha = if (isPressed) 0.9f else 0.7f)
             }
 
             Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(video.title, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                Text(
+                    video.title, 
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium), 
+                    maxLines = 1, 
+                    overflow = TextOverflow.Ellipsis, 
+                    modifier = Modifier.weight(1f)
+                )
                 if (isRecent) {
                     Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f), contentColor = MaterialTheme.colorScheme.onPrimary) {
                         Text(stringResource(R.string.gallery_new), fontSize = 8.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
