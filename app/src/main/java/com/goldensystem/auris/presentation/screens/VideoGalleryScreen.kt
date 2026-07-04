@@ -1,8 +1,8 @@
 package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
-import com.maxrave.simpmusic.ui.component.SortBottomSheet
-import com.maxrave.simpmusic.data.model.SortOption
+import com.goldensystem.auris.presentation.components.LibrarySortBottomSheet
+import com.goldensystem.auris.data.model.SortOption
 import androidx.compose.material.icons.filled.*
 import androidx.compose.foundation.Image
 import android.graphics.Bitmap
@@ -295,50 +295,52 @@ private fun GalleryTopBar(
         }
     }
     if (showSortSheet) {
-    SortBottomSheet(
-        sortOptions = SortOption.SONGS,
-        currentSortOption = when (state.sortMode) {
+    LibrarySortBottomSheet(
+        title = stringResource(R.string.gallery_sort),
+        options = VIDEO_SORT_OPTIONS,
+
+        selectedOption = when (state.sortMode) {
             SortMode.NAME_ASC -> SortOption.SongTitleAZ
             SortMode.NAME_DESC -> SortOption.SongTitleZA
             SortMode.DATE_DESC -> SortOption.SongDateAdded
             SortMode.DATE_ASC -> SortOption.SongDateAddedAsc
             SortMode.DURATION_DESC -> SortOption.SongDuration
             SortMode.DURATION_ASC -> SortOption.SongDurationAsc
-
-            // como você removeu tamanho
-            SortMode.SIZE_DESC,
-            SortMode.SIZE_ASC -> SortOption.SongDefaultOrder
+            SortMode.SIZE_ASC,
+            SortMode.SIZE_DESC -> SortOption.SongDefaultOrder
         },
+
         onDismiss = {
             showSortSheet = false
         },
-        onSortChange = { option ->
+
+        onOptionSelected = { option ->
             showSortSheet = false
 
             when (option) {
-                SortOption.SongTitleAZ ->
-                    onSortChange(SortMode.NAME_ASC)
-
-                SortOption.SongTitleZA ->
-                    onSortChange(SortMode.NAME_DESC)
-
-                SortOption.SongDateAdded ->
-                    onSortChange(SortMode.DATE_DESC)
-
-                SortOption.SongDateAddedAsc ->
-                    onSortChange(SortMode.DATE_ASC)
-
-                SortOption.SongDuration ->
-                    onSortChange(SortMode.DURATION_DESC)
-
-                SortOption.SongDurationAsc ->
-                    onSortChange(SortMode.DURATION_ASC)
-
+                SortOption.SongTitleAZ -> onSortChange(SortMode.NAME_ASC)
+                SortOption.SongTitleZA -> onSortChange(SortMode.NAME_DESC)
+                SortOption.SongDateAdded -> onSortChange(SortMode.DATE_DESC)
+                SortOption.SongDateAddedAsc -> onSortChange(SortMode.DATE_ASC)
+                SortOption.SongDuration -> onSortChange(SortMode.DURATION_DESC)
+                SortOption.SongDurationAsc -> onSortChange(SortMode.DURATION_ASC)
                 else -> {}
-                }
             }
-        )
-    }
+        },
+
+        onDirectionToggle = { option ->
+            when (option) {
+                SortOption.SongTitleAZ -> onSortChange(SortMode.NAME_ASC)
+                SortOption.SongTitleZA -> onSortChange(SortMode.NAME_DESC)
+                SortOption.SongDateAdded -> onSortChange(SortMode.DATE_DESC)
+                SortOption.SongDateAddedAsc -> onSortChange(SortMode.DATE_ASC)
+                SortOption.SongDuration -> onSortChange(SortMode.DURATION_DESC)
+                SortOption.SongDurationAsc -> onSortChange(SortMode.DURATION_ASC)
+                else -> {}
+            }
+        }
+    )
+}
 }
 
 @Composable
@@ -433,16 +435,23 @@ private fun FeaturedVideoItem(
 
             Row(modifier = Modifier.fillMaxWidth().height(180.dp)) {
                 Box(modifier = Modifier.weight(0.6f).fillMaxHeight()) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(contentUri)
-                            .videoFrameMillis(1000)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = video.title,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+                var thumbnail by remember(video.id) { mutableStateOf<ImageBitmap?>(null) }
+
+LaunchedEffect(video.id) {
+    val bmp = withContext(Dispatchers.IO) {
+        viewModel.getVideoThumbnail(video.id)
+    }
+    thumbnail = bmp?.asImageBitmap()
+}
+
+                   if (thumbnail != null) {
+    Image(
+        bitmap = thumbnail!!,
+        contentDescription = video.title,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.fillMaxSize()
+    )
+}
                     Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.4f)))))
                     CustomPlayIcon(modifier = Modifier.align(Alignment.Center).size(36.dp), alpha = if (isPressed) 0.9f else 0.7f)
                 }
@@ -479,20 +488,10 @@ private fun VideoGridItem(
     val scale by animateFloatAsState(targetValue = if (isPressed) 0.97f else 1f, animationSpec = spring(dampingRatio = 0.5f))
     val elevation by animateDpAsState(targetValue = if (isPressed) 8.dp else 2.dp, animationSpec = tween(100))
     val glowAlpha by animateFloatAsState(targetValue = if (isPressed) 0.5f else 0f, animationSpec = tween(150))
-
-    var thumbnail by remember { mutableStateOf<ImageBitmap?>(null) }
+     var thumbnail by remember(video.id) { mutableStateOf<ImageBitmap?>(null) }
     var isLoadingThumbnail by remember { mutableStateOf(true) }
     val context = LocalContext.current
 
-    // Carrega a thumbnail
-    LaunchedEffect(video.id) {
-        isLoadingThumbnail = true
-        withContext(Dispatchers.IO) {
-            val bitmap = viewModel.getVideoThumbnail(video.id)
-            thumbnail = bitmap?.asImageBitmap()
-        }
-        isLoadingThumbnail = false
-    }
 
     val isRecent = remember(video.dateAddedMs) {
         val now = System.currentTimeMillis()
@@ -666,3 +665,12 @@ private fun EmptyState() = Box(Modifier.fillMaxSize(), contentAlignment = Alignm
 private fun EmptySearchState() = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     Text(stringResource(R.string.gallery_empty_search), style = MaterialTheme.typography.titleMedium)
 }
+
+val VIDEO_SORT_OPTIONS = listOf(
+    SortOption.SongTitleAZ,
+    SortOption.SongTitleZA,
+    SortOption.SongDateAdded,
+    SortOption.SongDateAddedAsc,
+    SortOption.SongDuration,
+    SortOption.SongDurationAsc
+)
