@@ -1,6 +1,8 @@
 package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
+import com.maxrave.simpmusic.ui.component.SortBottomSheet
+import com.maxrave.simpmusic.data.model.SortOption
 import androidx.compose.material.icons.filled.*
 import androidx.compose.foundation.Image
 import android.graphics.Bitmap
@@ -230,7 +232,7 @@ private fun GalleryTopBar(
     onToggleShowFolders: (Boolean) -> Unit,
     onBack: () -> Unit
 ) {
-    var showSortMenu by remember { mutableStateOf(false) }
+    var showSortSheet by remember { mutableStateOf(false) }
     val isInFolder = state.currentContext == QueueContext.FOLDER
 
     Surface(
@@ -258,8 +260,8 @@ private fun GalleryTopBar(
                 },
                 actions = {
                     if (state.currentContext != QueueContext.RECENT) {
-                        IconButton(onClick = { showSortMenu = true }) {
-                            Icon(Icons.Filled.Sort, contentDescription = stringResource(R.string.gallery_sort))
+                        IconButton(onClick = { showSortSheet = true }) {
+                      Icon(Icons.Filled.Sort, null)
                         }
                     }
                 },
@@ -292,14 +294,50 @@ private fun GalleryTopBar(
             }
         }
     }
+    if (showSortSheet) {
+    SortBottomSheet(
+        sortOptions = SortOption.SONGS,
+        currentSortOption = when (state.sortMode) {
+            SortMode.NAME_ASC -> SortOption.SongTitleAZ
+            SortMode.NAME_DESC -> SortOption.SongTitleZA
+            SortMode.DATE_DESC -> SortOption.SongDateAdded
+            SortMode.DATE_ASC -> SortOption.SongDateAddedAsc
+            SortMode.DURATION_DESC -> SortOption.SongDuration
+            SortMode.DURATION_ASC -> SortOption.SongDurationAsc
 
-    DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
-        SortMode.entries.forEach { mode ->
-            DropdownMenuItem(
-                text = { Text(mode.label, fontWeight = if (mode == state.sortMode) FontWeight.Bold else FontWeight.Normal) },
-                onClick = { onSortChange(mode); showSortMenu = false }
-            )
-        }
+            // como você removeu tamanho
+            SortMode.SIZE_DESC,
+            SortMode.SIZE_ASC -> SortOption.SongDefaultOrder
+        },
+        onDismiss = {
+            showSortSheet = false
+        },
+        onSortChange = { option ->
+            showSortSheet = false
+
+            when (option) {
+                SortOption.SongTitleAZ ->
+                    onSortChange(SortMode.NAME_ASC)
+
+                SortOption.SongTitleZA ->
+                    onSortChange(SortMode.NAME_DESC)
+
+                SortOption.SongDateAdded ->
+                    onSortChange(SortMode.DATE_DESC)
+
+                SortOption.SongDateAddedAsc ->
+                    onSortChange(SortMode.DATE_ASC)
+
+                SortOption.SongDuration ->
+                    onSortChange(SortMode.DURATION_DESC)
+
+                SortOption.SongDurationAsc ->
+                    onSortChange(SortMode.DURATION_ASC)
+
+                else -> {}
+                }
+            }
+        )
     }
 }
 
