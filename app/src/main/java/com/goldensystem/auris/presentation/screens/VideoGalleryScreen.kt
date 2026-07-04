@@ -1,6 +1,7 @@
 package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
+import androidx.compose.animation.*
 import androidx.compose.material.icons.filled.*
 import com.goldensystem.auris.presentation.components.LibrarySortBottomSheet
 import com.goldensystem.auris.data.model.SortOption
@@ -61,6 +62,7 @@ import com.goldensystem.auris.ui.theme.WallpaperBackground
 import com.goldensystem.auris.utils.VideoQueueHolder
 import com.goldensystem.auris.utils.VideoUtils
 
+enum class NavigationDirection { FORWARD, BACK }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoGalleryScreen(
@@ -70,6 +72,10 @@ fun VideoGalleryScreen(
 ) {
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val transitionKey = remember {
+    "${state.currentContext.name}_${state.showFoldersOnly}_${state.currentFolder ?: "root"}"}
+    
+    var navDirection by remember { mutableStateOf(NavigationDirection.FORWARD) }
     
     // ===== ADICIONADO: CustomThemeViewModel para wallpaper =====
     val customThemeViewModel: CustomThemeViewModel = hiltViewModel()
@@ -119,13 +125,32 @@ fun VideoGalleryScreen(
                         onContextChange = viewModel::setContext,
                         onToggleShowFolders = viewModel::setShowFoldersOnly,
                         onBack = {
-                            if (state.currentContext == QueueContext.FOLDER) viewModel.exitFolder()
-                            else onBack()
-                        }
+    if (state.currentContext == QueueContext.FOLDER) {
+        navDirection = NavigationDirection.BACK
+        viewModel.exitFolder()
+    } else onBack()
+}
                     )
                 }
             ) { padding ->
-                Box(modifier = Modifier.padding(padding)) {
+            //ANIMACOES
+                AnimatedContent(
+    targetState = transitionKey,
+    transitionSpec = {
+    when (navDirection) {
+        NavigationDirection.FORWARD -> {
+            fadeIn() + slideInHorizontally { it } togetherWith 
+            fadeOut() + slideOutHorizontally { -it }
+        }
+        NavigationDirection.BACK -> {
+            fadeIn() + slideInHorizontally { -it } togetherWith 
+            fadeOut() + slideOutHorizontally { it }
+        }
+    }
+    using SizeTransform(clip = false)
+}
+             ) { _ ->
+    Box(modifier = Modifier.padding(padding)) {
                     when {
                         state.isLoading -> LoadingState()
                         state.errorMessage != null -> ErrorState(state.errorMessage!!) { viewModel.loadVideos() }
@@ -142,7 +167,10 @@ fun VideoGalleryScreen(
                             ) {
                                 if (state.showFoldersOnly) {
                                     items(state.folders, key = { it.path }) { folder ->
-                                        FolderItem(folder) { viewModel.enterFolder(folder.path) }
+                                        FolderItem(folder) { 
+    navDirection = NavigationDirection.FORWARD
+    viewModel.enterFolder(folder.path) 
+}
                                     }
                                 } else {
                                     val videos = state.displayVideos
