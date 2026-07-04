@@ -2,6 +2,8 @@ package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
 import androidx.compose.material.icons.filled.*
+import com.goldensystem.auris.presentation.components.LibrarySortBottomSheet
+import com.goldensystem.auris.data.model.SortOption
 import androidx.compose.foundation.Image
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.ImageBitmap
@@ -230,7 +232,7 @@ private fun GalleryTopBar(
     onToggleShowFolders: (Boolean) -> Unit,
     onBack: () -> Unit
 ) {
-    var showSortMenu by remember { mutableStateOf(false) }
+    var showSortSheet by remember { mutableStateOf(false) }
     val isInFolder = state.currentContext == QueueContext.FOLDER
 
     Surface(
@@ -258,9 +260,9 @@ private fun GalleryTopBar(
                 },
                 actions = {
                     if (state.currentContext != QueueContext.RECENT) {
-                        IconButton(onClick = { showSortMenu = true }) {
-                            Icon(Icons.Filled.Sort, contentDescription = stringResource(R.string.gallery_sort))
-                        }
+                        IconButton(onClick = { showSortSheet = true }) {
+    Icon(Icons.Filled.Sort, null)
+}
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
@@ -293,14 +295,53 @@ private fun GalleryTopBar(
         }
     }
 
-    DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
-        SortMode.entries.forEach { mode ->
-            DropdownMenuItem(
-                text = { Text(mode.label, fontWeight = if (mode == state.sortMode) FontWeight.Bold else FontWeight.Normal) },
-                onClick = { onSortChange(mode); showSortMenu = false }
-            )
+    if (showSortSheet) {
+    LibrarySortBottomSheet(
+        title = stringResource(R.string.gallery_sort),
+        options = VIDEO_SORT_OPTIONS,
+
+        selectedOption = when (state.sortMode) {
+            SortMode.NAME_ASC -> SortOption.SongTitleAZ
+            SortMode.NAME_DESC -> SortOption.SongTitleZA
+            SortMode.DATE_DESC -> SortOption.SongDateAdded
+            SortMode.DATE_ASC -> SortOption.SongDateAddedAsc
+            SortMode.DURATION_DESC -> SortOption.SongDuration
+            SortMode.DURATION_ASC -> SortOption.SongDurationAsc
+            SortMode.SIZE_ASC,
+            SortMode.SIZE_DESC -> SortOption.SongDefaultOrder
+        },
+
+        onDismiss = {
+            showSortSheet = false
+        },
+
+        onOptionSelected = { option ->
+            showSortSheet = false
+
+            when (option) {
+                SortOption.SongTitleAZ -> onSortChange(SortMode.NAME_ASC)
+                SortOption.SongTitleZA -> onSortChange(SortMode.NAME_DESC)
+                SortOption.SongDateAdded -> onSortChange(SortMode.DATE_DESC)
+                SortOption.SongDateAddedAsc -> onSortChange(SortMode.DATE_ASC)
+                SortOption.SongDuration -> onSortChange(SortMode.DURATION_DESC)
+                SortOption.SongDurationAsc -> onSortChange(SortMode.DURATION_ASC)
+                else -> {}
+            }
+        },
+
+        onDirectionToggle = { option ->
+            when (option) {
+                SortOption.SongTitleAZ -> onSortChange(SortMode.NAME_ASC)
+                SortOption.SongTitleZA -> onSortChange(SortMode.NAME_DESC)
+                SortOption.SongDateAdded -> onSortChange(SortMode.DATE_DESC)
+                SortOption.SongDateAddedAsc -> onSortChange(SortMode.DATE_ASC)
+                SortOption.SongDuration -> onSortChange(SortMode.DURATION_DESC)
+                SortOption.SongDurationAsc -> onSortChange(SortMode.DURATION_ASC)
+                else -> {}
+            }
         }
-    }
+    )
+}
 }
 
 @Composable
@@ -651,3 +692,12 @@ private fun EmptyState() = Box(Modifier.fillMaxSize(), contentAlignment = Alignm
 private fun EmptySearchState() = Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     Text(stringResource(R.string.gallery_empty_search), style = MaterialTheme.typography.titleMedium)
 }
+
+val VIDEO_SORT_OPTIONS = listOf(
+    SortOption.SongTitleAZ,
+    SortOption.SongTitleZA,
+    SortOption.SongDateAdded,
+    SortOption.SongDateAddedAsc,
+    SortOption.SongDuration,
+    SortOption.SongDurationAsc
+)
