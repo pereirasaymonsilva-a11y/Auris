@@ -73,8 +73,7 @@ fun VideoGalleryScreen(
 ) {
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val transitionKey = remember {
-    "${state.currentContext.name}_${state.showFoldersOnly}_${state.currentFolder ?: "root"}"}
+    val transitionKey = "${state.currentContext.name}_${state.showFoldersOnly}_${state.currentFolder ?: "root"}"
     
     var navDirection by remember { mutableStateOf(NavigationDirection.FORWARD) }
     
