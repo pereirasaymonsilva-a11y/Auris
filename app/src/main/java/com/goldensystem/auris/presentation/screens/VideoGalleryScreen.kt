@@ -125,11 +125,11 @@ fun VideoGalleryScreen(
                         onContextChange = viewModel::setContext,
                         onToggleShowFolders = viewModel::setShowFoldersOnly,
                         onBack = {
-    if (state.currentContext == QueueContext.FOLDER) {
+        if (state.currentContext == QueueContext.FOLDER) {
         navDirection = NavigationDirection.BACK
         viewModel.exitFolder()
-    } else onBack()
-}
+        } else onBack()
+    }
                     )
                 }
             ) { padding ->
@@ -145,10 +145,10 @@ fun VideoGalleryScreen(
         NavigationDirection.BACK -> {
             fadeIn() + slideInHorizontally { -it } togetherWith 
             fadeOut() + slideOutHorizontally { it }
+            }
         }
+             using SizeTransform(clip = false)
     }
-    using SizeTransform(clip = false)
-}
              ) { _ ->
     Box(modifier = Modifier.padding(padding)) {
                     when {
@@ -210,6 +210,7 @@ fun VideoGalleryScreen(
                                                 viewModel.incrementViewCount(video.id)
                                                 VideoQueueHolder.setQueue(queue)
                                                 onOpenPlayerWithQueue(queue)
+                                                }
                                             }
                                         }
                                     }
