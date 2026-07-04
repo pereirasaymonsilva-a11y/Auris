@@ -3,6 +3,7 @@ package com.goldensystem.auris.presentation.screens
 import android.Manifest
 import androidx.compose.animation.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.animation.SizeTransform
 import com.goldensystem.auris.presentation.components.LibrarySortBottomSheet
 import com.goldensystem.auris.data.model.SortOption
 import androidx.compose.foundation.Image
@@ -145,10 +146,8 @@ fun VideoGalleryScreen(
         NavigationDirection.BACK -> {
             fadeIn() + slideInHorizontally { -it } togetherWith 
             fadeOut() + slideOutHorizontally { it }
-            }
         }
-             using SizeTransform(clip = false)
-    }
+    }.using(SizeTransform(clip = false))}
              ) { _ ->
     Box(modifier = Modifier.padding(padding)) {
                     when {
