@@ -3,6 +3,7 @@ package com.goldensystem.auris.presentation.screens
 import android.Manifest
 import androidx.compose.animation.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.pulltorefresh.ExperimentalMaterial3PullToRefreshApi
 import androidx.compose.animation.SizeTransform
 import com.goldensystem.auris.presentation.components.LibrarySortBottomSheet
 import com.goldensystem.auris.presentation.components.ExpressiveScrollBar
@@ -72,8 +73,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 
 enum class NavigationDirection { FORWARD, BACK }
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3PullToRefreshApi::class)
 @Composable
 fun VideoGalleryScreen(
     onOpenPlayerWithQueue: (VideoQueue) -> Unit,
@@ -507,7 +507,10 @@ private fun FilterButton(
     }
 
     Surface(
-        modifier = Modifier.weight(1f),
+        Box(modifier = Modifier
+    .fillMaxWidth()
+    .weight(1f)
+),
         shape = shape,
         color = containerColor,
         tonalElevation = if (selected) 6.dp else 2.dp,
