@@ -3,7 +3,6 @@ package com.goldensystem.auris.presentation.screens
 import android.Manifest
 import androidx.compose.animation.*
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.pulltorefresh.ExperimentalMaterial3PullToRefreshApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.material3.pulltorefresh.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
@@ -23,6 +22,7 @@ import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.weight
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -75,7 +75,8 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 
 enum class NavigationDirection { FORWARD, BACK }
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3PullToRefreshApi::class)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoGalleryScreen(
     onOpenPlayerWithQueue: (VideoQueue) -> Unit,
