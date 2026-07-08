@@ -5,6 +5,7 @@ import androidx.compose.animation.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.animation.SizeTransform
 import com.goldensystem.auris.presentation.components.LibrarySortBottomSheet
+import com.goldensystem.auris.presentation.components.ExpressiveScrollBar
 import com.goldensystem.auris.data.model.SortOption
 import androidx.compose.foundation.Image
 import android.graphics.Bitmap
@@ -62,8 +63,14 @@ import com.goldensystem.auris.presentation.viewmodel.VideoGalleryViewModel
 import com.goldensystem.auris.ui.theme.WallpaperBackground
 import com.goldensystem.auris.utils.VideoQueueHolder
 import com.goldensystem.auris.utils.VideoUtils
+import androidx.compose.foundation.lazy.rememberLazyGridState
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.ui.platform.LocalDensity
 
 enum class NavigationDirection { FORWARD, BACK }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoGalleryScreen(
@@ -77,10 +84,8 @@ fun VideoGalleryScreen(
     
     var navDirection by remember { mutableStateOf(NavigationDirection.FORWARD) }
     
-    // ===== ADICIONADO: CustomThemeViewModel para wallpaper =====
     val customThemeViewModel: CustomThemeViewModel = hiltViewModel()
     val config by customThemeViewModel.customThemeConfig.collectAsStateWithLifecycle()
-    // ============================================================
 
     val permission = if (Build.VERSION.SDK_INT >= 33) {
         Manifest.permission.READ_MEDIA_VIDEO
@@ -107,7 +112,6 @@ fun VideoGalleryScreen(
         }
     }
 
-    // ===== WRAPPER COM WALLPAPER =====
     WallpaperBackground(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -125,92 +129,130 @@ fun VideoGalleryScreen(
                         onContextChange = viewModel::setContext,
                         onToggleShowFolders = viewModel::setShowFoldersOnly,
                         onBack = {
-        if (state.currentContext == QueueContext.FOLDER) {
-        navDirection = NavigationDirection.BACK
-        viewModel.exitFolder()
-        } else onBack()
-    }
+                            if (state.currentContext == QueueContext.FOLDER) {
+                                navDirection = NavigationDirection.BACK
+                                viewModel.exitFolder()
+                            } else onBack()
+                        }
                     )
                 }
             ) { padding ->
-            //ANIMACOES
                 AnimatedContent(
-    targetState = transitionKey,
-    transitionSpec = {
-    when (navDirection) {
-        NavigationDirection.FORWARD -> {
-            fadeIn() + slideInHorizontally { it } togetherWith 
-            fadeOut() + slideOutHorizontally { -it }
-        }
-        NavigationDirection.BACK -> {
-            fadeIn() + slideInHorizontally { -it } togetherWith 
-            fadeOut() + slideOutHorizontally { it }
-        }
-    }.using(SizeTransform(clip = false))}
-             ) { _ ->
-    Box(modifier = Modifier.padding(padding)) {
-                    when {
-                        state.isLoading -> LoadingState()
-                        state.errorMessage != null -> ErrorState(state.errorMessage!!) { viewModel.loadVideos() }
-                        state.showFoldersOnly && state.folders.isEmpty() -> EmptyState()
-                        state.displayVideos.isEmpty() && !state.showFoldersOnly && state.searchQuery.isNotBlank() -> EmptySearchState()
-                        state.displayVideos.isEmpty() && !state.showFoldersOnly && state.searchQuery.isBlank() -> EmptyState()
-                        else -> {
-                            val showFeatured = !state.showFoldersOnly && state.searchQuery.isBlank() && state.currentContext != QueueContext.FOLDER
-                            LazyVerticalGrid(
-                                columns = GridCells.Adaptive(minSize = 120.dp),
-                                contentPadding = PaddingValues(12.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                if (state.showFoldersOnly) {
-                                    items(state.folders, key = { it.path }) { folder ->
-                                        FolderItem(folder) { 
-    navDirection = NavigationDirection.FORWARD
-    viewModel.enterFolder(folder.path) 
-}
+                    targetState = transitionKey,
+                    transitionSpec = {
+                        when (navDirection) {
+                            NavigationDirection.FORWARD -> {
+                                slideInHorizontally { it } + fadeIn() togetherWith
+                                slideOutHorizontally { -it } + fadeOut()
+                            }
+                            NavigationDirection.BACK -> {
+                                slideInHorizontally { -it } + fadeIn() togetherWith
+                                slideOutHorizontally { it } + fadeOut()
+                            }
+                        }.using(SizeTransform(clip = false))
+                    }
+                ) { _ ->
+                    Box(modifier = Modifier.padding(padding)) {
+                        when {
+                            state.isLoading -> LoadingState()
+                            state.errorMessage != null -> ErrorState(state.errorMessage!!) { viewModel.loadVideos() }
+                            state.showFoldersOnly && state.folders.isEmpty() -> EmptyState()
+                            state.displayVideos.isEmpty() && !state.showFoldersOnly && state.searchQuery.isNotBlank() -> EmptySearchState()
+                            state.displayVideos.isEmpty() && !state.showFoldersOnly && state.searchQuery.isBlank() -> EmptyState()
+                            else -> {
+                                val showFeatured = !state.showFoldersOnly && state.searchQuery.isBlank() && state.currentContext != QueueContext.FOLDER
+                                val gridState = rememberLazyGridState()
+                                val isRefreshing by remember { mutableStateOf(false) }
+                                val pullToRefreshState = rememberPullToRefreshState()
+                                
+                                // Calcula o padding bottom para a scrollbar
+                                val density = LocalDensity.current
+                                val bottomPadding = with(density) { 16.dp }
+
+                                PullToRefreshBox(
+                                    isRefreshing = isRefreshing,
+                                    onRefresh = { viewModel.loadVideos() },
+                                    state = pullToRefreshState,
+                                    modifier = Modifier.fillMaxSize(),
+                                    indicator = {
+                                        PullToRefreshDefaults.LoadingIndicator(
+                                            state = pullToRefreshState,
+                                            isRefreshing = isRefreshing,
+                                            modifier = Modifier.align(Alignment.TopCenter)
+                                        )
                                     }
-                                } else {
-                                    val videos = state.displayVideos
-                                    if (showFeatured && videos.isNotEmpty()) {
-                                        val featured = viewModel.getFeaturedVideo()
-                                        if (featured != null) {
-                                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                                FeaturedVideoItem(
-                                                    video = featured,
-                                                    viewModel = viewModel,
-                                                    onClick = { queue ->
-                                                        viewModel.incrementViewCount(featured.id)
-                                                        VideoQueueHolder.setQueue(queue)
-                                                        onOpenPlayerWithQueue(queue)
+                                ) {
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        LazyVerticalGrid(
+                                            columns = GridCells.Adaptive(minSize = 120.dp),
+                                            contentPadding = PaddingValues(
+                                                start = 12.dp,
+                                                end = if (gridState.canScrollForward || gridState.canScrollBackward) 22.dp else 12.dp,
+                                                top = 12.dp,
+                                                bottom = 12.dp
+                                            ),
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                                            state = gridState
+                                        ) {
+                                            if (state.showFoldersOnly) {
+                                                items(state.folders, key = { it.path }) { folder ->
+                                                    FolderItem(folder) { 
+                                                        navDirection = NavigationDirection.FORWARD
+                                                        viewModel.enterFolder(folder.path) 
                                                     }
-                                                )
-                                            }
-                                            items(videos.filter { it.id != featured.id }, key = { it.id }) { video ->
-                                                VideoGridItem(video, viewModel) { queue ->
-                                                    viewModel.incrementViewCount(video.id)
-                                                    VideoQueueHolder.setQueue(queue)
-                                                    onOpenPlayerWithQueue(queue)
                                                 }
-                                            }
-                                        } else {
-                                            items(videos, key = { it.id }) { video ->
-                                                VideoGridItem(video, viewModel) { queue ->
-                                                    viewModel.incrementViewCount(video.id)
-                                                    VideoQueueHolder.setQueue(queue)
-                                                    onOpenPlayerWithQueue(queue)
+                                            } else {
+                                                val videos = state.displayVideos
+                                                if (showFeatured && videos.isNotEmpty()) {
+                                                    val featured = viewModel.getFeaturedVideo()
+                                                    if (featured != null) {
+                                                        item(span = { GridItemSpan(maxLineSpan) }) {
+                                                            FeaturedVideoItem(
+                                                                video = featured,
+                                                                viewModel = viewModel,
+                                                                onClick = { queue ->
+                                                                    viewModel.incrementViewCount(featured.id)
+                                                                    VideoQueueHolder.setQueue(queue)
+                                                                    onOpenPlayerWithQueue(queue)
+                                                                }
+                                                            )
+                                                        }
+                                                        items(videos.filter { it.id != featured.id }, key = { it.id }) { video ->
+                                                            VideoGridItem(video, viewModel) { queue ->
+                                                                viewModel.incrementViewCount(video.id)
+                                                                VideoQueueHolder.setQueue(queue)
+                                                                onOpenPlayerWithQueue(queue)
+                                                            }
+                                                        }
+                                                    } else {
+                                                        items(videos, key = { it.id }) { video ->
+                                                            VideoGridItem(video, viewModel) { queue ->
+                                                                viewModel.incrementViewCount(video.id)
+                                                                VideoQueueHolder.setQueue(queue)
+                                                                onOpenPlayerWithQueue(queue)
+                                                            }
+                                                        }
+                                                    }
+                                                } else {
+                                                    items(videos, key = { it.id }) { video ->
+                                                        VideoGridItem(video, viewModel) { queue ->
+                                                            viewModel.incrementViewCount(video.id)
+                                                            VideoQueueHolder.setQueue(queue)
+                                                            onOpenPlayerWithQueue(queue)
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
-                                    } else {
-                                        items(videos, key = { it.id }) { video ->
-                                            VideoGridItem(video, viewModel) { queue ->
-                                                viewModel.incrementViewCount(video.id)
-                                                VideoQueueHolder.setQueue(queue)
-                                                onOpenPlayerWithQueue(queue)
-                                                }
-                                            }
-                                        }
+
+                                        // ScrollBar Overlay - IGUAL AO DA LIBRARY
+                                        ExpressiveScrollBar(
+                                            modifier = Modifier
+                                                .align(Alignment.CenterEnd)
+                                                .padding(end = 4.dp, top = 16.dp, bottom = bottomPadding),
+                                            listState = gridState
+                                        )
                                     }
                                 }
                             }
@@ -219,7 +261,7 @@ fun VideoGalleryScreen(
                 }
             }
         }
-    } // Fim do WallpaperBackground
+    }
 }
 
 @Composable
@@ -288,8 +330,8 @@ private fun GalleryTopBar(
                 actions = {
                     if (state.currentContext != QueueContext.RECENT) {
                         IconButton(onClick = { showSortSheet = true }) {
-    Icon(Icons.Filled.Sort, null)
-}
+                            Icon(Icons.Filled.Sort, null)
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
@@ -312,113 +354,131 @@ private fun GalleryTopBar(
             )
 
             if (state.currentContext != QueueContext.FOLDER && state.searchQuery.isBlank()) {
-                ContextTabs(
-                    current = state.currentContext,
-                    showFoldersOnly = state.showFoldersOnly,
-                    onChange = onContextChange,
-                    onToggleShowFolders = onToggleShowFolders
-                )
+                // ContextTabs substituído por botões no estilo Library
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val isAllSelected = !state.showFoldersOnly && state.currentContext == QueueContext.ALL
+                    val isRecentSelected = !state.showFoldersOnly && state.currentContext == QueueContext.RECENT
+                    val isFoldersSelected = state.showFoldersOnly
+
+                    // Botão "Todos" - estilo Library
+                    FilterButton(
+                        selected = isAllSelected,
+                        onClick = {
+                            onContextChange(QueueContext.ALL)
+                            onToggleShowFolders(false)
+                        },
+                        text = stringResource(R.string.gallery_tab_all)
+                    )
+
+                    // Botão "Recentes" - estilo Library
+                    FilterButton(
+                        selected = isRecentSelected,
+                        onClick = {
+                            onContextChange(QueueContext.RECENT)
+                            onToggleShowFolders(false)
+                        },
+                        text = stringResource(R.string.gallery_tab_recent)
+                    )
+
+                    // Botão "Pastas" - estilo Library
+                    FilterButton(
+                        selected = isFoldersSelected,
+                        onClick = {
+                            if (!state.showFoldersOnly) onToggleShowFolders(true)
+                        },
+                        text = stringResource(R.string.gallery_tab_folders)
+                    )
+                }
             }
         }
     }
 
     if (showSortSheet) {
-    LibrarySortBottomSheet(
-        title = stringResource(R.string.gallery_sort),
-        options = VIDEO_SORT_OPTIONS,
-
-        selectedOption = when (state.sortMode) {
-            SortMode.NAME_ASC -> SortOption.SongTitleAZ
-            SortMode.NAME_DESC -> SortOption.SongTitleZA
-            SortMode.DATE_DESC -> SortOption.SongDateAdded
-            SortMode.DATE_ASC -> SortOption.SongDateAddedAsc
-            SortMode.DURATION_DESC -> SortOption.SongDuration
-            SortMode.DURATION_ASC -> SortOption.SongDurationAsc
-            SortMode.SIZE_ASC,
-            SortMode.SIZE_DESC -> SortOption.SongDefaultOrder
-        },
-
-        onDismiss = {
-            showSortSheet = false
-        },
-
-        onOptionSelected = { option ->
-            showSortSheet = false
-
-            when (option) {
-                SortOption.SongTitleAZ -> onSortChange(SortMode.NAME_ASC)
-                SortOption.SongTitleZA -> onSortChange(SortMode.NAME_DESC)
-                SortOption.SongDateAdded -> onSortChange(SortMode.DATE_DESC)
-                SortOption.SongDateAddedAsc -> onSortChange(SortMode.DATE_ASC)
-                SortOption.SongDuration -> onSortChange(SortMode.DURATION_DESC)
-                SortOption.SongDurationAsc -> onSortChange(SortMode.DURATION_ASC)
-                else -> {}
+        LibrarySortBottomSheet(
+            title = stringResource(R.string.gallery_sort),
+            options = VIDEO_SORT_OPTIONS,
+            selectedOption = when (state.sortMode) {
+                SortMode.NAME_ASC -> SortOption.SongTitleAZ
+                SortMode.NAME_DESC -> SortOption.SongTitleZA
+                SortMode.DATE_DESC -> SortOption.SongDateAdded
+                SortMode.DATE_ASC -> SortOption.SongDateAddedAsc
+                SortMode.DURATION_DESC -> SortOption.SongDuration
+                SortMode.DURATION_ASC -> SortOption.SongDurationAsc
+                SortMode.SIZE_ASC,
+                SortMode.SIZE_DESC -> SortOption.SongDefaultOrder
+            },
+            onDismiss = { showSortSheet = false },
+            onOptionSelected = { option ->
+                showSortSheet = false
+                when (option) {
+                    SortOption.SongTitleAZ -> onSortChange(SortMode.NAME_ASC)
+                    SortOption.SongTitleZA -> onSortChange(SortMode.NAME_DESC)
+                    SortOption.SongDateAdded -> onSortChange(SortMode.DATE_DESC)
+                    SortOption.SongDateAddedAsc -> onSortChange(SortMode.DATE_ASC)
+                    SortOption.SongDuration -> onSortChange(SortMode.DURATION_DESC)
+                    SortOption.SongDurationAsc -> onSortChange(SortMode.DURATION_ASC)
+                    else -> {}
+                }
+            },
+            onDirectionToggle = { option ->
+                when (option) {
+                    SortOption.SongTitleAZ -> onSortChange(SortMode.NAME_ASC)
+                    SortOption.SongTitleZA -> onSortChange(SortMode.NAME_DESC)
+                    SortOption.SongDateAdded -> onSortChange(SortMode.DATE_DESC)
+                    SortOption.SongDateAddedAsc -> onSortChange(SortMode.DATE_ASC)
+                    SortOption.SongDuration -> onSortChange(SortMode.DURATION_DESC)
+                    SortOption.SongDurationAsc -> onSortChange(SortMode.DURATION_ASC)
+                    else -> {}
+                }
             }
-        },
-
-        onDirectionToggle = { option ->
-            when (option) {
-                SortOption.SongTitleAZ -> onSortChange(SortMode.NAME_ASC)
-                SortOption.SongTitleZA -> onSortChange(SortMode.NAME_DESC)
-                SortOption.SongDateAdded -> onSortChange(SortMode.DATE_DESC)
-                SortOption.SongDateAddedAsc -> onSortChange(SortMode.DATE_ASC)
-                SortOption.SongDuration -> onSortChange(SortMode.DURATION_DESC)
-                SortOption.SongDurationAsc -> onSortChange(SortMode.DURATION_ASC)
-                else -> {}
-            }
-        }
-    )
-}
+        )
+    }
 }
 
+// NOVO COMPONENTE: Botão de filtro no estilo Library
 @Composable
-private fun ContextTabs(
-    current: QueueContext,
-    showFoldersOnly: Boolean,
-    onChange: (QueueContext) -> Unit,
-    onToggleShowFolders: (Boolean) -> Unit
+private fun FilterButton(
+    selected: Boolean,
+    onClick: () -> Unit,
+    text: String
 ) {
-    val selectedIndex = when {
-        showFoldersOnly -> 2
-        current == QueueContext.ALL -> 0
-        current == QueueContext.RECENT -> 1
-        else -> 0
+    val shape = RoundedCornerShape(50.dp)
+    val containerColor = if (selected) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    }
+    val contentColor = if (selected) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
     }
 
-    TabRow(
-        selectedTabIndex = selectedIndex,
-        containerColor = Color.Transparent,
-        divider = { Spacer(Modifier.height(0.dp)) }
+    Surface(
+        modifier = Modifier.weight(1f),
+        shape = shape,
+        color = containerColor,
+        tonalElevation = if (selected) 6.dp else 2.dp,
+        onClick = onClick
     ) {
-        Tab(
-            selected = !showFoldersOnly && current == QueueContext.ALL,
-            onClick = {
-                onChange(QueueContext.ALL)
-                onToggleShowFolders(false)
-            },
-            text = { Text(stringResource(R.string.gallery_tab_all)) },
-            selectedContentColor = MaterialTheme.colorScheme.primary,
-            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Tab(
-            selected = !showFoldersOnly && current == QueueContext.RECENT,
-            onClick = {
-                onChange(QueueContext.RECENT)
-                onToggleShowFolders(false)
-            },
-            text = { Text(stringResource(R.string.gallery_tab_recent)) },
-            selectedContentColor = MaterialTheme.colorScheme.primary,
-            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Tab(
-            selected = showFoldersOnly,
-            onClick = {
-                if (!showFoldersOnly) onToggleShowFolders(true)
-            },
-            text = { Text(stringResource(R.string.gallery_tab_folders)) },
-            selectedContentColor = MaterialTheme.colorScheme.primary,
-            unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp, horizontal = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                color = contentColor
+            )
+        }
     }
 }
 
@@ -435,7 +495,6 @@ private fun FeaturedVideoItem(
 
     var thumbnail by remember { mutableStateOf<ImageBitmap?>(null) }
     
-    // MESMO MÉTODO do VideoGridItem
     LaunchedEffect(video.id) {
         withContext(Dispatchers.IO) {
             val bitmap = viewModel.getVideoThumbnail(video.id)
@@ -471,7 +530,6 @@ private fun FeaturedVideoItem(
 
             Row(modifier = Modifier.fillMaxWidth().height(180.dp)) {
                 Box(modifier = Modifier.weight(0.6f).fillMaxHeight()) {
-                    // Thumbnail IGUAL ao VideoGridItem
                     if (thumbnail != null) {
                         Image(
                             bitmap = thumbnail!!,
@@ -480,7 +538,6 @@ private fun FeaturedVideoItem(
                             contentScale = ContentScale.Crop
                         )
                     } else {
-                        // Placeholder IGUAL ao VideoGridItem
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -537,7 +594,6 @@ private fun VideoGridItem(
     var isLoadingThumbnail by remember { mutableStateOf(true) }
     val context = LocalContext.current
 
-    // Carrega a thumbnail
     LaunchedEffect(video.id) {
         isLoadingThumbnail = true
         withContext(Dispatchers.IO) {
@@ -580,7 +636,6 @@ private fun VideoGridItem(
             )
 
             Box(modifier = Modifier.aspectRatio(16f / 9f)) {
-                // Thumbnail do vídeo
                 if (thumbnail != null) {
                     Image(
                         bitmap = thumbnail!!,
@@ -589,7 +644,6 @@ private fun VideoGridItem(
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    // Placeholder enquanto carrega
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -607,7 +661,6 @@ private fun VideoGridItem(
 
                 Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.5f)))))
                 
-                // Duração do vídeo
                 Text(
                     video.durationFormatted,
                     color = Color.White,
