@@ -5,6 +5,8 @@ import androidx.compose.animation.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.pulltorefresh.ExperimentalMaterial3PullToRefreshApi
 import androidx.compose.animation.SizeTransform
+import androidx.compose.material3.pulltorefresh.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import com.goldensystem.auris.presentation.components.LibrarySortBottomSheet
 import com.goldensystem.auris.presentation.components.ExpressiveScrollBar
 import com.goldensystem.auris.data.model.SortOption
@@ -507,10 +509,9 @@ private fun FilterButton(
     }
 
     Surface(
-        Box(modifier = Modifier
-    .fillMaxWidth()
-    .weight(1f)
-),
+        modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f),
         shape = shape,
         color = containerColor,
         tonalElevation = if (selected) 6.dp else 2.dp,
