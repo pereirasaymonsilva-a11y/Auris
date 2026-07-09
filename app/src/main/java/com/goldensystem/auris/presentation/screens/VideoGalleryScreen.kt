@@ -509,8 +509,7 @@ private fun FilterButton(
     }
 
     Surface(
-        modifier = Modifier
-            Modifier
+    modifier = Modifier
     .weight(1f)
     .fillMaxWidth(),
         shape = shape,
