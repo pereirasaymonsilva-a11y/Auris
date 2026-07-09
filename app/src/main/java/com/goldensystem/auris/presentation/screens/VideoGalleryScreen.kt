@@ -179,12 +179,13 @@ fun VideoGalleryScreen(
                                     state = pullToRefreshState,
                                     modifier = Modifier.fillMaxSize(),
                                     indicator = {
-                                        PullToRefreshDefaults.LoadingIndicator(
-                                            state = pullToRefreshState,
-                                            isRefreshing = isRefreshing,
-                                            modifier = Modifier
-                                        )
-                                    }
+    @OptIn(ExperimentalMaterial3Api::class)
+    PullToRefreshDefaults.LoadingIndicator(
+        state = pullToRefreshState,
+        isRefreshing = isRefreshing,
+        modifier = Modifier.align(Alignment.TopCenter)
+    )
+}
                                 ) {
                                     Box(modifier = Modifier.fillMaxSize()) {
                                         LazyColumn(
