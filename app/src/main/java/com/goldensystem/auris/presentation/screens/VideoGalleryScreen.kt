@@ -181,7 +181,7 @@ fun VideoGalleryScreen(
                                         PullToRefreshDefaults.LoadingIndicator(
                                             state = pullToRefreshState,
                                             isRefreshing = isRefreshing,
-                                            modifier = Modifier.align(Alignment.TopCenter)
+                                            modifier = Modifier
                                         )
                                     }
                                 ) {
@@ -510,8 +510,9 @@ private fun FilterButton(
 
     Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f),
+            Modifier
+    .weight(1f)
+    .fillMaxWidth(),
         shape = shape,
         color = containerColor,
         tonalElevation = if (selected) 6.dp else 2.dp,
