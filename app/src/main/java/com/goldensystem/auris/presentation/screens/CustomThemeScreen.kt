@@ -4,6 +4,10 @@ package com.goldensystem.auris.presentation.screens
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.net.Uri
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.navigation.NavController
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
