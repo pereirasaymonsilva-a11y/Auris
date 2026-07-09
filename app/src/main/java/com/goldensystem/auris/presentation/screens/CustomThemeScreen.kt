@@ -1,10 +1,12 @@
 // presentation/screens/CustomThemeScreen.kt
+
+@file:OptIn(ExperimentalAnimationApi::class)
+
 package com.goldensystem.auris.presentation.screens
 
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.net.Uri
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.navigation.NavController
