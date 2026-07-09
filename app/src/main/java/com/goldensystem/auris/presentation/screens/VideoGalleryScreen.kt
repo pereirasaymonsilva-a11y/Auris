@@ -3,6 +3,7 @@ package com.goldensystem.auris.presentation.screens
 import android.Manifest
 import androidx.compose.animation.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.animation.SizeTransform
 import androidx.compose.material3.pulltorefresh.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
@@ -491,7 +492,7 @@ private fun GalleryTopBar(
 }
 
 @Composable
-private fun FilterButton(
+private fun RowScope.FilterButton(
     selected: Boolean,
     onClick: () -> Unit,
     text: String
