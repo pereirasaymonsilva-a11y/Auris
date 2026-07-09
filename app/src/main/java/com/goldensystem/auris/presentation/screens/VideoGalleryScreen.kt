@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
@@ -5,6 +7,8 @@ import androidx.compose.animation.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.animation.SizeTransform
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material
 import androidx.compose.material3.pulltorefresh.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import com.goldensystem.auris.presentation.components.LibrarySortBottomSheet
@@ -76,7 +80,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 
 enum class NavigationDirection { FORWARD, BACK }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun VideoGalleryScreen(
     onOpenPlayerWithQueue: (VideoQueue) -> Unit,
@@ -179,7 +183,6 @@ fun VideoGalleryScreen(
                                     state = pullToRefreshState,
                                     modifier = Modifier.fillMaxSize(),
                                     indicator = {
-    @OptIn(ExperimentalMaterial3Api::class)
     PullToRefreshDefaults.LoadingIndicator(
         state = pullToRefreshState,
         isRefreshing = isRefreshing,
