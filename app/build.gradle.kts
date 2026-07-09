@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.baselineprofile)
     id("kotlin-parcelize")
     id("kotlin-kapt")          // necessário para outras libs (Room não, pq usa ksp, mas deixe)
+    id("com.android.application")
+    id("com.google.gms.google-services")
 }
 
 val enableAbiSplits = providers.gradleProperty("Auris.enableAbiSplits")
@@ -188,6 +190,12 @@ kapt {
 }
 
 dependencies {
+
+    //google firebase
+    implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    
+    //implementatinos
     implementation(libs.androidx.profileinstaller)
     implementation("com.google.zxing:core:3.5.3")
     implementation(libs.androidx.paging.common)

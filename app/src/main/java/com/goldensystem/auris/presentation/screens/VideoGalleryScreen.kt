@@ -3,6 +3,7 @@
 package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
+import androidx.navigation.NavController
 import androidx.compose.animation.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -10,6 +11,10 @@ import androidx.compose.animation.SizeTransform
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.pulltorefresh.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.background
 import com.goldensystem.auris.presentation.components.LibrarySortBottomSheet
 import com.goldensystem.auris.presentation.components.ExpressiveScrollBar
 import com.goldensystem.auris.data.model.SortOption

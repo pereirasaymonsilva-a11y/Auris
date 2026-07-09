@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "352494419760",
+    "project_id": "aurismusicplayer-gs",
+    "storage_bucket": "aurismusicplayer-gs.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352494419760:android:bbedd7b8fdd09b2b9592f5",
+        "android_client_info": {
+          "package_name": "com.goldensystem.auris"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbAEuY7nfXlMuGAgMQ8hHFQq7V9DmyP3Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
