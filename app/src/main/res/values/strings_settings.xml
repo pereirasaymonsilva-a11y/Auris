@@ -26,7 +26,21 @@
 <string name="wallpaper_server_subtitle">Choose a wallpaper from the server</string>
 <string name="wallpaper_blur">Blur</string>
 <string name="wallpaper_dim">Dimming</string>
-<string name="action_apply">Apply</string> 
+<string name="action_apply">Apply</string>
+<!-- Custom Theme -->
+<string name="custom_theme_more_colors">Mais cores ▼</string>
+<string name="custom_theme_less_colors">Menos cores ▲</string>
+<string name="custom_theme_additional_colors">Cores Adicionais</string>
+<string name="custom_theme_custom_color">🎨 Escolher cor personalizada</string>
+<string name="custom_theme_custom_color_title">Escolher cor personalizada</string>
+<string name="custom_theme_apply_color">Aplicar cor</string>
+<string name="custom_theme_cancel">Cancelar</string>
+<string name="custom_theme_hue">Matiz</string>
+<string name="custom_theme_saturation">Saturação</string>
+<string name="custom_theme_brightness">Brilho</string>
+<string name="custom_theme_selected_wallpaper">Wallpaper selecionado</string>
+<string name="custom_theme_no_image_selected">Nenhuma imagem selecionada</string>
+<string name="custom_theme_wallpaper_preview">Pré-visualização do Wallpaper</string>
 
 
 
