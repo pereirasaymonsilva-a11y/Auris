@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.baselineprofile)
     id("kotlin-parcelize")
     id("kotlin-kapt")          // necessário para outras libs (Room não, pq usa ksp, mas deixe)
-    id("com.android.application")
     id("com.google.gms.google-services")
 }
 
