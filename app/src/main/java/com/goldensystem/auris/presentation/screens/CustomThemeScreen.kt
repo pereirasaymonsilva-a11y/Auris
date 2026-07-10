@@ -4,7 +4,7 @@
 
 package com.goldensystem.auris.presentation.screens
 
-import android.graphics.RenderEffect
+import androidx.compose.ui.graphics.RenderEffect
 import android.graphics.Shader
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -295,7 +295,9 @@ fun CustomThemeScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
-                .graphicsLayer(alpha = animatedAlpha),
+                .graphicsLayer {
+    alpha = animatedAlpha
+},
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Preview do Player - Tamanho aumentado
