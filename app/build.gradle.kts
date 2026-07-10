@@ -416,6 +416,10 @@ dependencies {
 
     // roku
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    // Para DataStore com JSON (kotlinx.serialization)
+    implementation "androidx.datastore:datastore:1.0.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0"
 }
 
 tasks.withType<Test> {

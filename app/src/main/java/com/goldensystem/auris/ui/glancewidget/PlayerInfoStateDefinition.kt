@@ -5,7 +5,7 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
-import androidx.datastore.preferences.protobuf.InvalidProtocolBufferException
+import java.io.IOException
 import androidx.glance.state.GlanceStateDefinition
 import java.io.InputStream
 import java.io.OutputStream

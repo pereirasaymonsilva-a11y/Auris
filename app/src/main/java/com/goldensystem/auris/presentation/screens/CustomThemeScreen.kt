@@ -201,6 +201,8 @@ fun CustomThemeScreen(
     val previewColorScheme = remember(config) {
         customColorScheme(config, true)
     }
+    
+    val scope = rememberCoroutineScope()
 
     // Reset
     LaunchedEffect(resetTrigger) {
