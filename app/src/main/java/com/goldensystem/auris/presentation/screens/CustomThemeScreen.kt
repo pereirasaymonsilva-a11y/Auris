@@ -201,8 +201,6 @@ fun CustomThemeScreen(
     val previewColorScheme = remember(config) {
         customColorScheme(config, true)
     }
-    
-    val scope = rememberCoroutineScope()
 
     // Reset
     LaunchedEffect(resetTrigger) {
@@ -225,7 +223,7 @@ fun CustomThemeScreen(
     DisposableEffect(Unit) {
     onDispose {
         saveJob?.cancel()
-        scope.launch {
+        saveJob = scope.launch {
             viewModel.saveCustomTheme()
         }
     }

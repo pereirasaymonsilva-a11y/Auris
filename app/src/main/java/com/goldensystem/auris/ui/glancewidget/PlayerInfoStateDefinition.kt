@@ -12,7 +12,6 @@ import java.io.OutputStream
 import com.goldensystem.auris.data.model.PlayerInfo
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import okio.IOException
 import java.io.File
 
 object PlayerInfoStateDefinition : GlanceStateDefinition<PlayerInfo> { // Changed to PlayerInfo
