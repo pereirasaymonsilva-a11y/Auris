@@ -282,7 +282,9 @@ fun CustomThemeScreen(
                     IconButton(
                         onClick = { 
                             saveJob?.cancel()
+                            saveJob = scope.launch {
                             viewModel.saveCustomTheme()
+                            }
                             navController.popBackStack() 
                         }
                     ) {
