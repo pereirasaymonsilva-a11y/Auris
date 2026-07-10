@@ -22,6 +22,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
@@ -130,7 +131,6 @@ fun AurisTheme(
         val viewModel: CustomThemeViewModel = hiltViewModel()
         val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
 
-        // 👇 VERIFICA SE O ARQUIVO DE WALLPAPER EXISTE (GALLERY)
         LaunchedEffect(config.wallpaperUri) {
             if (config.wallpaperType == WallpaperType.GALLERY && config.wallpaperUri != null) {
                 val file = File(config.wallpaperUri!!)
@@ -141,12 +141,9 @@ fun AurisTheme(
             }
         }
 
-        // 👇 SE CUSTOM ESTIVER ATIVO, USA TEMA PERSONALIZADO + WALLPAPER
+        // ✅ BLOCO CORRIGIDO
         if (config.isEnabled) {
-            val baseScheme = customColorScheme(config, darkTheme)
-            val customColorScheme = baseScheme.copy(
-                surfaceContainer = Color(config.containerColor)
-            )
+            val customColorScheme = customColorScheme(config, darkTheme)  // ✅ SÓ UMA LINHA
 
             MaterialTheme(
                 colorScheme = customColorScheme,
@@ -154,7 +151,6 @@ fun AurisTheme(
                 shapes = Shapes
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // WALLPAPER
                     when (config.wallpaperType) {
                         WallpaperType.SOLID -> {
                             Box(
@@ -205,19 +201,18 @@ fun AurisTheme(
                         }
                     }
 
-                    // DIM
                     if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperDim > 0f) {
                         Box(
                             modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = config.wallpaperDim))
                         )
                     }
 
-                    // BLUR
+                    // ✅ BLUR CORRETO
                     if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperBlur > 0f) {
                         Box(
-                            modifier = Modifier.fillMaxSize().background(
-                                Color.White.copy(alpha = config.wallpaperBlur * 0.3f)
-                            )
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .blur(radius = (config.wallpaperBlur * 18f).dp)
                         )
                     }
 
@@ -225,7 +220,6 @@ fun AurisTheme(
                 }
             }
         } else {
-            // 👇 TEMA NORMAL (SEM CUSTOM)
             MaterialTheme(
                 colorScheme = finalColorScheme,
                 typography = Typography,

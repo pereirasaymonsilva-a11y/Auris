@@ -13,56 +13,53 @@ fun customColorScheme(
     config: CustomThemeConfig,
     isDark: Boolean
 ): ColorScheme {
-    val primary = Color(config.primaryColor)
-    val secondary = Color(config.secondaryColor)
-    val background = Color(config.backgroundColor)
-    val surface = Color(config.surfaceColor)
-
     return if (isDark) {
         darkColorScheme(
-            primary = primary,
-            onPrimary = Color.White,
-            secondary = secondary,
-            onSecondary = Color.White,
-            background = background,
-            surface = surface,
-            onSurface = Color.White.copy(alpha = 0.87f),
-            onBackground = Color.White.copy(alpha = 0.87f),
-            surfaceVariant = surface.copy(alpha = 0.8f),
-            onSurfaceVariant = Color.White.copy(alpha = 0.6f),
-            primaryContainer = primary.copy(alpha = 0.2f),
-            onPrimaryContainer = Color.White,
-            secondaryContainer = secondary.copy(alpha = 0.2f),
-            onSecondaryContainer = Color.White,
-            tertiary = Color(0xFFFF8A65),
-            onTertiary = Color.White,
-            error = Color(0xFFFF5252),
-            onError = Color.White,
-            outline = Color.White.copy(alpha = 0.12f),
-            outlineVariant = Color.White.copy(alpha = 0.08f)
+            primary = Color(config.primaryColor),
+            onPrimary = Color(config.onPrimaryColor),
+            secondary = Color(config.secondaryColor),
+            onSecondary = Color(config.onSecondaryColor),
+            tertiary = Color(config.tertiaryColor),
+            onTertiary = Color(config.onTertiaryColor),
+            background = Color(config.backgroundColor),
+            onBackground = Color(config.onBackgroundColor),
+            surface = Color(config.surfaceColor),
+            onSurface = Color(config.onSurfaceColor),
+            surfaceVariant = Color(config.surfaceVariantColor),
+            onSurfaceVariant = Color(config.onSurfaceVariantColor),
+            primaryContainer = Color(config.primaryContainerColor),
+            onPrimaryContainer = Color(config.onPrimaryContainerColor),
+            secondaryContainer = Color(config.secondaryContainerColor),
+            onSecondaryContainer = Color(config.onSecondaryContainerColor),
+            error = Color(config.errorColor),
+            onError = Color(config.onErrorColor),
+            outline = Color(config.outlineColor),
+            outlineVariant = Color(config.outlineVariantColor),
+            surfaceTint = Color(config.surfaceTintColor)
         )
     } else {
         lightColorScheme(
-            primary = primary,
-            onPrimary = Color.White,
-            secondary = secondary,
-            onSecondary = Color.White,
-            background = background,
-            surface = surface,
-            onSurface = Color.Black.copy(alpha = 0.87f),
-            onBackground = Color.Black.copy(alpha = 0.87f),
-            surfaceVariant = surface.copy(alpha = 0.8f),
-            onSurfaceVariant = Color.Black.copy(alpha = 0.6f),
-            primaryContainer = primary.copy(alpha = 0.15f),
-            onPrimaryContainer = Color.Black.copy(alpha = 0.87f),
-            secondaryContainer = secondary.copy(alpha = 0.15f),
-            onSecondaryContainer = Color.Black.copy(alpha = 0.87f),
-            tertiary = Color(0xFFFF8A65),
-            onTertiary = Color.White,
-            error = Color(0xFFD32F2F),
-            onError = Color.White,
-            outline = Color.Black.copy(alpha = 0.12f),
-            outlineVariant = Color.Black.copy(alpha = 0.08f)
+            primary = Color(config.primaryColor),
+            onPrimary = Color(config.onPrimaryColor),
+            secondary = Color(config.secondaryColor),
+            onSecondary = Color(config.onSecondaryColor),
+            tertiary = Color(config.tertiaryColor),
+            onTertiary = Color(config.onTertiaryColor),
+            background = Color(config.backgroundColor),
+            onBackground = Color(config.onBackgroundColor),
+            surface = Color(config.surfaceColor),
+            onSurface = Color(config.onSurfaceColor),
+            surfaceVariant = Color(config.surfaceVariantColor),
+            onSurfaceVariant = Color(config.onSurfaceVariantColor),
+            primaryContainer = Color(config.primaryContainerColor),
+            onPrimaryContainer = Color(config.onPrimaryContainerColor),
+            secondaryContainer = Color(config.secondaryContainerColor),
+            onSecondaryContainer = Color(config.onSecondaryContainerColor),
+            error = Color(config.errorColor),
+            onError = Color(config.onErrorColor),
+            outline = Color(config.outlineColor),
+            outlineVariant = Color(config.outlineVariantColor),
+            surfaceTint = Color(config.surfaceTintColor)
         )
     }
 }

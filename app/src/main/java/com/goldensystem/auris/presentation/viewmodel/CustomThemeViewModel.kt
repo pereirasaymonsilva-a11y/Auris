@@ -37,34 +37,87 @@ class CustomThemeViewModel @Inject constructor(
         }
     }
 
+    // ===== CORES PRINCIPAIS =====
     fun updatePrimaryColor(color: Int) {
         _config.update { it.copy(primaryColor = color) }
     }
-
     fun updateSecondaryColor(color: Int) {
         _config.update { it.copy(secondaryColor = color) }
     }
-
+    fun updateTertiaryColor(color: Int) {
+        _config.update { it.copy(tertiaryColor = color) }
+    }
+    fun updateBackgroundColor(color: Int) {
+        _config.update { it.copy(backgroundColor = color) }
+    }
+    fun updateSurfaceColor(color: Int) {
+        _config.update { it.copy(surfaceColor = color) }
+    }
     fun updateContainerColor(color: Int) {
         _config.update { it.copy(containerColor = color) }
     }
 
-    fun updateBackgroundColor(color: Int) {
-        _config.update { it.copy(backgroundColor = color) }
+    // ===== CORES ON (TEXTO) =====
+    fun updateOnPrimaryColor(color: Int) {
+        _config.update { it.copy(onPrimaryColor = color) }
+    }
+    fun updateOnSecondaryColor(color: Int) {
+        _config.update { it.copy(onSecondaryColor = color) }
+    }
+    fun updateOnTertiaryColor(color: Int) {
+        _config.update { it.copy(onTertiaryColor = color) }
+    }
+    fun updateOnBackgroundColor(color: Int) {
+        _config.update { it.copy(onBackgroundColor = color) }
+    }
+    fun updateOnSurfaceColor(color: Int) {
+        _config.update { it.copy(onSurfaceColor = color) }
+    }
+    fun updateOnSurfaceVariantColor(color: Int) {
+        _config.update { it.copy(onSurfaceVariantColor = color) }
     }
 
-    fun updateSurfaceColor(color: Int) {
-        _config.update { it.copy(surfaceColor = color) }
+    // ===== CONTAINERS =====
+    fun updatePrimaryContainerColor(color: Int) {
+        _config.update { it.copy(primaryContainerColor = color) }
+    }
+    fun updateOnPrimaryContainerColor(color: Int) {
+        _config.update { it.copy(onPrimaryContainerColor = color) }
+    }
+    fun updateSecondaryContainerColor(color: Int) {
+        _config.update { it.copy(secondaryContainerColor = color) }
+    }
+    fun updateOnSecondaryContainerColor(color: Int) {
+        _config.update { it.copy(onSecondaryContainerColor = color) }
+    }
+    fun updateSurfaceVariantColor(color: Int) {
+        _config.update { it.copy(surfaceVariantColor = color) }
     }
 
+    // ===== OUTROS =====
+    fun updateErrorColor(color: Int) {
+        _config.update { it.copy(errorColor = color) }
+    }
+    fun updateOnErrorColor(color: Int) {
+        _config.update { it.copy(onErrorColor = color) }
+    }
+    fun updateOutlineColor(color: Int) {
+        _config.update { it.copy(outlineColor = color) }
+    }
+    fun updateOutlineVariantColor(color: Int) {
+        _config.update { it.copy(outlineVariantColor = color) }
+    }
+    fun updateSurfaceTintColor(color: Int) {
+        _config.update { it.copy(surfaceTintColor = color) }
+    }
+
+    // ===== WALLPAPER =====
     fun setWallpaperType(type: WallpaperType) {
         _config.update { it.copy(wallpaperType = type) }
     }
-
     fun setWallpaperColor(color: Int) {
         _config.update { it.copy(wallpaperColor = color) }
     }
-
     fun setWallpaperFromGallery(uri: String) {
         _config.update { 
             it.copy(
@@ -73,7 +126,6 @@ class CustomThemeViewModel @Inject constructor(
             )
         }
     }
-
     fun setWallpaperFromServer(url: String) {
         _config.update { 
             it.copy(
@@ -82,11 +134,9 @@ class CustomThemeViewModel @Inject constructor(
             )
         }
     }
-
     fun setWallpaperBlur(blur: Float) {
         _config.update { it.copy(wallpaperBlur = blur) }
     }
-
     fun setWallpaperDim(dim: Float) {
         _config.update { it.copy(wallpaperDim = dim) }
     }
@@ -108,7 +158,6 @@ class CustomThemeViewModel @Inject constructor(
         }
     }
 
-    // 👇 FUNÇÃO CORRIGIDA DENTRO DA CLASSE
     fun saveWallpaperFromGallery(uriString: String) {
         viewModelScope.launch {
             try {
@@ -132,7 +181,6 @@ class CustomThemeViewModel @Inject constructor(
                         )
                     }
                     
-                    // Salva no preferences
                     themePreferences.setCustomTheme(_config.value)
                     
                     Log.d("CustomTheme", "Wallpaper salvo em: ${outputFile.absolutePath}")
@@ -143,7 +191,6 @@ class CustomThemeViewModel @Inject constructor(
         }
     }
 
-    // 👇 FUNÇÃO PARA RESETAR O WALLPAPER (quando o arquivo for deletado)
     fun resetWallpaper() {
         _config.update { currentConfig ->
             currentConfig.copy(
