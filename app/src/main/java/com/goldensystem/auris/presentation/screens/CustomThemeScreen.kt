@@ -5,6 +5,9 @@
 package com.goldensystem.auris.presentation.screens
 
 import androidx.compose.ui.graphics.RenderEffect
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.BlurredEdgeTreatment
+import androidx.compose.ui.unit.dp
 import android.graphics.Shader
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -33,7 +36,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.graphicsLayer
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
@@ -398,50 +401,52 @@ private fun CustomThemePreviewCard(config: CustomThemeConfig) {
                 }
                 WallpaperType.GALLERY -> {
                     config.wallpaperUri?.let { uri ->
-                        AsyncImage(
-                            model = ImageRequest.Builder(context)
-                                .data(Uri.parse(uri))
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .graphicsLayer {
-                                    scaleX = 1.1f
-                                    scaleY = 1.1f
-                                    this.alpha = 1f - config.wallpaperDim
-                                    renderEffect = RenderEffect.createBlurEffect(
-                                        config.wallpaperBlur * 18f, // Limite reduzido
-                                        config.wallpaperBlur * 18f,
-                                        Shader.TileMode.CLAMP
-                                    )
-                                },
-                            contentScale = ContentScale.Crop
-                        )
+                        // Versão corrigida para ambos os casos (Gallery e Server):
+AsyncImage(
+    model = ImageRequest.Builder(context)
+        .data(uri) // ou url
+        .crossfade(true)
+        .build(),
+    contentDescription = null,
+    modifier = Modifier
+        .fillMaxSize()
+        .graphicsLayer {
+            scaleX = 1.1f
+            scaleY = 1.1f
+            this.alpha = 1f - config.wallpaperDim
+            // renderEffect removido
+        }
+        .blur(
+            radius = (config.wallpaperBlur * 18f).dp,
+            edgeTreatment = BlurredEdgeTreatment(RoundedCornerShape(28.dp))
+        ),
+    contentScale = ContentScale.Crop
+)
                     } ?: Box(modifier = Modifier.fillMaxSize().background(colorScheme.surface))
                 }
                 WallpaperType.SERVER -> {
                     config.wallpaperUrl?.let { url ->
-                        AsyncImage(
-                            model = ImageRequest.Builder(context)
-                                .data(url)
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .graphicsLayer {
-                                    scaleX = 1.1f
-                                    scaleY = 1.1f
-                                    this.alpha = 1f - config.wallpaperDim
-                                    renderEffect = RenderEffect.createBlurEffect(
-                                        config.wallpaperBlur * 18f, // Limite reduzido
-                                        config.wallpaperBlur * 18f,
-                                        Shader.TileMode.CLAMP
-                                    )
-                                },
-                            contentScale = ContentScale.Crop
-                        )
+                        // Versão corrigida para ambos os casos (Gallery e Server):
+AsyncImage(
+    model = ImageRequest.Builder(context)
+        .data(url) // ou url
+        .crossfade(true)
+        .build(),
+    contentDescription = null,
+    modifier = Modifier
+        .fillMaxSize()
+        .graphicsLayer {
+            scaleX = 1.1f
+            scaleY = 1.1f
+            this.alpha = 1f - config.wallpaperDim
+            // renderEffect removido
+        }
+        .blur(
+            radius = (config.wallpaperBlur * 18f).dp,
+            edgeTreatment = BlurredEdgeTreatment(RoundedCornerShape(28.dp))
+        ),
+    contentScale = ContentScale.Crop
+)
                     } ?: Box(modifier = Modifier.fillMaxSize().background(colorScheme.surface))
                 }
             }

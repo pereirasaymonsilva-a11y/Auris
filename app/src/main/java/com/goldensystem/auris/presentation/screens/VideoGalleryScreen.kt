@@ -3,7 +3,6 @@
 package com.goldensystem.auris.presentation.screens
 
 import android.Manifest
-import androidx.navigation.NavController
 import androidx.compose.animation.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
