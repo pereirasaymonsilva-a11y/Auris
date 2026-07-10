@@ -6,7 +6,6 @@ package com.goldensystem.auris.presentation.screens
 
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.BlurredEdgeTreatment
 import androidx.compose.ui.unit.dp
 import android.graphics.Shader
 import android.net.Uri
@@ -222,11 +221,13 @@ fun CustomThemeScreen(
 
     // Salvar ao sair da tela
     DisposableEffect(Unit) {
-        onDispose {
-            saveJob?.cancel()
+    onDispose {
+        saveJob?.cancel()
+        scope.launch {
             viewModel.saveCustomTheme()
         }
     }
+}
 
     // Animações
     val animatedAlpha by animateFloatAsState(
@@ -401,10 +402,9 @@ private fun CustomThemePreviewCard(config: CustomThemeConfig) {
                 }
                 WallpaperType.GALLERY -> {
                     config.wallpaperUri?.let { uri ->
-                        // Versão corrigida para ambos os casos (Gallery e Server):
 AsyncImage(
     model = ImageRequest.Builder(context)
-        .data(uri) // ou url
+        .data(uri)
         .crossfade(true)
         .build(),
     contentDescription = null,
@@ -414,22 +414,17 @@ AsyncImage(
             scaleX = 1.1f
             scaleY = 1.1f
             this.alpha = 1f - config.wallpaperDim
-            // renderEffect removido
         }
-        .blur(
-            radius = (config.wallpaperBlur * 18f).dp,
-            edgeTreatment = BlurredEdgeTreatment(RoundedCornerShape(28.dp))
-        ),
+        .blur(radius = (config.wallpaperBlur * 18f).dp),
     contentScale = ContentScale.Crop
 )
                     } ?: Box(modifier = Modifier.fillMaxSize().background(colorScheme.surface))
                 }
                 WallpaperType.SERVER -> {
                     config.wallpaperUrl?.let { url ->
-                        // Versão corrigida para ambos os casos (Gallery e Server):
 AsyncImage(
     model = ImageRequest.Builder(context)
-        .data(url) // ou url
+        .data(url)
         .crossfade(true)
         .build(),
     contentDescription = null,
@@ -439,12 +434,8 @@ AsyncImage(
             scaleX = 1.1f
             scaleY = 1.1f
             this.alpha = 1f - config.wallpaperDim
-            // renderEffect removido
         }
-        .blur(
-            radius = (config.wallpaperBlur * 18f).dp,
-            edgeTreatment = BlurredEdgeTreatment(RoundedCornerShape(28.dp))
-        ),
+        .blur(radius = (config.wallpaperBlur * 18f).dp),
     contentScale = ContentScale.Crop
 )
                     } ?: Box(modifier = Modifier.fillMaxSize().background(colorScheme.surface))
