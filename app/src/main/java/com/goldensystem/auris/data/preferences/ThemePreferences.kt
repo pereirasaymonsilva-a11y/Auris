@@ -19,6 +19,7 @@ import javax.inject.Singleton
 
 data class CustomThemeConfig(
     val isEnabled: Boolean = false,
+    
     // ===== CORES PRINCIPAIS =====
     val primaryColor: Int = 0xFF6750A4.toInt(),
     val secondaryColor: Int = 0xFFF06292.toInt(),
@@ -41,6 +42,10 @@ data class CustomThemeConfig(
     val secondaryContainerColor: Int = 0xFFF06292.toInt(),
     val onSecondaryContainerColor: Int = 0xFFFFFFFF.toInt(),
     val surfaceVariantColor: Int = 0xFF2A1F40.toInt(),
+    val tertiaryContainerColor: Int = 0xFFFF8A65.toInt(),
+    val onTertiaryContainerColor: Int = 0xFFFFFFFF.toInt(),
+    val errorContainerColor: Int = 0xFFFF5252.toInt(),
+    val onErrorContainerColor: Int = 0xFFFFFFFF.toInt(),
     
     // ===== OUTROS =====
     val errorColor: Int = 0xFFFF5252.toInt(),
@@ -48,6 +53,10 @@ data class CustomThemeConfig(
     val outlineColor: Int = 0xFFB8860B.toInt(),
     val outlineVariantColor: Int = 0xFFB8860B.toInt(),
     val surfaceTintColor: Int = 0xFFFFC107.toInt(),
+    val inversePrimaryColor: Int = 0xFF6750A4.toInt(),
+    val inverseSurfaceColor: Int = 0xFF2A1F40.toInt(),
+    val inverseOnSurfaceColor: Int = 0xFFFFFFFF.toInt(),
+    val scrimColor: Int = 0x66000000.toInt(),
     
     // ===== WALLPAPER =====
     val wallpaperType: WallpaperType = WallpaperType.SOLID,
@@ -92,6 +101,10 @@ class ThemePreferences @Inject constructor(
         private val SECONDARY_CONTAINER_COLOR = intPreferencesKey("custom_secondary_container_color")
         private val ON_SECONDARY_CONTAINER_COLOR = intPreferencesKey("custom_on_secondary_container_color")
         private val SURFACE_VARIANT_COLOR = intPreferencesKey("custom_surface_variant_color")
+        private val TERTIARY_CONTAINER_COLOR = intPreferencesKey("custom_tertiary_container_color")
+        private val ON_TERTIARY_CONTAINER_COLOR = intPreferencesKey("custom_on_tertiary_container_color")
+        private val ERROR_CONTAINER_COLOR = intPreferencesKey("custom_error_container_color")
+        private val ON_ERROR_CONTAINER_COLOR = intPreferencesKey("custom_on_error_container_color")
         
         // OUTROS
         private val ERROR_COLOR = intPreferencesKey("custom_error_color")
@@ -99,6 +112,10 @@ class ThemePreferences @Inject constructor(
         private val OUTLINE_COLOR = intPreferencesKey("custom_outline_color")
         private val OUTLINE_VARIANT_COLOR = intPreferencesKey("custom_outline_variant_color")
         private val SURFACE_TINT_COLOR = intPreferencesKey("custom_surface_tint_color")
+        private val INVERSE_PRIMARY_COLOR = intPreferencesKey("custom_inverse_primary_color")
+        private val INVERSE_SURFACE_COLOR = intPreferencesKey("custom_inverse_surface_color")
+        private val INVERSE_ON_SURFACE_COLOR = intPreferencesKey("custom_inverse_on_surface_color")
+        private val SCRIM_COLOR = intPreferencesKey("custom_scrim_color")
         
         // WALLPAPER
         private val WALLPAPER_TYPE = stringPreferencesKey("wallpaper_type")
@@ -135,6 +152,10 @@ class ThemePreferences @Inject constructor(
             secondaryContainerColor = prefs[SECONDARY_CONTAINER_COLOR] ?: 0xFFF06292.toInt(),
             onSecondaryContainerColor = prefs[ON_SECONDARY_CONTAINER_COLOR] ?: 0xFFFFFFFF.toInt(),
             surfaceVariantColor = prefs[SURFACE_VARIANT_COLOR] ?: 0xFF2A1F40.toInt(),
+            tertiaryContainerColor = prefs[TERTIARY_CONTAINER_COLOR] ?: 0xFFFF8A65.toInt(),
+            onTertiaryContainerColor = prefs[ON_TERTIARY_CONTAINER_COLOR] ?: 0xFFFFFFFF.toInt(),
+            errorContainerColor = prefs[ERROR_CONTAINER_COLOR] ?: 0xFFFF5252.toInt(),
+            onErrorContainerColor = prefs[ON_ERROR_CONTAINER_COLOR] ?: 0xFFFFFFFF.toInt(),
             
             // OUTROS
             errorColor = prefs[ERROR_COLOR] ?: 0xFFFF5252.toInt(),
@@ -142,6 +163,10 @@ class ThemePreferences @Inject constructor(
             outlineColor = prefs[OUTLINE_COLOR] ?: 0xFFB8860B.toInt(),
             outlineVariantColor = prefs[OUTLINE_VARIANT_COLOR] ?: 0xFFB8860B.toInt(),
             surfaceTintColor = prefs[SURFACE_TINT_COLOR] ?: 0xFFFFC107.toInt(),
+            inversePrimaryColor = prefs[INVERSE_PRIMARY_COLOR] ?: 0xFF6750A4.toInt(),
+            inverseSurfaceColor = prefs[INVERSE_SURFACE_COLOR] ?: 0xFF2A1F40.toInt(),
+            inverseOnSurfaceColor = prefs[INVERSE_ON_SURFACE_COLOR] ?: 0xFFFFFFFF.toInt(),
+            scrimColor = prefs[SCRIM_COLOR] ?: 0x66000000.toInt(),
             
             // WALLPAPER
             wallpaperType = try {
@@ -183,6 +208,10 @@ class ThemePreferences @Inject constructor(
             prefs[SECONDARY_CONTAINER_COLOR] = config.secondaryContainerColor
             prefs[ON_SECONDARY_CONTAINER_COLOR] = config.onSecondaryContainerColor
             prefs[SURFACE_VARIANT_COLOR] = config.surfaceVariantColor
+            prefs[TERTIARY_CONTAINER_COLOR] = config.tertiaryContainerColor
+            prefs[ON_TERTIARY_CONTAINER_COLOR] = config.onTertiaryContainerColor
+            prefs[ERROR_CONTAINER_COLOR] = config.errorContainerColor
+            prefs[ON_ERROR_CONTAINER_COLOR] = config.onErrorContainerColor
             
             // OUTROS
             prefs[ERROR_COLOR] = config.errorColor
@@ -190,6 +219,10 @@ class ThemePreferences @Inject constructor(
             prefs[OUTLINE_COLOR] = config.outlineColor
             prefs[OUTLINE_VARIANT_COLOR] = config.outlineVariantColor
             prefs[SURFACE_TINT_COLOR] = config.surfaceTintColor
+            prefs[INVERSE_PRIMARY_COLOR] = config.inversePrimaryColor
+            prefs[INVERSE_SURFACE_COLOR] = config.inverseSurfaceColor
+            prefs[INVERSE_ON_SURFACE_COLOR] = config.inverseOnSurfaceColor
+            prefs[SCRIM_COLOR] = config.scrimColor
             
             // WALLPAPER
             prefs[WALLPAPER_TYPE] = config.wallpaperType.name
@@ -221,11 +254,19 @@ class ThemePreferences @Inject constructor(
             prefs.remove(SECONDARY_CONTAINER_COLOR)
             prefs.remove(ON_SECONDARY_CONTAINER_COLOR)
             prefs.remove(SURFACE_VARIANT_COLOR)
+            prefs.remove(TERTIARY_CONTAINER_COLOR)
+            prefs.remove(ON_TERTIARY_CONTAINER_COLOR)
+            prefs.remove(ERROR_CONTAINER_COLOR)
+            prefs.remove(ON_ERROR_CONTAINER_COLOR)
             prefs.remove(ERROR_COLOR)
             prefs.remove(ON_ERROR_COLOR)
             prefs.remove(OUTLINE_COLOR)
             prefs.remove(OUTLINE_VARIANT_COLOR)
             prefs.remove(SURFACE_TINT_COLOR)
+            prefs.remove(INVERSE_PRIMARY_COLOR)
+            prefs.remove(INVERSE_SURFACE_COLOR)
+            prefs.remove(INVERSE_ON_SURFACE_COLOR)
+            prefs.remove(SCRIM_COLOR)
             prefs.remove(WALLPAPER_TYPE)
             prefs.remove(WALLPAPER_COLOR)
             prefs.remove(WALLPAPER_URI)

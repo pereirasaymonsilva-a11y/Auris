@@ -93,6 +93,18 @@ class CustomThemeViewModel @Inject constructor(
     fun updateSurfaceVariantColor(color: Int) {
         _config.update { it.copy(surfaceVariantColor = color) }
     }
+    fun updateTertiaryContainerColor(color: Int) {
+        _config.update { it.copy(tertiaryContainerColor = color) }
+    }
+    fun updateOnTertiaryContainerColor(color: Int) {
+        _config.update { it.copy(onTertiaryContainerColor = color) }
+    }
+    fun updateErrorContainerColor(color: Int) {
+        _config.update { it.copy(errorContainerColor = color) }
+    }
+    fun updateOnErrorContainerColor(color: Int) {
+        _config.update { it.copy(onErrorContainerColor = color) }
+    }
 
     // ===== OUTROS =====
     fun updateErrorColor(color: Int) {
@@ -109,6 +121,18 @@ class CustomThemeViewModel @Inject constructor(
     }
     fun updateSurfaceTintColor(color: Int) {
         _config.update { it.copy(surfaceTintColor = color) }
+    }
+    fun updateInversePrimaryColor(color: Int) {
+        _config.update { it.copy(inversePrimaryColor = color) }
+    }
+    fun updateInverseSurfaceColor(color: Int) {
+        _config.update { it.copy(inverseSurfaceColor = color) }
+    }
+    fun updateInverseOnSurfaceColor(color: Int) {
+        _config.update { it.copy(inverseOnSurfaceColor = color) }
+    }
+    fun updateScrimColor(color: Int) {
+        _config.update { it.copy(scrimColor = color) }
     }
 
     // ===== WALLPAPER =====

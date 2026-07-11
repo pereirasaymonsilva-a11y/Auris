@@ -237,7 +237,7 @@ fun CustomThemeScreen(
     )
 
           // Dialog de color picker
-      if (showColorPickerDialog && colorPickerTarget != null) {
+if (showColorPickerDialog && colorPickerTarget != null) {
     CustomColorPickerDialog(
         initialColor = when {
             colorPickerTarget == viewModel::updatePrimaryColor -> config.primaryColor
@@ -255,6 +255,22 @@ fun CustomThemeScreen(
             colorPickerTarget == viewModel::updateOnErrorColor -> config.onErrorColor
             colorPickerTarget == viewModel::updateOutlineColor -> config.outlineColor
             colorPickerTarget == viewModel::updateSurfaceTintColor -> config.surfaceTintColor
+            // ===== NOVAS CORES =====
+            colorPickerTarget == viewModel::updateOnTertiaryColor -> config.onTertiaryColor
+            colorPickerTarget == viewModel::updateOnBackgroundColor -> config.onBackgroundColor
+            colorPickerTarget == viewModel::updateOnSurfaceVariantColor -> config.onSurfaceVariantColor
+            colorPickerTarget == viewModel::updateSecondaryContainerColor -> config.secondaryContainerColor
+            colorPickerTarget == viewModel::updateOnSecondaryContainerColor -> config.onSecondaryContainerColor
+            colorPickerTarget == viewModel::updateSurfaceVariantColor -> config.surfaceVariantColor
+            colorPickerTarget == viewModel::updateTertiaryContainerColor -> config.tertiaryContainerColor
+            colorPickerTarget == viewModel::updateOnTertiaryContainerColor -> config.onTertiaryContainerColor
+            colorPickerTarget == viewModel::updateErrorContainerColor -> config.errorContainerColor
+            colorPickerTarget == viewModel::updateOnErrorContainerColor -> config.onErrorContainerColor
+            colorPickerTarget == viewModel::updateOutlineVariantColor -> config.outlineVariantColor
+            colorPickerTarget == viewModel::updateInversePrimaryColor -> config.inversePrimaryColor
+            colorPickerTarget == viewModel::updateInverseSurfaceColor -> config.inverseSurfaceColor
+            colorPickerTarget == viewModel::updateInverseOnSurfaceColor -> config.inverseOnSurfaceColor
+            colorPickerTarget == viewModel::updateScrimColor -> config.scrimColor
             else -> config.primaryColor
         },
         onColorSelected = { color ->
@@ -751,6 +767,7 @@ private fun ColorPickerSection(
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // ===== CORES DE TEXTO (ON) =====
                 Text(
                     "📝 Cores de Texto (ON)",
                     style = MaterialTheme.typography.titleMedium,
@@ -785,6 +802,7 @@ private fun ColorPickerSection(
                     onCustomColorClick = { onCustomColorClick(viewModel::updateOnSurfaceColor) }
                 )
 
+                // ===== CONTAINERS =====
                 Text(
                     "📦 Containers",
                     style = MaterialTheme.typography.titleMedium,
@@ -810,6 +828,7 @@ private fun ColorPickerSection(
                     onCustomColorClick = { onCustomColorClick(viewModel::updateOnPrimaryContainerColor) }
                 )
 
+                // ===== OUTRAS CORES =====
                 Text(
                     "🔧 Outras Cores",
                     style = MaterialTheme.typography.titleMedium,
@@ -851,6 +870,140 @@ private fun ColorPickerSection(
                     additionalColors = ADDITIONAL_COLORS,
                     onColorSelected = { viewModel.updateSurfaceTintColor(it) },
                     onCustomColorClick = { onCustomColorClick(viewModel::updateSurfaceTintColor) }
+                )
+
+                // ===== NOVAS CORES ADICIONAIS =====
+                Text(
+                    "🎨 Cores Adicionais",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+
+                ColorPickerRow(
+                    label = "On Tertiary",
+                    currentColor = config.onTertiaryColor,
+                    mainColors = listOf(0xFFFFFFFF.toInt(), 0xFF000000.toInt()),
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateOnTertiaryColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateOnTertiaryColor) }
+                )
+
+                ColorPickerRow(
+                    label = "On Background",
+                    currentColor = config.onBackgroundColor,
+                    mainColors = listOf(0xFFFFFFFF.toInt(), 0xFF000000.toInt()),
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateOnBackgroundColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateOnBackgroundColor) }
+                )
+
+                ColorPickerRow(
+                    label = "On Surface Variant",
+                    currentColor = config.onSurfaceVariantColor,
+                    mainColors = listOf(0xFFFFFFFF.toInt(), 0xFF000000.toInt()),
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateOnSurfaceVariantColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateOnSurfaceVariantColor) }
+                )
+
+                ColorPickerRow(
+                    label = "Secondary Container",
+                    currentColor = config.secondaryContainerColor,
+                    mainColors = MAIN_COLORS,
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateSecondaryContainerColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateSecondaryContainerColor) }
+                )
+
+                ColorPickerRow(
+                    label = "On Secondary Container",
+                    currentColor = config.onSecondaryContainerColor,
+                    mainColors = listOf(0xFFFFFFFF.toInt(), 0xFF000000.toInt()),
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateOnSecondaryContainerColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateOnSecondaryContainerColor) }
+                )
+
+                ColorPickerRow(
+                    label = "Tertiary Container",
+                    currentColor = config.tertiaryContainerColor,
+                    mainColors = MAIN_COLORS,
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateTertiaryContainerColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateTertiaryContainerColor) }
+                )
+
+                ColorPickerRow(
+                    label = "On Tertiary Container",
+                    currentColor = config.onTertiaryContainerColor,
+                    mainColors = listOf(0xFFFFFFFF.toInt(), 0xFF000000.toInt()),
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateOnTertiaryContainerColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateOnTertiaryContainerColor) }
+                )
+
+                ColorPickerRow(
+                    label = "Error Container",
+                    currentColor = config.errorContainerColor,
+                    mainColors = listOf(0xFFFF5252.toInt(), 0xFFD32F2F.toInt()),
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateErrorContainerColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateErrorContainerColor) }
+                )
+
+                ColorPickerRow(
+                    label = "On Error Container",
+                    currentColor = config.onErrorContainerColor,
+                    mainColors = listOf(0xFFFFFFFF.toInt(), 0xFF000000.toInt()),
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateOnErrorContainerColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateOnErrorContainerColor) }
+                )
+
+                ColorPickerRow(
+                    label = "Outline Variant",
+                    currentColor = config.outlineVariantColor,
+                    mainColors = MAIN_COLORS,
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateOutlineVariantColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateOutlineVariantColor) }
+                )
+
+                ColorPickerRow(
+                    label = "Inverse Primary",
+                    currentColor = config.inversePrimaryColor,
+                    mainColors = MAIN_COLORS,
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateInversePrimaryColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateInversePrimaryColor) }
+                )
+
+                ColorPickerRow(
+                    label = "Inverse Surface",
+                    currentColor = config.inverseSurfaceColor,
+                    mainColors = MAIN_COLORS,
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateInverseSurfaceColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateInverseSurfaceColor) }
+                )
+
+                ColorPickerRow(
+                    label = "Inverse On Surface",
+                    currentColor = config.inverseOnSurfaceColor,
+                    mainColors = listOf(0xFFFFFFFF.toInt(), 0xFF000000.toInt()),
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateInverseOnSurfaceColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateInverseOnSurfaceColor) }
+                )
+
+                ColorPickerRow(
+                    label = "Scrim",
+                    currentColor = config.scrimColor,
+                    mainColors = listOf(0x66000000.toInt(), 0x88000000.toInt(), 0x00000000.toInt()),
+                    additionalColors = ADDITIONAL_COLORS,
+                    onColorSelected = { viewModel.updateScrimColor(it) },
+                    onCustomColorClick = { onCustomColorClick(viewModel::updateScrimColor) }
                 )
             }
         }

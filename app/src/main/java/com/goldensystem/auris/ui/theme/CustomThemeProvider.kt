@@ -14,55 +14,98 @@ fun customColorScheme(
     isDark: Boolean
 ): ColorScheme {
     val primary = Color(config.primaryColor)
+    val onPrimary = Color(config.onPrimaryColor)
     val secondary = Color(config.secondaryColor)
+    val onSecondary = Color(config.onSecondaryColor)
+    val tertiary = Color(config.tertiaryColor)
+    val onTertiary = Color(config.onTertiaryColor)
     val background = Color(config.backgroundColor)
+    val onBackground = Color(config.onBackgroundColor)
     val surface = Color(config.surfaceColor)
+    val onSurface = Color(config.onSurfaceColor)
+    val surfaceVariant = Color(config.surfaceVariantColor)
+    val onSurfaceVariant = Color(config.onSurfaceVariantColor)
+    val primaryContainer = Color(config.primaryContainerColor)
+    val onPrimaryContainer = Color(config.onPrimaryContainerColor)
+    val secondaryContainer = Color(config.secondaryContainerColor)
+    val onSecondaryContainer = Color(config.onSecondaryContainerColor)
+    val tertiaryContainer = Color(config.tertiaryContainerColor)
+    val onTertiaryContainer = Color(config.onTertiaryContainerColor)
+    val error = Color(config.errorColor)
+    val onError = Color(config.onErrorColor)
+    val errorContainer = Color(config.errorContainerColor)
+    val onErrorContainer = Color(config.onErrorContainerColor)
+    val outline = Color(config.outlineColor)
+    val outlineVariant = Color(config.outlineVariantColor)
+    val surfaceTint = Color(config.surfaceTintColor)
+    val inversePrimary = Color(config.inversePrimaryColor)
+    val inverseSurface = Color(config.inverseSurfaceColor)
+    val inverseOnSurface = Color(config.inverseOnSurfaceColor)
+    val scrim = Color(config.scrimColor)
 
     return if (isDark) {
         darkColorScheme(
             primary = primary,
-            onPrimary = Color.White,
+            onPrimary = onPrimary,
             secondary = secondary,
-            onSecondary = Color.White,
+            onSecondary = onSecondary,
+            tertiary = tertiary,
+            onTertiary = onTertiary,
             background = background,
+            onBackground = onBackground,
             surface = surface,
-            onSurface = Color.White.copy(alpha = 0.87f),
-            onBackground = Color.White.copy(alpha = 0.87f),
-            surfaceVariant = surface.copy(alpha = 0.8f),
-            onSurfaceVariant = Color.White.copy(alpha = 0.6f),
-            primaryContainer = primary.copy(alpha = 0.2f),
-            onPrimaryContainer = Color.White,
-            secondaryContainer = secondary.copy(alpha = 0.2f),
-            onSecondaryContainer = Color.White,
-            tertiary = Color(0xFFFF8A65),
-            onTertiary = Color.White,
-            error = Color(0xFFFF5252),
-            onError = Color.White,
-            outline = Color.White.copy(alpha = 0.12f),
-            outlineVariant = Color.White.copy(alpha = 0.08f)
+            onSurface = onSurface,
+            surfaceVariant = surfaceVariant,
+            onSurfaceVariant = onSurfaceVariant,
+            primaryContainer = primaryContainer,
+            onPrimaryContainer = onPrimaryContainer,
+            secondaryContainer = secondaryContainer,
+            onSecondaryContainer = onSecondaryContainer,
+            tertiaryContainer = tertiaryContainer,
+            onTertiaryContainer = onTertiaryContainer,
+            error = error,
+            onError = onError,
+            errorContainer = errorContainer,
+            onErrorContainer = onErrorContainer,
+            outline = outline,
+            outlineVariant = outlineVariant,
+            surfaceTint = surfaceTint,
+            inversePrimary = inversePrimary,
+            inverseSurface = inverseSurface,
+            inverseOnSurface = inverseOnSurface,
+            scrim = scrim
         )
     } else {
         lightColorScheme(
             primary = primary,
-            onPrimary = Color.White,
+            onPrimary = onPrimary,
             secondary = secondary,
-            onSecondary = Color.White,
+            onSecondary = onSecondary,
+            tertiary = tertiary,
+            onTertiary = onTertiary,
             background = background,
+            onBackground = onBackground,
             surface = surface,
-            onSurface = Color.Black.copy(alpha = 0.87f),
-            onBackground = Color.Black.copy(alpha = 0.87f),
-            surfaceVariant = surface.copy(alpha = 0.8f),
-            onSurfaceVariant = Color.Black.copy(alpha = 0.6f),
-            primaryContainer = primary.copy(alpha = 0.15f),
-            onPrimaryContainer = Color.Black.copy(alpha = 0.87f),
-            secondaryContainer = secondary.copy(alpha = 0.15f),
-            onSecondaryContainer = Color.Black.copy(alpha = 0.87f),
-            tertiary = Color(0xFFFF8A65),
-            onTertiary = Color.White,
-            error = Color(0xFFD32F2F),
-            onError = Color.White,
-            outline = Color.Black.copy(alpha = 0.12f),
-            outlineVariant = Color.Black.copy(alpha = 0.08f)
+            onSurface = onSurface,
+            surfaceVariant = surfaceVariant,
+            onSurfaceVariant = onSurfaceVariant,
+            primaryContainer = primaryContainer,
+            onPrimaryContainer = onPrimaryContainer,
+            secondaryContainer = secondaryContainer,
+            onSecondaryContainer = onSecondaryContainer,
+            tertiaryContainer = tertiaryContainer,
+            onTertiaryContainer = onTertiaryContainer,
+            error = error,
+            onError = onError,
+            errorContainer = errorContainer,
+            onErrorContainer = onErrorContainer,
+            outline = outline,
+            outlineVariant = outlineVariant,
+            surfaceTint = surfaceTint,
+            inversePrimary = inversePrimary,
+            inverseSurface = inverseSurface,
+            inverseOnSurface = inverseOnSurface,
+            scrim = scrim
         )
     }
 }
