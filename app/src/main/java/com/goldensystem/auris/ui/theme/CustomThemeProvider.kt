@@ -23,18 +23,21 @@ fun customColorScheme(
     val onBackground = Color(config.onBackgroundColor)
     val surface = Color(config.surfaceColor)
     val onSurface = Color(config.onSurfaceColor)
-    val surfaceVariant = Color(config.surfaceVariantColor)
     val onSurfaceVariant = Color(config.onSurfaceVariantColor)
-    val primaryContainer = Color(config.primaryContainerColor)
+    
+    // ===== CORES COM TRANSPARÊNCIA (VOLTARAM COMO ANTES) =====
+    val primaryContainer = primary.copy(alpha = 0.2f)           // 👈 VOLTOU!
     val onPrimaryContainer = Color(config.onPrimaryContainerColor)
-    val secondaryContainer = Color(config.secondaryContainerColor)
+    val secondaryContainer = secondary.copy(alpha = 0.2f)       // 👈 VOLTOU!
     val onSecondaryContainer = Color(config.onSecondaryContainerColor)
-    val tertiaryContainer = Color(config.tertiaryContainerColor)
+    val tertiaryContainer = tertiary.copy(alpha = 0.2f)         // 👈 VOLTOU!
     val onTertiaryContainer = Color(config.onTertiaryContainerColor)
+    val surfaceVariant = surface.copy(alpha = 0.8f)             // 👈 VOLTOU!
+    val errorContainer = Color(config.errorColor).copy(alpha = 0.2f) // 👈 VOLTOU!
+    val onErrorContainer = Color(config.onErrorContainerColor)
+    
     val error = Color(config.errorColor)
     val onError = Color(config.onErrorColor)
-    val errorContainer = Color(config.errorContainerColor)
-    val onErrorContainer = Color(config.onErrorContainerColor)
     val outline = Color(config.outlineColor)
     val outlineVariant = Color(config.outlineVariantColor)
     val surfaceTint = Color(config.surfaceTintColor)
@@ -55,17 +58,17 @@ fun customColorScheme(
             onBackground = onBackground,
             surface = surface,
             onSurface = onSurface,
-            surfaceVariant = surfaceVariant,
+            surfaceVariant = surfaceVariant,        // 👈 COM TRANSPARÊNCIA
             onSurfaceVariant = onSurfaceVariant,
-            primaryContainer = primaryContainer,
+            primaryContainer = primaryContainer,    // 👈 COM TRANSPARÊNCIA
             onPrimaryContainer = onPrimaryContainer,
-            secondaryContainer = secondaryContainer,
+            secondaryContainer = secondaryContainer, // 👈 COM TRANSPARÊNCIA
             onSecondaryContainer = onSecondaryContainer,
-            tertiaryContainer = tertiaryContainer,
+            tertiaryContainer = tertiaryContainer,  // 👈 COM TRANSPARÊNCIA
             onTertiaryContainer = onTertiaryContainer,
             error = error,
             onError = onError,
-            errorContainer = errorContainer,
+            errorContainer = errorContainer,        // 👈 COM TRANSPARÊNCIA
             onErrorContainer = onErrorContainer,
             outline = outline,
             outlineVariant = outlineVariant,
@@ -87,17 +90,17 @@ fun customColorScheme(
             onBackground = onBackground,
             surface = surface,
             onSurface = onSurface,
-            surfaceVariant = surfaceVariant,
+            surfaceVariant = surfaceVariant,        // 👈 COM TRANSPARÊNCIA
             onSurfaceVariant = onSurfaceVariant,
-            primaryContainer = primaryContainer,
+            primaryContainer = primaryContainer,    // 👈 COM TRANSPARÊNCIA
             onPrimaryContainer = onPrimaryContainer,
-            secondaryContainer = secondaryContainer,
+            secondaryContainer = secondaryContainer, // 👈 COM TRANSPARÊNCIA
             onSecondaryContainer = onSecondaryContainer,
-            tertiaryContainer = tertiaryContainer,
+            tertiaryContainer = tertiaryContainer,  // 👈 COM TRANSPARÊNCIA
             onTertiaryContainer = onTertiaryContainer,
             error = error,
             onError = onError,
-            errorContainer = errorContainer,
+            errorContainer = errorContainer,        // 👈 COM TRANSPARÊNCIA
             onErrorContainer = onErrorContainer,
             outline = outline,
             outlineVariant = outlineVariant,
