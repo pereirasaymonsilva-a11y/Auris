@@ -44,11 +44,6 @@ enum class WallpaperType {
     GALLERY,
     SERVER
 }
-enum class WallpaperType {
-    SOLID,
-    GALLERY,
-    SERVER
-}
 
 @Singleton
 class ThemePreferences @Inject constructor(
