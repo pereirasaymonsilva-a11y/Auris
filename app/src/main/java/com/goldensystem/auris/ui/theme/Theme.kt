@@ -2,6 +2,7 @@
 package com.goldensystem.auris.ui.theme
 
 import android.app.Activity
+import androidx.compose.runtime.remember
 import android.content.Context
 import android.content.ContextWrapper
 import android.net.Uri
