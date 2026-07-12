@@ -44,95 +44,19 @@ class CustomThemeViewModel @Inject constructor(
     fun updateSecondaryColor(color: Int) {
         _config.update { it.copy(secondaryColor = color) }
     }
-    fun updateTertiaryColor(color: Int) {
-        _config.update { it.copy(tertiaryColor = color) }
-    }
     fun updateBackgroundColor(color: Int) {
         _config.update { it.copy(backgroundColor = color) }
     }
-    fun updateSurfaceColor(color: Int) {
-        _config.update { it.copy(surfaceColor = color) }
-    }
-    fun updateContainerColor(color: Int) {
-        _config.update { it.copy(containerColor = color) }
-    }
-
-    // ===== CORES ON (TEXTO) =====
     fun updateOnPrimaryColor(color: Int) {
         _config.update { it.copy(onPrimaryColor = color) }
-    }
-    fun updateOnSecondaryColor(color: Int) {
-        _config.update { it.copy(onSecondaryColor = color) }
-    }
-    fun updateOnTertiaryColor(color: Int) {
-        _config.update { it.copy(onTertiaryColor = color) }
-    }
-    fun updateOnBackgroundColor(color: Int) {
-        _config.update { it.copy(onBackgroundColor = color) }
     }
     fun updateOnSurfaceColor(color: Int) {
         _config.update { it.copy(onSurfaceColor = color) }
     }
-    fun updateOnSurfaceVariantColor(color: Int) {
-        _config.update { it.copy(onSurfaceVariantColor = color) }
-    }
-
-    // ===== CONTAINERS =====
-    fun updatePrimaryContainerColor(color: Int) {
-        _config.update { it.copy(primaryContainerColor = color) }
-    }
-    fun updateOnPrimaryContainerColor(color: Int) {
-        _config.update { it.copy(onPrimaryContainerColor = color) }
-    }
-    fun updateSecondaryContainerColor(color: Int) {
-        _config.update { it.copy(secondaryContainerColor = color) }
-    }
-    fun updateOnSecondaryContainerColor(color: Int) {
-        _config.update { it.copy(onSecondaryContainerColor = color) }
-    }
-    fun updateSurfaceVariantColor(color: Int) {
-        _config.update { it.copy(surfaceVariantColor = color) }
-    }
-    fun updateTertiaryContainerColor(color: Int) {
-        _config.update { it.copy(tertiaryContainerColor = color) }
-    }
-    fun updateOnTertiaryContainerColor(color: Int) {
-        _config.update { it.copy(onTertiaryContainerColor = color) }
-    }
-    fun updateErrorContainerColor(color: Int) {
-        _config.update { it.copy(errorContainerColor = color) }
-    }
-    fun updateOnErrorContainerColor(color: Int) {
-        _config.update { it.copy(onErrorContainerColor = color) }
-    }
-
-    // ===== OUTROS =====
-    fun updateErrorColor(color: Int) {
-        _config.update { it.copy(errorColor = color) }
-    }
-    fun updateOnErrorColor(color: Int) {
-        _config.update { it.copy(onErrorColor = color) }
-    }
-    fun updateOutlineColor(color: Int) {
-        _config.update { it.copy(outlineColor = color) }
-    }
-    fun updateOutlineVariantColor(color: Int) {
-        _config.update { it.copy(outlineVariantColor = color) }
-    }
-    fun updateSurfaceTintColor(color: Int) {
-        _config.update { it.copy(surfaceTintColor = color) }
-    }
-    fun updateInversePrimaryColor(color: Int) {
-        _config.update { it.copy(inversePrimaryColor = color) }
-    }
-    fun updateInverseSurfaceColor(color: Int) {
-        _config.update { it.copy(inverseSurfaceColor = color) }
-    }
-    fun updateInverseOnSurfaceColor(color: Int) {
-        _config.update { it.copy(inverseOnSurfaceColor = color) }
-    }
-    fun updateScrimColor(color: Int) {
-        _config.update { it.copy(scrimColor = color) }
+    
+    // ===== COR DE DETALHES (ACENTO) =====
+    fun updateAccentColor(color: Int) {
+        _config.update { it.copy(accentColor = color) }  // 👈 UMA COR PARA TUDO!
     }
 
     // ===== WALLPAPER =====
