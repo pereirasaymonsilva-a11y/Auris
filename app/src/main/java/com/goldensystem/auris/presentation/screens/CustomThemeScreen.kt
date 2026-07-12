@@ -4,6 +4,7 @@
 
 package com.goldensystem.auris.presentation.screens
 
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.unit.dp
