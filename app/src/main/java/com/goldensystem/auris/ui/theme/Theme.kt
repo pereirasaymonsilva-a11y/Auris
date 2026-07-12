@@ -115,20 +115,10 @@ fun AurisTheme(
     val context = LocalContext.current
     val finalColorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
-    val statusBarElevation = if (darkTheme) 4.dp else 12.dp
-    val elevatedSurface = finalColorScheme.surfaceColorAtElevation(statusBarElevation)
-    val defaultStatusBarColor = Color(
-        ColorUtils.blendARGB(
-            finalColorScheme.background.toArgb(),
-            elevatedSurface.toArgb(),
-            0.35f
-        )
-    )
-
-    AurisStatusBarStyle(color = defaultStatusBarColor)
+    // ... status bar ...
 
     CompositionLocalProvider(LocalAurisDarkTheme provides darkTheme) {
-        val viewModel: CustomThemeViewModel = hiltViewModel()
+        val viewModel: CustomThemeViewModel = remember { hiltViewModel() }
         val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
 
         LaunchedEffect(config.wallpaperUri) {
@@ -141,9 +131,8 @@ fun AurisTheme(
             }
         }
 
-        // ✅ BLOCO CORRIGIDO
         if (config.isEnabled) {
-            val customColorScheme = customColorScheme(config, darkTheme)  // ✅ SÓ UMA LINHA
+            val customColorScheme = customColorScheme(config, darkTheme)
 
             MaterialTheme(
                 colorScheme = customColorScheme,
@@ -162,15 +151,22 @@ fun AurisTheme(
                             if (uri != null) {
                                 val file = File(uri)
                                 if (file.exists()) {
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(context)
-                                            .data(file)
-                                            .crossfade(true)
-                                            .build(),
-                                        contentDescription = "Wallpaper da galeria",
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentScale = ContentScale.Crop
-                                    )
+                                    // 🔥 BLUR NO BOX QUE ENVOLVE O ASYNCIMAGE
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .blur(radius = (config.wallpaperBlur * 18f).dp)
+                                    ) {
+                                        AsyncImage(
+                                            model = ImageRequest.Builder(context)
+                                                .data(file)
+                                                .crossfade(true)
+                                                .build(),
+                                            contentDescription = "Wallpaper da galeria",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Crop
+                                        )
+                                    }
                                 } else {
                                     Box(
                                         modifier = Modifier.fillMaxSize().background(Color(config.backgroundColor))
@@ -184,15 +180,22 @@ fun AurisTheme(
                         }
                         WallpaperType.SERVER -> {
                             config.wallpaperUrl?.let {
-                                AsyncImage(
-                                    model = ImageRequest.Builder(context)
-                                        .data(it)
-                                        .crossfade(true)
-                                        .build(),
-                                    contentDescription = "Wallpaper do servidor",
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
+                                // 🔥 BLUR NO BOX QUE ENVOLVE O ASYNCIMAGE
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .blur(radius = (config.wallpaperBlur * 18f).dp)
+                                ) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data(it)
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = "Wallpaper do servidor",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
                             } ?: run {
                                 Box(
                                     modifier = Modifier.fillMaxSize().background(Color(config.backgroundColor))
@@ -201,18 +204,10 @@ fun AurisTheme(
                         }
                     }
 
+                    // DIM (escurecimento) - isso está funcionando!
                     if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperDim > 0f) {
                         Box(
                             modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = config.wallpaperDim))
-                        )
-                    }
-
-                    // ✅ BLUR CORRETO
-                    if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperBlur > 0f) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .blur(radius = (config.wallpaperBlur * 18f).dp)
                         )
                     }
 

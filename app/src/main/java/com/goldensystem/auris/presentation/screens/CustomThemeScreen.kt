@@ -364,6 +364,8 @@ if (showColorPickerDialog && colorPickerTarget != null) {
 
 // ==================== PREVIEW CARD ====================
 
+// CustomThemeScreen.kt
+
 @Composable
 private fun CustomThemePreviewCard(config: CustomThemeConfig) {
     val colorScheme = remember(config) { customColorScheme(config, true) }
@@ -379,7 +381,7 @@ private fun CustomThemePreviewCard(config: CustomThemeConfig) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(260.dp) // Tamanho aumentado
+            .height(260.dp)
             .scale(cardScale)
             .clickable(
                 interactionSource = interactionSource,
@@ -396,7 +398,6 @@ private fun CustomThemePreviewCard(config: CustomThemeConfig) {
                 .fillMaxSize()
                 .background(colorScheme.surface)
         ) {
-            // Wallpaper com blur e dim
             when (config.wallpaperType) {
                 WallpaperType.SOLID -> {
                     Box(
@@ -407,54 +408,65 @@ private fun CustomThemePreviewCard(config: CustomThemeConfig) {
                 }
                 WallpaperType.GALLERY -> {
                     config.wallpaperUri?.let { uri ->
-AsyncImage(
-    model = ImageRequest.Builder(context)
-        .data(uri)
-        .crossfade(true)
-        .build(),
-    contentDescription = null,
-    modifier = Modifier
-        .fillMaxSize()
-        .graphicsLayer {
-            scaleX = 1.1f
-            scaleY = 1.1f
-            this.alpha = 1f - config.wallpaperDim
-        }
-        .blur(radius = (config.wallpaperBlur * 18f).dp),
-    contentScale = ContentScale.Crop
-)
+                        // 🔥 BLUR NO BOX QUE ENVOLVE O ASYNCIMAGE
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .blur(radius = (config.wallpaperBlur * 18f).dp)
+                        ) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(context)
+                                    .data(uri)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .graphicsLayer {
+                                        scaleX = 1.1f
+                                        scaleY = 1.1f
+                                        this.alpha = 1f - config.wallpaperDim
+                                    },
+                                contentScale = ContentScale.Crop
+                            )
+                        }
                     } ?: Box(modifier = Modifier.fillMaxSize().background(colorScheme.surface))
                 }
                 WallpaperType.SERVER -> {
                     config.wallpaperUrl?.let { url ->
-AsyncImage(
-    model = ImageRequest.Builder(context)
-        .data(url)
-        .crossfade(true)
-        .build(),
-    contentDescription = null,
-    modifier = Modifier
-        .fillMaxSize()
-        .graphicsLayer {
-            scaleX = 1.1f
-            scaleY = 1.1f
-            this.alpha = 1f - config.wallpaperDim
-        }
-        .blur(radius = (config.wallpaperBlur * 18f).dp),
-    contentScale = ContentScale.Crop
-)
+                        // 🔥 BLUR NO BOX QUE ENVOLVE O ASYNCIMAGE
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .blur(radius = (config.wallpaperBlur * 18f).dp)
+                        ) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(context)
+                                    .data(url)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .graphicsLayer {
+                                        scaleX = 1.1f
+                                        scaleY = 1.1f
+                                        this.alpha = 1f - config.wallpaperDim
+                                    },
+                                contentScale = ContentScale.Crop
+                            )
+                        }
                     } ?: Box(modifier = Modifier.fillMaxSize().background(colorScheme.surface))
                 }
             }
 
-            // Overlay
+            // Overlay de escurecimento (dim)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = config.wallpaperDim * 0.5f))
             )
 
-            // Conteúdo do player melhorado
             PlayerPreviewContent(colorScheme = colorScheme)
         }
     }
