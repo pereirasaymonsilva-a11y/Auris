@@ -20,7 +20,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -109,7 +108,6 @@ val LightColorScheme = lightColorScheme(
 
 @Composable
 fun AurisTheme(
-    viewModel: CustomThemeViewModel? = null,  // 👈 TORNA OPCIONAL!
     darkTheme: Boolean = isSystemInDarkTheme(),
     colorSchemePairOverride: ColorSchemePair? = null,
     content: @Composable () -> Unit
@@ -130,15 +128,14 @@ fun AurisTheme(
     AurisStatusBarStyle(color = defaultStatusBarColor)
 
     CompositionLocalProvider(LocalAurisDarkTheme provides darkTheme) {
-        // 🔥 SE NÃO VEIO VIEWMODEL, CRIA UM
-        val effectiveViewModel = viewModel ?: remember { hiltViewModel() }
-        val config by effectiveViewModel.customThemeConfig.collectAsStateWithLifecycle()
+        val viewModel: CustomThemeViewModel = hiltViewModel()
+        val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
 
         LaunchedEffect(config.wallpaperUri) {
             if (config.wallpaperType == WallpaperType.GALLERY && config.wallpaperUri != null) {
                 val file = File(config.wallpaperUri!!)
                 if (!file.exists()) {
-                    effectiveViewModel.resetWallpaper()
+                    viewModel.resetWallpaper()
                     Log.d("Theme", "Wallpaper não encontrado, resetando para cor sólida")
                 }
             }

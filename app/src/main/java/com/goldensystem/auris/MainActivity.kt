@@ -275,23 +275,21 @@ class MainActivity : ComponentActivity() {
         }
 val viewModel: CustomThemeViewModel = hiltViewModel()
 
-AurisTheme(
-    viewModel = viewModel,
-    darkTheme = useDarkTheme
-) {
-            AppContent(
-                showSetupScreen = showSetupScreen,
-                playerViewModel = playerViewModel,
-                mainViewModel = mainViewModel,
-                showCrashReportDialog = showCrashReportDialog,
-                crashLogData = crashLogData,
-                onCrashDismiss = {
-                    CrashHandler.clearCrashLog()
-                    crashLogData = null
-                    showCrashReportDialog = false
-                }
-            )
+// MainActivity.kt - DENTRO DO setContent
+AurisTheme(darkTheme = useDarkTheme) {
+    AppContent(
+        showSetupScreen = showSetupScreen,
+        playerViewModel = playerViewModel,
+        mainViewModel = mainViewModel,
+        showCrashReportDialog = showCrashReportDialog,
+        crashLogData = crashLogData,
+        onCrashDismiss = {
+            CrashHandler.clearCrashLog()
+            crashLogData = null
+            showCrashReportDialog = false
         }
+    )
+}
     }
 }
         handleIntent(intent)
