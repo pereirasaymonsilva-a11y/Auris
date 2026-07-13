@@ -8,23 +8,23 @@ class BackupFormatDetectorTest {
     private val detector = BackupFormatDetector()
 
     @Test
-    fun `detects v3 PXPL ZIP format`() {
-        // PXPL magic + ZIP header (PK\x03\x04)
+    fun `detects v3 GABK ZIP format`() {
+        // GABK magic + ZIP header (PK\x03\x04)
         val header = byteArrayOf(
             'P'.code.toByte(), 'X'.code.toByte(), 'P'.code.toByte(), 'L'.code.toByte(),
             0x50, 0x4B, 0x03, 0x04
         )
-        assertEquals(BackupFormatDetector.Format.PXPL_V3_ZIP, detector.detect(header))
+        assertEquals(BackupFormatDetector.Format.GABK_V3_ZIP, detector.detect(header))
     }
 
     @Test
-    fun `detects v2 PXPL GZIP format`() {
-        // PXPL magic + GZIP magic (1f 8b)
+    fun `detects v2 GABK GZIP format`() {
+        // GABK magic + GZIP magic (1f 8b)
         val header = byteArrayOf(
             'P'.code.toByte(), 'X'.code.toByte(), 'P'.code.toByte(), 'L'.code.toByte(),
             0x1f, 0x8b.toByte(), 0x08, 0x00
         )
-        assertEquals(BackupFormatDetector.Format.PXPL_V2_GZIP, detector.detect(header))
+        assertEquals(BackupFormatDetector.Format.GABK_V2_GZIP, detector.detect(header))
     }
 
     @Test

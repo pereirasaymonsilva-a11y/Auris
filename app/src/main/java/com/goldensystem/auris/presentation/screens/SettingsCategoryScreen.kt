@@ -1705,7 +1705,7 @@ fun SettingsCategoryScreen(
             title = stringResource(R.string.setcat_export_backup_title),
             supportingText = stringResource(R.string.backup_dialog_supporting_export),
             selectedSections = exportSections,
-            confirmLabel = stringResource(R.string.backup_confirm_export_pxpl),
+            confirmLabel = stringResource(R.string.backup_confirm_export_gabk),
             inProgress = uiState.isDataTransferInProgress,
             onDismiss = { showExportDataDialog = false },
             onSelectionChanged = { exportSections = it },

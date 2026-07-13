@@ -66,7 +66,7 @@
 -keep class com.goldensystem.auris.data.preferences.PreferenceBackupEntry { *; }
 -keep class com.goldensystem.auris.data.backup.model.** { *; }
 -keep class com.goldensystem.auris.data.backup.module.** { *; }
-# Backup payload entities are part of the persisted .pxpl contract.
+# Backup payload entities are part of the persisted .gabk contract.
 -keep class com.goldensystem.auris.data.database.FavoritesEntity { *; }
 -keep class com.goldensystem.auris.data.database.SongEngagementEntity { *; }
 -keep class com.goldensystem.auris.data.database.LyricsEntity { *; }

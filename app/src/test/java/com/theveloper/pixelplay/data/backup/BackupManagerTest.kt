@@ -58,7 +58,7 @@ class BackupManagerTest {
             listOf(
                 ValidationError(
                     code = "FILE_EXTENSION",
-                    message = "File extension is not .pxpl.",
+                    message = "File extension is not .gabk.",
                     severity = com.goldensystem.auris.data.backup.model.Severity.WARNING
                 )
             )
@@ -89,7 +89,7 @@ class BackupManagerTest {
 
         assertEquals(
             listOf(
-                "File extension is not .pxpl.",
+                "File extension is not .gabk.",
                 "Engagement Stats: EngagementStats[0]: missing songId"
             ),
             result.warnings
