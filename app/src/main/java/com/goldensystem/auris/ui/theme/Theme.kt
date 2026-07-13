@@ -109,6 +109,7 @@ val LightColorScheme = lightColorScheme(
 
 @Composable
 fun AurisTheme(
+    viewModel: CustomThemeViewModel, 
     darkTheme: Boolean = isSystemInDarkTheme(),
     colorSchemePairOverride: ColorSchemePair? = null,
     content: @Composable () -> Unit
@@ -119,7 +120,6 @@ fun AurisTheme(
     // ... status bar ...
 
     CompositionLocalProvider(LocalAurisDarkTheme provides darkTheme) {
-        val viewModel: CustomThemeViewModel = remember { hiltViewModel() }
         val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
 
         LaunchedEffect(config.wallpaperUri) {
