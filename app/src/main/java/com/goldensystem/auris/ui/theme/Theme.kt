@@ -4,7 +4,9 @@ package com.goldensystem.auris.ui.theme
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.net.Uri
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -24,6 +26,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -165,7 +169,7 @@ fun AurisTheme(
                             if (uri != null) {
                                 val file = File(uri)
                                 if (file.exists()) {
-                                    // ✅ BLUR DIRETO NO ASYNCIMAGE
+                                    val blurRadius = config.wallpaperBlur * 18f
                                     AsyncImage(
                                         model = ImageRequest.Builder(context)
                                             .data(file)
@@ -174,7 +178,22 @@ fun AurisTheme(
                                         contentDescription = "Wallpaper da galeria",
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .blur(radius = (config.wallpaperBlur * 18f).dp),
+                                            .then(
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                                    Modifier.graphicsLayer {
+                                                        renderEffect = RenderEffect
+                                                            .createBlurEffect(
+                                                                blurRadius,
+                                                                blurRadius,
+                                                                Shader.TileMode.MIRROR
+                                                            )
+                                                            .asComposeRenderEffect()
+                                                    }
+                                                } else {
+                                                    // Fallback para Android 11 e abaixo
+                                                    Modifier.blur(radius = blurRadius.dp)
+                                                }
+                                            ),
                                         contentScale = ContentScale.Crop
                                     )
                                 } else {
@@ -195,7 +214,7 @@ fun AurisTheme(
                         
                         WallpaperType.SERVER -> {
                             config.wallpaperUrl?.let { url ->
-                                // ✅ BLUR DIRETO NO ASYNCIMAGE
+                                val blurRadius = config.wallpaperBlur * 18f
                                 AsyncImage(
                                     model = ImageRequest.Builder(context)
                                         .data(url)
@@ -204,7 +223,22 @@ fun AurisTheme(
                                     contentDescription = "Wallpaper do servidor",
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .blur(radius = (config.wallpaperBlur * 18f).dp),
+                                        .then(
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                                Modifier.graphicsLayer {
+                                                    renderEffect = RenderEffect
+                                                        .createBlurEffect(
+                                                            blurRadius,
+                                                            blurRadius,
+                                                            Shader.TileMode.MIRROR
+                                                        )
+                                                        .asComposeRenderEffect()
+                                                }
+                                            } else {
+                                                // Fallback para Android 11 e abaixo
+                                                Modifier.blur(radius = blurRadius.dp)
+                                            }
+                                        ),
                                     contentScale = ContentScale.Crop
                                 )
                             } ?: run {
