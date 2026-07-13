@@ -273,9 +273,6 @@ class MainActivity : ComponentActivity() {
                 showCrashReportDialog = true
             }
         }
-val viewModel: CustomThemeViewModel = hiltViewModel()
-
-// MainActivity.kt - DENTRO DO setContent
 AurisTheme(darkTheme = useDarkTheme) {
     AppContent(
         showSetupScreen = showSetupScreen,
