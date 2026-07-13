@@ -60,94 +60,46 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// Links para wallpapers do servidor
-val SERVER_WALLPAPERS = listOf(
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper24.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper7.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper31.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper14.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper3.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper19.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper11.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper26.jpg",
-    "https://wallpaper.forfun.com/fetch/0f/0faffa5239e20701db8c7de8a72be9b8.jpeg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper5.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper22.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper15.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper9.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper28.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper17.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper2.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper20.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper12.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper6.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper23.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper29.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper16.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper8.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper25.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper13.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper21.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper4.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper18.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper10.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper27.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper1.jpg",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/auris_wallpaper.png",
-    "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper30.jpg"
+// ============================================================
+// 1. CONFIGURAÇÃO DAS CATEGORIAS (Fácil de editar)
+// ============================================================
+// Chave: Categoria / Valor: (nome_da_pasta, quantidade_de_imagens)
+private val CATEGORY_CONFIG = mapOf(
+    WallpaperCategory.ANIME to ("anime" to 7),   // Wallpaper1 até Wallpaper7
+    WallpaperCategory.CARR  to ("carr" to 12),   // Wallpaper1 até Wallpaper12
+    WallpaperCategory.NEON  to ("neon" to 7),    // Wallpaper1 até Wallpaper7
+    WallpaperCategory.OTRS  to ("otrs" to 7),    // Wallpaper1 até Wallpaper7
+    WallpaperCategory.SPACE to ("space" to 10)   // Wallpaper1 até Wallpaper10
 )
 
-// Categorias de wallpapers
-enum class WallpaperCategory {
-    ALL, NATURE, AMOLED, ANIME, ABSTRACT, AURORA, MINIMALIST
+// ============================================================
+// 2. GERADOR DE URLs (Automático)
+// ============================================================
+private const val BASE_URL = "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper"
+
+// Mapa principal com as listas separadas por categoria (já inclui a ALL)
+val WALLPAPER_CATEGORIES = mutableMapOf<WallpaperCategory, List<String>>().apply {
+    CATEGORY_CONFIG.forEach { (category, config) ->
+        val (folder, count) = config
+        // Gera os links de Wallpaper1 até WallpaperN
+        val urls = (1..count).map { index ->
+            "$BASE_URL/$folder/Wallpaper$index.jpg"
+        }
+        this[category] = urls
+    }
+    // Adiciona a categoria ALL com TODAS as imagens juntas
+    this[WallpaperCategory.ALL] = this.values.flatten()
 }
 
-// Mapeamento de categorias
-val WALLPAPER_CATEGORIES = mapOf(
-    WallpaperCategory.ALL to SERVER_WALLPAPERS,
-    WallpaperCategory.NATURE to listOf(
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper3.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper14.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper24.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper7.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper31.jpg"
-    ),
-    WallpaperCategory.AMOLED to listOf(
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper1.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper2.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper4.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper5.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper6.jpg"
-    ),
-    WallpaperCategory.ANIME to listOf(
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper8.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper9.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper10.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper11.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper12.jpg"
-    ),
-    WallpaperCategory.ABSTRACT to listOf(
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper13.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper15.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper16.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper17.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper18.jpg"
-    ),
-    WallpaperCategory.AURORA to listOf(
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/auris_wallpaper.png",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper19.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper20.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper21.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper22.jpg"
-    ),
-    WallpaperCategory.MINIMALIST to listOf(
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper23.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper25.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper26.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper27.jpg",
-        "https://raw.githubusercontent.com/pereirasaymonsilva-a11y/Auris/main/assets/wallpaper/Wallpaper28.jpg"
-    )
-)
+// Lista global com todos os wallpapers (para manter compatibilidade com seu código antigo)
+val SERVER_WALLPAPERS: List<String> = WALLPAPER_CATEGORIES[WallpaperCategory.ALL] ?: emptyList()
+
+// ============================================================
+// 3. ENUM (Mantenha o seu ou use este)
+// ============================================================
+enum class WallpaperCategory {
+    ALL, SPACE, CARR, ANIME, NEON, OTRS
+}
 
 // Cores principais
 val MAIN_COLORS = listOf(
@@ -726,29 +678,6 @@ private fun ColorPickerSection(
             onColorSelected = { viewModel.updateOnSurfaceColor(it) },
             onCustomColorClick = { onCustomColorClick(viewModel::updateOnSurfaceColor) }
         )
-
-        // ===== COR DE ACENTO (DETALHES) =====
-        Text(
-            "🔸 Cor de Detalhes",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.tertiary
-        )
-        
-        Text(
-            "Usada em: bordas, ícones secundários, legendas e pequenos botões",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        
-        ColorPickerRow(
-            label = "Acento",
-            currentColor = config.accentColor,
-            mainColors = MAIN_COLORS,
-            additionalColors = ADDITIONAL_COLORS,
-            onColorSelected = { viewModel.updateAccentColor(it) },
-            onCustomColorClick = { onCustomColorClick(viewModel::updateAccentColor) }
-        )
     }
 }
 
@@ -1293,12 +1222,10 @@ private fun WallpaperSection(
                                 Text(
                                     when (category) {
                                         WallpaperCategory.ALL -> "Todos"
-                                        WallpaperCategory.NATURE -> "🌿 Natureza"
-                                        WallpaperCategory.AMOLED -> "🌑 AMOLED"
-                                        WallpaperCategory.ANIME -> "🎌 Anime"
-                                        WallpaperCategory.ABSTRACT -> "🎨 Abstrato"
-                                        WallpaperCategory.AURORA -> "🌌 Aurora"
-                                        WallpaperCategory.MINIMALIST -> "⬜ Minimalista"
+                                        WallpaperCategory.CARR -> "Carros"
+                                        WallpaperCategory.ANIME -> "Anime"
+                                        WallpaperCategory.SPACE -> "Espaço"
+                                        WallpaperCategory.OTRS -> "Outros"
                                     }
                                 )
                             },
