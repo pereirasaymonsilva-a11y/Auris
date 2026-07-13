@@ -5,47 +5,39 @@ import java.io.InputStream
 class BackupFormatDetector {
 
     enum class Format {
-        PXPL_V3_ZIP,
-        PXPL_V2_GZIP,
-        LEGACY_GZIP,
-        LEGACY_RAW,
+        GABK_V3_ZIP,
+        GABK_V2_GZIP,
         UNKNOWN
     }
 
     fun detect(header: ByteArray): Format {
         if (header.size < 4) return Format.UNKNOWN
 
-        val hasPxplMagic = header[0] == 'P'.code.toByte() &&
-            header[1] == 'X'.code.toByte() &&
-            header[2] == 'P'.code.toByte() &&
-            header[3] == 'L'.code.toByte()
+        val hasGabkMagic = header[0] == 'G'.code.toByte() &&
+            header[1] == 'A'.code.toByte() &&
+            header[2] == 'B'.code.toByte() &&
+            header[3] == 'K'.code.toByte()
 
-        if (hasPxplMagic) {
-            if (header.size < 8) return Format.PXPL_V2_GZIP
-            val afterMagic0 = header[4]
-            val afterMagic1 = header[5]
-            // ZIP local file header: PK\x03\x04
-            if (afterMagic0 == 'P'.code.toByte() && afterMagic1 == 'K'.code.toByte()) {
-                return Format.PXPL_V3_ZIP
-            }
-            // GZIP magic: 1f 8b
-            if (afterMagic0 == 0x1f.toByte() && afterMagic1 == 0x8b.toByte()) {
-                return Format.PXPL_V2_GZIP
-            }
-            return Format.PXPL_V2_GZIP
+        if (!hasGabkMagic) {
+            return Format.UNKNOWN
         }
 
-        // No PXPL magic: check for raw GZIP
-        if (header[0] == 0x1f.toByte() && header[1] == 0x8b.toByte()) {
-            return Format.LEGACY_GZIP
+        if (header.size < 8) return Format.GABK_V2_GZIP
+
+        val afterMagic0 = header[4]
+        val afterMagic1 = header[5]
+
+        // ZIP local file header: PK\x03\x04
+        if (afterMagic0 == 'P'.code.toByte() && afterMagic1 == 'K'.code.toByte()) {
+            return Format.GABK_V3_ZIP
         }
 
-        // Check for raw JSON (starts with '{')
-        if (header[0] == '{'.code.toByte()) {
-            return Format.LEGACY_RAW
+        // GZIP magic: 1f 8b
+        if (afterMagic0 == 0x1f.toByte() && afterMagic1 == 0x8b.toByte()) {
+            return Format.GABK_V2_GZIP
         }
 
-        return Format.UNKNOWN
+        return Format.GABK_V2_GZIP
     }
 
     fun readHeader(inputStream: InputStream, size: Int = 8): ByteArray {
@@ -55,12 +47,12 @@ class BackupFormatDetector {
     }
 
     companion object {
-        val PXPL_MAGIC = byteArrayOf(
-            'P'.code.toByte(),
-            'X'.code.toByte(),
-            'P'.code.toByte(),
-            'L'.code.toByte()
+        val GABK_MAGIC = byteArrayOf(
+            'G'.code.toByte(),
+            'A'.code.toByte(),
+            'B'.code.toByte(),
+            'K'.code.toByte()
         )
-        const val PXPL_MAGIC_SIZE = 4
+        const val GABK_MAGIC_SIZE = 4
     }
 }

@@ -19,95 +19,72 @@ import javax.inject.Singleton
 class BackupReader @Inject constructor(
     @ApplicationContext private val context: Context,
     @BackupGson private val gson: Gson,
-    private val formatDetector: BackupFormatDetector,
-    private val legacyAdapter: LegacyPayloadAdapter
+    private val formatDetector: BackupFormatDetector
 ) {
     companion object {
         const val MAX_MANIFEST_BYTES = 512 * 1024
         const val MAX_MODULE_PAYLOAD_BYTES = 16 * 1024 * 1024
-        const val MAX_LEGACY_BACKUP_BYTES = 32 * 1024 * 1024
     }
 
-    /**
-     * Reads only the manifest from a backup file (efficient for inspection/preview).
-     */
     suspend fun readManifest(uri: Uri): Result<BackupManifest> = withContext(Dispatchers.IO) {
         runCatching {
             val format = detectFormatInternal(uri)
 
             when (format) {
-                BackupFormatDetector.Format.PXPL_V3_ZIP -> {
+                BackupFormatDetector.Format.GABK_V3_ZIP -> {
                     readManifestFromZip(uri)
                 }
-                BackupFormatDetector.Format.PXPL_V2_GZIP,
-                BackupFormatDetector.Format.LEGACY_GZIP,
-                BackupFormatDetector.Format.LEGACY_RAW -> {
-                    val json = decompressLegacy(uri, format)
-                    val (manifest, _) = legacyAdapter.adapt(json, gson)
-                    manifest
+                BackupFormatDetector.Format.GABK_V2_GZIP -> {
+                    val json = decompressGzip(uri)
+                    gson.fromJson(json, BackupManifest::class.java)
                 }
                 BackupFormatDetector.Format.UNKNOWN -> {
-                    throw IllegalArgumentException("Unrecognized backup file format")
+                    throw IllegalArgumentException("Unrecognized backup file format. Expected .gabk file.")
                 }
             }
         }
     }
 
-    /**
-     * Reads a specific module's JSON payload from the backup.
-     */
     suspend fun readModulePayload(uri: Uri, moduleKey: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
             val format = detectFormatInternal(uri)
 
             when (format) {
-                BackupFormatDetector.Format.PXPL_V3_ZIP -> {
+                BackupFormatDetector.Format.GABK_V3_ZIP -> {
                     readEntryFromZip(uri, "$moduleKey.json", MAX_MODULE_PAYLOAD_BYTES)
                         ?: throw IllegalArgumentException("Module '$moduleKey' not found in backup")
                 }
-                BackupFormatDetector.Format.PXPL_V2_GZIP,
-                BackupFormatDetector.Format.LEGACY_GZIP,
-                BackupFormatDetector.Format.LEGACY_RAW -> {
-                    val json = decompressLegacy(uri, format)
-                    val (_, modules) = legacyAdapter.adapt(json, gson)
-                    modules[moduleKey]
-                        ?: throw IllegalArgumentException("Module '$moduleKey' not found in legacy backup")
+                BackupFormatDetector.Format.GABK_V2_GZIP -> {
+                    val json = decompressGzip(uri)
+                    // Parse JSON and extract module
+                    extractModuleFromJson(json, moduleKey)
                 }
                 BackupFormatDetector.Format.UNKNOWN -> {
-                    throw IllegalArgumentException("Unrecognized backup file format")
+                    throw IllegalArgumentException("Unrecognized backup file format. Expected .gabk file.")
                 }
             }
         }
     }
 
-    /**
-     * Reads all module payloads from the backup.
-     */
     suspend fun readAllModulePayloads(uri: Uri): Result<Map<String, String>> = withContext(Dispatchers.IO) {
         runCatching {
             val format = detectFormatInternal(uri)
 
             when (format) {
-                BackupFormatDetector.Format.PXPL_V3_ZIP -> {
+                BackupFormatDetector.Format.GABK_V3_ZIP -> {
                     readAllEntriesFromZip(uri, MAX_MODULE_PAYLOAD_BYTES)
                 }
-                BackupFormatDetector.Format.PXPL_V2_GZIP,
-                BackupFormatDetector.Format.LEGACY_GZIP,
-                BackupFormatDetector.Format.LEGACY_RAW -> {
-                    val json = decompressLegacy(uri, format)
-                    val (_, modules) = legacyAdapter.adapt(json, gson)
-                    modules
+                BackupFormatDetector.Format.GABK_V2_GZIP -> {
+                    val json = decompressGzip(uri)
+                    extractAllModulesFromJson(json)
                 }
                 BackupFormatDetector.Format.UNKNOWN -> {
-                    throw IllegalArgumentException("Unrecognized backup file format")
+                    throw IllegalArgumentException("Unrecognized backup file format. Expected .gabk file.")
                 }
             }
         }
     }
 
-    /**
-     * Detects the format of the backup file.
-     */
     suspend fun detectFormat(uri: Uri): Result<BackupFormatDetector.Format> = withContext(Dispatchers.IO) {
         runCatching {
             detectFormatInternal(uri)
@@ -118,8 +95,7 @@ class BackupReader @Inject constructor(
         return context.contentResolver.openInputStream(uri)?.use { input ->
             val header = formatDetector.readHeader(input)
             formatDetector.detect(header)
-        }
-            ?: throw IllegalStateException("Unable to open backup file")
+        } ?: throw IllegalStateException("Unable to open backup file")
     }
 
     private fun readManifestFromZip(uri: Uri): BackupManifest {
@@ -127,24 +103,19 @@ class BackupReader @Inject constructor(
             uri = uri,
             entryName = BackupManifest.MANIFEST_FILENAME,
             maxChars = MAX_MANIFEST_BYTES
-        )
-            ?: throw IllegalArgumentException("Manifest not found in backup archive")
+        ) ?: throw IllegalArgumentException("Manifest not found in backup archive")
         return gson.fromJson(json, BackupManifest::class.java)
     }
 
     private fun readEntryFromZip(uri: Uri, entryName: String, maxChars: Int): String? {
         context.contentResolver.openInputStream(uri)?.use { raw ->
-            skipFully(raw, BackupFormatDetector.PXPL_MAGIC_SIZE)
+            skipFully(raw, BackupFormatDetector.GABK_MAGIC_SIZE)
             ZipInputStream(raw).use { zip ->
                 var entry = zip.nextEntry
                 while (entry != null) {
                     if (entry.name == entryName) {
                         return zip.bufferedReader(Charsets.UTF_8).use { reader ->
-                            readTextLimited(
-                                reader = reader,
-                                maxChars = maxChars,
-                                sourceLabel = "Backup entry '$entryName'"
-                            )
+                            readTextLimited(reader, maxChars, "Backup entry '$entryName'")
                         }
                     }
                     zip.closeEntry()
@@ -158,7 +129,7 @@ class BackupReader @Inject constructor(
     private fun readAllEntriesFromZip(uri: Uri, maxChars: Int): Map<String, String> {
         val entries = mutableMapOf<String, String>()
         context.contentResolver.openInputStream(uri)?.use { raw ->
-            skipFully(raw, BackupFormatDetector.PXPL_MAGIC_SIZE)
+            skipFully(raw, BackupFormatDetector.GABK_MAGIC_SIZE)
             ZipInputStream(raw).use { zip ->
                 var entry = zip.nextEntry
                 while (entry != null) {
@@ -166,11 +137,7 @@ class BackupReader @Inject constructor(
                     if (name != BackupManifest.MANIFEST_FILENAME && name.endsWith(".json")) {
                         val key = name.removeSuffix(".json")
                         entries[key] = zip.bufferedReader(Charsets.UTF_8).use { reader ->
-                            readTextLimited(
-                                reader = reader,
-                                maxChars = maxChars,
-                                sourceLabel = "Backup entry '$name'"
-                            )
+                            readTextLimited(reader, maxChars, "Backup entry '$name'")
                         }
                     }
                     zip.closeEntry()
@@ -181,40 +148,42 @@ class BackupReader @Inject constructor(
         return entries
     }
 
-    private fun decompressLegacy(uri: Uri, format: BackupFormatDetector.Format): String {
+    private fun decompressGzip(uri: Uri): String {
         val input = context.contentResolver.openInputStream(uri)
             ?: throw IllegalStateException("Unable to open backup file")
 
         return input.use { raw ->
-            val source = when (format) {
-                BackupFormatDetector.Format.PXPL_V2_GZIP -> {
-                    skipFully(raw, BackupFormatDetector.PXPL_MAGIC_SIZE)
-                    GZIPInputStream(raw)
-                }
-                BackupFormatDetector.Format.LEGACY_GZIP -> {
-                    GZIPInputStream(raw)
-                }
-                BackupFormatDetector.Format.LEGACY_RAW -> raw
-                else -> throw IllegalArgumentException("Cannot decompress format: $format")
-            }
-
-            source.use { stream ->
+            skipFully(raw, BackupFormatDetector.GABK_MAGIC_SIZE)
+            GZIPInputStream(raw).use { stream ->
                 stream.bufferedReader(Charsets.UTF_8).use { reader ->
-                    readTextLimited(
-                        reader = reader,
-                        maxChars = MAX_LEGACY_BACKUP_BYTES,
-                        sourceLabel = "Legacy backup payload"
-                    )
+                    readTextLimited(reader, MAX_MANIFEST_BYTES * 2, "GZIP backup payload")
                 }
             }
         }
     }
 
-    private fun readTextLimited(
-        reader: Reader,
-        maxChars: Int,
-        sourceLabel: String
-    ): String {
+    @Suppress("UNCHECKED_CAST")
+    private fun extractModuleFromJson(json: String, moduleKey: String): String {
+        val map = gson.fromJson(json, Map::class.java) as Map<String, Any>
+        val module = map[moduleKey]
+            ?: throw IllegalArgumentException("Module '$moduleKey' not found in backup")
+        return gson.toJson(module)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun extractAllModulesFromJson(json: String): Map<String, String> {
+        val result = mutableMapOf<String, String>()
+        val map = gson.fromJson(json, Map::class.java) as Map<String, Any>
+        
+        map.forEach { (key, value) ->
+            if (key != "manifest") {
+                result[key] = gson.toJson(value)
+            }
+        }
+        return result
+    }
+
+    private fun readTextLimited(reader: Reader, maxChars: Int, sourceLabel: String): String {
         val buffer = CharArray(DEFAULT_BUFFER_SIZE)
         val builder = StringBuilder(minOf(maxChars, DEFAULT_BUFFER_SIZE))
         var totalChars = 0

@@ -38,7 +38,7 @@ class BackupManager @Inject constructor(
     private val handlers: Map<BackupSection, @JvmSuppressWildcards BackupModuleHandler>
 ) {
     /**
-     * Exports selected modules to a .pxpl file at the given URI.
+     * Exports selected modules to a .gabk file at the given URI.
      */
     suspend fun export(
         uri: Uri,
@@ -86,7 +86,7 @@ class BackupManager @Inject constructor(
             )
 
             reportProgress(onProgress, BackupOperationType.EXPORT, ++step, totalSteps,
-                "Packaging backup", "Creating .pxpl archive.")
+                "Packaging backup", "Creating .gabk (GoldenSystem Auris Backup) archive.")
 
             backupWriter.write(uri, manifest, modulePayloads).getOrThrow()
 
@@ -175,7 +175,7 @@ class BackupManager @Inject constructor(
                 backupHistoryRepository.addEntry(
                     BackupHistoryEntry(
                         uri = uri.toString(),
-                        displayName = docFile?.name ?: "backup.pxpl",
+                        displayName = docFile?.name ?: "backup.gabk",
                         createdAt = plan.manifest.createdAt,
                         schemaVersion = plan.manifest.schemaVersion,
                         modules = plan.manifest.modules.keys,

@@ -21,8 +21,8 @@ class BackupFileValidator @Inject constructor(
     private val formatDetector: BackupFormatDetector
 ) {
     companion object {
-        const val MAX_BACKUP_SIZE_BYTES = 50L * 1024 * 1024 // 50 MB
-        const val MAX_ZIP_RATIO = 100 // max decompressed/compressed ratio
+        const val MAX_BACKUP_SIZE_BYTES = 50L * 1024 * 1024
+        const val MAX_ZIP_RATIO = 100
         private const val MAX_TOTAL_DECOMPRESSED_BYTES = 256L * 1024 * 1024
     }
 
@@ -32,7 +32,6 @@ class BackupFileValidator @Inject constructor(
         val fileName = docFile?.name
         val fileSize = docFile?.length()?.takeIf { it >= 0L }
 
-        // Check URI accessibility
         val format = try {
             context.contentResolver.openInputStream(uri)?.use { input ->
                 val header = formatDetector.readHeader(input)
@@ -47,31 +46,26 @@ class BackupFileValidator @Inject constructor(
             return BackupValidationResult.Invalid(errors)
         }
 
-        if (format == null) {
-            errors.add(ValidationError("FILE_EMPTY", "Backup file is empty or inaccessible."))
+        if (format == null || format == BackupFormatDetector.Format.UNKNOWN) {
+            errors.add(ValidationError("FORMAT_UNKNOWN", 
+                "File is not a valid GoldenSystem Auris Backup (.gabk) file."))
             return BackupValidationResult.Invalid(errors)
         }
 
-        // Check file size
         if (fileSize != null && fileSize > MAX_BACKUP_SIZE_BYTES) {
-            errors.add(ValidationError("FILE_TOO_LARGE", "Backup file exceeds the ${MAX_BACKUP_SIZE_BYTES / (1024 * 1024)}MB limit."))
+            errors.add(ValidationError("FILE_TOO_LARGE", 
+                "Backup file exceeds the ${MAX_BACKUP_SIZE_BYTES / (1024 * 1024)}MB limit."))
             return BackupValidationResult.Invalid(errors)
         }
 
-        // Check file name extension (if available)
-        if (fileName != null && !fileName.endsWith(".pxpl", ignoreCase = true) &&
-            !fileName.endsWith(".gz", ignoreCase = true)) {
-            errors.add(ValidationError("FILE_EXTENSION", "File extension is not .pxpl. The file may not be a valid backup.", severity = Severity.WARNING))
+        if (fileName != null && !fileName.endsWith(".gabk", ignoreCase = true)) {
+            errors.add(ValidationError("FILE_EXTENSION", 
+                "File must have .gabk extension (GoldenSystem Auris Backup).", 
+                severity = Severity.WARNING))
         }
 
-        if (format == BackupFormatDetector.Format.UNKNOWN) {
-            errors.add(ValidationError("FORMAT_UNKNOWN", "File is not a recognized Auris backup format."))
-            return BackupValidationResult.Invalid(errors)
-        }
-
-        // For ZIP format: validate zip structure safety
-        if (format == BackupFormatDetector.Format.PXPL_V3_ZIP) {
-            validateZipSafety(uri, fileSize, BackupFormatDetector.PXPL_MAGIC_SIZE, errors)
+        if (format == BackupFormatDetector.Format.GABK_V3_ZIP) {
+            validateZipSafety(uri, fileSize, BackupFormatDetector.GABK_MAGIC_SIZE, errors)
         }
 
         return if (errors.any { it.severity == Severity.ERROR }) {
@@ -98,18 +92,19 @@ class BackupFileValidator @Inject constructor(
                     var entry = zip.nextEntry
                     var totalDecompressed = 0L
                     val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                    
                     while (entry != null) {
                         val name = entry.name
 
-                        // Path traversal check
                         if (name.contains("..") || name.startsWith("/") || name.startsWith("\\")) {
-                            errors.add(ValidationError("ZIP_PATH_TRAVERSAL", "Suspicious zip entry path: $name"))
+                            errors.add(ValidationError("ZIP_PATH_TRAVERSAL", 
+                                "Suspicious zip entry path: $name"))
                             return
                         }
 
-                        // Only allow .json files and manifest
                         if (!name.endsWith(".json")) {
-                            errors.add(ValidationError("ZIP_UNEXPECTED_ENTRY", "Unexpected file in backup: $name", severity = Severity.WARNING))
+                            errors.add(ValidationError("ZIP_UNEXPECTED_ENTRY", 
+                                "Unexpected file in backup: $name", severity = Severity.WARNING))
                         }
 
                         val perEntryLimit = if (name == BackupManifest.MANIFEST_FILENAME) {
@@ -150,7 +145,8 @@ class BackupFileValidator @Inject constructor(
                                 compressedZipBytes > 0 &&
                                 totalDecompressed > compressedZipBytes * MAX_ZIP_RATIO
                             ) {
-                                errors.add(ValidationError("ZIP_BOMB", "Backup file has suspicious compression ratio."))
+                                errors.add(ValidationError("ZIP_BOMB", 
+                                    "Backup file has suspicious compression ratio."))
                                 return
                             }
                         }
@@ -161,7 +157,8 @@ class BackupFileValidator @Inject constructor(
                 }
             } ?: errors.add(ValidationError("FILE_ACCESS", "Cannot open backup file."))
         } catch (e: Exception) {
-            errors.add(ValidationError("ZIP_CORRUPT", "Backup ZIP archive is corrupted: ${e.message}"))
+            errors.add(ValidationError("ZIP_CORRUPT", 
+                "Backup ZIP archive is corrupted: ${e.message}"))
         }
     }
 

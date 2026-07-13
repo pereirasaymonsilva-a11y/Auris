@@ -137,11 +137,13 @@ class AppDataBackupManager @Inject constructor(
         "playlist_song_order_modes",
         "playlists_sort_option"
     )
-    private val pxplMagic = byteArrayOf(
-        'P'.code.toByte(),
-        'X'.code.toByte(),
-        'P'.code.toByte(),
-        'L'.code.toByte()
+    
+    // GoldenSystem Auris Backup Magic Bytes: GABK
+    private val gabkMagic = byteArrayOf(
+        'G'.code.toByte(),
+        'A'.code.toByte(),
+        'B'.code.toByte(),
+        'K'.code.toByte()
     )
     private val gzipMagic = byteArrayOf(0x1f, 0x8b.toByte())
 
@@ -232,7 +234,7 @@ class AppDataBackupManager @Inject constructor(
                 step = ++step,
                 totalSteps = totalSteps,
                 title = "Packaging backup",
-                detail = "Compressing selected data into .pxpl."
+                detail = "Compressing selected data into .gabk (GoldenSystem Auris Backup)."
             )
             val bytes = encodePayload(payload)
 
@@ -444,7 +446,7 @@ class AppDataBackupManager @Inject constructor(
     private fun encodePayload(payload: AppDataBackupPayload): ByteArray {
         val jsonBytes = gson.toJson(payload).toByteArray(Charsets.UTF_8)
         val output = ByteArrayOutputStream()
-        output.write(pxplMagic)
+        output.write(gabkMagic)
         GZIPOutputStream(output).use { gzip ->
             gzip.write(jsonBytes)
         }
@@ -453,8 +455,8 @@ class AppDataBackupManager @Inject constructor(
 
     private fun decodePayload(rawBytes: ByteArray): AppDataBackupPayload {
         val json = when {
-            isPxplFormat(rawBytes) -> {
-                val compressed = rawBytes.copyOfRange(pxplMagic.size, rawBytes.size)
+            isGabkFormat(rawBytes) -> {
+                val compressed = rawBytes.copyOfRange(gabkMagic.size, rawBytes.size)
                 GZIPInputStream(ByteArrayInputStream(compressed)).bufferedReader().use { it.readText() }
             }
             isGzipPayload(rawBytes) -> {
@@ -465,9 +467,9 @@ class AppDataBackupManager @Inject constructor(
         return gson.fromJson(json, AppDataBackupPayload::class.java) ?: error("Backup file is invalid")
     }
 
-    private fun isPxplFormat(rawBytes: ByteArray): Boolean {
-        if (rawBytes.size <= pxplMagic.size) return false
-        return rawBytes.copyOfRange(0, pxplMagic.size).contentEquals(pxplMagic)
+    private fun isGabkFormat(rawBytes: ByteArray): Boolean {
+        if (rawBytes.size <= gabkMagic.size) return false
+        return rawBytes.copyOfRange(0, gabkMagic.size).contentEquals(gabkMagic)
     }
 
     private fun isGzipPayload(rawBytes: ByteArray): Boolean {
