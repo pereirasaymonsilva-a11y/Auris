@@ -1225,6 +1225,7 @@ private fun WallpaperSection(
                                         WallpaperCategory.CARR -> "Carros"
                                         WallpaperCategory.ANIME -> "Anime"
                                         WallpaperCategory.SPACE -> "Espaço"
+                                        WallpaperCategory.NEON -> "Neon"
                                         WallpaperCategory.OTRS -> "Outros"
                                     }
                                 )
