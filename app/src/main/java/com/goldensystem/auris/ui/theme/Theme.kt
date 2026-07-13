@@ -2,7 +2,6 @@
 package com.goldensystem.auris.ui.theme
 
 import android.app.Activity
-import androidx.compose.runtime.remember
 import android.content.Context
 import android.content.ContextWrapper
 import android.net.Uri
@@ -21,6 +20,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -109,7 +109,7 @@ val LightColorScheme = lightColorScheme(
 
 @Composable
 fun AurisTheme(
-    viewModel: CustomThemeViewModel, 
+    viewModel: CustomThemeViewModel? = null,  // 👈 TORNA OPCIONAL!
     darkTheme: Boolean = isSystemInDarkTheme(),
     colorSchemePairOverride: ColorSchemePair? = null,
     content: @Composable () -> Unit
@@ -117,16 +117,28 @@ fun AurisTheme(
     val context = LocalContext.current
     val finalColorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
-    // ... status bar ...
+    val statusBarElevation = if (darkTheme) 4.dp else 12.dp
+    val elevatedSurface = finalColorScheme.surfaceColorAtElevation(statusBarElevation)
+    val defaultStatusBarColor = Color(
+        ColorUtils.blendARGB(
+            finalColorScheme.background.toArgb(),
+            elevatedSurface.toArgb(),
+            0.35f
+        )
+    )
+
+    AurisStatusBarStyle(color = defaultStatusBarColor)
 
     CompositionLocalProvider(LocalAurisDarkTheme provides darkTheme) {
-        val config by viewModel.customThemeConfig.collectAsStateWithLifecycle()
+        // 🔥 SE NÃO VEIO VIEWMODEL, CRIA UM
+        val effectiveViewModel = viewModel ?: remember { hiltViewModel() }
+        val config by effectiveViewModel.customThemeConfig.collectAsStateWithLifecycle()
 
         LaunchedEffect(config.wallpaperUri) {
             if (config.wallpaperType == WallpaperType.GALLERY && config.wallpaperUri != null) {
                 val file = File(config.wallpaperUri!!)
                 if (!file.exists()) {
-                    viewModel.resetWallpaper()
+                    effectiveViewModel.resetWallpaper()
                     Log.d("Theme", "Wallpaper não encontrado, resetando para cor sólida")
                 }
             }
@@ -152,7 +164,6 @@ fun AurisTheme(
                             if (uri != null) {
                                 val file = File(uri)
                                 if (file.exists()) {
-                                    // 🔥 BLUR NO BOX QUE ENVOLVE O ASYNCIMAGE
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
@@ -181,7 +192,6 @@ fun AurisTheme(
                         }
                         WallpaperType.SERVER -> {
                             config.wallpaperUrl?.let {
-                                // 🔥 BLUR NO BOX QUE ENVOLVE O ASYNCIMAGE
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -205,7 +215,6 @@ fun AurisTheme(
                         }
                     }
 
-                    // DIM (escurecimento) - isso está funcionando!
                     if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperDim > 0f) {
                         Box(
                             modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = config.wallpaperDim))
