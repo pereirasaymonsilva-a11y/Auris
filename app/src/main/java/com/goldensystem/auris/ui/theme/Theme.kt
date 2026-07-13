@@ -150,74 +150,83 @@ fun AurisTheme(
                 shapes = Shapes
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
+                    // ===== WALLPAPER COM BLUR =====
                     when (config.wallpaperType) {
                         WallpaperType.SOLID -> {
                             Box(
-                                modifier = Modifier.fillMaxSize().background(Color(config.backgroundColor))
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(config.backgroundColor))
                             )
                         }
+                        
                         WallpaperType.GALLERY -> {
                             val uri = config.wallpaperUri
                             if (uri != null) {
                                 val file = File(uri)
                                 if (file.exists()) {
+                                    // ✅ BLUR DIRETO NO ASYNCIMAGE
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data(file)
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = "Wallpaper da galeria",
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .blur(radius = (config.wallpaperBlur * 18f).dp),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                } else {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .blur(radius = (config.wallpaperBlur * 18f).dp)
-                                    ) {
-                                        AsyncImage(
-                                            model = ImageRequest.Builder(context)
-                                                .data(file)
-                                                .crossfade(true)
-                                                .build(),
-                                            contentDescription = "Wallpaper da galeria",
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentScale = ContentScale.Crop
-                                        )
-                                    }
-                                } else {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize().background(Color(config.backgroundColor))
+                                            .background(Color(config.backgroundColor))
                                     )
                                 }
                             } else {
                                 Box(
-                                    modifier = Modifier.fillMaxSize().background(Color(config.backgroundColor))
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color(config.backgroundColor))
                                 )
                             }
                         }
+                        
                         WallpaperType.SERVER -> {
-                            config.wallpaperUrl?.let {
+                            config.wallpaperUrl?.let { url ->
+                                // ✅ BLUR DIRETO NO ASYNCIMAGE
+                                AsyncImage(
+                                    model = ImageRequest.Builder(context)
+                                        .data(url)
+                                        .crossfade(true)
+                                        .build(),
+                                    contentDescription = "Wallpaper do servidor",
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .blur(radius = (config.wallpaperBlur * 18f).dp),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } ?: run {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .blur(radius = (config.wallpaperBlur * 18f).dp)
-                                ) {
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(context)
-                                            .data(it)
-                                            .crossfade(true)
-                                            .build(),
-                                        contentDescription = "Wallpaper do servidor",
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                }
-                            } ?: run {
-                                Box(
-                                    modifier = Modifier.fillMaxSize().background(Color(config.backgroundColor))
+                                        .background(Color(config.backgroundColor))
                                 )
                             }
                         }
                     }
 
+                    // ===== DIM (ESCUREcIMENTO) =====
                     if (config.wallpaperType != WallpaperType.SOLID && config.wallpaperDim > 0f) {
                         Box(
-                            modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = config.wallpaperDim))
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = config.wallpaperDim))
                         )
                     }
 
+                    // ===== CONTEÚDO DO APP =====
                     content()
                 }
             }
